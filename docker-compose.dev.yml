@@ -1,0 +1,16 @@
+version: "3.1"
+
+services:
+  openbox_db:
+    image: postgres:alpine
+    ports:
+      - "5000:5432"
+    environment:
+      POSTGRES_PASSWORD: super_complicated_password
+      POSTGRES_USER: openbox_user
+      POSTGRES_DB: openbox_database
+    volumes:
+      - openbox_database:/var/lib/postgresql/data
+
+volumes:
+  openbox_database: {}
