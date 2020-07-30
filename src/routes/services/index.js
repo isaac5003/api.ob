@@ -120,6 +120,12 @@ router.get("/:id", async (req, res) => {
       .leftJoin("s.sellingType", "st")
       .getOne();
 
+    if (!service) {
+      return res
+        .status(400)
+        .json({ message: "El servicio seleccionado no existe." });
+    }
+
     return res.json({ service });
   } catch (error) {
     return res
@@ -145,7 +151,7 @@ router.post("/", async (req, res) => {
 
   // Inserta el servicio
   try {
-    await req.conn
+    const service = await req.conn
       .createQueryBuilder()
       .insert()
       .into("Service")
@@ -167,7 +173,10 @@ router.post("/", async (req, res) => {
     );
 
     // On success
-    return res.json({ message: "El servicio se ha creado correctamente." });
+    return res.json({
+      message: "El servicio se ha creado correctamente.",
+      id: service.raw[0].id,
+    });
   } catch (error) {
     // On errror
     return res.status(400).json({

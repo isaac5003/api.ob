@@ -23,6 +23,13 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
+    customerBranches: {
+      target: "CustomerBranch",
+      type: "one-to-many",
+      joinTable: true,
+      joinColumn: true,
+      inverseSide: "customer",
+    },
     customerType: {
       target: "CustomerType",
       type: "many-to-one",

@@ -26,11 +26,13 @@ app.use(async (req, res, next) => {
 // ROUTES
 const auth = require("./routes/auth");
 const users = require("./routes/users");
+const others = require("./routes/others");
 const services = require("./routes/services");
 const customers = require("./routes/customers");
 
 app.use("/auth", auth);
 app.use("/users", users);
+app.use("/others", checkAuth, others);
 app.use("/services", checkAuth, services);
 app.use("/customers", checkAuth, customers);
 

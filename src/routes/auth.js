@@ -97,6 +97,7 @@ router.post("/login", async (req, res) => {
     // return token
     return res.json({ access_token, refresh_token });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al proveer token de refrescamiento." });
