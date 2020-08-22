@@ -65,7 +65,7 @@ router.get("/", async (req, res) => {
     let services = req.conn
       .getRepository("Service")
       .createQueryBuilder("s")
-      .select(["s.id", "s.name", "s.description", "s.cost", "st.id", "st.name"])
+      .select(["s.id", "s.name", "s.description", "s.cost", "s.active", "st.id", "st.name"])
       .where("s.company = :company", { company: cid })
       .leftJoin("s.sellingType", "st")
       .orderBy("s.createdAt", "DESC");
