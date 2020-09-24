@@ -65,7 +65,16 @@ router.get("/", async (req, res) => {
     let services = req.conn
       .getRepository("Service")
       .createQueryBuilder("s")
-      .select(["s.id", "s.name", "s.description", "s.cost", "s.active", "st.id", "st.name"])
+      .select([
+        "s.id",
+        "s.name",
+        "s.description",
+        "s.cost",
+        "s.active",
+        "s.active",
+        "st.id",
+        "st.name",
+      ])
       .where("s.company = :company", { company: cid })
       .leftJoin("s.sellingType", "st")
       .orderBy("s.createdAt", "DESC");
@@ -114,7 +123,15 @@ router.get("/:id", async (req, res) => {
     const service = await req.conn
       .getRepository("Service")
       .createQueryBuilder("s")
-      .select(["s.id", "s.name", "s.description", "s.cost", "st.id", "st.name"])
+      .select([
+        "s.id",
+        "s.name",
+        "s.description",
+        "s.cost",
+        "s.active",
+        "st.id",
+        "st.name",
+      ])
       .where("s.company = :company", { company: req.user.cid })
       .andWhere("s.id = :id", { id: req.params.id })
       .leftJoin("s.sellingType", "st")
