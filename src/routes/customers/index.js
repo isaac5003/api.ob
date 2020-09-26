@@ -206,14 +206,14 @@ router.post("/", async (req, res) => {
     { name: "giro", optional: true },
     { name: "customerType", type: "integer" },
     { name: "customerTaxerType", type: "integer", optional: true },
-    { name: "customerTypeNatural", type: "integer", optional: true },
+    { name: "customerTypeNatural", optional: true },
     "branch",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
-  const check_branch = checkRequired(JSON.parse(req.body.branch), [
+  const check_branch = checkRequired(req.body.branch, [
     "contactName",
     { name: "contactInfo", optional: true },
     "address1",
@@ -288,7 +288,7 @@ router.post("/", async (req, res) => {
         country,
         state,
         city,
-      } = JSON.parse(req.body.branch);
+      } = req.body.branch;
 
       await req.conn
         .createQueryBuilder()
