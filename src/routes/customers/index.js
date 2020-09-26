@@ -199,6 +199,7 @@ router.post("/", async (req, res) => {
   const check = checkRequired(req.body, [
     "name",
     "shortName",
+    { name: "isProvider", type: "boolean", optional: false },
     { name: "dui", optional: true },
     { name: "nrc", optional: true },
     { name: "nit", optional: true },
@@ -206,13 +207,13 @@ router.post("/", async (req, res) => {
     { name: "customerType", type: "integer" },
     { name: "customerTaxerType", type: "integer", optional: true },
     { name: "customerTypeNatural", type: "integer", optional: true },
-    "details",
+    "branch",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
-  const check_details = checkRequired(JSON.parse(req.body.details), [
+  const check_branch = checkRequired(JSON.parse(req.body.branch), [
     "contactName",
     { name: "contactInfo", optional: true },
     "address1",
@@ -221,8 +222,8 @@ router.post("/", async (req, res) => {
     "state",
     "city",
   ]);
-  if (!check_details.success) {
-    return res.status(400).json({ message: check_details.message });
+  if (!check_branch.success) {
+    return res.status(400).json({ message: check_branch.message });
   }
 
   // crea el cliente
@@ -231,12 +232,13 @@ router.post("/", async (req, res) => {
     let {
       name,
       shortName,
+      isProvider,
       dui,
       nrc,
       nit,
       giro,
-      customerTaxerType,
       customerType,
+      customerTaxerType,
       customerTypeNatural,
     } = req.body;
 
@@ -247,12 +249,12 @@ router.post("/", async (req, res) => {
       .values({
         name,
         shortName,
+        isProvider,
+        isCustomer: true,
         dui,
         nrc,
         nit,
         giro,
-        isCustomer: true,
-        isProvider: false,
         isActiveProvider: false,
         company: req.user.cid,
         customerTaxerType,
@@ -286,7 +288,7 @@ router.post("/", async (req, res) => {
         country,
         state,
         city,
-      } = JSON.parse(req.body.details);
+      } = JSON.parse(req.body.branch);
 
       await req.conn
         .createQueryBuilder()
@@ -321,7 +323,7 @@ router.post("/", async (req, res) => {
       // on error
       return res.status(500).json({
         message:
-          "Error al crear la sucursal del cliente. Conctacta con tu administrador.",
+          "Error al crear la sucursal del cliente. Contacta con tu administrador.",
       });
     }
   } catch (error) {
