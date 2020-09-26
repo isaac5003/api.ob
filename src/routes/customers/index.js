@@ -108,10 +108,12 @@ router.get("/", async (req, res) => {
       .orderBy("c.createdAt", "DESC");
 
     // Si el parametro esta nulo entonces pagina
+    let index = 1;
     if (search == null) {
       customers = customers
         .limit(limit)
         .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
@@ -128,9 +130,13 @@ router.get("/", async (req, res) => {
       count = customers.length;
     }
 
-    return res.json({ count, customers });
+    return res.json({
+      count,
+      customers: customers.map((c) => {
+        return { index: index++, ...c };
+      }),
+    });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de clientes." });

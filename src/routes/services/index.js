@@ -79,10 +79,12 @@ router.get("/", async (req, res) => {
       .leftJoin("s.sellingType", "st")
       .orderBy("s.createdAt", "DESC");
 
+    let index = 1;
     if (search == null) {
       services = services
         .limit(limit)
         .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
@@ -109,7 +111,12 @@ router.get("/", async (req, res) => {
       count = services.length;
     }
 
-    return res.json({ count, services });
+    return res.json({
+      count,
+      services: services.map((s) => {
+        return { index: index++, ...s };
+      }),
+    });
   } catch (error) {
     console.log(error);
     return res
