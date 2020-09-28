@@ -199,6 +199,7 @@ router.get("/user", checkAuth, async (req, res) => {
       "m.name",
       "c.id",
       "c.name",
+      "c.unique",
       "b.id",
       "b.name",
     ])
@@ -234,7 +235,7 @@ router.get("/user", checkAuth, async (req, res) => {
     company: await req.conn
       .getRepository("Company")
       .createQueryBuilder("c")
-      .select(["c.id", "c.name"])
+      .select(["c.id", "c.name", "c.unique"])
       .where({ id: cid })
       .getOne(),
     branch: await req.conn
