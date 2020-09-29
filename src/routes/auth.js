@@ -194,6 +194,7 @@ router.get("/user", checkAuth, async (req, res) => {
       "u.avatarURL",
       "p.id",
       "p.name",
+      "p.admin",
       "a.permissions",
       "m.id",
       "m.name",
