@@ -100,23 +100,33 @@ const addLog = async (conn, module, userName, userID, detail) => {
   }
 };
 
-const foundRelations = async (conn, table_name, id) => {
+const foundRelations = async (
+  conn,
+  table_name,
+  id,
+  exeptions = [],
+  field_name
+) => {
   // Get a list of tables related to table_name
   let relations = await conn.query(
     `select table_name from information_schema.table_constraints where constraint_name in (SELECT constraint_name from information_schema.constraint_column_usage where table_name = '${table_name}' and constraint_name like 'FK_%')`
   );
-  relations = relations.map((r) => r.table_name);
+  relations = relations
+    .map((r) => r.table_name)
+    .filter((r) => !exeptions.includes(r));
 
   // created a subquery for each table found
   const subquery = [];
   for (const r of relations) {
     subquery.push(
-      `select count(*) from ${r} where "${table_name}Id" = '${id}'`
+      `select count(*) from ${r} where "${
+        field_name ? field_name : table_name
+      }Id" = '${id}'`
     );
   }
 
   const [result] = await conn.query(subquery.join(" union all "));
-  return result.count > 0;
+  return result == null ? false : result.count > 0;
 };
 
 module.exports = {
@@ -159,6 +169,8 @@ module.exports = {
       require("../entities/CustomerType"),
       require("../entities/CustomerTypeNatural"),
       require("../entities/CustomerTaxerType"),
+      require("../entities/InvoicesStatus"),
+      require("../entities/InvoicesZone"),
     ],
   },
 };

@@ -29,6 +29,7 @@ const users = require("./routes/users");
 const others = require("./routes/others");
 const services = require("./routes/services");
 const business = require("./routes/business");
+const invoices = require("./routes/invoices");
 const customers = require("./routes/customers");
 
 app.use("/auth", auth);
@@ -36,6 +37,7 @@ app.use("/users", users);
 app.use("/others", checkAuth, others);
 app.use("/services", checkAuth, services);
 app.use("/business", checkAuth, business);
+app.use("/invoices", checkAuth, invoices);
 app.use("/customers", checkAuth, customers);
 
 // Start server

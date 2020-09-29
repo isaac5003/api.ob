@@ -211,8 +211,8 @@ router.post("/", async (req, res) => {
     { name: "nrc", optional: true },
     { name: "nit", optional: true },
     { name: "giro", optional: true },
-    { name: "customerType", type: "integer" },
-    { name: "customerTaxerType", type: "integer", optional: true },
+    { name: "customerType", optional: false },
+    { name: "customerTaxerType", optional: true },
     { name: "customerTypeNatural", optional: true },
     "branch",
   ]);
@@ -335,6 +335,7 @@ router.post("/", async (req, res) => {
     }
   } catch (error) {
     // on error
+    console.log(error);
     return res.status(500).json({
       message: "Error al crear el cliente. Contacta con tu administrador",
     });
@@ -351,8 +352,8 @@ router.put("/:id", async (req, res) => {
     { name: "nrc", optional: true },
     { name: "nit", optional: true },
     { name: "giro", optional: true },
-    { name: "customerType", type: "integer" },
-    { name: "customerTaxerType", type: "integer", optional: true },
+    { name: "customerType", optional: false },
+    { name: "customerTaxerType", optional: true },
     { name: "customerTypeNatural", optional: true },
     "branch",
   ]);
@@ -555,7 +556,9 @@ router.delete("/:id", async (req, res) => {
 
   // If customer exist
   // Check references in other tables
-  const references = await foundRelations(req.conn, "customer", customer.id);
+  const references = await foundRelations(req.conn, "customer", customer.id, [
+    "customer_branch",
+  ]);
 
   // if references rejects deletion
   if (references) {
