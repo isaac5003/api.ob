@@ -13,27 +13,23 @@ const checkRequired = function (object, fields, nonrequired = false) {
           success: RegDate.test(value) && isValid(new Date(value)),
           message: "debe ser YYYY-MM-DD",
         };
-        break;
       case "us-phone":
         const RegUSPhone = /^[2-9]\d{2}\d{3}\d{4}$/;
         return {
           success: RegUSPhone.test(value),
           message: "deben ser 10 digitos seguidos de numero de telefono valido",
         };
-        break;
       case "email":
         const RegEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return {
           success: RegEmail.test(value),
           message: "Debe ser un correo válido.",
         };
-        break;
       case "array":
         return {
           success: Array.isArray(value) && value.length > 0,
           message: "Debe ser un arreglo y no ser vacio",
         };
-        break;
       case "slug":
         return {
           success: !value.includes(" "),
@@ -45,16 +41,13 @@ const checkRequired = function (object, fields, nonrequired = false) {
           success: value == parsed && Number.isInteger(parsed),
           message: "debe ser un número entero.",
         };
-        break;
       case "boolean":
         return {
           success: value != "true" || value != "false",
           message: "debe ser un número booleano.",
         };
-        break;
       default:
         return { success: true };
-        break;
     }
   }
 
@@ -171,6 +164,7 @@ module.exports = {
       require("../entities/CustomerTaxerType"),
       require("../entities/InvoicesStatus"),
       require("../entities/InvoicesZone"),
+      require("../entities/InvoicesSeller"),
     ],
   },
 };
