@@ -15,7 +15,7 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
-    zone: {
+    invoicesZone: {
       target: "InvoicesZone",
       type: "many-to-one",
       joinTable: true,

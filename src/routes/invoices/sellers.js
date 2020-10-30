@@ -23,49 +23,49 @@ router.get("/", async (req, res) => {
     const { limit, page, active, search } = req.query;
 
     let query = req.conn
-      .getRepository("InvoicesZone")
-      .createQueryBuilder("iz")
-      .where("iz.company = :company", { company: cid })
-      .select("COUNT(iz.id)", "count");
+      .getRepository("InvoicesSeller")
+      .createQueryBuilder("is")
+      .where("is.company = :company", { company: cid })
+      .select("COUNT(is.id)", "count");
 
     if (active != null) {
-      query = query.andWhere("iz.active = :active", {
+      query = query.andWhere("is.active = :active", {
         active: active == "true",
       });
     }
 
     let { count } = await query.getRawOne();
 
-    let zones = req.conn
-      .getRepository("InvoicesZone")
-      .createQueryBuilder("iz")
-      .select([ "iz.id", "iz.name", 'iz.active'])
-      .where("iz.company = :company", { company: cid })
-      .orderBy("iz.createdAt", "DESC");
+    let sellers = req.conn
+      .getRepository("InvoicesSeller")
+      .createQueryBuilder("is")
+      .select([ "is.id", "is.name"])
+      .where("is.company = :company", { company: cid })
+      .orderBy("is.createdAt", "DESC");
 
     let index = 1;
     if (search == null) {
-      zones = zones
+      sellers = sellers
         .limit(limit)
         .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
       index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
-      zones = zones.andWhere("s.active = :active", {
+      sellers = sellers.andWhere("s.active = :active", {
         active: active == "true",
       });
     }
-    zones = await zones.getMany();
+    sellers = await sellers.getMany();
 
     if (search != null) {
-      zones = zones.filter((s) => s.name.toLowerCase().includes(search));
-      count = zones.length;
+      sellers = sellers.filter((s) => s.name.toLowerCase().includes(search));
+      count = sellers.length;
     }
 
     return res.json({
       count,
-      zones: zones.map((s) => {
+      sellers: sellers.map((s) => {
         return { index: index++, ...s };
       }),
     });
@@ -73,7 +73,7 @@ router.get("/", async (req, res) => {
     console.error(error)
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de zonas." });
+      .json({ message: "Error al obtener el listado de vendedores." });
   }
 });
 
@@ -92,7 +92,7 @@ router.post("/", async (req, res) => {
     const zone = await req.conn
       .createQueryBuilder()
       .insert()
-      .into("InvoicesZone")
+      .into("InvoicesSeller")
       .values({ 
         name,
         company: req.user.cid
@@ -110,19 +110,19 @@ router.post("/", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha creado la zona: ${name}`
+      `Se ha creado el vendedor: ${name}`
     );
 
     // On success
     return res.json({
-      message: "La zona se ha creado correctamente.",
+      message: "El vendedor se ha creado correctamente.",
       id: zone.raw[0].id,
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
       message:
-        "Error al guardar la nueva zona, contacta con tu administrador.",
+        "Error al guardar el nuevo vendedor, contacta con tu administrador.",
     });
   }
 });
@@ -137,11 +137,11 @@ router.put("/:id", async (req, res) => {
   // Obtiene los campos requeridos
   const { name } = req.body;
 
-  // Actualiza el servicio
+  // Actualisa el servicio
   try {
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesZone")
+      .update("InvoicesSeller")
       .set({ name })
       .where("id = :id", { id: req.params.id })
       .execute();
@@ -157,18 +157,18 @@ router.put("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha editado la zona: ${name}`
+      `Se ha editado El vendedor: ${name}`
     );
 
     // On success
     return res.json({
-      message: "La zona ha sido actualizada correctamente.",
+      message: "El vendedor ha sido actualisada correctamente.",
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
       message:
-        "Error al actualizar la zona, contacta con tu administrador.",
+        "Error al actualizar el vendedor, contacta con tu administrador.",
     });
   }
 });
@@ -185,17 +185,17 @@ router.put("/status/:id", async (req, res) => {
   
   // Get zone
   const zone = await req.conn
-  .getRepository("InvoicesZone")
-  .createQueryBuilder("iz")
-  .where("iz.company = :company", { company: req.user.cid })
-  .andWhere("iz.id = :id", { id: req.params.id })
+  .getRepository("InvoicesSeller")
+  .createQueryBuilder("is")
+  .where("is.company = :company", { company: req.user.cid })
+  .andWhere("is.id = :id", { id: req.params.id })
   .getOne();
   
   // If no exist
   if (!zone) {
     return res
       .status(400)
-      .json({ message: "La zona seleccionada no existe." });
+      .json({ message: "El vendedor seleccionado no existe." });
   }
 
   // If zone exist updates it
@@ -203,7 +203,7 @@ router.put("/status/:id", async (req, res) => {
     // return success
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesZone")
+      .update("InvoicesSeller")
       .set({ active: status })
       .where("company = :company", { company: req.user.cid })
       .where("id = :id", { id: req.params.id })
@@ -220,19 +220,19 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado de la zona: ${zone.name} a ${
+      `Se cambio el estado del vendedor: ${zone.name} a ${
         status ? "ACTIVO" : "INACTIVO"
       }.`
     );
 
     return res.json({
-      message: "La zona ha sido actualizado correctamente.",
+      message: "El vendedor ha sido actualizado correctamente.",
     });
   } catch (error) {
     // return error
     return res.status(500).json({
       message:
-        "Error al actualizar la zona. Contacta con tu administrador.",
+        "Error al actualizar el vendedor. Contacta con tu administrador.",
     });
   }
 });
@@ -240,7 +240,7 @@ router.put("/status/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   // Get the zone
   const zone = await req.conn
-    .getRepository("InvoicesZone")
+    .getRepository("InvoicesSeller")
     .createQueryBuilder("s")
     .where("s.company = :company", { company: req.user.cid })
     .andWhere("s.id = :id", { id: req.params.id })
@@ -248,18 +248,18 @@ router.delete("/:id", async (req, res) => {
 
   // If no zone exist
   if (!zone) {
-    return res.status(400).json({ message: "la zona ingresada no existe" });
+    return res.status(400).json({ message: "El vendedor ingresado no existe" });
   }
 
   // If zone exist
   // Check references in other tables
-  const references = await foundRelations(req.conn, "invoices_zone", zone.id, [], 'invoicesZone');
+  const references = await foundRelations(req.conn, "invoices_seller", zone.id, [], 'invoicesSeller');
 
   // if references rejects deletion
   if (references) {
     return res.status(400).json({
       message:
-        "La zona no puede ser eliminada porque esta siendo utilizado en el sistema.",
+        "El vendedor no puede ser eliminado porque esta siendo utilizado en el sistema.",
     });
   }
 
@@ -268,7 +268,7 @@ router.delete("/:id", async (req, res) => {
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("InvoicesZone")
+      .from("InvoicesSeller")
       .where("id = :id", { id: req.params.id })
       .andWhere("company = :company", { company: req.user.cid })
       .execute();
@@ -284,15 +284,15 @@ router.delete("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se elimino la zona con nombre: ${zone.name}.`
+      `Se elimino el vendedor con nombre: ${zone.name}.`
     );
 
     return res.json({
-      message: "La zona ha sido eliminada correctamente.",
+      message: "El vendedor ha sido eliminado correctamente.",
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Error al eliminar la zona. Conctacta a tu administrador.",
+      message: "Error al eliminar el vendedor. Conctacta a tu administrador.",
     });
   }
 });

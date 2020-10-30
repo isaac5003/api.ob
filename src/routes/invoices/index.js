@@ -8,5 +8,6 @@ router.use((req, res, next) => {
 });
 
 router.use("/zones", require("./zones"));
+router.use("/sellers", require("./sellers"));
 
 module.exports = router;
