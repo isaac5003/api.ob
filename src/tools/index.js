@@ -171,6 +171,10 @@ module.exports = {
       require("../entities/CustomerTaxerType"),
       require("../entities/InvoicesStatus"),
       require("../entities/InvoicesZone"),
+      require("../entities/AccountingEntryType"),
+      require("../entities/AccountingCatalog"),
+      require("../entities/AccountingEntryDetail"),
+      require("../entities/AccountingEntry"),
     ],
   },
 };
