@@ -97,6 +97,7 @@ router.post("/login", async (req, res) => {
     // return token
     return res.json({ access_token, refresh_token });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al proveer token de refrescamiento." });
@@ -193,11 +194,13 @@ router.get("/user", checkAuth, async (req, res) => {
       "u.avatarURL",
       "p.id",
       "p.name",
+      "p.admin",
       "a.permissions",
       "m.id",
       "m.name",
       "c.id",
       "c.name",
+      "c.unique",
       "b.id",
       "b.name",
     ])
@@ -233,7 +236,7 @@ router.get("/user", checkAuth, async (req, res) => {
     company: await req.conn
       .getRepository("Company")
       .createQueryBuilder("c")
-      .select(["c.id", "c.name"])
+      .select(["c.id", "c.name", "c.unique"])
       .where({ id: cid })
       .getOne(),
     branch: await req.conn

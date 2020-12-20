@@ -11,6 +11,7 @@ module.exports = new EntitySchema({
     name: { type: "varchar" },
     description: { type: "varchar" },
     editable: { type: "boolean", default: true },
+    admin: { type: "boolean", default: false },
     createdAt: { type: "timestamp", createDate: true },
     updatedAt: { type: "timestamp", updateDate: true },
   },

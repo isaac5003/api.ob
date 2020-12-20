@@ -3,7 +3,7 @@ const { checkRequired, foundRelations, addLog } = require("../../tools");
 const router = express.Router();
 
 router.use((req, res, next) => {
-  req.moduleName = "Customers";
+  req.moduleName = "Accounting";
   next();
 });
 
@@ -20,38 +20,6 @@ router.get("/customer-types", async (req, res) => {
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de tipos de cliente." });
-  }
-});
-
-router.get("/customer-taxer-types", async (req, res) => {
-  try {
-    const taxerTypes = await req.conn
-      .getRepository("CustomerTaxerType")
-      .createQueryBuilder("s")
-      .select(["s.id", "s.name"])
-      .getMany();
-
-    return res.json({ taxerTypes });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error al obtener el listado de tipos de tributaciones.",
-    });
-  }
-});
-
-router.get("/customer-type-naturals", async (req, res) => {
-  try {
-    const typeNaturals = await req.conn
-      .getRepository("CustomerTypeNatural")
-      .createQueryBuilder("s")
-      .select(["s.id", "s.name"])
-      .getMany();
-
-    return res.json({ typeNaturals });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Error al obtener el listado de tipos de cliente naturales.",
-    });
   }
 });
 

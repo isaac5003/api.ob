@@ -17,6 +17,7 @@ module.exports = new EntitySchema({
       target: "Customer",
       type: "many-to-one",
       joinTable: true,
+      onDelete: "CASCADE",
     },
     country: {
       target: "Country",

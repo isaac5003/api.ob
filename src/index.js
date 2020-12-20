@@ -5,12 +5,12 @@ const { createConnection } = require("typeorm");
 const { connection } = require("./tools");
 const { checkAuth } = require("./middlewares");
 
-const port = 5001; //
+const port = 3000; //
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5002",
+    origin: "http://localhost:3000",
   })
 );
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,12 +26,18 @@ app.use(async (req, res, next) => {
 // ROUTES
 const auth = require("./routes/auth");
 const users = require("./routes/users");
+const others = require("./routes/others");
 const services = require("./routes/services");
+const business = require("./routes/business");
+const invoices = require("./routes/invoices");
 const customers = require("./routes/customers");
 
 app.use("/auth", auth);
 app.use("/users", users);
+app.use("/others", checkAuth, others);
 app.use("/services", checkAuth, services);
+app.use("/business", checkAuth, business);
+app.use("/invoices", checkAuth, invoices);
 app.use("/customers", checkAuth, customers);
 
 // Start server

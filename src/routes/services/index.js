@@ -65,15 +65,26 @@ router.get("/", async (req, res) => {
     let services = req.conn
       .getRepository("Service")
       .createQueryBuilder("s")
-      .select(["s.id", "s.name", "s.description", "s.cost", "st.id", "st.name"])
+      .select([
+        "s.id",
+        "s.name",
+        "s.description",
+        "s.cost",
+        "s.active",
+        "s.active",
+        "st.id",
+        "st.name",
+      ])
       .where("s.company = :company", { company: cid })
       .leftJoin("s.sellingType", "st")
       .orderBy("s.createdAt", "DESC");
 
+    let index = 1;
     if (search == null) {
       services = services
         .limit(limit)
         .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
@@ -100,7 +111,12 @@ router.get("/", async (req, res) => {
       count = services.length;
     }
 
-    return res.json({ count, services });
+    return res.json({
+      count,
+      services: services.map((s) => {
+        return { index: index++, ...s };
+      }),
+    });
   } catch (error) {
     console.log(error);
     return res
@@ -114,11 +130,25 @@ router.get("/:id", async (req, res) => {
     const service = await req.conn
       .getRepository("Service")
       .createQueryBuilder("s")
-      .select(["s.id", "s.name", "s.description", "s.cost", "st.id", "st.name"])
+      .select([
+        "s.id",
+        "s.name",
+        "s.description",
+        "s.cost",
+        "s.active",
+        "st.id",
+        "st.name",
+      ])
       .where("s.company = :company", { company: req.user.cid })
       .andWhere("s.id = :id", { id: req.params.id })
       .leftJoin("s.sellingType", "st")
       .getOne();
+
+    if (!service) {
+      return res
+        .status(400)
+        .json({ message: "El servicio seleccionado no existe." });
+    }
 
     return res.json({ service });
   } catch (error) {
@@ -145,7 +175,7 @@ router.post("/", async (req, res) => {
 
   // Inserta el servicio
   try {
-    await req.conn
+    const service = await req.conn
       .createQueryBuilder()
       .insert()
       .into("Service")
@@ -167,7 +197,10 @@ router.post("/", async (req, res) => {
     );
 
     // On success
-    return res.json({ message: "El servicio se ha creado correctamente." });
+    return res.json({
+      message: "El servicio se ha creado correctamente.",
+      id: service.raw[0].id,
+    });
   } catch (error) {
     // On errror
     return res.status(400).json({

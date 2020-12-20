@@ -13,27 +13,23 @@ const checkRequired = function (object, fields, nonrequired = false) {
           success: RegDate.test(value) && isValid(new Date(value)),
           message: "debe ser YYYY-MM-DD",
         };
-        break;
       case "us-phone":
         const RegUSPhone = /^[2-9]\d{2}\d{3}\d{4}$/;
         return {
           success: RegUSPhone.test(value),
           message: "deben ser 10 digitos seguidos de numero de telefono valido",
         };
-        break;
       case "email":
         const RegEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return {
           success: RegEmail.test(value),
           message: "Debe ser un correo válido.",
         };
-        break;
       case "array":
         return {
           success: Array.isArray(value) && value.length > 0,
           message: "Debe ser un arreglo y no ser vacio",
         };
-        break;
       case "slug":
         return {
           success: !value.includes(" "),
@@ -45,16 +41,13 @@ const checkRequired = function (object, fields, nonrequired = false) {
           success: value == parsed && Number.isInteger(parsed),
           message: "debe ser un número entero.",
         };
-        break;
       case "boolean":
         return {
           success: value != "true" || value != "false",
           message: "debe ser un número booleano.",
         };
-        break;
       default:
         return { success: true };
-        break;
     }
   }
 
@@ -100,23 +93,33 @@ const addLog = async (conn, module, userName, userID, detail) => {
   }
 };
 
-const foundRelations = async (conn, table_name, id) => {
+const foundRelations = async (
+  conn,
+  table_name,
+  id,
+  exeptions = [],
+  field_name
+) => {
   // Get a list of tables related to table_name
   let relations = await conn.query(
     `select table_name from information_schema.table_constraints where constraint_name in (SELECT constraint_name from information_schema.constraint_column_usage where table_name = '${table_name}' and constraint_name like 'FK_%')`
   );
-  relations = relations.map((r) => r.table_name);
+  relations = relations
+    .map((r) => r.table_name)
+    .filter((r) => !exeptions.includes(r));
 
   // created a subquery for each table found
   const subquery = [];
   for (const r of relations) {
     subquery.push(
-      `select count(*) from ${r} where "${table_name}Id" = '${id}'`
+      `select count(*) from ${r} where "${
+        field_name ? field_name : table_name
+      }Id" = '${id}'`
     );
   }
 
   const [result] = await conn.query(subquery.join(" union all "));
-  return result.count > 0;
+  return result == null ? false : result.count > 0;
 };
 
 module.exports = {
@@ -129,11 +132,11 @@ module.exports = {
   foundRelations,
   connection: {
     type: "postgres",
-    host: "localhost",
-    port: 5000,
-    username: "openbox_user",
-    password: "super_complicated_password",
-    database: "openbox_database",
+    host: process.env.POSTGRES_HOST,
+    port: process.env.POSTGRES_PORT,
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DB,
     synchronize: true,
     logging: false,
     entities: [
@@ -159,6 +162,13 @@ module.exports = {
       require("../entities/CustomerType"),
       require("../entities/CustomerTypeNatural"),
       require("../entities/CustomerTaxerType"),
+      require("../entities/InvoicesStatus"),
+      require("../entities/InvoicesZone"),
+      require("../entities/AccountingEntryType"),
+      require("../entities/AccountingCatalog"),
+      require("../entities/AccountingEntryDetail"),
+      require("../entities/AccountingEntry"),
+      require("../entities/InvoicesSeller"),
     ],
   },
 };
