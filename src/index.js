@@ -5,12 +5,12 @@ const { createConnection } = require("typeorm");
 const { connection } = require("./tools");
 const { checkAuth } = require("./middlewares");
 
-const port = 5001; //
+const port = 3000; //
 const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5002",
+    origin: "http://localhost:3000",
   })
 );
 app.use(bodyParser.urlencoded({ extended: true }));
