@@ -12,22 +12,22 @@ services:
     volumes:
       - openbox_database:/var/lib/postgresql/data
 
-  openbox_api:
-    image: "node:lts-slim"
-    working_dir: /usr/api
-    ports:
-      - "5001:3000"
-    command: npm run dev
-    environment:
-      POSTGRES_HOST: openbox_db
-      POSTGRES_USER: openbox_user
-      POSTGRES_PASSWORD: super_complicated_password
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: openbox_database
-    depends_on:
-      - openbox_db
-    volumes:
-      - ./:/usr/api
+  # openbox_api:
+  #   image: "node:lts-slim"
+  #   working_dir: /usr/api
+  #   ports:
+  #     - "5001:3000"
+  #   command: npm run dev
+  #   environment:
+  #     POSTGRES_HOST: openbox_db
+  #     POSTGRES_USER: openbox_user
+  #     POSTGRES_PASSWORD: super_complicated_password
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_DB: openbox_database
+  #   depends_on:
+  #     - openbox_db
+  #   volumes:
+  #     - ./:/usr/api
 
 volumes:
   openbox_database: {}
