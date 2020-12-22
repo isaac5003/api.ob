@@ -2,7 +2,6 @@ const express = require("express");
 const { checkRequired, foundRelations, addLog } = require("../../tools");
 const router = express.Router();
 
-
 router.get("/", async (req, res) => {
   const check = checkRequired(
     req.query,
@@ -39,7 +38,8 @@ router.get("/", async (req, res) => {
     let sellers = req.conn
       .getRepository("InvoicesSeller")
       .createQueryBuilder("is")
-      .select([ "is.id", "is.name"])
+      .leftJoin("is.invoicesZone", "iz")
+      .select(["is.id", "is.name", "is.active", "iz.name"])
       .where("is.company = :company", { company: cid })
       .orderBy("is.createdAt", "DESC");
 
@@ -70,7 +70,7 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de vendedores." });
@@ -79,7 +79,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, ['name']);
+  const check = checkRequired(req.body, ["name"]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -93,10 +93,10 @@ router.post("/", async (req, res) => {
       .createQueryBuilder()
       .insert()
       .into("InvoicesSeller")
-      .values({ 
+      .values({
         name,
-        company: req.user.cid
-       })
+        company: req.user.cid,
+      })
       .execute();
 
     const user = await req.conn
@@ -129,7 +129,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, [ "name" ]);
+  const check = checkRequired(req.body, ["name"]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -179,18 +179,18 @@ router.put("/status/:id", async (req, res) => {
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
-  
+
   // Get field
   const { status } = req.body;
-  
+
   // Get zone
   const zone = await req.conn
-  .getRepository("InvoicesSeller")
-  .createQueryBuilder("is")
-  .where("is.company = :company", { company: req.user.cid })
-  .andWhere("is.id = :id", { id: req.params.id })
-  .getOne();
-  
+    .getRepository("InvoicesSeller")
+    .createQueryBuilder("is")
+    .where("is.company = :company", { company: req.user.cid })
+    .andWhere("is.id = :id", { id: req.params.id })
+    .getOne();
+
   // If no exist
   if (!zone) {
     return res
@@ -253,7 +253,13 @@ router.delete("/:id", async (req, res) => {
 
   // If zone exist
   // Check references in other tables
-  const references = await foundRelations(req.conn, "invoices_seller", zone.id, [], 'invoicesSeller');
+  const references = await foundRelations(
+    req.conn,
+    "invoices_seller",
+    zone.id,
+    [],
+    "invoicesSeller"
+  );
 
   // if references rejects deletion
   if (references) {
