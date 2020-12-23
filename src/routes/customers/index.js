@@ -100,11 +100,15 @@ router.get("/", async (req, res) => {
         "c.nit",
         "c.nrc",
         "c.isActiveCustomer",
+        "ct.id",
         "ct.name",
+        "ctn.id",
+        "ctn.name",
       ])
       .where("c.company = :company", { company: cid })
       .andWhere("c.isCustomer = :isCustomer", { isCustomer: true })
       .leftJoin("c.customerType", "ct")
+      .leftJoin("c.customerTypeNatural", "ctn")
       .orderBy("c.createdAt", "DESC");
 
     // Si el parametro esta nulo entonces pagina
