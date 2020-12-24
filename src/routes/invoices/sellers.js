@@ -52,7 +52,7 @@ router.get("/", async (req, res) => {
     }
 
     if (active != null) {
-      sellers = sellers.andWhere("s.active = :active", {
+      sellers = sellers.andWhere("is.active = :active", {
         active: active == "true",
       });
     }
