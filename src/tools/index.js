@@ -171,6 +171,7 @@ module.exports = {
       require("../entities/InvoicesSeller"),
       require("../entities/InvoicesDocumentType"),
       require("../entities/InvoicesPaymentsCondition"),
+      require("../entities/InvoicesDocument"),
     ],
   },
 };
