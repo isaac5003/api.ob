@@ -10,6 +10,7 @@ router.use("/types", require("./types"));
 router.use("/taxer-types", require("./taxerTypes"));
 router.use("/type-naturals", require("./typeNaturals"));
 router.use("/:customerId/branches", require("./branches"));
+router.use("/:customerId/tributary", require("./tributary"));
 router.use("/", require("./customers"));
 
 module.exports = router;
