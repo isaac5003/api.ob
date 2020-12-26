@@ -169,6 +169,7 @@ module.exports = {
       require("../entities/AccountingEntryDetail"),
       require("../entities/AccountingEntry"),
       require("../entities/InvoicesSeller"),
+      require("../entities/InvoicesDocumentType"),
     ],
   },
 };
