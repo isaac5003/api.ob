@@ -9,5 +9,6 @@ router.use((req, res, next) => {
 router.use("/zones", require("./zones"));
 router.use("/sellers", require("./sellers"));
 router.use("/document-types", require("./documentTypes"));
+router.use("/payment-condition", require("./paymentCondition"));
 
 module.exports = router;

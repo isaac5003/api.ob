@@ -22,58 +22,59 @@ router.get("/", async (req, res) => {
     const { limit, page, active, search } = req.query;
 
     let query = req.conn
-      .getRepository("InvoicesSeller")
-      .createQueryBuilder("is")
-      .where("is.company = :company", { company: cid })
-      .select("COUNT(is.id)", "count");
+      .getRepository("InvoicesPaymentsCondition")
+      .createQueryBuilder("pc")
+      .where("pc.company = :company", { company: cid })
+      .select("COUNT(pc.id)", "count");
 
     if (active != null) {
-      query = query.andWhere("is.active = :active", {
+      query = query.andWhere("pc.active = :active", {
         active: active == "true",
       });
     }
 
     let { count } = await query.getRawOne();
 
-    let sellers = req.conn
-      .getRepository("InvoicesSeller")
-      .createQueryBuilder("is")
-      .leftJoin("is.invoicesZone", "iz")
-      .select(["is.id", "is.name", "is.active", "iz.name"])
-      .where("is.company = :company", { company: cid })
-      .orderBy("is.createdAt", "DESC");
+    let paymentConditions = req.conn
+      .getRepository("InvoicesPaymentsCondition")
+      .createQueryBuilder("pc")
+      .select(["pc.id", "pc.name", "pc.active"])
+      .where("pc.company = :company", { company: cid })
+      .orderBy("pc.createdAt", "DESC");
 
     let index = 1;
     if (search == null) {
-      sellers = sellers
+      paymentConditions = paymentConditions
         .limit(limit)
         .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
       index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
-      sellers = sellers.andWhere("is.active = :active", {
+      paymentConditions = paymentConditions.andWhere("s.active = :active", {
         active: active == "true",
       });
     }
-    sellers = await sellers.getMany();
+    paymentConditions = await paymentConditions.getMany();
 
     if (search != null) {
-      sellers = sellers.filter((s) => s.name.toLowerCase().includes(search));
-      count = sellers.length;
+      paymentConditions = paymentConditions.filter((s) =>
+        s.name.toLowerCase().includes(search)
+      );
+      count = paymentConditions.length;
     }
 
     return res.json({
       count,
-      sellers: sellers.map((s) => {
+      paymentConditions: paymentConditions.map((s) => {
         return { index: index++, ...s };
       }),
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de vendedores." });
+      .json({ message: "Error al obtener el listado de condiciones de pago." });
   }
 });
 
@@ -87,12 +88,12 @@ router.post("/", async (req, res) => {
   // Obtiene los campos requeridos
   const { name } = req.body;
 
-  // Inserta el servicio
+  // Inserta la condicion de pago
   try {
-    const zone = await req.conn
+    const paymentCondition = await req.conn
       .createQueryBuilder()
       .insert()
-      .into("InvoicesSeller")
+      .into("InvoicesPaymentsCondition")
       .values({
         name,
         company: req.user.cid,
@@ -110,19 +111,19 @@ router.post("/", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha creado el vendedor: ${name}`
+      `Se ha creado la condicion de pago: ${name}`
     );
 
     // On success
     return res.json({
-      message: "El vendedor se ha creado correctamente.",
-      id: zone.raw[0].id,
+      message: "La condicion de pago se ha creado correctamente.",
+      id: paymentCondition.raw[0].id,
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
       message:
-        "Error al guardar el nuevo vendedor, contacta con tu administrador.",
+        "Error al guardar la nueva condicion de pago, contacta con tu administrador.",
     });
   }
 });
@@ -137,11 +138,11 @@ router.put("/:id", async (req, res) => {
   // Obtiene los campos requeridos
   const { name } = req.body;
 
-  // Actualisa el servicio
+  // Actualiza la condicion de pago
   try {
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesSeller")
+      .update("InvoicesPaymentsCondition")
       .set({ name })
       .where("id = :id", { id: req.params.id })
       .execute();
@@ -157,18 +158,18 @@ router.put("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha editado El vendedor: ${name}`
+      `Se ha editado la condicion de pago: ${name}`
     );
 
     // On success
     return res.json({
-      message: "El vendedor ha sido actualisada correctamente.",
+      message: "La condicion de pago ha sido actualizada correctamente.",
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
       message:
-        "Error al actualizar el vendedor, contacta con tu administrador.",
+        "Error al actualizar la condicion de pago, contacta con tu administrador.",
     });
   }
 });
@@ -183,27 +184,27 @@ router.put("/status/:id", async (req, res) => {
   // Get field
   const { status } = req.body;
 
-  // Get zone
-  const zone = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("is")
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.id = :id", { id: req.params.id })
+  // Get paymentCondition
+  const paymentCondition = await req.conn
+    .getRepository("InvoicesPaymentsCondition")
+    .createQueryBuilder("pc")
+    .where("pc.company = :company", { company: req.user.cid })
+    .andWhere("pc.id = :id", { id: req.params.id })
     .getOne();
 
   // If no exist
-  if (!zone) {
+  if (!paymentCondition) {
     return res
       .status(400)
-      .json({ message: "El vendedor seleccionado no existe." });
+      .json({ message: "La condicion de pago seleccionada no existe." });
   }
 
-  // If zone exist updates it
+  // If paymentCondition exist updates it
   try {
     // return success
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesSeller")
+      .update("InvoicesPaymentsCondition")
       .set({ active: status })
       .where("company = :company", { company: req.user.cid })
       .where("id = :id", { id: req.params.id })
@@ -220,61 +221,63 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del vendedor: ${zone.name} a ${
-        status ? "ACTIVO" : "INACTIVO"
-      }.`
+      `Se cambio el estado de la condicion de pago: ${
+        paymentCondition.name
+      } a ${status ? "ACTIVO" : "INACTIVO"}.`
     );
 
     return res.json({
-      message: "El vendedor ha sido actualizado correctamente.",
+      message: "La condicion de pago ha sido actualizada correctamente.",
     });
   } catch (error) {
     // return error
     return res.status(500).json({
       message:
-        "Error al actualizar el vendedor. Contacta con tu administrador.",
+        "Error al actualizar la condicion de pago. Contacta con tu administrador.",
     });
   }
 });
 
 router.delete("/:id", async (req, res) => {
-  // Get the zone
-  const zone = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("s")
-    .where("s.company = :company", { company: req.user.cid })
-    .andWhere("s.id = :id", { id: req.params.id })
+  // Get the paymentCondition
+  const paymentCondition = await req.conn
+    .getRepository("InvoicesPaymentsCondition")
+    .createQueryBuilder("pc")
+    .where("pc.company = :company", { company: req.user.cid })
+    .andWhere("pc.id = :id", { id: req.params.id })
     .getOne();
 
-  // If no zone exist
-  if (!zone) {
-    return res.status(400).json({ message: "El vendedor ingresado no existe" });
+  // If no paymentCondition exist
+  if (!paymentCondition) {
+    return res
+      .status(400)
+      .json({ message: "La condicion de pago ingresada no existe" });
   }
 
-  // If zone exist
+  // If paymentCondition exist
   // Check references in other tables
-  const references = await foundRelations(
-    req.conn,
-    "invoices_seller",
-    zone.id,
-    [],
-    "invoicesSeller"
-  );
+  // const references = await foundRelations(
+  //   req.conn,
+  //   "invoices_seller",
+  //   paymentCondition.id,
+  //   [],
+  //   "invoicesSeller"
+  // );
 
   // if references rejects deletion
-  if (references) {
-    return res.status(400).json({
-      message:
-        "El vendedor no puede ser eliminado porque esta siendo utilizado en el sistema.",
-    });
-  }
+  // if (references) {
+  //   return res.status(400).json({
+  //     message:
+  //       "El vendedor no puede ser eliminado porque esta siendo utilizado en el sistema.",
+  //   });
+  // }
 
   // If no references deletes
   try {
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("InvoicesSeller")
+      .from("InvoicesPaymentsCondition")
       .where("id = :id", { id: req.params.id })
       .andWhere("company = :company", { company: req.user.cid })
       .execute();
@@ -290,15 +293,16 @@ router.delete("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se elimino el vendedor con nombre: ${zone.name}.`
+      `Se elimino la condicion de pago con nombre: ${paymentCondition.name}.`
     );
 
     return res.json({
-      message: "El vendedor ha sido eliminado correctamente.",
+      message: "La condicion de pago ha sido eliminada correctamente.",
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Error al eliminar el vendedor. Conctacta a tu administrador.",
+      message:
+        "Error al eliminar la condicion de pago. Conctacta a tu administrador.",
     });
   }
 });
