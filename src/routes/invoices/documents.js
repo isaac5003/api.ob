@@ -26,16 +26,19 @@ router.get("/", async (req, res) => {
       .getRepository("InvoicesDocument")
       .createQueryBuilder("id")
       .where("id.company = :company", { company: cid })
+      .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+        isCurrentDocument: true,
+      })
       .leftJoin("id.documentType", "dt")
       .select("COUNT(id.id)", "count");
 
     if (active != null) {
-      query = query.andWhere("dt.id = :type", { type });
-    }
-    if (type) {
       query = query.andWhere("id.active = :active", {
         active: active == "true",
       });
+    }
+    if (type) {
+      query = query.andWhere("dt.id = :type", { type });
     }
 
     let { count } = await query.getRawOne();
@@ -55,6 +58,9 @@ router.get("/", async (req, res) => {
       ])
       .leftJoin("id.documentType", "dt")
       .where("id.company = :company", { company: cid })
+      .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+        isCurrentDocument: true,
+      })
       .orderBy("id.createdAt", "DESC");
 
     let index = 1;
@@ -84,14 +90,87 @@ router.get("/", async (req, res) => {
 
     return res.json({
       count,
-      documents: documents.map((s) => {
-        return { index: index++, ...s };
+      documents: documents.map((d) => {
+        return { index: index++, ...d, next: d.current + 1 };
       }),
     });
   } catch (error) {
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de los documentos." });
+  }
+});
+
+router.post("/", async (req, res) => {
+  // Verifica los campos requeridos
+  const check = checkRequired(req.body, [
+    { name: "authorization", type: "string", optional: false },
+    { name: "initial", type: "integer", optional: false },
+    { name: "final", type: "integer", optional: false },
+    { name: "current", type: "integer", optional: false },
+    { name: "documentType", type: "integer", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  // Obtiene los campos requeridos
+  const { authorization, initial, final, current, documentType } = req.body;
+
+  // Inserta el documento
+  try {
+    // Set active and isCurrentDocument to false for all documents with similar type
+    await req.conn
+      .createQueryBuilder()
+      .update("InvoicesDocument")
+      .set({
+        active: false,
+        isCurrentDocument: false,
+      })
+      .where("documentType = :documentType", { documentType })
+      .execute();
+
+    // 3. Inserta el nuevo tipo de documento
+    const zone = await req.conn
+      .createQueryBuilder()
+      .insert()
+      .into("InvoicesDocument")
+      .values({
+        authorization,
+        initial,
+        final,
+        current,
+        documentType,
+        isCurrentDocument: true,
+        company: req.user.cid,
+      })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se ha creado el docuento con autorizacion : ${authorization}`
+    );
+
+    // On success
+    return res.json({
+      message: "El documento se ha creado correctamente.",
+      id: zone.raw[0].id,
+    });
+  } catch (error) {
+    // On errror
+    return res.status(400).json({
+      message:
+        "Error al guardar el nuevo documento, contacta con tu administrador.",
+    });
   }
 });
 
@@ -107,9 +186,12 @@ router.get("/:id", async (req, res) => {
         "id.final",
         "id.current",
         "id.active",
+        "dt.id",
+        "dt.name",
       ])
       .where("id.company = :company", { company: req.user.cid })
       .andWhere("id.id = :id", { id: req.params.id })
+      .leftJoin("id.documentType", "dt")
       .orderBy("id.createdAt", "DESC")
       .getOne();
 
