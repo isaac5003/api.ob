@@ -90,8 +90,8 @@ router.get("/", async (req, res) => {
 
     return res.json({
       count,
-      documents: documents.map((s) => {
-        return { index: index++, ...s };
+      documents: documents.map((d) => {
+        return { index: index++, ...d, next: d.current + 1 };
       }),
     });
   } catch (error) {
