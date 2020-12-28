@@ -131,7 +131,7 @@ router.post("/", async (req, res) => {
       .execute();
 
     // 3. Inserta el nuevo tipo de documento
-    const zone = await req.conn
+    const document = await req.conn
       .createQueryBuilder()
       .insert()
       .into("InvoicesDocument")
@@ -163,7 +163,7 @@ router.post("/", async (req, res) => {
     // On success
     return res.json({
       message: "El documento se ha creado correctamente.",
-      id: zone.raw[0].id,
+      id: document.raw[0].id,
     });
   } catch (error) {
     // On errror
@@ -270,6 +270,74 @@ router.put("/status/:id", async (req, res) => {
     return res.status(500).json({
       message:
         "Error al actualizar el documento. Contacta con tu administrador.",
+    });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  // Get the document
+  const document = await req.conn
+    .getRepository("InvoicesDocument")
+    .createQueryBuilder("d")
+    .where("d.company = :company", { company: req.user.cid })
+    .andWhere("d.id = :id", { id: req.params.id })
+    .getOne();
+
+  // If no document exist
+  if (!document) {
+    return res
+      .status(400)
+      .json({ message: "El documento ingresado no existe" });
+  }
+
+  // If document exist
+  // Check references in other tables
+  // const references = await foundRelations(
+  //   req.conn,
+  //   "invoices_document",
+  //   document.id,
+  //   [],
+  //   "invoicesZone"
+  // );
+
+  // // if references rejects deletion
+  // if (references) {
+  //   return res.status(400).json({
+  //     message:
+  //       "La zona no puede ser eliminada porque esta siendo utilizado en el sistema.",
+  //   });
+  // }
+
+  // If no references deletes
+  try {
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("InvoicesDocument")
+      .where("id = :id", { id: req.params.id })
+      .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se elimino el documeto con authorizacion: ${document.authorization}.`
+    );
+
+    return res.json({
+      message: "El documento ha sido eliminado correctamente.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al eliminar el documento. Conctacta a tu administrador.",
     });
   }
 });
