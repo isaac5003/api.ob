@@ -107,9 +107,12 @@ router.get("/:id", async (req, res) => {
         "id.final",
         "id.current",
         "id.active",
+        "dt.id",
+        "dt.name",
       ])
       .where("id.company = :company", { company: req.user.cid })
       .andWhere("id.id = :id", { id: req.params.id })
+      .leftJoin("id.documentType", "dt")
       .orderBy("id.createdAt", "DESC")
       .getOne();
 
