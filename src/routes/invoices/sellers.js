@@ -79,13 +79,13 @@ router.get("/", async (req, res) => {
 
 router.post("/", async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, ["name"]);
+  const check = checkRequired(req.body, ["name", "invoicesZone"]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name } = req.body;
+  const { name, invoicesZone } = req.body;
 
   // Inserta el servicio
   try {
@@ -95,6 +95,7 @@ router.post("/", async (req, res) => {
       .into("InvoicesSeller")
       .values({
         name,
+        invoicesZone,
         company: req.user.cid,
       })
       .execute();
