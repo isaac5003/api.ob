@@ -11,8 +11,11 @@ router.get("/", async (req, res) => {
         "c.nit",
         "c.nrc",
         "c.giro",
+        "ct.id",
         "ct.name",
+        "ctn.id",
         "ctn.name",
+        "ctt.id",
         "ctt.name",
       ])
       .leftJoin("c.customerType", "ct")
