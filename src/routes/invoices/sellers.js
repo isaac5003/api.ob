@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
       .getRepository("InvoicesSeller")
       .createQueryBuilder("is")
       .leftJoin("is.invoicesZone", "iz")
-      .select(["is.id", "is.name", "is.active", "iz.name"])
+      .select(["is.id", "is.name", "is.active", "iz.id", "iz.name"])
       .where("is.company = :company", { company: cid })
       .orderBy("is.createdAt", "DESC");
 
