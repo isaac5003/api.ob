@@ -1,4 +1,4 @@
-const { isEmpty } = require("ramda");
+const { isValid } = require("date-fns");
 
 const checkRequired = function (object, fields, nonrequired = false) {
   // Define incomplete fields response
@@ -52,7 +52,7 @@ const checkRequired = function (object, fields, nonrequired = false) {
   }
 
   // Check if empty object
-  if (isEmpty(object)) {
+  if (Object.keys(object).length == 0) {
     // Check if all fields are not required
     if (nonrequired) return { success: true };
     return { success: false, message: "Ningún campo recibido." };
@@ -172,6 +172,7 @@ module.exports = {
       require("../entities/InvoicesDocumentType"),
       require("../entities/InvoicesPaymentsCondition"),
       require("../entities/InvoicesDocument"),
+      require("../entities/Invoice"),
     ],
   },
 };
