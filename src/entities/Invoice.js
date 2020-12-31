@@ -43,7 +43,6 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
-
     customer: {
       target: "Customer",
       type: "many-to-one",
@@ -64,7 +63,7 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
-    invoicesDocumentType: {
+    documentType: {
       target: "InvoicesDocumentType",
       type: "many-to-one",
       joinTable: true,
