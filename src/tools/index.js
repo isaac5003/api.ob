@@ -28,7 +28,16 @@ const checkRequired = function (object, fields, nonrequired = false) {
       case "array":
         return {
           success: Array.isArray(value) && value.length > 0,
-          message: "Debe ser un arreglo y no ser vacio",
+          message: "Debe ser un arreglo y no estar vacio",
+        };
+      case "object":
+        return {
+          success:
+            !Array.isArray(value) &&
+            typeof value === "object" &&
+            value != null &&
+            Object.keys(value).length > 0,
+          message: "Debe ser un objeto y no estar vacio",
         };
       case "slug":
         return {

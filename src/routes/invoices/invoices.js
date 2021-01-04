@@ -215,4 +215,36 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  // valida los objetos header y details
+  const check = checkRequired(req.body, [
+    { name: "header", type: "object", optional: false },
+    { name: "details", type: "object", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  // valida el objeto header
+  const checkHeader = checkRequired(req.body.header, [
+    { name: "documentType", type: "object", optional: false },
+    { name: "authorization", optional: false },
+    { name: "sequence", type: "integer", optional: false },
+    { name: "invoiceDate", type: "date", optional: false },
+    { name: "customer", optional: false },
+    { name: "customerBranch", optional: false },
+    { name: "invoicesPaymentsCondition", optional: false },
+    { name: "invoicesSeller", optional: false },
+  ]);
+  if (!checkHeader.success) {
+    return res.status(400).json({ message: check.message });
+  }
+  // valida el objeto details
+
+  // verifica si el correlativo es correcto
+  // inserta en Invoice
+  // inserta en InvoiceDetail
+  // Actualiza el documento
+});
+
 module.exports = router;
