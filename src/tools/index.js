@@ -173,6 +173,7 @@ module.exports = {
       require("../entities/InvoicesPaymentsCondition"),
       require("../entities/InvoicesDocument"),
       require("../entities/Invoice"),
+      require("../entities/InvoiceDetail"),
     ],
   },
 };
