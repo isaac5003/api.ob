@@ -126,4 +126,93 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const invoice = await req.conn
+      .getRepository("Invoice")
+      .createQueryBuilder("i")
+      .select([
+        "i.id",
+        "i.authorization",
+        "i.sequence",
+        "i.invoiceDate",
+        "i.customerName",
+        "i.customerAddress1",
+        "i.customerAddress2",
+        "i.customerCountry",
+        "i.customerState",
+        "i.customerCity",
+        "i.customerDui",
+        "i.customerNit",
+        "i.customerNrc",
+        "i.customerGiro",
+        "i.paymentConditionName",
+        "i.sellerName",
+        "i.zoneName",
+        "i.sum",
+        "i.iva",
+        "i.subtotal",
+        "i.ivaRetenido",
+        "i.ventasExentas",
+        "i.ventasNoSujetas",
+        "i.ventaTotal",
+        "i.ventaTotalText",
+        "i.printedDate",
+        "d.id",
+        "d.chargeName",
+        "d.chargeDescription",
+        "d.quantity",
+        "d.unitPrice",
+        "d.incTax",
+        "d.ventaPrice",
+        "dsv.id",
+        "dst.id",
+        "c.id",
+        "cb.id",
+        "ct.id",
+        "ctn.id",
+        "dt.id",
+        "ipc.id",
+        "is.id",
+        "iz.id",
+        "s.id",
+      ])
+      .where("i.company = :company", { company: req.user.cid })
+      .andWhere("i.id = :id", { id: req.params.id })
+      .leftJoin("i.details", "d")
+      .leftJoin("d.service", "dsv")
+      .leftJoin("d.sellingType", "dst")
+      .leftJoin("i.customer", "c")
+      .leftJoin("i.customerBranch", "cb")
+      .leftJoin("i.customerType", "ct")
+      .leftJoin("i.customerTypeNatural", "ctn")
+      .leftJoin("i.documentType", "dt")
+      .leftJoin("i.invoicesPaymentsCondition", "ipc")
+      .leftJoin("i.invoicesSeller", "is")
+      .leftJoin("i.invoicesZone", "iz")
+      .leftJoin("i.status", "s")
+      .getOne();
+
+    if (!invoice) {
+      return res
+        .status(400)
+        .json({ message: "La venta seleccionada no existe." });
+    }
+
+    return res.json({
+      invoice: {
+        ...invoice,
+        invoiceDate: format(new Date(invoice.invoiceDate), "dd/MM/yyyy"),
+        printedDate: invoice.printedDate
+          ? format(new Date(invoice.printedDate), "dd/MM/yyyy")
+          : null,
+      },
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error al obtener la venta seleccionada." });
+  }
+});
+
 module.exports = router;
