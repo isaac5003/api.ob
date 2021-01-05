@@ -130,20 +130,20 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, ["name"]);
+  const check = checkRequired(req.body, ["name", "invoicesZone"]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name } = req.body;
+  const { name, invoicesZone } = req.body;
 
-  // Actualisa el servicio
+  // Actualiza el servicio
   try {
     await req.conn
       .createQueryBuilder()
       .update("InvoicesSeller")
-      .set({ name })
+      .set({ name, invoicesZone })
       .where("id = :id", { id: req.params.id })
       .execute();
 
@@ -163,7 +163,7 @@ router.put("/:id", async (req, res) => {
 
     // On success
     return res.json({
-      message: "El vendedor ha sido actualisada correctamente.",
+      message: "El vendedor ha sido actualizado correctamente.",
     });
   } catch (error) {
     // On errror
