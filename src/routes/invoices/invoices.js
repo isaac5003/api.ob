@@ -179,6 +179,7 @@ router.get("/:id", async (req, res) => {
         "ctn.name",
         "dt.id",
         "dt.name",
+        "dt.code",
         "ipc.id",
         "ipc.name",
         "is.id",
