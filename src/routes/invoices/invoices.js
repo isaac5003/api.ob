@@ -288,6 +288,8 @@ router.post("/", async (req, res) => {
     .createQueryBuilder("c")
     .where("c.company = :company", { company: req.user.cid })
     .andWhere("c.id = :id", { id: header.customer })
+    .leftJoinAndSelect("c.customerType", "ct")
+    .leftJoinAndSelect("c.customerTypeNatural", "ctn")
     .getOne();
 
   const branch = await req.conn
@@ -361,6 +363,19 @@ router.post("/", async (req, res) => {
         ventasNoSujetas: header.ventasNoSujetas,
         ventaTotal: header.ventaTotal,
         ventaTotalText: numeroALetras(header.ventaTotal),
+        company: req.user.cid,
+        branch: req.user.bid,
+        customer: header.customer,
+        customerBranch: header.customerBranch,
+        customerType: customer.customerType.id,
+        customerTypeNatural: customer.customerTypeNatural
+          ? customer.customerTypeNatural.id
+          : null,
+        documentType: header.documentType,
+        invoicesPaymentsCondition: header.invoicesPaymentsCondition,
+        invoicesSeller: header.invoicesSeller,
+        invoicesZone: seller.invoicesZone.id,
+        status: 1,
       })
       .execute();
   } catch (error) {
