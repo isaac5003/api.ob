@@ -52,7 +52,11 @@ router.get("/", async (req, res) => {
         "i.invoiceDate",
         "i.ventaTotal",
         "i.customerName",
+        "st.id",
         "st.name",
+        "dt.id",
+        "dt.name",
+        "dt.code",
       ])
       .leftJoin("i.documentType", "dt")
       .leftJoin("i.customer", "cu")
