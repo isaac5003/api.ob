@@ -107,9 +107,7 @@ const addLog = async (conn, module, userName, userID, detail) => {
       .into("Logger")
       .values({ userID, userName, module, detail })
       .execute();
-  } catch (error) {
-    console.log(error);
-  }
+  } catch (error) {}
 };
 
 const foundRelations = async (
@@ -123,11 +121,9 @@ const foundRelations = async (
   let relations = await conn.query(
     `select table_name from information_schema.table_constraints where constraint_name in (SELECT constraint_name from information_schema.constraint_column_usage where table_name = '${table_name}' and constraint_name like 'FK_%')`
   );
-  console.log(relations);
   relations = relations
     .map((r) => r.table_name)
     .filter((r) => !exeptions.includes(r));
-  console.log(relations);
 
   // created a subquery for each table found
   const subquery = [];
@@ -138,7 +134,6 @@ const foundRelations = async (
       }Id" = '${id}'`
     );
   }
-  console.log(subquery);
 
   let result = await conn.query(subquery.join(" union all "));
   return result == null ? false : result.reduce((a, b) => a + b.count, 0) > 0;
