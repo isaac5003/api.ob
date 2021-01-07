@@ -118,7 +118,6 @@ router.get("/", async (req, res) => {
         return {
           index: index++,
           ...i,
-          invoiceRawDate: i.invoiceDate,
           invoiceDate: format(new Date(i.invoiceDate), "dd/MM/yyyy"),
         };
       }),
@@ -219,9 +218,7 @@ router.get("/:id", async (req, res) => {
     return res.json({
       invoice: {
         ...invoice,
-        invoiceRawDate: format(new Date(invoice.invoiceDate), "dd/MM/yyyy"),
         invoiceDate: format(new Date(invoice.invoiceDate), "dd/MM/yyyy"),
-        printedRawDate: invoice.printedDate,
         printedDate: invoice.printedDate
           ? format(new Date(invoice.printedDate), "dd/MM/yyyy")
           : null,
