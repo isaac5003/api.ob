@@ -91,7 +91,7 @@ router.get("/", async (req, res) => {
     return res.json({
       count,
       documents: documents.map((d) => {
-        return { index: index++, ...d, next: d.current + 1 };
+        return { index: index++, ...d };
       }),
     });
   } catch (error) {
@@ -195,14 +195,8 @@ router.get("/:id", async (req, res) => {
       .orderBy("id.createdAt", "DESC")
       .getOne();
 
-    return res.json({
-      document: {
-        ...document,
-        next: document.current + 1,
-      },
-    });
+    return res.json({ document });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el detalle del documento." });
