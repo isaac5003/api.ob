@@ -141,8 +141,7 @@ const foundRelations = async (
   console.log(subquery);
 
   let result = await conn.query(subquery.join(" union all "));
-  console.log(result.reduce((a, b) => a + b.count, 0));
-  return result == null ? false : result.count > 0;
+  return result == null ? false : result.reduce((a, b) => a + b.count, 0) > 0;
 };
 
 const numeroALetras = (num, currency) => {
