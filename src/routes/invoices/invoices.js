@@ -42,6 +42,42 @@ router.get("/", async (req, res) => {
       endDate,
     } = req.query;
 
+    // Obtiene el total de facturas
+    let query = req.conn
+      .getRepository("Invoice")
+      .createQueryBuilder("i")
+      .select("COUNT(i.id)", "count")
+      .leftJoin("i.documentType", "dt")
+      .leftJoin("i.customer", "cu")
+      .leftJoin("i.invoicesSeller", "sl")
+      .leftJoin("i.invoicesZone", "zo")
+      .leftJoin("i.status", "st")
+      .where("i.company = :company", { company: cid });
+
+    if (documentType) {
+      query = query.andWhere("dt.id = :documentType", { documentType });
+    }
+    if (customer) {
+      query = query.andWhere("cu.id = :customer", { customer });
+    }
+    if (seller) {
+      query = query.andWhere("sl.id = :seller", { seller });
+    }
+    if (zone) {
+      query = query.andWhere("zo.id = :zone", { zone });
+    }
+    if (status) {
+      query = query.andWhere("st.id = :status", { status });
+    }
+    if (startDate && endDate) {
+      query = query.andWhere("i.invoiceDate >= :startDate", {
+        startDate,
+      });
+      query = query.andWhere("i.invoiceDate <= :endDate", { endDate });
+    }
+
+    let { count } = await query.getRawOne();
+
     let invoices = req.conn
       .getRepository("Invoice")
       .createQueryBuilder("i")
@@ -97,7 +133,6 @@ router.get("/", async (req, res) => {
     }
     invoices = await invoices.getMany();
 
-    let count = invoices.length;
     if (search != null) {
       invoices = invoices.filter(
         (s) =>
