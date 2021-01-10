@@ -142,108 +142,56 @@ router.get("/", async (req, res) => {
   }
 });
 
-// router.get("/:id", async (req, res) => {
-//   try {
-//     const invoice = await req.conn
-//       .getRepository("Invoice")
-//       .createQueryBuilder("i")
-//       .select([
-//         "i.id",
-//         "i.authorization",
-//         "i.sequence",
-//         "i.invoiceDate",
-//         "i.customerName",
-//         "i.customerAddress1",
-//         "i.customerAddress2",
-//         "i.customerCountry",
-//         "i.customerState",
-//         "i.customerCity",
-//         "i.customerDui",
-//         "i.customerNit",
-//         "i.customerNrc",
-//         "i.customerGiro",
-//         "i.paymentConditionName",
-//         "i.sellerName",
-//         "i.zoneName",
-//         "i.sum",
-//         "i.iva",
-//         "i.subtotal",
-//         "i.ivaRetenido",
-//         "i.ventasExentas",
-//         "i.ventasNoSujetas",
-//         "i.ventaTotal",
-//         "i.ventaTotalText",
-//         "i.printedDate",
-//         "d.id",
-//         "d.chargeName",
-//         "d.chargeDescription",
-//         "d.quantity",
-//         "d.unitPrice",
-//         "d.incTax",
-//         "d.ventaPrice",
-//         "dsv.id",
-//         "dsv.name",
-//         "dst.id",
-//         "dst.name",
-//         "c.id",
-//         "c.name",
-//         "cb.id",
-//         "cb.name",
-//         "ct.id",
-//         "ct.name",
-//         "ctn.id",
-//         "ctn.name",
-//         "dt.id",
-//         "dt.name",
-//         "dt.code",
-//         "ipc.id",
-//         "ipc.name",
-//         "is.id",
-//         "is.name",
-//         "iz.id",
-//         "iz.name",
-//         "s.id",
-//         "s.name",
-//       ])
-//       .where("i.company = :company", { company: req.user.cid })
-//       .andWhere("i.id = :id", { id: req.params.id })
-//       .leftJoin("i.details", "d")
-//       .leftJoin("d.service", "dsv")
-//       .leftJoin("d.sellingType", "dst")
-//       .leftJoin("i.customer", "c")
-//       .leftJoin("i.customerBranch", "cb")
-//       .leftJoin("i.customerType", "ct")
-//       .leftJoin("i.customerTypeNatural", "ctn")
-//       .leftJoin("i.documentType", "dt")
-//       .leftJoin("i.invoicesPaymentsCondition", "ipc")
-//       .leftJoin("i.invoicesSeller", "is")
-//       .leftJoin("i.invoicesZone", "iz")
-//       .leftJoin("i.status", "s")
-//       .getOne();
+router.get("/:id", async (req, res) => {
+  try {
+    const entry = await req.conn
+      .getRepository("AccountingEntry")
+      .createQueryBuilder("ae")
+      .select([
+        "ae.id",
+        "ae.serie",
+        "ae.title",
+        "ae.date",
+        "ae.squared",
+        "ae.accounted",
+        "aet.id",
+        "aet.name",
+        "aet.code",
+        "aed.id",
+        "aed.catalogName",
+        "aed.concept",
+        "aed.cargo",
+        "aed.abono",
+        "ac.id",
+        "ac.code",
+        "ac.name",
+      ])
+      .where("ae.company = :company", { company: req.user.cid })
+      .andWhere("ae.id = :id", { id: req.params.id })
+      .leftJoin("ae.accountingEntryType", "aet")
+      .leftJoin("ae.accountingEntryDetails", "aed")
+      .leftJoin("aed.accountingCatalog", "ac")
+      .getOne();
 
-//     if (!invoice) {
-//       return res
-//         .status(400)
-//         .json({ message: "La venta seleccionada no existe." });
-//     }
+    if (!entry) {
+      return res
+        .status(400)
+        .json({ message: "La partida contable seleccionada no existe." });
+    }
 
-//     return res.json({
-//       invoice: {
-//         ...invoice,
-//         invoiceRawDate: invoice.invoiceDate,
-//         invoiceDate: format(new Date(invoice.invoiceDate), "dd/MM/yyyy"),
-//         printedRawDate: invoice.printedDate,
-//         printedDate: invoice.printedDate
-//           ? format(new Date(invoice.printedDate), "dd/MM/yyyy")
-//           : null,
-//       },
-//     });
-//   } catch (error) {
-//     return res
-//       .status(500)
-//       .json({ message: "Error al obtener la venta seleccionada." });
-//   }
-// });
+    return res.json({
+      entry: {
+        ...entry,
+        rawDate: entry.date,
+        date: format(new Date(entry.date), "dd/MM/yyyy"),
+      },
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error al obtener la partida contable seleccionada." });
+  }
+});
 
 // router.post("/", async (req, res) => {
 //   // valida los objetos header y details
