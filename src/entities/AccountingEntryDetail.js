@@ -6,8 +6,8 @@ module.exports = new EntitySchema({
     id: { type: "uuid", generated: "uuid", primary: true },
     catalogName: { type: "varchar", nullable: false },
     concept: { type: "varchar", nullable: false },
-    cargo: { type: "boolean", nullable: true },
-    abono: { type: "boolean", nullable: true },
+    cargo: { type: "float", nullable: true },
+    abono: { type: "float", nullable: true },
     createdAt: { type: "timestamp", createDate: true },
     updatedAt: { type: "timestamp", updateDate: true },
   },
@@ -24,6 +24,11 @@ module.exports = new EntitySchema({
     },
     accountingCatalog: {
       target: "AccountingCatalog",
+      type: "many-to-one",
+      joinTable: true,
+    },
+    accountingEntry: {
+      target: "AccountingEntry",
       type: "many-to-one",
       joinTable: true,
     },
