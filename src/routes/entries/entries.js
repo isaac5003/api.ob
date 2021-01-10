@@ -70,10 +70,8 @@ router.get("/", async (req, res) => {
         "aet.id",
         "aet.name",
         "aet.code",
-        // "aed.cargo",
       ])
       .leftJoin("ae.accountingEntryType", "aet")
-      // .leftJoin("ae.accountingEntryDetails", "aed")
       .where("ae.company = :company", { company: cid })
       .orderBy("ae.createdAt", "DESC");
 
@@ -231,19 +229,6 @@ router.post("/", async (req, res) => {
   const { header, details } = req.body;
 
   // Get the highest serie
-  // const { currentSerie } = await req.conn
-  //   .getRepository("AccountingEntry")
-  //   .createQueryBuilder("ae")
-  //   .select("MAX(ae.serie)", "currentSerie")
-  //   .where("ae.company = :company", { company: req.user.cid })
-  //   .andWhere("ae.date >= :startDate", {
-  //     startDate: startOfMonth(new Date(header.date)),
-  //   })
-  //   .andWhere("ae.date <= :endDate", {
-  //     endDate: endOfMonth(new Date(header.date)),
-  //   })
-  //   .getRawOne();
-
   const entries = await req.conn
     .getRepository("AccountingEntry")
     .createQueryBuilder("ae")
@@ -319,7 +304,6 @@ router.post("/", async (req, res) => {
       )
       .execute();
   } catch (error) {
-    console.log(error);
     return res.status(400).json({
       message:
         "Error al guardar los detalles de la partida contable, contacta con tu administrador.",
@@ -346,186 +330,124 @@ router.post("/", async (req, res) => {
   });
 });
 
-// router.put("/:id", async (req, res) => {
-//   // valida los objetos header y details
-//   const check = checkRequired(req.body, [
-//     { name: "header", type: "object", optional: false },
-//     { name: "details", type: "array", optional: false },
-//   ]);
-//   if (!check.success) {
-//     return res.status(400).json({ message: check.message });
-//   }
+router.put("/:id", async (req, res) => {
+  // valida los objetos header y details
+  const check = checkRequired(req.body, [
+    { name: "header", type: "object", optional: false },
+    { name: "details", type: "array", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
 
-//   // valida el objeto header
-//   const checkHeader = checkRequired(req.body.header, [
-//     { name: "customer", optional: false },
-//     { name: "customerBranch", optional: false },
-//     { name: "invoicesSeller", optional: false },
-//     { name: "invoicesPaymentsCondition", optional: false },
-//     { name: "invoiceDate", type: "date", optional: false },
-//     { name: "sum", type: "float", optional: false },
-//     { name: "iva", type: "float", optional: false },
-//     { name: "subtotal", type: "float", optional: false },
-//     { name: "ivaRetenido", type: "float", optional: false },
-//     { name: "ventasExentas", type: "float", optional: false },
-//     { name: "ventasNoSujetas", type: "float", optional: false },
-//     { name: "ventaTotal", type: "float", optional: false },
-//   ]);
-//   if (!checkHeader.success) {
-//     return res.status(400).json({ message: checkHeader.message });
-//   }
-//   // valida el objeto details
-//   for (const details of req.body.details) {
-//     const checkDetails = checkRequired(details, [
-//       { name: "service", optional: false },
-//       { name: "chargeDescription", optional: false },
-//       { name: "quantity", type: "float", optional: false },
-//       { name: "unitPrice", type: "float", optional: false },
-//       { name: "incTax", type: "boolean", optional: false },
-//       { name: "ventaPrice", type: "float", optional: false },
-//     ]);
-//     if (!checkDetails.success) {
-//       return res.status(400).json({ message: checkDetails.message });
-//     }
-//   }
+  // valida el objeto header
+  const checkHeader = checkRequired(req.body.header, [
+    { name: "accountingEntryType", type: "string", optional: false },
+    { name: "title", type: "string", optional: false },
+    { name: "date", type: "datae", optional: false },
+    { name: "squared", type: "boolea", optional: false },
+    { name: "accounted", type: "boolean", optional: false },
+  ]);
+  if (!checkHeader.success) {
+    return res.status(400).json({ message: checkHeader.message });
+  }
+  // valida el objeto details
+  for (const details of req.body.details) {
+    const checkDetails = checkRequired(details, [
+      { name: "accountingCatalog", type: "string", optional: false },
+      { name: "concept", type: "string", optional: false },
+      { name: "cargo", type: "float", optional: true },
+      { name: "abono", type: "float", optional: true },
+    ]);
+    if (!checkDetails.success) {
+      return res.status(400).json({ message: checkDetails.message });
+    }
+  }
 
-//   const { header, details } = req.body;
+  const { header, details } = req.body;
+  const { cid } = req.user;
 
-//   const invoice = await req.conn
-//     .getRepository("Invoice")
-//     .createQueryBuilder("i")
-//     .where("i.company = :company", { company: req.user.cid })
-//     .andWhere("i.id = :id", { id: req.params.id })
-//     .getOne();
+  // actualiza el encabezado de partida
+  try {
+    await req.conn
+      .createQueryBuilder()
+      .update("AccountingEntry")
+      .set({
+        title: header.title,
+        date: header.date,
+        squared: header.squared,
+        accounted: header.accounted,
+        accountingEntryType: header.accountingEntryType,
+      })
+      .where("company = :company", { company: cid })
+      .andWhere("id = :id", { id: req.params.id })
+      .execute();
+  } catch (error) {
+    return res.status(400).json({
+      message:
+        "Error al actualizar el encabezado de la partida contable, contacta con tu administrador.",
+    });
+  }
 
-//   const customer = await req.conn
-//     .getRepository("Customer")
-//     .createQueryBuilder("c")
-//     .where("c.company = :company", { company: req.user.cid })
-//     .andWhere("c.id = :id", { id: header.customer })
-//     .getOne();
+  // Actualiza los detalles
+  try {
+    // Elimina todos los detalles
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("AccountingEntryDetail")
+      .where("company = :company", { company: cid })
+      .andWhere("accountingEntry = :accountingEntry", {
+        accountingEntry: req.params.id,
+      })
+      .execute();
 
-//   const branch = await req.conn
-//     .getRepository("CustomerBranch")
-//     .createQueryBuilder("cb")
-//     .where("cb.customer = :customer", { customer: header.customer })
-//     .andWhere("cb.id = :id", { id: header.customerBranch })
-//     .leftJoinAndSelect("cb.country", "co")
-//     .leftJoinAndSelect("cb.state", "st")
-//     .leftJoinAndSelect("cb.city", "ci")
-//     .getOne();
+    const catalog = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("c")
+      .where("c.company = :company", { company: req.user.cid })
+      .getMany();
 
-//   const condition = await req.conn
-//     .getRepository("InvoicesPaymentsCondition")
-//     .createQueryBuilder("pc")
-//     .where("pc.company = :company", { company: req.user.cid })
-//     .andWhere("pc.id = :id", { id: header.invoicesPaymentsCondition })
-//     .getOne();
+    // inserta los detalles de partida
+    await req.conn
+      .createQueryBuilder()
+      .insert()
+      .into("AccountingEntryDetail")
+      .values(
+        details.map((d) => {
+          return {
+            ...d,
+            accountingEntry: req.params.id,
+            catalogName: catalog.find((c) => c.id == d.accountingCatalog).name,
+            company: req.user.cid,
+          };
+        })
+      )
+      .execute();
+  } catch (error) {
+    return res.status(400).json({
+      message:
+        "Error al actualizar los detalles de la partida contable, contacta con tu administrador.",
+    });
+  }
 
-//   const seller = await req.conn
-//     .getRepository("InvoicesSeller")
-//     .createQueryBuilder("is")
-//     .where("is.company = :company", { company: req.user.cid })
-//     .andWhere("is.id = :id", { id: header.invoicesSeller })
-//     .leftJoinAndSelect("is.invoicesZone", "iz")
-//     .getOne();
+  const user = await req.conn
+    .getRepository("User")
+    .createQueryBuilder("u")
+    .where("u.id = :id", { id: req.user.uid })
+    .getOne();
 
-//   const services = await req.conn
-//     .getRepository("Service")
-//     .createQueryBuilder("s")
-//     .select(["s.id", "s.name", "st.id"])
-//     .where("s.id IN (:...ids)", { ids: details.map((d) => d.service) })
-//     .leftJoin("s.sellingType", "st")
-//     .getMany();
+  await addLog(
+    req.conn,
+    req.moduleName,
+    `${user.names} ${user.lastnames}`,
+    user.id,
+    `Se ha actualizado la partida contable: ${header.title}`
+  );
 
-//   // Actualiza el invoice
-//   try {
-//     await req.conn
-//       .createQueryBuilder()
-//       .update("Invoice")
-//       .set({
-//         invoiceDate: header.invoiceDate,
-//         customerName: customer.name,
-//         customerAddress1: branch.address1,
-//         customerAddress2: branch.address2,
-//         customerCountry: branch.country.name,
-//         customerState: branch.state.name,
-//         customerCity: branch.city.name,
-//         customerDui: customer.dui,
-//         customerNit: customer.nit,
-//         customerNrc: customer.nrc,
-//         customerGiro: customer.giro,
-//         paymentConditionName: condition.name,
-//         sellerName: seller.name,
-//         zoneName: seller.invoicesZone.name,
-//         sum: header.sum,
-//         iva: header.iva,
-//         subtotal: header.subtotal,
-//         ivaRetenido: header.ivaRetenido,
-//         ventasExentas: header.ventasExentas,
-//         ventasNoSujetas: header.ventasNoSujetas,
-//         ventaTotal: header.ventaTotal,
-//         ventaTotalText: numeroALetras(header.ventaTotal),
-//       })
-//       .where("id = :id", { id: req.params.id })
-//       .execute();
-//   } catch (error) {
-//     return res.status(400).json({
-//       message:
-//         "Error al actualilzar el encabezado de la venta, contacta con tu administrador.",
-//     });
-//   }
-
-//   // Actualiza los detalles
-//   try {
-//     // Elimina todos los detalles
-//     await req.conn
-//       .createQueryBuilder()
-//       .delete()
-//       .from("InvoiceDetail")
-//       .where("invoice = :invoice", { invoice: req.params.id })
-//       .execute();
-
-//     // Inserta todos los detalles nuevamente
-//     await req.conn
-//       .createQueryBuilder()
-//       .insert()
-//       .into("InvoiceDetail")
-//       .values(
-//         details.map((d) => {
-//           return {
-//             ...d,
-//             invoice: req.params.id,
-//             sellingType: services.find((s) => s.id == d.service).sellingType.id,
-//             chargeName: services.find((s) => s.id == d.service).name,
-//           };
-//         })
-//       )
-//       .execute();
-//   } catch (error) {
-//     return res.status(400).json({
-//       message:
-//         "Error al actualizar los detalles de la venta, contacta con tu administrador.",
-//     });
-//   }
-
-//   const user = await req.conn
-//     .getRepository("User")
-//     .createQueryBuilder("u")
-//     .where("u.id = :id", { id: req.user.uid })
-//     .getOne();
-
-//   await addLog(
-//     req.conn,
-//     req.moduleName,
-//     `${user.names} ${user.lastnames}`,
-//     user.id,
-//     `Se ha registrado la venta: ${invoice.authorization} - ${invoice.sequence}`
-//   );
-
-//   return res.json({
-//     message: `La venta ha sido actualizada correctamente.`,
-//   });
-// });
+  return res.json({
+    message: `La partida contable ha sido actualizada correctamente.`,
+  });
+});
 
 module.exports = router;
