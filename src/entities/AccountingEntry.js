@@ -28,5 +28,12 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
+    accountingEntryDetails: {
+      target: "AccountingEntryDetail",
+      type: "one-to-many",
+      joinTable: true,
+      joinColumn: true,
+      inverseSide: "accountingEntry",
+    },
   },
 });

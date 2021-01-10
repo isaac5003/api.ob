@@ -27,6 +27,7 @@ const services = require("./routes/services");
 const business = require("./routes/business");
 const invoices = require("./routes/invoices");
 const customers = require("./routes/customers");
+const entries = require("./routes/entries");
 
 app.use("/auth", auth);
 app.use("/users", users);
@@ -35,6 +36,7 @@ app.use("/services", checkAuth, services);
 app.use("/business", checkAuth, business);
 app.use("/invoices", checkAuth, invoices);
 app.use("/customers", checkAuth, customers);
+app.use("/entries", checkAuth, entries);
 
 // Start server
 app.listen(port, () => console.log(`Server listening on port ${port}!`));
