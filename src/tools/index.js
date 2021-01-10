@@ -78,7 +78,7 @@ const checkRequired = function (object, fields, nonrequired = false) {
       // if field field is object
       if (object.hasOwnProperty(field.name)) {
         const checked = checkType(object[field.name], field.type);
-        if (!checked.success)
+        if (!checked.success && object[field.name])
           return {
             success: false,
             message: `El campo ${field.name} tiene un formato incorrecto, ${checked.message}`,
