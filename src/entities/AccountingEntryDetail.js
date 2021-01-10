@@ -17,11 +17,6 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
-    branch: {
-      target: "Branch",
-      type: "many-to-one",
-      joinTable: true,
-    },
     accountingCatalog: {
       target: "AccountingCatalog",
       type: "many-to-one",
