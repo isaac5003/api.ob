@@ -6,6 +6,7 @@ router.use((req, res, next) => {
   next();
 });
 
+router.use("/types", require("./entryTypes"));
 router.use("/", require("./entries"));
 
 module.exports = router;

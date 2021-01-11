@@ -67,6 +67,8 @@ router.get("/", async (req, res) => {
         "ae.serie",
         "ae.title",
         "ae.date",
+        "ae.squared",
+        "ae.accounted",
         "aet.id",
         "aet.name",
         "aet.code",
