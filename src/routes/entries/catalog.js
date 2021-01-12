@@ -6,8 +6,16 @@ router.get("/", async (req, res) => {
     const accountingCatalog = await req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("ac")
-      .select(["ac.id", "ac.code", "ac.name", "ac.isAcreedora", "ac.isBalance"])
+      .select([
+        "ac.id",
+        "ac.code",
+        "ac.name",
+        "ac.isAcreedora",
+        "ac.isBalance",
+        "ac.isParent",
+      ])
       .where("ac.company = :company", { company: req.user.cid })
+      .orderBy("ac.code", "ASC")
       .getMany();
 
     return res.json({
