@@ -28,15 +28,15 @@ router.get("/", async (req, res) => {
       .andWhere("ae.date <= :endDate", { endDate: endOfMonth(new Date(date)) })
       .getMany();
 
+    const currentEntries = entries
+      .map((e) => parseInt(e.serie))
+      .sort((a, b) => {
+        if (a < b) return 1;
+        if (a > b) return -1;
+        return 0;
+      });
     return res.json({
-      nextSerie:
-        entries
-          .map((e) => parseInt(e.serie))
-          .sort((a, b) => {
-            if (a < b) return 1;
-            if (a > b) return -1;
-            return 0;
-          })[0] + 1,
+      nextSerie: currentEntries.length > 0 ? currentEntries[0] + 1 : 1,
     });
   } catch (error) {
     console.log(error);
