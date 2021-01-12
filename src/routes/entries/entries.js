@@ -14,6 +14,7 @@ router.get("/", async (req, res) => {
       { name: "accounted", type: "boolean", optional: true },
       { name: "startDate", type: "date", optional: true },
       { name: "endDate", type: "date", optional: true },
+      { name: "entryType", type: "string", optional: true },
     ],
     true
   );
@@ -31,6 +32,7 @@ router.get("/", async (req, res) => {
       accounted,
       startDate,
       endDate,
+      entryType,
     } = req.query;
 
     let query = req.conn
@@ -48,6 +50,11 @@ router.get("/", async (req, res) => {
     if (accounted == "true") {
       query = query.andWhere("ae.accounted = :accounted", {
         accounted: accounted == "true",
+      });
+    }
+    if (entryType) {
+      query = query.andWhere("aet.id = :entryType", {
+        entryType,
       });
     }
     if (startDate && endDate) {
