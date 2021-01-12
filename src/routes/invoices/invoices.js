@@ -1,6 +1,11 @@
 const express = require("express");
 const { format } = require("date-fns");
-const { checkRequired, addLog, numeroALetras } = require("../../tools");
+const {
+  checkRequired,
+  addLog,
+  numeroALetras,
+  foundRelations,
+} = require("../../tools");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -265,7 +270,7 @@ router.get("/:id", async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Error al obtener la venta seleccionada." });
+      .json({ message: "Error al obtener La venta seleccionada." });
   }
 });
 
@@ -424,7 +429,7 @@ router.post("/", async (req, res) => {
     console.log(error);
     return res.status(400).json({
       message:
-        "Error al registrar el encabezado de la venta, contacta con tu administrador.",
+        "Error al registrar el encabezado de La venta, contacta con tu administrador.",
     });
   }
 
@@ -447,7 +452,7 @@ router.post("/", async (req, res) => {
   } catch (error) {
     return res.status(400).json({
       message:
-        "Error al guardar los detalles de la venta, contacta con tu administrador.",
+        "Error al guardar los detalles de La venta, contacta con tu administrador.",
     });
   }
 
@@ -472,7 +477,7 @@ router.post("/", async (req, res) => {
     req.moduleName,
     `${user.names} ${user.lastnames}`,
     user.id,
-    `Se ha registrado la venta: ${document.authorization} - ${sequence}`
+    `Se ha registrado La venta: ${document.authorization} - ${sequence}`
   );
 
   return res.json({
@@ -661,6 +666,109 @@ router.put("/:id", async (req, res) => {
   return res.json({
     message: `La venta ha sido actualizada correctamente.`,
   });
+});
+
+router.delete("/:id", async (req, res) => {
+  // Get the invoice
+  const invoice = await req.conn
+    .getRepository("Invoice")
+    .createQueryBuilder("i")
+    .leftJoinAndSelect("i.documentType", "dt")
+    .leftJoinAndSelect("i.status", "st")
+    .where("i.company = :company", { company: req.user.cid })
+    .andWhere("i.id = :id", { id: req.params.id })
+    .getOne();
+
+  // If no customer exist
+  if (!invoice) {
+    return res.status(400).json({ message: "La venta ingresada no existe." });
+  }
+
+  // If customer exist
+  // Check references in other tables than details
+  const references = await foundRelations(req.conn, "invoice", invoice.id, [
+    "invoice_detail",
+  ]);
+
+  // if references rejects deletion
+  if (references) {
+    return res.status(400).json({
+      message:
+        "La venta seleccionada no puede ser eliminada porque esta siendo utilizada en el sistema.",
+    });
+  }
+
+  // check if any allowed status to delete
+  const allowedStatuses = [1];
+  let statuses = await req.conn
+    .getRepository("InvoicesStatus")
+    .createQueryBuilder("st")
+    .getMany();
+
+  if (!allowedStatuses.includes(invoice.status.id)) {
+    const status = statuses.find((s) => s.id == invoice.status.id);
+    return res.status(400).json({
+      message: `La venta seleccionada no puede ser eliminada mientras tenga estado "${status.name.toUpperCase()}"`,
+    });
+  }
+
+  // Check if last invoice number
+  const document = await req.conn
+    .getRepository("InvoicesDocument")
+    .createQueryBuilder("id")
+    .where("id.documentType = :documentType", {
+      documentType: invoice.documentType.id,
+    })
+    .andWhere("id.company = :company", { company: req.user.cid })
+    .getOne();
+
+  if (document.current - 1 != invoice.sequence) {
+    return res.status(400).json({
+      message:
+        "La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.",
+    });
+  }
+
+  try {
+    // Delete invoice details
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("InvoiceDetail")
+      .where("invoice = :invoice", { invoice: req.params.id })
+      .execute();
+
+    // Delete invoices
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("Invoice")
+      .where("id = :id", { id: req.params.id })
+      .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se elimino la venta con referencia: ${invoice.authorization} - ${invoice.sequence}.`
+    );
+
+    return res.json({
+      message: "La venta ha sido eliminada correctamente.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al eliminar la venta. Conctacta a tu administrador.",
+    });
+  }
 });
 
 module.exports = router;
