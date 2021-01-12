@@ -134,7 +134,6 @@ const foundRelations = async (
       }Id" = '${id}'`
     );
   }
-
   let result = await conn.query(subquery.join(" union all "));
   return result == null ? false : result.reduce((a, b) => a + b.count, 0) > 0;
 };
