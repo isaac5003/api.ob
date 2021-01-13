@@ -108,6 +108,11 @@ router.get("/", async (req, res) => {
       });
       entries = entries.andWhere("ae.date <= :endDate", { endDate });
     }
+    if (entryType) {
+      entries = entries.andWhere("aet.id = :entryType", {
+        entryType,
+      });
+    }
 
     entries = await entries.getMany();
 
