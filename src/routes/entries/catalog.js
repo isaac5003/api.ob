@@ -1,9 +1,21 @@
 const express = require("express");
+const { checkRequired } = require("../../tools");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
+  const check = checkRequired(
+    req.query,
+    [{ name: "search", type: "string", optional: true }],
+    true
+  );
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
   try {
-    const accountingCatalog = await req.conn
+    const { search } = req.query;
+
+    let accountingCatalog = await req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("ac")
       .select([
@@ -17,6 +29,14 @@ router.get("/", async (req, res) => {
       .where("ac.company = :company", { company: req.user.cid })
       .orderBy("ac.code", "ASC")
       .getMany();
+
+    if (search) {
+      accountingCatalog = accountingCatalog.filter(
+        (ac) =>
+          ac.code.toLowerCase().includes(search) ||
+          ac.name.toLowerCase().includes(search)
+      );
+    }
 
     return res.json({
       accountingCatalog,
