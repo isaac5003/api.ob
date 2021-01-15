@@ -48,52 +48,73 @@ router.get("/diario-mayor", async (req, res) => {
 
     let accounts = [];
     // obtiene el saldo inicial por cuenta
-    accounts = affectedCatalog.map((c) => {
-      const account = catalog.find((ct) => ct.code == c);
-      const abono = previousDetails
-        .filter((d) => d.accountingCatalog.code == c)
-        .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
-      const cargo = previousDetails
-        .filter((d) => d.accountingCatalog.code == c)
-        .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
-      const applicable = rangeDetails.filter(
-        (d) => d.accountingCatalog.code == c
-      );
-      const movements = [];
-      for (let item of applicable) {
-        const found = movements.find(
-          (m) => m.date == item.accountingEntry.date
+    accounts = affectedCatalog
+      .map((c) => {
+        const account = catalog.find((ct) => ct.code == c);
+        const abono = previousDetails
+          .filter((d) => d.accountingCatalog.code == c)
+          .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+        const cargo = previousDetails
+          .filter((d) => d.accountingCatalog.code == c)
+          .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+        const applicable = rangeDetails.filter(
+          (d) => d.accountingCatalog.code == c
         );
-        if (found) {
-          console.log("entra");
-          item.cargo = found.cargo + (item.cargo ? item.cargo : 0);
-          item.abono = found.abono + (item.abono ? item.abono : 0);
-        } else {
-          movements.push({
-            date: item.accountingEntry.date,
-            cargo: item.cargo ? item.cargo : 0,
-            abono: item.abono ? item.abono : 0,
-            balance: 0,
-          });
+        const movements = [];
+        for (let item of applicable) {
+          const found = movements.find(
+            (m) => m.date == item.accountingEntry.date
+          );
+          if (found) {
+            found.cargo = found.cargo + (item.cargo ? item.cargo : 0);
+            found.abono = found.abono + (item.abono ? item.abono : 0);
+          } else {
+            movements.push({
+              date: item.accountingEntry.date,
+              cargo: item.cargo ? item.cargo : 0,
+              abono: item.abono ? item.abono : 0,
+              balance: 0,
+            });
+          }
         }
-      }
-      return {
-        code: c,
-        name: account.name,
-        initialBalance: (account.isAcreedora
+        const initialBalance = account.isAcreedora
           ? abono - cargo
-          : cargo - abono
-        ).toFixed(2),
-        movements: movements.sort((a, b) => {
-          if (new Date(a.date) > new Date(b.date)) return 1;
-          if (new Date(a.date) < new Date(b.date)) return -1;
-          return 0;
-        }),
-        totalAbono: 0,
-        totalCargo: 0,
-        currentBalance: 0,
-      };
-    });
+          : cargo - abono;
+        let currentBalance = initialBalance;
+        return {
+          code: c,
+          name: account.name,
+          initialBalance: parseFloat(initialBalance.toFixed(2)),
+          movements: movements
+            .sort((a, b) => {
+              if (new Date(a.date) > new Date(b.date)) return 1;
+              if (new Date(a.date) < new Date(b.date)) return -1;
+              return 0;
+            })
+            .map((m) => {
+              const acc = catalog.find((ct) => ct.code == c);
+              currentBalance = parseFloat(
+                (
+                  currentBalance +
+                  (acc.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)
+                ).toFixed(2)
+              );
+              return {
+                ...m,
+                date: format(new Date(m.date), "dd/MM/yyyy"),
+                balance: currentBalance,
+              };
+            }),
+          totalAbono: movements.reduce((a, b) => a + b.abono, 0),
+          totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
+          currentBalance,
+        };
+      })
+      .sort((a, b) => {
+        if (a.code < b.code) return -1;
+        if (a.code > b.code) return 1;
+        return 0;
+      });
 
     return res.json({ accounts });
   } catch (error) {
