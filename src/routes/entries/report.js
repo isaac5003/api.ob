@@ -92,11 +92,10 @@ router.get("/diario-mayor", async (req, res) => {
               return 0;
             })
             .map((m) => {
-              const acc = catalog.find((ct) => ct.code == c);
               currentBalance = parseFloat(
                 (
                   currentBalance +
-                  (acc.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)
+                  (account.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)
                 ).toFixed(2)
               );
               return {
