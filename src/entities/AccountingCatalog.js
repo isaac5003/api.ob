@@ -8,7 +8,7 @@ module.exports = new EntitySchema({
     name: { type: "varchar", nullable: false },
     description: { type: "varchar", nullable: true },
     level: { type: "int", nullable: true },
-    isParent: { type: "boolean", nullable: true },
+    isParent: { type: "boolean", default: false },
     isAcreedora: { type: "boolean", nullable: true },
     isBalance: { type: "boolean", nullable: true },
     createdAt: { type: "timestamp", createDate: true },

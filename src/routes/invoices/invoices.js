@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
       { name: "status", type: "integer", optional: true },
       { name: "startDate", type: "date", optional: true },
       { name: "endDate", type: "date", optional: true },
-      // TODO Servicio
+      { name: "service", type: "string", optional: true },
     ],
     true
   );
@@ -57,6 +57,8 @@ router.get("/", async (req, res) => {
       .leftJoin("i.invoicesSeller", "sl")
       .leftJoin("i.invoicesZone", "zo")
       .leftJoin("i.status", "st")
+      .leftJoin("i.details", "d")
+      .leftJoin("d.service", "s")
       .where("i.company = :company", { company: cid });
 
     if (documentType) {
@@ -73,6 +75,9 @@ router.get("/", async (req, res) => {
     }
     if (status) {
       query = query.andWhere("st.id = :status", { status });
+    }
+    if (service) {
+      query = query.andWhere("s.id = :service", { service });
     }
     if (startDate && endDate) {
       query = query.andWhere("i.invoiceDate >= :startDate", {
@@ -104,6 +109,8 @@ router.get("/", async (req, res) => {
       .leftJoin("i.invoicesSeller", "sl")
       .leftJoin("i.invoicesZone", "zo")
       .leftJoin("i.status", "st")
+      .leftJoin("i.details", "d")
+      .leftJoin("d.service", "s")
       .where("i.company = :company", { company: cid })
       .orderBy("i.createdAt", "DESC");
 
@@ -130,6 +137,9 @@ router.get("/", async (req, res) => {
     if (status) {
       invoices = invoices.andWhere("st.id = :status", { status });
     }
+    if (service) {
+      invoices = invoices.andWhere("s.id = :service", { service });
+    }
     if (startDate && endDate) {
       invoices = invoices.andWhere("i.invoiceDate >= :startDate", {
         startDate,
@@ -147,7 +157,8 @@ router.get("/", async (req, res) => {
             .toLowerCase()
             .includes(search) ||
           s.customerName.toLowerCase().includes(search) ||
-          s.status.name.toLowerCase().includes(search)
+          s.customerName.toLowerCase().includes(search) ||
+          s.ventaTotal.toString().includes(search)
       );
       count = invoices.length;
     }
