@@ -224,4 +224,77 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  const check = checkRequired(req.body, [
+    { name: "code", type: "string", optional: true },
+    { name: "name", type: "string", optional: false },
+    { name: "description", type: "string", optional: true },
+    { name: "isAcreedora", type: "boolean", optional: false },
+    { name: "isBalance", type: "boolean", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  // Get the catalog
+  const catalog = await req.conn
+    .getRepository("AccountingCatalog")
+    .createQueryBuilder("ac")
+    .where("ac.company = :company", { company: req.user.cid })
+    .andWhere("ac.id = :id", { id: req.params.id })
+    .leftJoinAndSelect('ac.subAccounts', 'sa')
+    .getOne();
+
+  // If no catalog exist
+  if (!catalog) {
+    return res.status(400).json({ message: "La cuenta contable ingresada no existe" });
+  }
+
+  let { code, name, description, isAcreedora, isBalance, } = req.body;
+
+  // actualiza el encabezado de partida
+  try {
+    let message = ''
+    const data = { name, description, isAcreedora, isBalance, }
+    if (!(catalog.isParent || catalog.subAccounts.length > 0)) {
+      data['code'] = code
+    } else {
+      message = 'El codigo no se cambio ya que otras cuentas dependen de él.'
+      code = catalog.code
+    }
+    await req.conn
+      .createQueryBuilder()
+      .update("AccountingCatalog")
+      .set(data)
+      .where("company = :company", { company: req.user.cid })
+      .andWhere("id = :id", { id: req.params.id })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se ha actualizado la cuenta contable contable: ${catalog.code} - ${catalog.name} a ${code} - ${name}`
+    );
+
+    return res.json({
+      message: `La cuenta contable ha sido actualizada correctamente. ${message}`,
+    });
+
+  } catch (error) {
+    return res.status(400).json({
+      message:
+        `Error al actualizar la cuenta contable, contacta con tu administrador.`,
+    });
+  }
+
+});
+
 module.exports = router;
