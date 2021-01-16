@@ -25,8 +25,13 @@ router.get("/", async (req, res) => {
         "ac.isAcreedora",
         "ac.isBalance",
         "ac.isParent",
+        'sa.id',
+        'pc.code',
+        'pc.name'
       ])
       .where("ac.company = :company", { company: req.user.cid })
+      .leftJoin('ac.subAccounts', 'sa')
+      .leftJoin('ac.parentCatalog', 'pc')
       .orderBy("ac.code", "ASC")
       .getMany();
 
@@ -39,7 +44,12 @@ router.get("/", async (req, res) => {
     }
 
     return res.json({
-      accountingCatalog,
+      accountingCatalog: accountingCatalog.map(a => {
+        return {
+          ...a,
+          subAccounts: a.subAccounts.length > 0
+        }
+      }),
     });
   } catch (error) {
     return res
