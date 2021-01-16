@@ -26,7 +26,7 @@ const checkRequired = function (object, fields, nonrequired = false) {
         };
       case "array":
         return {
-          success: Array.isArray(value) && value.length > 0,
+          success: (Array.isArray(value) || Array.isArray(JSON.parse(value))) && (value.length > 0 || JSON.parse(value).length > 0),
           message: "Debe ser un arreglo y no estar vacio",
         };
       case "object":
@@ -107,7 +107,7 @@ const addLog = async (conn, module, userName, userID, detail) => {
       .into("Logger")
       .values({ userID, userName, module, detail })
       .execute();
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const foundRelations = async (
@@ -129,8 +129,7 @@ const foundRelations = async (
   const subquery = [];
   for (const r of relations) {
     subquery.push(
-      `select count(*) from ${r} where "${
-        field_name ? field_name : table_name
+      `select count(*) from ${r} where "${field_name ? field_name : table_name
       }Id" = '${id}'`
     );
   }
@@ -155,9 +154,8 @@ const numeroALetras = (num, currency) => {
     data.letrasCentavos = "00/100";
     data.enteros++;
   } else if (data.centavos > 0) {
-    data.letrasCentavos = `${data.centavos.toString().length == 1 ? "0" : ""}${
-      data.centavos
-    }/100`;
+    data.letrasCentavos = `${data.centavos.toString().length == 1 ? "0" : ""}${data.centavos
+      }/100`;
   } else {
     data.letrasCentavos = "00/100";
   }
