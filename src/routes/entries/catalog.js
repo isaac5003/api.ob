@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
         "ac.isAcreedora",
         "ac.isBalance",
         "ac.isParent",
+        "ac.description",
         'sa.id',
         'pc.code',
         'pc.name'
