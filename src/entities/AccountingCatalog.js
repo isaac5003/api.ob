@@ -25,5 +25,12 @@ module.exports = new EntitySchema({
       type: "many-to-one",
       joinTable: true,
     },
+    subAccounts: {
+      target: "AccountingCatalog",
+      type: "one-to-many",
+      joinTable: true,
+      joinColumn: true,
+      inverseSide: "parentCatalog",
+    },
   },
 });
