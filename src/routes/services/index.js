@@ -118,7 +118,6 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de servicios." });
@@ -308,8 +307,7 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del servicio: ${service.name} a ${
-        status ? "ACTIVO" : "INACTIVO"
+      `Se cambio el estado del servicio: ${service.name} a ${status ? "ACTIVO" : "INACTIVO"
       }.`
     );
 

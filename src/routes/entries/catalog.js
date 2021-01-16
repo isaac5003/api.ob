@@ -5,7 +5,11 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const check = checkRequired(
     req.query,
-    [{ name: "search", type: "string", optional: true }],
+    [
+      { name: "search", type: "string", optional: true },
+      { name: "limit", type: "integer", optional: true },
+      { name: "page", type: "integer", optional: true }
+    ],
     true
   );
   if (!check.success) {
@@ -13,7 +17,14 @@ router.get("/", async (req, res) => {
   }
 
   try {
-    const { search } = req.query;
+    const { search, limit, page } = req.query;
+
+    let { count } = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("ac")
+      .where("ac.company = :company", { company: req.user.cid })
+      .select("COUNT(ac.id)", "count")
+      .getRawOne();
 
     let accountingCatalog = await req.conn
       .getRepository("AccountingCatalog")
@@ -42,9 +53,11 @@ router.get("/", async (req, res) => {
           ac.code.toLowerCase().includes(search) ||
           ac.name.toLowerCase().includes(search)
       );
+      count = accountingCatalog.length;
     }
 
     return res.json({
+      count,
       accountingCatalog: accountingCatalog.map(a => {
         return {
           ...a,
@@ -53,6 +66,7 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
+    console.log(error)
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de tipos de partida." });
