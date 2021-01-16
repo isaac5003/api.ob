@@ -1,5 +1,5 @@
 const express = require("express");
-const { checkRequired, addLog } = require("../../tools");
+const { checkRequired, addLog, foundRelations } = require("../../tools");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -25,6 +25,7 @@ router.get("/", async (req, res) => {
         "ac.isAcreedora",
         "ac.isBalance",
         "ac.isParent",
+        "ac.description",
         'sa.id',
         'pc.code',
         'pc.name'
@@ -153,6 +154,72 @@ router.post("/", async (req, res) => {
     return res.status(400).json({
       message:
         "Error al guardar la(s) cuenta(s) contable(s), contacta con tu administrador.",
+    });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  // Get the catalog
+  const catalog = await req.conn
+    .getRepository("AccountingCatalog")
+    .createQueryBuilder("ac")
+    .where("ac.company = :company", { company: req.user.cid })
+    .andWhere("ac.id = :id", { id: req.params.id })
+    .leftJoinAndSelect('ac.subAccounts', 'sa')
+    .getOne();
+
+  // If no catalog exist
+  if (!catalog) {
+    return res.status(400).json({ message: "La cuenta contable ingresada no existe" });
+  }
+
+  // If catalog exist
+  // check if catalog is parent
+  if (catalog.isParent || catalog.subAccounts.length > 0) {
+    return res.status(400).json({ message: "No se puede eliminar la cuenta contable ya que tiene subcuentas asignadas a ella" });
+  }
+
+  // Check references in other tables
+  const references = await foundRelations(req.conn, "accounting_catalog", catalog.id, ['accounting_catalog'], 'accountingCatalog');
+
+  // if references rejects deletion
+  if (references) {
+    return res.status(400).json({
+      message:
+        "La cuenta contable no puede ser eliminada porque esta siendo utilizada en el sistema.",
+    });
+  }
+
+  // If no references deletes
+  try {
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("AccountingCatalog")
+      .where("id = :id", { id: req.params.id })
+      .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se elimino la cuenta contable: ${catalog.code} - ${catalog.name}.`
+    );
+
+    return res.json({
+      message: "La cuenta contable ha sido eliminada correctamente.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al eliminar la cuenta contable. Conctacta a tu administrador.",
     });
   }
 });
