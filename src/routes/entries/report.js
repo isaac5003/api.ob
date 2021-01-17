@@ -268,7 +268,7 @@ router.get("/account-movements", async (req, res) => {
       .where("d.company = :company", { company: req.user.cid })
       .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
-      .andWhere("c.code IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
+      .andWhere("c.id IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
@@ -280,7 +280,7 @@ router.get("/account-movements", async (req, res) => {
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
       .andWhere("e.date < :startDate", { startDate })
-      .andWhere("c.code IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
+      .andWhere("c.id IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
