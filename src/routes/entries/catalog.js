@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
       .select("COUNT(ac.id)", "count")
       .getRawOne();
 
-    let accountingCatalog = await req.conn
+    let accountingCatalog = req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("ac")
       .select([
@@ -45,7 +45,16 @@ router.get("/", async (req, res) => {
       .leftJoin('ac.subAccounts', 'sa')
       .leftJoin('ac.parentCatalog', 'pc')
       .orderBy("ac.code", "ASC")
-      .getMany();
+
+    let index = 1;
+    if (search == null) {
+      accountingCatalog = accountingCatalog
+        .take(limit)
+        .skip(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      index = index * page ? (page - 1) * limit + 1 : 1;
+    }
+
+    accountingCatalog = await accountingCatalog.getMany();
 
     if (search) {
       accountingCatalog = accountingCatalog.filter(
@@ -60,6 +69,7 @@ router.get("/", async (req, res) => {
       count,
       accountingCatalog: accountingCatalog.map(a => {
         return {
+          index: index++,
           ...a,
           subAccounts: a.subAccounts.length > 0
         }
