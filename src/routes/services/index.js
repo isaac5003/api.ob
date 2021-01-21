@@ -7,7 +7,7 @@ router.use((req, res, next) => {
 });
 router.use("/selling-types", require("./sellingTypes"));
 router.use("/status", require("./status"));
-router.use("/report", require("./reports"));
+router.use("/report", require("./report"));
 router.use("/", require("./services"));
 
 module.exports = router;
