@@ -174,6 +174,26 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get('/:type/layout', async (req, res) => {
+  // Get document
+  const document = await req.conn
+    .getRepository("InvoicesDocument")
+    .createQueryBuilder("id")
+    .leftJoinAndSelect("id.documentType", 'dt')
+    .where("id.company = :company", { company: req.user.cid })
+    .andWhere("dt.id = :id", { id: req.params.type })
+    .getOne();
+
+  // If no exist
+  if (!document) {
+    return res
+      .status(400)
+      .json({ message: "El documento seleccionado no existe." });
+  }
+
+  return res.json({ layout: document.documentLayout });
+});
+
 router.get("/:id", async (req, res) => {
   try {
     const document = await req.conn
@@ -250,8 +270,7 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del documento: ${document.name} a ${
-        status ? "ACTIVO" : "INACTIVO"
+      `Se cambio el estado del documento: ${document.name} a ${status ? "ACTIVO" : "INACTIVO"
       }.`
     );
 
