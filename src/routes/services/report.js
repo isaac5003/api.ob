@@ -21,9 +21,15 @@ router.get("/general", async (req, res) => {
       .leftJoin("s.sellingType", "st")
       .getMany();
 
+    let index = 1
     return res.json({
       company,
-      services,
+      services: services.map(s => {
+        return {
+          index: index++,
+          ...s
+        }
+      }),
     });
   } catch (error) {
     console.log(error);
