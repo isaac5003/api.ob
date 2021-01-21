@@ -382,6 +382,7 @@ module.exports = {
       require("../entities/InvoicesDocument"),
       require("../entities/Invoice"),
       require("../entities/InvoiceDetail"),
+      require("../entities/AccountingSetting"),
     ],
   },
 };
