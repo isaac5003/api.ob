@@ -459,4 +459,81 @@ router.get("/balance-comprobacion", async (req, res) => {
   }
 });
 
+router.get("/balance-general", async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "date", type: "date", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  try {
+    const date = new Date(req.query.date);
+
+    const { settings } = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    const catalog = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .getMany();
+
+    // obtiene los detalles de la partida del rango seleccionado
+    const rangeDetails = await req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .getMany();
+
+    const balanceGeneral = settings.report.map(s => {
+      let add = 0
+      if (s.id == 3) {
+        const accum = rangeDetails
+          .filter(d => d.accountingCatalog.id == settings.special.accum_gain)
+          .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0) -
+          rangeDetails
+            .filter(d => d.accountingCatalog.id == settings.special.accum_lost)
+            .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
+        const curre = rangeDetails
+          .filter(d => d.accountingCatalog.id == settings.special.curre_gain)
+          .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0) -
+          rangeDetails
+            .filter(d => d.accountingCatalog.id == settings.special.curre_lost)
+            .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
+
+        console.log(accum, curre);
+      }
+      console.log(add)
+      return {
+        code: s.id,
+        name: s.display,
+        total: s.children
+          .map(c => {
+            return c.children
+              .map(ch => rangeDetails
+                .filter(d => d.accountingCatalog.code.startsWith(ch.id))
+                .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
+              )
+            // .reduce((a, b) => a + b, 0)
+          }
+          )
+        // .reduce((a, b) => a + b, 0) + add
+      }
+    })
+    return res.json({ settings, balanceGeneral });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el listado de tipos de partida." });
+  }
+});
+
 module.exports = router;
