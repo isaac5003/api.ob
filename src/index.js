@@ -8,7 +8,11 @@ const { checkAuth } = require("./middlewares");
 const port = 3000; //
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 

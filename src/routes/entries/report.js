@@ -273,7 +273,6 @@ router.get("/account-movements", async (req, res) => {
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
-
     // obtiene los detalles de la partida anteriores al rango seleccionado
     const previousDetails = await req.conn
       .getRepository("AccountingEntryDetail")
@@ -357,6 +356,101 @@ router.get("/account-movements", async (req, res) => {
       });
 
     return res.json({ accounts });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el listado de tipos de partida." });
+  }
+});
+
+router.get("/balance-comprobacion", async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "date", type: "date", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  try {
+    const date = new Date(req.query.date);
+
+    let catalog = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .getMany();
+
+    // obtiene los detalles de la partida del rango seleccionado
+    const rangeDetails = await req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .andWhere("e.date >= :startDate", { startDate: startOfMonth(date) })
+      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .getMany();
+
+    // obtiene los detalles de la partida anteriores al rango seleccionado
+    const previousDetails = await req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .andWhere("e.date < :date", { date: startOfMonth(date) })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .getMany();
+
+    // define el listado de cuentas contables afectadas en el periodo seleccionado
+    const affectedCatalog = [
+      ...rangeDetails.map((d) => d.accountingCatalog.code),
+    ].concat(...previousDetails.map((d) => d.accountingCatalog.code));
+
+    balanceComprobacion = catalog
+      .filter((c) => {
+        return affectedCatalog.some((ac) => ac.startsWith(c.code));
+      })
+      .map((c) => {
+        let initialBalance = previousDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => {
+            return (
+              a +
+              (b.accountingCatalog.isAcreedora
+                ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
+                : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0))
+            );
+          }, 0);
+        initialBalance = parseFloat(initialBalance.toFixed(2));
+        let cargo = rangeDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+        cargo = parseFloat(cargo.toFixed(2));
+        let abono = rangeDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+        abono = parseFloat(abono.toFixed(2));
+        let currentBalance = c.isAcreedora ? abono - cargo : cargo - abono;
+        currentBalance = parseFloat(currentBalance.toFixed(2));
+        return {
+          code: c.code,
+          name: c.name,
+          initialBalance,
+          cargo,
+          abono,
+          currentBalance,
+          actualBalance: initialBalance + currentBalance,
+        };
+      })
+      .sort((a, b) => {
+        if (a.code < b.code) return -1;
+        if (a.code > b.code) return 1;
+        return 0;
+      })
+      .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
+
+    return res.json({ balanceComprobacion });
   } catch (error) {
     console.log(error);
     return res
