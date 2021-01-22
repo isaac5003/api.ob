@@ -375,7 +375,7 @@ router.get("/balance-comprobacion", async (req, res) => {
   try {
     const date = new Date(req.query.date);
 
-    const catalog = await req.conn
+    let catalog = await req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
@@ -404,79 +404,53 @@ router.get("/balance-comprobacion", async (req, res) => {
 
     // define el listado de cuentas contables afectadas en el periodo seleccionado
     const affectedCatalog = [
-      ...new Set(rangeDetails.map((d) => d.accountingCatalog.code)),
-    ];
+      ...rangeDetails.map((d) => d.accountingCatalog.code),
+    ].concat(...previousDetails.map((d) => d.accountingCatalog.code));
 
-    // let accounts = [];
-    // // obtiene el saldo inicial por cuenta
-    // accounts = affectedCatalog
-    //   .map((c) => {
-    //     const account = catalog.find((ct) => ct.code == c);
-    //     const abono = previousDetails
-    //       .filter((d) => d.accountingCatalog.code == c)
-    //       .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
-    //     const cargo = previousDetails
-    //       .filter((d) => d.accountingCatalog.code == c)
-    //       .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
-    //     const applicable = rangeDetails.filter(
-    //       (d) => d.accountingCatalog.code == c
-    //     );
-    //     const movements = [];
-    //     for (let item of applicable) {
-    //       const found = movements.find(
-    //         (m) => m.date == item.accountingEntry.date
-    //       );
-    //       if (found) {
-    //         found.cargo = found.cargo + (item.cargo ? item.cargo : 0);
-    //         found.abono = found.abono + (item.abono ? item.abono : 0);
-    //       } else {
-    //         movements.push({
-    //           date: item.accountingEntry.date,
-    //           cargo: item.cargo ? item.cargo : 0,
-    //           abono: item.abono ? item.abono : 0,
-    //           balance: 0,
-    //         });
-    //       }
-    //     }
-    //     const initialBalance = account.isAcreedora
-    //       ? abono - cargo
-    //       : cargo - abono;
-    //     let currentBalance = initialBalance;
-    //     return {
-    //       code: c,
-    //       name: account.name,
-    //       initialBalance: parseFloat(initialBalance.toFixed(2)),
-    //       movements: movements
-    //         .sort((a, b) => {
-    //           if (new Date(a.date) > new Date(b.date)) return 1;
-    //           if (new Date(a.date) < new Date(b.date)) return -1;
-    //           return 0;
-    //         })
-    //         .map((m) => {
-    //           currentBalance = parseFloat(
-    //             (
-    //               currentBalance +
-    //               (account.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)
-    //             ).toFixed(2)
-    //           );
-    //           return {
-    //             ...m,
-    //             date: format(new Date(m.date), "dd/MM/yyyy"),
-    //             balance: currentBalance,
-    //           };
-    //         }),
-    //       totalAbono: movements.reduce((a, b) => a + b.abono, 0),
-    //       totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
-    //       currentBalance,
-    //     };
-    //   })
-    //   .sort((a, b) => {
-    //     if (a.code < b.code) return -1;
-    //     if (a.code > b.code) return 1;
-    //     return 0;
-    //   });
+    balanceComprobacion = catalog
+      .filter((c) => {
+        return affectedCatalog.some((ac) => ac.startsWith(c.code));
+      })
+      .map((c) => {
+        let initialBalance = previousDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => {
+            return (
+              a +
+              (b.accountingCatalog.isAcreedora
+                ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
+                : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0))
+            );
+          }, 0);
+        initialBalance = parseFloat(initialBalance.toFixed(2));
+        let cargo = rangeDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+        cargo = parseFloat(cargo.toFixed(2));
+        let abono = rangeDetails
+          .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+          .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+        abono = parseFloat(abono.toFixed(2));
+        let currentBalance = c.isAcreedora ? abono - cargo : cargo - abono;
+        currentBalance = parseFloat(currentBalance.toFixed(2));
+        return {
+          code: c.code,
+          name: c.name,
+          initialBalance,
+          cargo,
+          abono,
+          currentBalance,
+          actualBalance: initialBalance + currentBalance,
+        };
+      })
+      .sort((a, b) => {
+        if (a.code < b.code) return -1;
+        if (a.code > b.code) return 1;
+        return 0;
+      })
+      .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
 
-    return res.json({ affectedCatalog });
+    return res.json({ balanceComprobacion });
   } catch (error) {
     console.log(error);
     return res
