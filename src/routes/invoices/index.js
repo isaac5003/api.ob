@@ -12,6 +12,7 @@ router.use("/document-types", require("./documentTypes"));
 router.use("/payment-condition", require("./paymentCondition"));
 router.use("/documents", require("./documents"));
 router.use("/status", require("./status"));
+router.use("/report", require("./report"));
 router.use("/", require("./invoices"));
 
 module.exports = router;
