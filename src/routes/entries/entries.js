@@ -15,6 +15,8 @@ router.get("/", async (req, res) => {
       { name: "startDate", type: "date", optional: true },
       { name: "endDate", type: "date", optional: true },
       { name: "entryType", type: "string", optional: true },
+      { name: "prop", type: "string", optional: true },
+      { name: "order", type: "string", optional: true },
     ],
     true
   );
@@ -33,6 +35,8 @@ router.get("/", async (req, res) => {
       startDate,
       endDate,
       entryType,
+      prop,
+      order
     } = req.query;
 
     let query = req.conn
@@ -81,8 +85,13 @@ router.get("/", async (req, res) => {
         "aet.code",
       ])
       .leftJoin("ae.accountingEntryType", "aet")
-      .where("ae.company = :company", { company: cid })
-      .orderBy("ae.createdAt", "DESC");
+      .where("ae.company = :company", { company: cid });
+
+    if (order && prop) {
+      entries = entries.orderBy(`ae.${prop}`, order == 'ascending' ? 'ASC' : "DESC")
+    } else {
+      entries = entries.orderBy("ae.createdAt", "DESC")
+    }
 
     let index = 1;
     if (search == null) {
