@@ -10,6 +10,8 @@ router.get("/", async (req, res) => {
       { name: "page", type: "integer", optional: true },
       { name: "active", type: "boolean", optional: true },
       { name: "search", type: "string", optional: true },
+      { name: "prop", type: "string", optional: true },
+      { name: "order", type: "string", optional: true },
     ],
     true
   );
@@ -19,7 +21,7 @@ router.get("/", async (req, res) => {
 
   try {
     const { cid } = req.user;
-    const { limit, page, active, search } = req.query;
+    const { limit, page, active, search, prop, order } = req.query;
 
     // Obtiene el total de clientes
     let query = req.conn
@@ -55,8 +57,14 @@ router.get("/", async (req, res) => {
       .where("c.company = :company", { company: cid })
       .andWhere("c.isCustomer = :isCustomer", { isCustomer: true })
       .leftJoin("c.customerType", "ct")
-      .leftJoin("c.customerTypeNatural", "ctn")
-      .orderBy("c.createdAt", "DESC");
+      .leftJoin("c.customerTypeNatural", "ctn");
+
+    if (order && prop) {
+      customers = customers.orderBy(`c.${prop}`, order == 'ascending' ? 'ASC' : "DESC");
+    } else {
+      customers = customers.orderBy("c.createdAt", "DESC");
+    }
+
 
     // Si el parametro esta nulo entonces pagina
     let index = 1;
@@ -475,8 +483,7 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del cliente: ${customer.name} a ${
-        status ? "ACTIVO" : "INACTIVO"
+      `Se cambio el estado del cliente: ${customer.name} a ${status ? "ACTIVO" : "INACTIVO"
       }.`
     );
 

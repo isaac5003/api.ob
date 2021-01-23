@@ -9,4 +9,13 @@ module.exports = new EntitySchema({
     createdAt: { type: "timestamp", createDate: true },
     updatedAt: { type: "timestamp", updateDate: true },
   },
+  relations: {
+    invoicesDocuments: {
+      target: "InvoicesDocument",
+      type: "one-to-many",
+      joinTable: true,
+      joinColumn: true,
+      inverseSide: "documentType",
+    },
+  }
 });
