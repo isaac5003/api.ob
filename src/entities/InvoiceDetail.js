@@ -4,7 +4,6 @@ module.exports = new EntitySchema({
   name: "InvoiceDetail",
   columns: {
     id: { type: "uuid", generated: "uuid", primary: true },
-    chargeName: { type: "varchar", nullable: false },
     chargeDescription: { type: "varchar", nullable: false },
     quantity: { type: "float", nullable: false },
     unitPrice: { type: "float", nullable: false },
