@@ -475,9 +475,10 @@ router.get("/balance-general", async (req, res) => {
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
       .where("as.company = :company", { company: req.user.cid })
+      .andWhere("as.type = :type", { type: 'balance-general' })
       .getOne();
 
-    const catalog = await req.conn
+    let catalog = await req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
@@ -495,40 +496,71 @@ router.get("/balance-general", async (req, res) => {
 
     const balanceGeneral = settings.report.map(s => {
       let add = 0
+      let objaccount = {}
       if (s.id == 3) {
-        const accum = rangeDetails
-          .filter(d => d.accountingCatalog.id == settings.special.accum_gain)
-          .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0) -
-          rangeDetails
-            .filter(d => d.accountingCatalog.id == settings.special.accum_lost)
-            .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
-        const curre = rangeDetails
-          .filter(d => d.accountingCatalog.id == settings.special.curre_gain)
-          .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0) -
-          rangeDetails
-            .filter(d => d.accountingCatalog.id == settings.special.curre_lost)
-            .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
-
-        console.log(accum, curre);
+        const resacreedora = rangeDetails
+          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && d.accountingCatalog.isAcreedora)
+          .reduce((a, b) => {
+            return {
+              cargo: a.cargo + (b.cargo ? b.cargo : 0),
+              abono: a.abono + (b.abono ? b.abono : 0)
+            }
+          }, { cargo: 0, abono: 0 })
+        const resdeudora = rangeDetails
+          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && !d.accountingCatalog.isAcreedora)
+          .reduce((a, b) => {
+            return {
+              cargo: a.cargo + (b.cargo ? b.cargo : 0),
+              abono: a.abono + (b.abono ? b.abono : 0)
+            }
+          }, { cargo: 0, abono: 0 })
+        add = (resacreedora.abono + resdeudora.abono) - (resacreedora.cargo + resdeudora.cargo)
+        objaccount = {
+          code: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).code,
+          name: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).name,
+          total: parseFloat(add.toFixed(2))
+        }
       }
-      console.log(add)
       return {
         code: s.id,
         name: s.display,
-        total: s.children
+        total: parseFloat((s.children
           .map(c => {
-            return c.children
-              .map(ch => rangeDetails
-                .filter(d => d.accountingCatalog.code.startsWith(ch.id))
-                .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
-              )
-            // .reduce((a, b) => a + b, 0)
+            const totalniveldos = c.children
+              .map(ch => {
+                const totalniveltres = rangeDetails
+                  .filter(d => d.accountingCatalog.code.startsWith(ch.id))
+                  .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
+                ch.total = totalniveltres
+                return totalniveltres
+              })
+              .reduce((a, b) => a + b, 0)
+            c.total = totalniveldos
+            return totalniveldos
           }
           )
-        // .reduce((a, b) => a + b, 0) + add
+          .reduce((a, b) => a + b, 0) + add).toFixed(2)),
+        accounts: s.children.map(c => {
+          const accounts = c.children.map(ch => {
+            return {
+              code: ch.id,
+              name: ch.display,
+              total: parseFloat(ch.total.toFixed(2))
+            }
+          }).filter(ch => ch.total > 0)
+          if (s.id == 3) {
+            accounts.push(objaccount)
+          }
+          return {
+            code: c.id,
+            name: c.display,
+            total: parseFloat(c.total.toFixed(2)),
+            accounts
+          }
+        })
       }
     })
-    return res.json({ settings, balanceGeneral });
+    return res.json({ balanceGeneral });
   } catch (error) {
     console.log(error);
     return res
