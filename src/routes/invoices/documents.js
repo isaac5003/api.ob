@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
       index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
-    if (active != null) {
+    if (active) {
       documents = documents.andWhere("id.active = :active", {
         active: active == "true",
       });
@@ -80,6 +80,28 @@ router.get("/", async (req, res) => {
       documents = documents.andWhere("dt.id = :type", { type });
     }
     documents = await documents.getMany();
+
+    if (!active && !type) {
+      const documentTypes = await req.conn
+        .getRepository("InvoicesDocumentType")
+        .createQueryBuilder("idt")
+        .select(["idt.id", 'idt.name'])
+        .orderBy("idt.id", "ASC")
+        .getMany();
+
+      documents = documentTypes.map(dt => {
+        const found = documents.find(d => d.documentType.id == dt.id)
+        return found ? found : {
+          id: null,
+          authorization: null,
+          initial: null,
+          final: null,
+          current: null,
+          active: false,
+          documentType: dt
+        }
+      })
+    }
 
     if (search != null) {
       documents = documents.filter((s) =>
