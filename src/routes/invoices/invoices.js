@@ -24,6 +24,8 @@ router.get("/", async (req, res) => {
       { name: "startDate", type: "date", optional: true },
       { name: "endDate", type: "date", optional: true },
       { name: "service", type: "string", optional: true },
+      { name: "prop", type: "string", optional: true },
+      { name: "order", type: "string", optional: true },
     ],
     true
   );
@@ -45,6 +47,8 @@ router.get("/", async (req, res) => {
       status,
       startDate,
       endDate,
+      prop,
+      order
     } = req.query;
 
     // Obtiene el total de facturas
@@ -111,8 +115,13 @@ router.get("/", async (req, res) => {
       .leftJoin("i.status", "st")
       .leftJoin("i.details", "d")
       .leftJoin("d.service", "s")
-      .where("i.company = :company", { company: cid })
-      .orderBy("i.createdAt", "DESC");
+      .where("i.company = :company", { company: cid });
+
+    if (prop && order) {
+      invoices = invoices.orderBy(`i.${prop}`, order == 'ascending' ? 'ASC' : "DESC")
+    } else {
+      invoices = invoices.orderBy("i.createdAt", "DESC")
+    }
 
     let index = 1;
     if (!search) {
@@ -175,7 +184,6 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de ventas." });
@@ -437,7 +445,6 @@ router.post("/", async (req, res) => {
       })
       .execute();
   } catch (error) {
-    console.log(error);
     return res.status(400).json({
       message:
         "Error al registrar el encabezado de La venta, contacta con tu administrador.",
