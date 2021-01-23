@@ -11,6 +11,8 @@ router.get("/", async (req, res) => {
       { name: "active", type: "boolean", optional: true },
       { name: "type", type: "integer", optional: true },
       { name: "search", type: "string", optional: true },
+      { name: "prop", type: "string", optional: true },
+      { name: "order", type: "string", optional: true },
     ],
     true
   );
@@ -20,7 +22,7 @@ router.get("/", async (req, res) => {
 
   try {
     const { cid } = req.user;
-    const { limit, page, active, type, search } = req.query;
+    const { limit, page, active, type, search, prop, order } = req.query;
 
     let query = req.conn
       .getRepository("Service")
@@ -50,13 +52,17 @@ router.get("/", async (req, res) => {
         "s.description",
         "s.cost",
         "s.active",
-        "s.active",
         "st.id",
         "st.name",
       ])
       .where("s.company = :company", { company: cid })
-      .leftJoin("s.sellingType", "st")
-      .orderBy("s.createdAt", "DESC");
+      .leftJoin("s.sellingType", "st");
+
+    if (order && prop) {
+      services = services.orderBy(`s.${prop}`, order == 'ascending' ? 'ASC' : "DESC")
+    } else {
+      services = services.orderBy("s.createdAt", "DESC")
+    }
 
     let index = 1;
     if (search == null) {
