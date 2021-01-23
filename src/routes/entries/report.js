@@ -459,4 +459,114 @@ router.get("/balance-comprobacion", async (req, res) => {
   }
 });
 
+router.get("/balance-general", async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "date", type: "date", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+
+  try {
+    const date = new Date(req.query.date);
+
+    const { settings } = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .where("as.company = :company", { company: req.user.cid })
+      .andWhere("as.type = :type", { type: 'balance-general' })
+      .getOne();
+
+    let catalog = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .getMany();
+
+    // obtiene los detalles de la partida del rango seleccionado
+    const rangeDetails = await req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .getMany();
+
+    const balanceGeneral = settings.report.map(s => {
+      let add = 0
+      let objaccount = {}
+      if (s.id == 3) {
+        const resacreedora = rangeDetails
+          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && d.accountingCatalog.isAcreedora)
+          .reduce((a, b) => {
+            return {
+              cargo: a.cargo + (b.cargo ? b.cargo : 0),
+              abono: a.abono + (b.abono ? b.abono : 0)
+            }
+          }, { cargo: 0, abono: 0 })
+        const resdeudora = rangeDetails
+          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && !d.accountingCatalog.isAcreedora)
+          .reduce((a, b) => {
+            return {
+              cargo: a.cargo + (b.cargo ? b.cargo : 0),
+              abono: a.abono + (b.abono ? b.abono : 0)
+            }
+          }, { cargo: 0, abono: 0 })
+        add = (resacreedora.abono + resdeudora.abono) - (resacreedora.cargo + resdeudora.cargo)
+        objaccount = {
+          code: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).code,
+          name: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).name,
+          total: parseFloat(add.toFixed(2))
+        }
+      }
+      return {
+        code: s.id,
+        name: s.display,
+        total: parseFloat((s.children
+          .map(c => {
+            const totalniveldos = c.children
+              .map(ch => {
+                const totalniveltres = rangeDetails
+                  .filter(d => d.accountingCatalog.code.startsWith(ch.id))
+                  .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
+                ch.total = totalniveltres
+                return totalniveltres
+              })
+              .reduce((a, b) => a + b, 0)
+            c.total = totalniveldos
+            return totalniveldos
+          }
+          )
+          .reduce((a, b) => a + b, 0) + add).toFixed(2)),
+        accounts: s.children.map(c => {
+          const accounts = c.children.map(ch => {
+            return {
+              code: ch.id,
+              name: ch.display,
+              total: parseFloat(ch.total.toFixed(2))
+            }
+          }).filter(ch => ch.total > 0)
+          if (s.id == 3) {
+            accounts.push(objaccount)
+          }
+          return {
+            code: c.id,
+            name: c.display,
+            total: parseFloat(c.total.toFixed(2)),
+            accounts
+          }
+        })
+      }
+    })
+    return res.json({ balanceGeneral });
+  } catch (error) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el listado de tipos de partida." });
+  }
+});
+
 module.exports = router;
