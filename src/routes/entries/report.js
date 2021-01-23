@@ -467,6 +467,7 @@ router.get("/balance-general", async (req, res) => {
     return res.status(400).json({ message: check.message });
   }
 
+
   try {
     const date = new Date(req.query.date);
 
