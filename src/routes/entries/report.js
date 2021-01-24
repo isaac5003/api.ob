@@ -120,7 +120,7 @@ router.get("/diario-mayor", async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de tipos de partida." });
+      .json({ message: "Error al obtener el reporte de libro diario mayor." });
   }
 });
 
@@ -238,7 +238,7 @@ router.get("/auxiliares", async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de tipos de partida." });
+      .json({ message: "Error al obtener el reporte de auxiliares." });
   }
 });
 
@@ -360,7 +360,7 @@ router.get("/account-movements", async (req, res) => {
     console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de tipos de partida." });
+      .json({ message: "Error al obtener el reporte de movimiento de cuentas." });
   }
 });
 
@@ -452,10 +452,9 @@ router.get("/balance-comprobacion", async (req, res) => {
 
     return res.json({ balanceComprobacion });
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de tipos de partida." });
+      .json({ message: "Error al obtener el reporte de balance de comprobacion." });
   }
 });
 
@@ -562,10 +561,87 @@ router.get("/balance-general", async (req, res) => {
     })
     return res.json({ balanceGeneral });
   } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error al obtener el reporte de balance general." });
+  }
+});
+
+router.get('/estado-resultados', async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "date", type: "date", optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  try {
+    const date = new Date(req.query.date);
+
+    const { settings } = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .where("as.company = :company", { company: req.user.cid })
+      .andWhere("as.type = :type", { type: 'estado-resultados' })
+      .getOne();
+
+    let catalog = await req.conn
+      .getRepository("AccountingCatalog")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .getMany();
+
+    // obtiene los detalles de la partida del rango seleccionado
+    const rangeDetails = await req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .getMany();
+
+    let saldoacumulado = 0
+    const estadoResultados = settings
+      .filter(setting => setting.show)
+      .map(account => {
+        let total = 0
+        if (account.children) {
+          total = account.children
+            .map(children => children.id)
+            .map(catalogo => rangeDetails
+              .filter(d => d.accountingCatalog.code.startsWith(catalogo))
+              .reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0)
+            ).reduce((a, b) => a + b, 0)
+          saldoacumulado = parseFloat(saldoacumulado) + parseFloat(total)
+        } else {
+          total = saldoacumulado
+        }
+
+        let children = null
+        if (account.details) {
+          children = account.children.map(ch => {
+            return {
+              name: ch.display,
+              total: rangeDetails.filter(detail => detail.accountingCatalog.code.startsWith(ch.id)).reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0)
+            }
+          })
+        }
+
+        return {
+          name: account.display,
+          total: parseFloat(total.toFixed(2)),
+          type: !account.children ? 'total' : null,
+          children
+        }
+      })
+
+    return res.json({ estadoResultados });
+  } catch (error) {
     console.log(error);
     return res
       .status(500)
-      .json({ message: "Error al obtener el listado de tipos de partida." });
+      .json({ message: "Error al obtener el reporte de estado de resultados." });
   }
 });
 
