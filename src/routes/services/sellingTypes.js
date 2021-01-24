@@ -7,6 +7,7 @@ router.get("/", async (req, res) => {
       .getRepository("SellingType")
       .createQueryBuilder("s")
       .select(["s.id", "s.name"])
+      .orderBy("s.id", 'DESC')
       .getMany();
 
     return res.json({ types });
