@@ -1,6 +1,17 @@
 version: "3.1"
 
 services:
+  openbox_db:
+    image: postgres:12.3
+    ports:
+      - "3001:5432"
+    environment:
+      POSTGRES_PASSWORD: super_complicated_password
+      POSTGRES_USER: openbox_user
+      POSTGRES_DB: openbox_database
+    volumes:
+      - openbox_database:/var/lib/postgresql/data
+
   openbox_api:
     build:
       context: ./
@@ -9,3 +20,10 @@ services:
       - "3000:3000"
     env_file:
       - app-variables.env
+    depends_on:
+      - openbox_db
+
+volumes:
+  openbox_database:
+    external: true
+    name: openbox_database
