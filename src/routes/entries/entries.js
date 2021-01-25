@@ -274,7 +274,7 @@ router.post("/", async (req, res) => {
     })[0];
 
   let message = "";
-  const serie = parseInt(currentSerie) + 1;
+  const serie = currentSerie ? parseInt(currentSerie) + 1 : 1;
   if (header.serie != serie) {
     message = `El numero de serie asignado fué: ${serie}`;
   }

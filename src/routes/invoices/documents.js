@@ -54,6 +54,7 @@ router.get("/", async (req, res) => {
         "id.current",
         "id.active",
         "dt.id",
+        "dt.code",
         "dt.name",
       ])
       .leftJoin("id.documentType", "dt")
