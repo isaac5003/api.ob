@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { checkRequired, addLog, access_key, refresh_key } = require("../tools");
 const { checkAuth } = require("../middlewares");
-const expiresIn = "30m";
+const expiresIn = "2h";
 
 router.use((req, res, next) => {
   req.moduleName = "Authentication";
@@ -79,12 +79,7 @@ router.post("/login", async (req, res) => {
   const refresh_token = jwt.sign(token_data, refresh_key);
 
   try {
-    await req.conn
-      .createQueryBuilder()
-      .insert()
-      .into("Token")
-      .values({ token: refresh_token, active: access_token })
-      .execute();
+
     // Adds log
     await addLog(
       req.conn,
@@ -114,20 +109,11 @@ router.post("/refresh", async (req, res) => {
   // Get the refresh token
   const { refresh_token } = req.body;
 
-  // Check if refresh token is valid
-  const token = await req.conn
-    .getRepository("Token")
-    .createQueryBuilder("t")
-    .where("t.token = :token", { token: refresh_token })
-    .getOne();
-
-  if (!token) {
-    return res
-      .status(400)
-      .json({ message: "Solicitud de nuevo token incorrecta" });
-  }
-
   try {
+    console.log(jwt.verify(
+      refresh_token.replace("Bearer ", ""),
+      refresh_key
+    ))
     const { uid, pid, cid, bid } = jwt.verify(
       refresh_token.replace("Bearer ", ""),
       refresh_key
@@ -135,13 +121,6 @@ router.post("/refresh", async (req, res) => {
     const access_token = jwt.sign({ uid, pid, cid, bid }, access_key, {
       expiresIn,
     });
-
-    await req.conn
-      .createQueryBuilder()
-      .update("Token")
-      .set({ active: access_token })
-      .where("token = :token", { token: refresh_token })
-      .execute();
 
     // return token
     return res.json({ access_token });
