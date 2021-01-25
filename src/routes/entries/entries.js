@@ -1,6 +1,6 @@
 const express = require("express");
 const { format, startOfMonth, endOfMonth } = require("date-fns");
-const { checkRequired, addLog } = require("../../tools");
+const { checkRequired, addLog, foundRelations } = require("../../tools");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
@@ -471,6 +471,77 @@ router.put("/:id", async (req, res) => {
   return res.json({
     message: `La partida contable ha sido actualizada correctamente.`,
   });
+});
+
+router.delete("/:id", async (req, res) => {
+  // Get the entry
+  const entry = await req.conn
+    .getRepository("AccountingEntry")
+    .createQueryBuilder("a")
+    .where("a.company = :company", { company: req.user.cid })
+    .andWhere("a.id = :id", { id: req.params.id })
+    .getOne();
+
+  // If no entry exist
+  if (!entry) {
+    return res.status(400).json({ message: "La partida contable ingresada no existe." });
+  }
+
+  // If entry exist
+  // Check references in other tables than details
+  const references = await foundRelations(req.conn, "accounting_entry", entry.id, [
+    "accounting_entry_detail",
+  ]);
+
+  // if references rejects deletion
+  if (references) {
+    return res.status(400).json({
+      message:
+        "La partida contable seleccionada no puede ser eliminada porque esta siendo utilizada en el sistema.",
+    });
+  }
+
+  try {
+    // Delete entry details
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("AccountingEntryDetail")
+      .where("accountingEntry = :accountingEntry", { accountingEntry: req.params.id })
+      .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    // Delete entry
+    await req.conn
+      .createQueryBuilder()
+      .delete()
+      .from("AccountingEntry")
+      .where("id = :id", { id: req.params.id })
+      .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    const user = await req.conn
+      .getRepository("User")
+      .createQueryBuilder("u")
+      .where("u.id = :id", { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se elimino la partida contable con referencia: ${entry.serie}.`
+    );
+
+    return res.json({
+      message: "La partida contable ha sido eliminada correctamente.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error al eliminar la partida contable. Conctacta a tu administrador.",
+    });
+  }
 });
 
 module.exports = router;
