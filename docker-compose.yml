@@ -1,31 +1,11 @@
 version: "3.1"
 
 services:
-  openbox_db:
-    image: postgres:alpine
-    ports:
-      - "5000:5432"
-    environment:
-      POSTGRES_PASSWORD: super_complicated_password
-      POSTGRES_USER: openbox_user
-      POSTGRES_DB: openbox_database
-    volumes:
-      - openbox_database:/var/lib/postgresql/data
-
   openbox_api:
     build:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "5001:3000"
-    environment:
-      POSTGRES_HOST: openbox_db
-      POSTGRES_USER: openbox_user
-      POSTGRES_PASSWORD: super_complicated_password
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: openbox_database
-    depends_on:
-      - openbox_db
-
-volumes:
-  openbox_database: {}
+      - "3000:3000"
+    env_file:
+      - app-variables.env

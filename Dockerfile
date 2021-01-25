@@ -1,5 +1,5 @@
 FROM node:lts-slim
-WORKDIR /usr/api
+WORKDIR /usr/app
 COPY ./package.json ./
 RUN npm i
 COPY ./src ./src
