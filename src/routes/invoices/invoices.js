@@ -223,7 +223,6 @@ router.get("/:id", async (req, res) => {
         "i.ventaTotalText",
         "i.printedDate",
         "d.id",
-        "d.chargeName",
         "d.chargeDescription",
         "d.quantity",
         "d.unitPrice",
@@ -287,6 +286,7 @@ router.get("/:id", async (req, res) => {
       },
     });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener La venta seleccionada." });
