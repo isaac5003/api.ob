@@ -18,12 +18,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    env_file:
-      - app-variables.env
+    environment:
+      POSTGRES_HOST: openbox_db
+      POSTGRES_USER: openbox_user
+      POSTGRES_PASSWORD: super_complicated_password
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: openbox_database
     depends_on:
       - openbox_db
 
 volumes:
-  openbox_database:
-    external: true
-    name: openbox_database
+  openbox_database: {}

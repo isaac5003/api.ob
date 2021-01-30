@@ -24,6 +24,4 @@ services:
       - openbox_db
 
 volumes:
-  openbox_database:
-    external: true
-    name: openbox_database
+  openbox_database: {}

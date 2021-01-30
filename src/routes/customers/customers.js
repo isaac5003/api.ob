@@ -46,6 +46,7 @@ router.get("/", async (req, res) => {
       .select([
         "c.id",
         "c.name",
+        "c.shortName",
         "c.nit",
         "c.nrc",
         "c.isActiveCustomer",
