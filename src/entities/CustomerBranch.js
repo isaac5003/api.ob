@@ -5,6 +5,7 @@ module.exports = new EntitySchema({
   columns: {
     id: { type: "uuid", generated: "uuid", primary: true },
     name: { type: "varchar" },
+    default: { type: "boolean", default: true },
     contactName: { type: "varchar", nullable: true },
     contactInfo: { type: "json", nullable: true },
     address1: { type: "varchar", nullable: true },

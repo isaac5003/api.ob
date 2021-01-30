@@ -9,6 +9,7 @@ router.get("/", async (req, res) => {
       .select([
         "cb.id",
         "cb.name",
+        "cb.default",
         "cb.address1",
         "cb.address2",
         "co.name",
