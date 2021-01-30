@@ -460,7 +460,8 @@ router.get("/balance-comprobacion", async (req, res) => {
 
 router.get("/balance-general", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "date", type: "date", optional: false },
+    { name: "startDate", type: "date", optional: false },
+    { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
@@ -468,7 +469,8 @@ router.get("/balance-general", async (req, res) => {
 
 
   try {
-    const date = new Date(req.query.date);
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
 
     const { settings } = await req.conn
       .getRepository("AccountingSetting")
@@ -488,7 +490,8 @@ router.get("/balance-general", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .andWhere("e.date >= :startDate", { startDate })
+      .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
