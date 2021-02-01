@@ -597,7 +597,7 @@ router.get("/balance-general", async (req, res) => {
                           (b.accountingCatalog.isAcreedora
                             ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
                             : (b.cargo ? b.cargo : 0) -
-                              (b.abono ? b.abono : 0)),
+                            (b.abono ? b.abono : 0)),
                         0
                       );
                     ch.total = totalniveltres;
@@ -730,7 +730,15 @@ router.get("/estado-resultados", async (req, res) => {
         };
       });
 
-    return res.json({ estadoResultados });
+    const name = `ESTADO DE RESULTADOS AL ${format(
+      date,
+      "dd - MMMM - yyyy",
+      { locale: es }
+    )
+      .split("-")
+      .join("de")
+      .toUpperCase()}`;
+    return res.json({ name, estadoResultados });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
