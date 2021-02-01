@@ -1,6 +1,7 @@
 const express = require("express");
 const { checkRequired } = require("../../tools");
 const { startOfMonth, endOfMonth, format } = require("date-fns");
+const { es } = require("date-fns/locale");
 const router = express.Router();
 
 router.get("/diario-mayor", async (req, res) => {
@@ -115,7 +116,12 @@ router.get("/diario-mayor", async (req, res) => {
         return 0;
       });
 
-    return res.json({ accounts });
+    const name = `LIBRO DIARIO MAYOR PARA EL MES DE ${format(
+      date,
+      "MMMM yyyy",
+      { locale: es }
+    ).toUpperCase()}`;
+    return res.json({ name, accounts });
   } catch (error) {
     console.log(error);
     return res
@@ -233,7 +239,12 @@ router.get("/auxiliares", async (req, res) => {
         return 0;
       });
 
-    return res.json({ accounts });
+    const name = `LIBROS DE AUXILIARES PARA EL MES DE ${format(
+      date,
+      "MMMM yyyy",
+      { locale: es }
+    ).toUpperCase()}`;
+    return res.json({ name, accounts });
   } catch (error) {
     console.log(error);
     return res
@@ -355,12 +366,16 @@ router.get("/account-movements", async (req, res) => {
         return 0;
       });
 
-    return res.json({ accounts });
+    const name = `DETALLE DE MOVIMIENTO DE CUENTAS EN EL PERÍODO DEL ${format(
+      new Date(startDate),
+      "dd/MM/yyyy"
+    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    return res.json({ name, accounts });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Error al obtener el reporte de movimiento de cuentas." });
+    return res.status(500).json({
+      message: "Error al obtener el reporte de movimiento de cuentas.",
+    });
   }
 });
 
@@ -450,11 +465,19 @@ router.get("/balance-comprobacion", async (req, res) => {
       })
       .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
 
-    return res.json({ balanceComprobacion });
+    const name = `BALANCE DE COMPROBACIÓN AL ${format(
+      date,
+      "dd - MMMM - yyyy",
+      { locale: es }
+    )
+      .split("-")
+      .join("de")
+      .toUpperCase()}`;
+    return res.json({ name, balanceComprobacion });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error al obtener el reporte de balance de comprobacion." });
+    return res.status(500).json({
+      message: "Error al obtener el reporte de balance de comprobacion.",
+    });
   }
 });
 
@@ -467,17 +490,24 @@ router.get("/balance-general", async (req, res) => {
     return res.status(400).json({ message: check.message });
   }
 
-
   try {
     const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
 
-    const { settings } = await req.conn
+    const { balanceGeneral } = await req.conn
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
       .where("as.company = :company", { company: req.user.cid })
-      .andWhere("as.type = :type", { type: 'balance-general' })
       .getOne();
+
+    if (!balanceGeneral) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "No hay configuracion valida guardada para el Balance general.",
+        });
+    }
 
     let catalog = await req.conn
       .getRepository("AccountingCatalog")
@@ -496,81 +526,128 @@ router.get("/balance-general", async (req, res) => {
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
-    const balanceGeneral = settings.report.map(s => {
-      let add = 0
-      let objaccount = {}
+    balanceGeneral = balanceGeneral.map((s) => {
+      let add = 0;
+      let objaccount = {};
       if (s.id == 3) {
         const resacreedora = rangeDetails
-          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && d.accountingCatalog.isAcreedora)
-          .reduce((a, b) => {
-            return {
-              cargo: a.cargo + (b.cargo ? b.cargo : 0),
-              abono: a.abono + (b.abono ? b.abono : 0)
-            }
-          }, { cargo: 0, abono: 0 })
+          .filter(
+            (d) =>
+              (d.accountingCatalog.code.startsWith("4") ||
+                d.accountingCatalog.code.startsWith("5")) &&
+              d.accountingCatalog.isAcreedora
+          )
+          .reduce(
+            (a, b) => {
+              return {
+                cargo: a.cargo + (b.cargo ? b.cargo : 0),
+                abono: a.abono + (b.abono ? b.abono : 0),
+              };
+            },
+            { cargo: 0, abono: 0 }
+          );
         const resdeudora = rangeDetails
-          .filter(d => (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) && !d.accountingCatalog.isAcreedora)
-          .reduce((a, b) => {
-            return {
-              cargo: a.cargo + (b.cargo ? b.cargo : 0),
-              abono: a.abono + (b.abono ? b.abono : 0)
-            }
-          }, { cargo: 0, abono: 0 })
-        add = (resacreedora.abono + resdeudora.abono) - (resacreedora.cargo + resdeudora.cargo)
+          .filter(
+            (d) =>
+              (d.accountingCatalog.code.startsWith("4") ||
+                d.accountingCatalog.code.startsWith("5")) &&
+              !d.accountingCatalog.isAcreedora
+          )
+          .reduce(
+            (a, b) => {
+              return {
+                cargo: a.cargo + (b.cargo ? b.cargo : 0),
+                abono: a.abono + (b.abono ? b.abono : 0),
+              };
+            },
+            { cargo: 0, abono: 0 }
+          );
+        add =
+          resacreedora.abono +
+          resdeudora.abono -
+          (resacreedora.cargo + resdeudora.cargo);
         objaccount = {
-          code: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).code,
-          name: catalog.find(c => c.id == add >= 0 ? settings.special.curre_gain : settings.special.curre_lost).name,
-          total: parseFloat(add.toFixed(2))
-        }
+          code: catalog.find((c) =>
+            c.id == add >= 0
+              ? settings.special.curre_gain
+              : settings.special.curre_lost
+          ).code,
+          name: catalog.find((c) =>
+            c.id == add >= 0
+              ? settings.special.curre_gain
+              : settings.special.curre_lost
+          ).name,
+          total: parseFloat(add.toFixed(2)),
+        };
       }
       return {
         code: s.id,
         name: s.display,
-        total: parseFloat((s.children
-          .map(c => {
-            const totalniveldos = c.children
-              .map(ch => {
-                const totalniveltres = rangeDetails
-                  .filter(d => d.accountingCatalog.code.startsWith(ch.id))
-                  .reduce((a, b) => a + (b.accountingCatalog.isAcreedora ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0) : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)), 0)
-                ch.total = totalniveltres
-                return totalniveltres
+        total: parseFloat(
+          (
+            s.children
+              .map((c) => {
+                const totalniveldos = c.children
+                  .map((ch) => {
+                    const totalniveltres = rangeDetails
+                      .filter((d) => d.accountingCatalog.code.startsWith(ch.id))
+                      .reduce(
+                        (a, b) =>
+                          a +
+                          (b.accountingCatalog.isAcreedora
+                            ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
+                            : (b.cargo ? b.cargo : 0) -
+                            (b.abono ? b.abono : 0)),
+                        0
+                      );
+                    ch.total = totalniveltres;
+                    return totalniveltres;
+                  })
+                  .reduce((a, b) => a + b, 0);
+                c.total = totalniveldos;
+                return totalniveldos;
               })
-              .reduce((a, b) => a + b, 0)
-            c.total = totalniveldos
-            return totalniveldos
-          }
-          )
-          .reduce((a, b) => a + b, 0) + add).toFixed(2)),
-        accounts: s.children.map(c => {
-          const accounts = c.children.map(ch => {
-            return {
-              code: ch.id,
-              name: ch.display,
-              total: parseFloat(ch.total.toFixed(2))
-            }
-          }).filter(ch => ch.total > 0)
+              .reduce((a, b) => a + b, 0) + add
+          ).toFixed(2)
+        ),
+        accounts: s.children.map((c) => {
+          const accounts = c.children
+            .map((ch) => {
+              return {
+                code: ch.id,
+                name: ch.display,
+                total: parseFloat(ch.total.toFixed(2)),
+              };
+            })
+            .filter((ch) => ch.total > 0);
           if (s.id == 3) {
-            accounts.push(objaccount)
+            accounts.push(objaccount);
           }
           return {
             code: c.id,
             name: c.display,
             total: parseFloat(c.total.toFixed(2)),
-            accounts
-          }
-        })
-      }
-    })
-    return res.json({ balanceGeneral });
+            accounts,
+          };
+        }),
+      };
+    });
+
+    const name = `BALANCE GENERAL PARA EL PERÍODO DEL ${format(
+      new Date(startDate),
+      "dd/MM/yyyy"
+    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+
+    return res.json({ name, balanceGeneral });
   } catch (error) {
+    console.log(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el reporte de balance general." });
   }
 });
 
-router.get('/estado-resultados', async (req, res) => {
+router.get("/estado-resultados", async (req, res) => {
   const check = checkRequired(req.query, [
     { name: "date", type: "date", optional: false },
   ]);
@@ -585,7 +662,7 @@ router.get('/estado-resultados', async (req, res) => {
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
       .where("as.company = :company", { company: req.user.cid })
-      .andWhere("as.type = :type", { type: 'estado-resultados' })
+      .andWhere("as.type = :type", { type: "estado-resultados" })
       .getOne();
 
     let catalog = await req.conn
@@ -604,47 +681,69 @@ router.get('/estado-resultados', async (req, res) => {
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
-    let saldoacumulado = 0
+    let saldoacumulado = 0;
     const estadoResultados = settings
-      .filter(setting => setting.show)
-      .map(account => {
-        let total = 0
+      .filter((setting) => setting.show)
+      .map((account) => {
+        let total = 0;
         if (account.children) {
           total = account.children
-            .map(children => children.id)
-            .map(catalogo => rangeDetails
-              .filter(d => d.accountingCatalog.code.startsWith(catalogo))
-              .reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0)
-            ).reduce((a, b) => a + b, 0)
-          saldoacumulado = parseFloat(saldoacumulado) + parseFloat(total)
+            .map((children) => children.id)
+            .map((catalogo) =>
+              rangeDetails
+                .filter((d) => d.accountingCatalog.code.startsWith(catalogo))
+                .reduce(
+                  (a, b) =>
+                    a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)),
+                  0
+                )
+            )
+            .reduce((a, b) => a + b, 0);
+          saldoacumulado = parseFloat(saldoacumulado) + parseFloat(total);
         } else {
-          total = saldoacumulado
+          total = saldoacumulado;
         }
 
-        let children = null
+        let children = null;
         if (account.details) {
-          children = account.children.map(ch => {
+          children = account.children.map((ch) => {
             return {
               name: ch.display,
-              total: rangeDetails.filter(detail => detail.accountingCatalog.code.startsWith(ch.id)).reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0)
-            }
-          })
+              total: rangeDetails
+                .filter((detail) =>
+                  detail.accountingCatalog.code.startsWith(ch.id)
+                )
+                .reduce(
+                  (a, b) =>
+                    a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)),
+                  0
+                ),
+            };
+          });
         }
 
         return {
           name: account.display,
           total: parseFloat(total.toFixed(2)),
-          type: !account.children ? 'total' : null,
-          children
-        }
-      })
+          type: !account.children ? "total" : null,
+          children,
+        };
+      });
 
-    return res.json({ estadoResultados });
+    const name = `ESTADO DE RESULTADOS AL ${format(
+      date,
+      "dd - MMMM - yyyy",
+      { locale: es }
+    )
+      .split("-")
+      .join("de")
+      .toUpperCase()}`;
+    return res.json({ name, estadoResultados });
   } catch (error) {
     console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Error al obtener el reporte de estado de resultados." });
+    return res.status(500).json({
+      message: "Error al obtener el reporte de estado de resultados.",
+    });
   }
 });
 
