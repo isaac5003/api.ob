@@ -302,7 +302,7 @@ router.put("/status/:id", async (req, res) => {
     });
   } catch (error) {
     // return error
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message:
         "Error al actualizar el documento. Contacta con tu administrador.",

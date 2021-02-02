@@ -123,7 +123,7 @@ router.get("/diario-mayor", async (req, res) => {
     ).toUpperCase()}`;
     return res.json({ name, accounts });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el reporte de libro diario mayor." });
@@ -246,7 +246,7 @@ router.get("/auxiliares", async (req, res) => {
     ).toUpperCase()}`;
     return res.json({ name, accounts });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el reporte de auxiliares." });
@@ -372,7 +372,7 @@ router.get("/account-movements", async (req, res) => {
     )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
     return res.json({ name, accounts });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al obtener el reporte de movimiento de cuentas.",
     });
@@ -494,7 +494,7 @@ router.get("/balance-general", async (req, res) => {
     const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
 
-    const { balanceGeneral } = await req.conn
+    let { balanceGeneral } = await req.conn
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
       .where("as.company = :company", { company: req.user.cid })
@@ -506,6 +506,15 @@ router.get("/balance-general", async (req, res) => {
         .json({
           message:
             "No hay configuracion valida guardada para el Balance general.",
+        });
+    }
+
+    if (Object.values(balanceGeneral.special).filter(v => v == '').length > 0) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.",
         });
     }
 
@@ -526,7 +535,7 @@ router.get("/balance-general", async (req, res) => {
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
-    balanceGeneral = balanceGeneral.map((s) => {
+    balanceGeneral = balanceGeneral.report.map((s) => {
       let add = 0;
       let objaccount = {};
       if (s.id == 3) {
@@ -569,13 +578,13 @@ router.get("/balance-general", async (req, res) => {
         objaccount = {
           code: catalog.find((c) =>
             c.id == add >= 0
-              ? settings.special.curre_gain
-              : settings.special.curre_lost
+              ? balanceGeneral.special.curre_gain
+              : balanceGeneral.special.curre_lost
           ).code,
           name: catalog.find((c) =>
             c.id == add >= 0
-              ? settings.special.curre_gain
-              : settings.special.curre_lost
+              ? balanceGeneral.special.curre_gain
+              : balanceGeneral.special.curre_lost
           ).name,
           total: parseFloat(add.toFixed(2)),
         };
@@ -640,7 +649,7 @@ router.get("/balance-general", async (req, res) => {
 
     return res.json({ name, balanceGeneral });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el reporte de balance general." });
@@ -740,7 +749,7 @@ router.get("/estado-resultados", async (req, res) => {
       .toUpperCase()}`;
     return res.json({ name, estadoResultados });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al obtener el reporte de estado de resultados.",
     });

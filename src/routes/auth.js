@@ -92,7 +92,7 @@ router.post("/login", async (req, res) => {
     // return token
     return res.json({ access_token, refresh_token });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al proveer token de refrescamiento." });
@@ -110,10 +110,6 @@ router.post("/refresh", async (req, res) => {
   const { refresh_token } = req.body;
 
   try {
-    console.log(jwt.verify(
-      refresh_token.replace("Bearer ", ""),
-      refresh_key
-    ))
     const { uid, pid, cid, bid } = jwt.verify(
       refresh_token.replace("Bearer ", ""),
       refresh_key

@@ -43,4 +43,4 @@ app.use("/customers", checkAuth, customers);
 app.use("/entries", checkAuth, entries);
 
 // Start server
-app.listen(port, () => console.log(`Server listening on port ${port}!`));
+app.listen(port, () => console.info(`Server listening on port ${port}!`));

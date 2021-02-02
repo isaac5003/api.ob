@@ -78,7 +78,7 @@ router.put("/void/:id", async (req, res) => {
       message: "El documento ha sido anulado correctamente.",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al anular el documento. Contacta con tu administrador.",
     });

@@ -32,7 +32,7 @@ router.get("/general", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message:
         "Error al obtener reporte solicitado. Contacta con tu administrador.",

@@ -71,7 +71,7 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de condiciones de pago." });
@@ -221,8 +221,7 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado de la condicion de pago: ${
-        paymentCondition.name
+      `Se cambio el estado de la condicion de pago: ${paymentCondition.name
       } a ${status ? "ACTIVO" : "INACTIVO"}.`
     );
 
