@@ -295,7 +295,7 @@ router.post("/", async (req, res) => {
     }
   } catch (error) {
     // on error
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al crear el cliente. Contacta con tu administrador",
     });
@@ -555,7 +555,7 @@ router.delete("/:id", async (req, res) => {
       message: "El cliente ha sido eliminado correctamente.",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al eliminar el cliente. Conctacta a tu administrador.",
     });

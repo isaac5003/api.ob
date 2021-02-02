@@ -76,7 +76,7 @@ router.get("/", async (req, res) => {
       }),
     });
   } catch (error) {
-    console.log(error)
+    console.error(error)
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de tipos de partida." });
@@ -174,7 +174,7 @@ router.post("/", async (req, res) => {
     });
   } catch (error) {
     // On errror
-    console.log(error);
+    console.error(error);
     return res.status(400).json({
       message:
         "Error al guardar la(s) cuenta(s) contable(s), contacta con tu administrador.",

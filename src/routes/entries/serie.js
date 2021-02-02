@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
       nextSerie: currentEntries.length > 0 ? currentEntries[0] + 1 : 1,
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res
       .status(500)
       .json({ message: "Error al obtener el listado de tipos de partida." });

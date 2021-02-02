@@ -13,6 +13,8 @@ router.get("/", async (req, res) => {
       { name: "search", type: "string", optional: true },
       { name: "prop", type: "string", optional: true },
       { name: "order", type: "string", optional: true },
+      { name: "fromAmount", type: "boolean", optional: true },
+      { name: "toAmount", type: "boolean", optional: true },
     ],
     true
   );
@@ -22,7 +24,7 @@ router.get("/", async (req, res) => {
 
   try {
     const { cid } = req.user;
-    const { limit, page, active, type, search, prop, order } = req.query;
+    const { limit, page, active, type, search, prop, order, fromAmount, toAmount } = req.query;
 
     let query = req.conn
       .getRepository("Service")
@@ -39,6 +41,10 @@ router.get("/", async (req, res) => {
       query = query.andWhere("s.sellingType = :sellingType", {
         sellingType: type,
       });
+    }
+    if (!fromAmount && !toAmount) {
+      query = query.andWhere("s.cost >= :fromAmount", { fromAmount });
+      query = query.andWhere("s.cost <= :toAmount", { toAmount });
     }
 
     let { count } = await query.getRawOne();
@@ -299,7 +305,7 @@ router.delete("/:id", async (req, res) => {
       message: "El servicio ha sido eliminado correctamente.",
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: "Error al eliminar el servicio. Conctacta a tu administrador.",
     });
