@@ -53,6 +53,7 @@ router.get("/", async (req, res) => {
         "id.final",
         "id.current",
         "id.active",
+        "id.used",
         "dt.id",
         "dt.code",
         "dt.name",
