@@ -42,7 +42,7 @@ router.get("/", async (req, res) => {
         sellingType: type,
       });
     }
-    if (!fromAmount && !toAmount) {
+    if (fromAmount && toAmount) {
       query = query.andWhere("s.cost >= :fromAmount", { fromAmount });
       query = query.andWhere("s.cost <= :toAmount", { toAmount });
     }
@@ -87,6 +87,10 @@ router.get("/", async (req, res) => {
       services = services.andWhere("s.sellingType = :sellingType", {
         sellingType: type,
       });
+    }
+    if (fromAmount && toAmount) {
+      services = services.andWhere("s.cost >= :fromAmount", { fromAmount });
+      services = services.andWhere("s.cost <= :toAmount", { toAmount });
     }
     services = await services.getMany();
 
