@@ -1,0 +1,29 @@
+version: "3.1"
+
+services:
+  local_openbox_db:
+    container_name: local_openbox_db
+    image: postgres:13.1-alpine
+    ports:
+      - "5000:5432"
+    env_file:
+      - local.env
+    volumes:
+      - local_openbox_database:/var/lib/postgresql/data
+
+  local_openbox_api:
+    container_name: local_openbox_api
+    image: "node:lts-slim"
+    working_dir: /usr/api
+    ports:
+      - "5001:3000"
+    command: npm run dev
+    env_file:
+      - local.env
+    depends_on:
+      - local_openbox_db
+    volumes:
+      - ./:/usr/api
+
+volumes:
+  local_openbox_database: {}

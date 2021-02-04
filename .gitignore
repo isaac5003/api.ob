@@ -3,3 +3,4 @@ package-lock.json
 yarn-error.log
 yarn.lock
 app-variables.env
+*.env
