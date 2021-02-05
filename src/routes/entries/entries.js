@@ -243,6 +243,7 @@ router.post("/", async (req, res) => {
       { name: "concept", type: "string", optional: false },
       { name: "cargo", type: "float", optional: true },
       { name: "abono", type: "float", optional: true },
+      { name: "order", type: "integer", optional: false },
     ]);
     if (!checkDetails.success) {
       return res.status(400).json({ message: checkDetails.message });

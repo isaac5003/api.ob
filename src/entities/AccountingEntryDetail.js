@@ -4,6 +4,7 @@ module.exports = new EntitySchema({
   name: "AccountingEntryDetail",
   columns: {
     id: { type: "uuid", generated: "uuid", primary: true },
+    order: { type: "int", nullable: true },
     catalogName: { type: "varchar", nullable: false },
     concept: { type: "varchar", nullable: false },
     cargo: { type: "float", nullable: true },
