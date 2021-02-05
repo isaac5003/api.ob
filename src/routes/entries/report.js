@@ -685,8 +685,6 @@ router.get("/estado-resultados", async (req, res) => {
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
-    console.log(rangeDetails);
-
 
     let saldoacumulado = 0;
     estadoResultados = estadoResultados
