@@ -658,14 +658,16 @@ router.get("/balance-general", async (req, res) => {
 
 router.get("/estado-resultados", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "date", type: "date", optional: false },
+    { name: "startDate", type: "date", optional: false },
+    { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
-    const date = new Date(req.query.date);
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
 
     let { estadoResultados } = await req.conn
       .getRepository("AccountingSetting")
@@ -678,10 +680,13 @@ router.get("/estado-resultados", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date <= :endDate", { endDate: endOfMonth(date) })
+      .andWhere("e.date >= :startDate", { startDate })
+      .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
+    console.log(rangeDetails);
+
 
     let saldoacumulado = 0;
     estadoResultados = estadoResultados
@@ -732,14 +737,10 @@ router.get("/estado-resultados", async (req, res) => {
         };
       });
 
-    const name = `ESTADO DE RESULTADOS AL ${format(
-      date,
-      "dd - MMMM - yyyy",
-      { locale: es }
-    )
-      .split("-")
-      .join("de")
-      .toUpperCase()}`;
+    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO DEL ${format(
+      new Date(startDate),
+      "dd/MM/yyyy"
+    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
     return res.json({ name, estadoResultados });
   } catch (error) {
     console.error(error);
