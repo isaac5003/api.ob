@@ -765,6 +765,17 @@ router.delete("/:id", async (req, res) => {
       .andWhere("company = :company", { company: req.user.cid })
       .execute();
 
+    // updates secuence
+    // Actualiza el documento
+    await req.conn
+      .createQueryBuilder()
+      .update("InvoicesDocument")
+      .set({ current: document.current - 1 })
+      .where("company = :company", { company: req.user.cid })
+      .andWhere("isCurrentDocument = :current", { current: true })
+      .andWhere("documentType = :type", { type: invoice.documentType.id })
+      .execute();
+
     const user = await req.conn
       .getRepository("User")
       .createQueryBuilder("u")
