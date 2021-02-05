@@ -183,6 +183,7 @@ router.get("/:id", async (req, res) => {
         "aed.concept",
         "aed.cargo",
         "aed.abono",
+        "aed.order",
         "ac.id",
         "ac.code",
         "ac.name",
@@ -205,6 +206,11 @@ router.get("/:id", async (req, res) => {
         ...entry,
         rawDate: entry.date,
         date: format(new Date(entry.date), "dd/MM/yyyy"),
+        accountingEntryDetails: entry.accountingEntryDetails.sort((a, b) => {
+          if (a.order > b.order) return 1
+          if (a.order < b.order) return -1
+          return 0
+        })
       },
     });
   } catch (error) {
@@ -382,6 +388,7 @@ router.put("/:id", async (req, res) => {
       { name: "concept", type: "string", optional: false },
       { name: "cargo", type: "float", optional: true },
       { name: "abono", type: "float", optional: true },
+      { name: "order", type: "integer", optional: false },
     ]);
     if (!checkDetails.success) {
       return res.status(400).json({ message: checkDetails.message });
