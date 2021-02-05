@@ -667,18 +667,11 @@ router.get("/estado-resultados", async (req, res) => {
   try {
     const date = new Date(req.query.date);
 
-    const { settings } = await req.conn
+    let { estadoResultados } = await req.conn
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
       .where("as.company = :company", { company: req.user.cid })
-      .andWhere("as.type = :type", { type: "estado-resultados" })
       .getOne();
-
-    let catalog = await req.conn
-      .getRepository("AccountingCatalog")
-      .createQueryBuilder("d")
-      .where("d.company = :company", { company: req.user.cid })
-      .getMany();
 
     // obtiene los detalles de la partida del rango seleccionado
     const rangeDetails = await req.conn
@@ -691,7 +684,7 @@ router.get("/estado-resultados", async (req, res) => {
       .getMany();
 
     let saldoacumulado = 0;
-    const estadoResultados = settings
+    estadoResultados = estadoResultados
       .filter((setting) => setting.show)
       .map((account) => {
         let total = 0;
