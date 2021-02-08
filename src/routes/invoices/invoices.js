@@ -738,6 +738,7 @@ router.delete("/:id", async (req, res) => {
     .where("id.documentType = :documentType", {
       documentType: invoice.documentType.id,
     })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", { isCurrentDocument: true })
     .andWhere("id.company = :company", { company: req.user.cid })
     .getOne();
 
