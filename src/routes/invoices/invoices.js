@@ -345,6 +345,7 @@ router.post("/", async (req, res) => {
     .getRepository("InvoicesDocument")
     .createQueryBuilder("id")
     .where("id.company = :company", { company: req.user.cid })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", { isCurrentDocument: true })
     .andWhere("dt.id = :documentType", { documentType: header.documentType })
     .leftJoin("id.documentType", "dt")
     .getOne();
@@ -763,6 +764,17 @@ router.delete("/:id", async (req, res) => {
       .from("Invoice")
       .where("id = :id", { id: req.params.id })
       .andWhere("company = :company", { company: req.user.cid })
+      .execute();
+
+    // updates secuence
+    // Actualiza el documento
+    await req.conn
+      .createQueryBuilder()
+      .update("InvoicesDocument")
+      .set({ current: document.current - 1 })
+      .where("company = :company", { company: req.user.cid })
+      .andWhere("isCurrentDocument = :current", { current: true })
+      .andWhere("documentType = :type", { type: invoice.documentType.id })
       .execute();
 
     const user = await req.conn
