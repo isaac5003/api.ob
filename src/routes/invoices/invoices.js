@@ -345,6 +345,7 @@ router.post("/", async (req, res) => {
     .getRepository("InvoicesDocument")
     .createQueryBuilder("id")
     .where("id.company = :company", { company: req.user.cid })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", { isCurrentDocument: true })
     .andWhere("dt.id = :documentType", { documentType: header.documentType })
     .leftJoin("id.documentType", "dt")
     .getOne();
