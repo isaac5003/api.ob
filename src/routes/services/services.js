@@ -144,7 +144,8 @@ router.get("/:id", async (req, res) => {
         "s.description",
         "s.cost",
         "s.active",
-        "s.incTax",
+        "s.incIva",
+        "s.incRenta",
         "st.id",
         "st.name",
       ])
@@ -174,14 +175,15 @@ router.post("/", async (req, res) => {
     "cost",
     "sellingType",
     "description",
-    "incTax",
+    "incIva",
+    "incRenta",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name, cost, sellingType, description, incTax } = req.body;
+  const { name, cost, sellingType, description, incIva, incRenta } = req.body;
 
   // Inserta el servicio
   try {
@@ -194,7 +196,8 @@ router.post("/", async (req, res) => {
         cost,
         sellingType,
         description,
-        incTax,
+        incIva,
+        incRenta,
         company: req.user.cid,
       })
       .execute();
@@ -234,21 +237,22 @@ router.put("/:id", async (req, res) => {
     "cost",
     "sellingType",
     "description",
-    "incTax",
+    "incIva",
+    "incRenta",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name, cost, sellingType, description, incTax } = req.body;
+  const { name, cost, sellingType, description, incIva, incRenta } = req.body;
 
   // Actualiza el servicio
   try {
     await req.conn
       .createQueryBuilder()
       .update("Service")
-      .set({ name, cost, sellingType, description, incTax })
+      .set({ name, cost, sellingType, description, incIva, incRenta })
       .where("id = :id", { id: req.params.id })
       .execute();
 
