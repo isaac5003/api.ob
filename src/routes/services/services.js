@@ -18,13 +18,24 @@ router.get("/", async (req, res) => {
     ],
     true
   );
+
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
     const { cid } = req.user;
-    const { limit, page, active, type, search, prop, order, fromAmount, toAmount } = req.query;
+    const {
+      limit,
+      page,
+      active,
+      type,
+      search,
+      prop,
+      order,
+      fromAmount,
+      toAmount,
+    } = req.query;
 
     let query = req.conn
       .getRepository("Service")
@@ -65,9 +76,12 @@ router.get("/", async (req, res) => {
       .leftJoin("s.sellingType", "st");
 
     if (order && prop) {
-      services = services.orderBy(`s.${prop}`, order == 'ascending' ? 'ASC' : "DESC")
+      services = services.orderBy(
+        `s.${prop}`,
+        order == "ascending" ? "ASC" : "DESC"
+      );
     } else {
-      services = services.orderBy("s.createdAt", "DESC")
+      services = services.orderBy("s.createdAt", "DESC");
     }
 
     let index = 1;
@@ -130,6 +144,8 @@ router.get("/:id", async (req, res) => {
         "s.description",
         "s.cost",
         "s.active",
+        "s.incIva",
+        "s.incRenta",
         "st.id",
         "st.name",
       ])
@@ -159,13 +175,15 @@ router.post("/", async (req, res) => {
     "cost",
     "sellingType",
     "description",
+    "incIva",
+    "incRenta",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name, cost, sellingType, description } = req.body;
+  const { name, cost, sellingType, description, incIva, incRenta } = req.body;
 
   // Inserta el servicio
   try {
@@ -173,7 +191,15 @@ router.post("/", async (req, res) => {
       .createQueryBuilder()
       .insert()
       .into("Service")
-      .values({ name, cost, sellingType, description, company: req.user.cid })
+      .values({
+        name,
+        cost,
+        sellingType,
+        description,
+        incIva,
+        incRenta,
+        company: req.user.cid,
+      })
       .execute();
 
     const user = await req.conn
@@ -211,20 +237,22 @@ router.put("/:id", async (req, res) => {
     "cost",
     "sellingType",
     "description",
+    "incIva",
+    "incRenta",
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   // Obtiene los campos requeridos
-  const { name, cost, sellingType, description } = req.body;
+  const { name, cost, sellingType, description, incIva, incRenta } = req.body;
 
   // Actualiza el servicio
   try {
     await req.conn
       .createQueryBuilder()
       .update("Service")
-      .set({ name, cost, sellingType, description })
+      .set({ name, cost, sellingType, description, incIva, incRenta })
       .where("id = :id", { id: req.params.id })
       .execute();
 

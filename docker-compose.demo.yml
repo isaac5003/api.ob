@@ -10,20 +10,19 @@ services:
       - demo.env
     volumes:
       - demo_openbox_database:/var/lib/postgresql/data
+      - ./local.init:/docker-entrypoint-initdb.d
 
   demo_openbox_api:
     container_name: demo_openbox_api
-    image: "node:lts-slim"
-    working_dir: /usr/api
+    build:
+      context: ./
+      dockerfile: Dockerfile
     ports:
       - "8001:3000"
-    command: npm run dev
     env_file:
       - demo.env
     depends_on:
       - demo_openbox_db
-    volumes:
-      - ./:/usr/api
 
 volumes:
   demo_openbox_database: {}

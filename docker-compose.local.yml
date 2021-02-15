@@ -10,6 +10,7 @@ services:
       - local.env
     volumes:
       - local_openbox_database:/var/lib/postgresql/data
+      - ./local.init:/docker-entrypoint-initdb.d
 
   local_openbox_api:
     container_name: local_openbox_api
@@ -24,6 +25,5 @@ services:
       - local_openbox_db
     volumes:
       - ./:/usr/api
-
 volumes:
   local_openbox_database: {}

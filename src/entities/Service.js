@@ -8,6 +8,8 @@ module.exports = new EntitySchema({
     description: { type: "varchar" },
     cost: { type: "float" },
     active: { type: "boolean", default: true },
+    incIva: { type: "boolean", default: false },
+    incRenta: { type: "boolean", default: false },
     createdAt: { type: "timestamp", createDate: true },
     updatedAt: { type: "timestamp", updateDate: true },
   },

@@ -5,10 +5,8 @@ services:
     image: postgres:12.3
     ports:
       - "3001:5432"
-    environment:
-      POSTGRES_PASSWORD: super_complicated_password
-      POSTGRES_USER: openbox_user
-      POSTGRES_DB: openbox_database
+    env_file:
+      - prod.env
     volumes:
       - openbox_database:/var/lib/postgresql/data
 
@@ -18,12 +16,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      POSTGRES_HOST: openbox_db
-      POSTGRES_USER: openbox_user
-      POSTGRES_PASSWORD: super_complicated_password
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: openbox_database
+    env_file:
+      - prod.env
     depends_on:
       - openbox_db
 
