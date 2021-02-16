@@ -112,7 +112,7 @@ router.get('/', async (req, res) => {
     }
 
     entries = await entries.getMany();
-    console.log(entries);
+
     if (search) {
       entries = entries.filter(
         (e) =>
