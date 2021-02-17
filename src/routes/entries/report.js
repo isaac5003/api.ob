@@ -466,7 +466,7 @@ router.get("/balance-comprobacion", async (req, res) => {
       .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
 
     const name = `BALANCE DE COMPROBACIÓN AL ${format(
-      date,
+      endOfMonth(date),
       "dd - MMMM - yyyy",
       { locale: es }
     )
