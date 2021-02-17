@@ -483,7 +483,6 @@ router.get("/balance-comprobacion", async (req, res) => {
 
 router.get("/balance-general", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: false },
     { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
@@ -491,7 +490,6 @@ router.get("/balance-general", async (req, res) => {
   }
 
   try {
-    const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
 
     let { balanceGeneral } = await req.conn
@@ -529,7 +527,6 @@ router.get("/balance-general", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
@@ -642,10 +639,7 @@ router.get("/balance-general", async (req, res) => {
       };
     });
 
-    const name = `BALANCE GENERAL PARA EL PERÍODO DEL ${format(
-      new Date(startDate),
-      "dd/MM/yyyy"
-    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    const name = `BALANCE GENERAL PARA EL PERÍODO AL  ${format(new Date(endDate), "dd/MM/yyyy")}`;
 
     return res.json({ name, balanceGeneral });
   } catch (error) {
@@ -658,7 +652,6 @@ router.get("/balance-general", async (req, res) => {
 
 router.get("/estado-resultados", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: false },
     { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
@@ -680,7 +673,6 @@ router.get("/estado-resultados", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
@@ -735,10 +727,7 @@ router.get("/estado-resultados", async (req, res) => {
         };
       });
 
-    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO DEL ${format(
-      new Date(startDate),
-      "dd/MM/yyyy"
-    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
     return res.json({ name, estadoResultados });
   } catch (error) {
     console.error(error);
