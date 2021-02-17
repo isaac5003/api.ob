@@ -515,6 +515,7 @@ router.get("/balance-general", async (req, res) => {
             "Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.",
         });
     }
+    //prueba commit
 
     let catalog = await req.conn
       .getRepository("AccountingCatalog")
