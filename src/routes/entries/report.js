@@ -515,7 +515,6 @@ router.get("/balance-general", async (req, res) => {
             "Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.",
         });
     }
-    //prueba commit
 
     let catalog = await req.conn
       .getRepository("AccountingCatalog")
@@ -653,7 +652,6 @@ router.get("/balance-general", async (req, res) => {
 
 router.get("/estado-resultados", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: false },
     { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
@@ -675,7 +673,6 @@ router.get("/estado-resultados", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
@@ -730,10 +727,7 @@ router.get("/estado-resultados", async (req, res) => {
         };
       });
 
-    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO DEL ${format(
-      new Date(startDate),
-      "dd/MM/yyyy"
-    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
     return res.json({ name, estadoResultados });
   } catch (error) {
     console.error(error);
