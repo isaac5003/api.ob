@@ -639,7 +639,7 @@ router.get("/balance-general", async (req, res) => {
       };
     });
 
-    const name = `BALANCE GENERAL PARA EL PERÍODO DEL  ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    const name = `BALANCE GENERAL PARA EL PERÍODO AL  ${format(new Date(endDate), "dd/MM/yyyy")}`;
 
     return res.json({ name, balanceGeneral });
   } catch (error) {
