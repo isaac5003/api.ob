@@ -96,7 +96,7 @@ router.put('/reverse/:id', async (req, res) => {
   }
 
   // Verifica que tenga uno de los estados que pueden revertirse
-  const statuses = [2, 3];
+  const statuses = [2, 3, 5];
   if (!statuses.includes(invoice.status.id)) {
     return res.status(500).json({
       message: 'El documento no puede revertirse porque tiene un estado que no lo permite.',
@@ -111,6 +111,9 @@ router.put('/reverse/:id', async (req, res) => {
         newStatus = 1;
         break;
       case 3:
+        newStatus = 2;
+        break;
+      case 5:
         newStatus = 2;
         break;
     }
