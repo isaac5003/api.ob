@@ -69,13 +69,15 @@ router.get('/', async (req, res) => {
         'ae.date',
         'ae.squared',
         'ae.accounted',
-        'ae.accountingEntryTypeId',
+        'aet.id',
+        'aet.code',
+        'aet.name',
         'sum(aed.cargo) cargo',
       ])
-
+      .leftJoin('ae.accountingEntryType', 'aet')
       .leftJoin('ae.accountingEntryDetails', 'aed')
       .where('ae.company = :company', { company: cid })
-      .groupBy('ae.id');
+      .groupBy(['ae.id', 'aet.id']);
 
     if (order && prop) {
       entries = entries.orderBy(`${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
@@ -112,6 +114,7 @@ router.get('/', async (req, res) => {
     }
 
     entries = await entries.getMany();
+    console.log(entries);
 
     if (search) {
       entries = entries.filter(
@@ -130,19 +133,6 @@ router.get('/', async (req, res) => {
         .where('e.id = :entry', { entry: entry.id })
         .getMany();
       entry.cargo = details.reduce((a, b) => a + b.cargo, 0);
-
-      const entryType = await req.conn
-        .getRepository('AccountingEntryType')
-        .createQueryBuilder('et')
-        .where('et.company = :company', { company: cid })
-        .getMany();
-      entry.entryType = entryType.find((et) =>
-        et.id == entry.accountingEntryTypeId
-          ? {
-              entryType: { id: et.id, code: et.code, name: et.name },
-            }
-          : { entryType: {} },
-      );
     }
 
     return res.json({
