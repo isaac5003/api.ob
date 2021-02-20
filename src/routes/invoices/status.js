@@ -238,7 +238,7 @@ router.put('/paid/:id', async (req, res) => {
   const statuses = [2];
   if (!statuses.includes(invoice.status.id)) {
     return res.status(500).json({
-      message: 'El documento no puede marcarse como impreso porque tiene un estado que no lo permite.',
+      message: 'El documento no puede marcarse como pagado porque tiene un estado que no lo permite.',
     });
   }
 
