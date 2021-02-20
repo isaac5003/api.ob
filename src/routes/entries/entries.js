@@ -114,13 +114,14 @@ router.get('/', async (req, res) => {
     }
 
     entries = await entries.getMany();
-    console.log(entries);
 
     if (search) {
       entries = entries.filter(
-        (e) =>
+        e =>
           e.title.toLowerCase().includes(search) ||
-          format(new Date(e.date), 'dd/MM/yyyy').toLowerCase().includes(search),
+          format(new Date(e.date), 'dd/MM/yyyy')
+            .toLowerCase()
+            .includes(search),
       );
       count = entries.length;
     }
@@ -137,7 +138,7 @@ router.get('/', async (req, res) => {
 
     return res.json({
       count,
-      entries: entries.map((e) => {
+      entries: entries.map(e => {
         return {
           index: index++,
           ...e,
@@ -258,7 +259,7 @@ router.post('/', async (req, res) => {
     .getMany();
 
   const currentSerie = entries
-    .map((e) => parseInt(e.serie))
+    .map(e => parseInt(e.serie))
     .sort((a, b) => {
       if (a < b) return 1;
       if (a > b) return -1;
@@ -307,11 +308,11 @@ router.post('/', async (req, res) => {
       .insert()
       .into('AccountingEntryDetail')
       .values(
-        details.map((d) => {
+        details.map(d => {
           return {
             ...d,
             accountingEntry: entry.raw[0].id,
-            catalogName: catalog.find((c) => c.id == d.accountingCatalog).name,
+            catalogName: catalog.find(c => c.id == d.accountingCatalog).name,
             company: req.user.cid,
           };
         }),
@@ -427,11 +428,11 @@ router.put('/:id', async (req, res) => {
       .insert()
       .into('AccountingEntryDetail')
       .values(
-        details.map((d) => {
+        details.map(d => {
           return {
             ...d,
             accountingEntry: req.params.id,
-            catalogName: catalog.find((c) => c.id == d.accountingCatalog).name,
+            catalogName: catalog.find(c => c.id == d.accountingCatalog).name,
             company: req.user.cid,
           };
         }),
