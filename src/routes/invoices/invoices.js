@@ -48,7 +48,7 @@ router.get("/", async (req, res) => {
       startDate,
       endDate,
       prop,
-      order
+      order,
     } = req.query;
 
     // Obtiene el total de facturas
@@ -118,9 +118,12 @@ router.get("/", async (req, res) => {
       .where("i.company = :company", { company: cid });
 
     if (prop && order) {
-      invoices = invoices.orderBy(`i.${prop}`, order == 'ascending' ? 'ASC' : "DESC")
+      invoices = invoices.orderBy(
+        `i.${prop}`,
+        order == "ascending" ? "ASC" : "DESC"
+      );
     } else {
-      invoices = invoices.orderBy("i.createdAt", "DESC")
+      invoices = invoices.orderBy("i.createdAt", "DESC");
     }
 
     let index = 1;
@@ -345,7 +348,9 @@ router.post("/", async (req, res) => {
     .getRepository("InvoicesDocument")
     .createQueryBuilder("id")
     .where("id.company = :company", { company: req.user.cid })
-    .andWhere("id.isCurrentDocument = :isCurrentDocument", { isCurrentDocument: true })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+      isCurrentDocument: true,
+    })
     .andWhere("dt.id = :documentType", { documentType: header.documentType })
     .leftJoin("id.documentType", "dt")
     .getOne();
@@ -385,7 +390,7 @@ router.post("/", async (req, res) => {
     .getOne();
 
   let message = "";
-  const sequence = document.current;
+  let sequence = document.current;
   if (header.sequence != sequence) {
     message = `El numero de secuencia asignado fué: ${sequence}`;
   }
@@ -397,6 +402,31 @@ router.post("/", async (req, res) => {
     .where("s.id IN (:...ids)", { ids: details.map((d) => d.service) })
     .leftJoin("s.sellingType", "st")
     .getMany();
+
+  let invoiceSequences = await req.conn
+    .getRepository("Invoice")
+    .createQueryBuilder("is")
+    .select(["is.sequence"])
+    .where("is.company = :company", { company: req.user.cid })
+    .andWhere("is.status = :status", { status: 4 })
+    .andWhere("is.documentType = :documentType", {
+      documentType: header.documentType,
+    })
+    .getMany();
+
+  const invoicesSequence = invoiceSequences.map((is) => parseInt(is.sequence));
+
+  //definiendo el valor de sequence
+  if (invoicesSequence.includes(sequence)) {
+    for (const is of invoicesSequence) {
+      for (let s = sequence; s <= document.final; s++) {
+        if (s != is) {
+          sequence = s;
+          s = document.final;
+        }
+      }
+    }
+  }
 
   // inserta en Invoice
   let invoice = null;
@@ -451,7 +481,7 @@ router.post("/", async (req, res) => {
         "Error al registrar el encabezado de La venta, contacta con tu administrador.",
     });
   }
-
+  //insertando los detalles
   try {
     await req.conn
       .createQueryBuilder()
@@ -475,11 +505,23 @@ router.post("/", async (req, res) => {
     });
   }
 
+  //definiendo el valor para nextssequence
+  let nextSequence = sequence + 1;
+  if (invoicesSequence.includes(nextSequence)) {
+    for (const is of invoicesSequence) {
+      for (let s = nextSequence; s <= document.final; s++) {
+        if (s != is) {
+          nextSequence = s;
+          s = document.final;
+        }
+      }
+    }
+  }
   // Actualiza el documento
   await req.conn
     .createQueryBuilder()
     .update("InvoicesDocument")
-    .set({ current: sequence + 1 })
+    .set({ current: nextSequence })
     .where("company = :company", { company: req.user.cid })
     .andWhere("isCurrentDocument = :current", { current: true })
     .andWhere("documentType = :type", { type: header.documentType })
@@ -502,6 +544,125 @@ router.post("/", async (req, res) => {
   return res.json({
     message: `La venta ha sido registrada correctamente. ${message}`,
     id: invoice.raw[0].id,
+  });
+});
+
+router.post("/reserved", async (req, res) => {
+  // valida los objetos del body
+  const check = checkRequired(req.body, [
+    { name: "sequenceFrom", type: "integer", optional: false },
+    { name: "sequenceTo", type: "integer", optional: false },
+    { name: "InvoicesDocument", type: "string", optional: false },
+  ]);
+
+  const { sequenceForm, sequenceTo, documentType } = req.body;
+
+  const document = await req.conn
+    .getRepository("InvoicesDocument")
+    .createQueryBuilder("id")
+    .where("id.company = :company", { company: req.user.cid })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+      isCurrentDocument: true,
+    })
+    .andWhere("dt.id = :documentType", { documentType: documentType })
+    .leftJoin("id.documentType", "dt")
+    .getOne();
+
+  let message = "";
+  if (sequenceForm < document.current || sequenceTo > document.final) {
+    return res.status(400).json({
+      message: `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
+    });
+  }
+  let sequence = [];
+  for (let s = sequenceForm; s <= sequenceTo; s++) {
+    sequence.push(s);
+  }
+
+  let invoiceSequences = await req.conn
+    .getRepository("Invoice")
+    .createQueryBuilder("is")
+    .select(["is.sequence"])
+    .where("is.company = :company", { company: req.user.cid })
+    .andWhere("is.status = :status", { status: 4 })
+    .andWhere("is.documentType = :documentType", { documentType: documentType })
+    .getMany();
+
+  const invoicesSequence = invoiceSequences.map((is) => parseInt(is.sequence));
+  const alreadyReserved = invoicesSequence.filter((is) =>
+    sequence.includes(is)
+  );
+
+  let sequenceToReserve = sequence.filter((s) => !alreadyReserved.includes(s));
+
+  let invoiceValues = sequenceToReserve.flatMap((sr) => {
+    return {
+      authorization: document.authorization,
+      sequence: sr,
+      company: req.user.cid,
+      documentType: documentType,
+      status: 4,
+    };
+  });
+
+  //insertar en invoice
+  try {
+    invoice = await req.conn
+      .createQueryBuilder()
+      .insert()
+      .into("Invoice")
+      .values(invoiceValues)
+      .execute();
+  } catch (error) {
+    return res.status(400).json({
+      message:
+        "Error al reservar los documentos, contacta con tu administrador.",
+    });
+  }
+
+  if (sequenceForm == document.current) {
+    // Actualiza el documento
+    await req.conn
+      .createQueryBuilder()
+      .update("InvoicesDocument")
+      .set({ current: sequenceTo + 1 })
+      .where("company = :company", { company: req.user.cid })
+      .andWhere("isCurrentDocument = :current", { current: true })
+      .andWhere("documentType = :type", { type: documentType })
+      .execute();
+  }
+
+  const user = await req.conn
+    .getRepository("User")
+    .createQueryBuilder("u")
+    .where("u.id = :id", { id: req.user.uid })
+    .getOne();
+
+  await addLog(
+    req.conn,
+    req.moduleName,
+    `${user.names} ${user.lastnames}`,
+    user.id,
+    `Se han reservado los documentos con sequencia: ${sequenceToReserve.join(
+      ", "
+    )}`
+  );
+
+  return res.json({
+    message:
+      alreadyReserved.length > 0 && sequenceToReserve.length > 0
+        ? `Los documentos ${alreadyReserved.join(
+            ", "
+          )} ya estan reservados, unicamente se reservaron los documentos con sequencia ${sequenceToReserve.join(
+            ", "
+          )} correctamente.`
+        : sequenceToReserve.length > 0
+        ? `Los documentos con sequencia ${sequenceToReserve.join(
+            ", "
+          )} han sido reservados correctamente.`
+        : `Los documentos con secuencia ${alreadyReserved.join(
+            ", "
+          )} ya estan reservados`,
   });
 });
 
@@ -738,7 +899,9 @@ router.delete("/:id", async (req, res) => {
     .where("id.documentType = :documentType", {
       documentType: invoice.documentType.id,
     })
-    .andWhere("id.isCurrentDocument = :isCurrentDocument", { isCurrentDocument: true })
+    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+      isCurrentDocument: true,
+    })
     .andWhere("id.company = :company", { company: req.user.cid })
     .getOne();
 
