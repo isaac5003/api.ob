@@ -14,6 +14,21 @@ router.get("/diario-mayor", async (req, res) => {
 
   try {
     const date = new Date(req.query.date);
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
 
     const catalog = await req.conn
       .getRepository("AccountingCatalog")
@@ -121,7 +136,16 @@ router.get("/diario-mayor", async (req, res) => {
       "MMMM yyyy",
       { locale: es }
     ).toUpperCase()}`;
-    return res.json({ name, accounts });
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      accounts,
+    });
   } catch (error) {
     console.error(error);
     return res
@@ -139,6 +163,22 @@ router.get("/auxiliares", async (req, res) => {
   }
 
   try {
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
+
     const date = new Date(req.query.date);
 
     const catalog = await req.conn
@@ -244,7 +284,16 @@ router.get("/auxiliares", async (req, res) => {
       "MMMM yyyy",
       { locale: es }
     ).toUpperCase()}`;
-    return res.json({ name, accounts });
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      accounts,
+    });
   } catch (error) {
     console.error(error);
     return res
@@ -272,6 +321,22 @@ router.get("/account-movements", async (req, res) => {
       .where("d.company = :company", { company: req.user.cid })
       .getMany();
 
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
+
     // obtiene los detalles de la partida del rango seleccionado
     const rangeDetails = await req.conn
       .getRepository("AccountingEntryDetail")
@@ -279,7 +344,7 @@ router.get("/account-movements", async (req, res) => {
       .where("d.company = :company", { company: req.user.cid })
       .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
-      .andWhere("c.id IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
+      .andWhere("c.code IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
@@ -290,7 +355,7 @@ router.get("/account-movements", async (req, res) => {
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
       .andWhere("e.date < :startDate", { startDate })
-      .andWhere("c.id IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
+      .andWhere("c.code IN (:...ids)", { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
@@ -370,7 +435,16 @@ router.get("/account-movements", async (req, res) => {
       new Date(startDate),
       "dd/MM/yyyy"
     )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
-    return res.json({ name, accounts });
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      accounts,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -389,7 +463,21 @@ router.get("/balance-comprobacion", async (req, res) => {
 
   try {
     const date = new Date(req.query.date);
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
 
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
     let catalog = await req.conn
       .getRepository("AccountingCatalog")
       .createQueryBuilder("d")
@@ -473,7 +561,16 @@ router.get("/balance-comprobacion", async (req, res) => {
       .split("-")
       .join("de")
       .toUpperCase()}`;
-    return res.json({ name, balanceComprobacion });
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      balanceComprobacion,
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Error al obtener el reporte de balance de comprobacion.",
@@ -492,6 +589,22 @@ router.get("/balance-general", async (req, res) => {
   try {
     const endDate = new Date(req.query.endDate);
 
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
+
     let { balanceGeneral } = await req.conn
       .getRepository("AccountingSetting")
       .createQueryBuilder("as")
@@ -499,21 +612,19 @@ router.get("/balance-general", async (req, res) => {
       .getOne();
 
     if (!balanceGeneral) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "No hay configuracion valida guardada para el Balance general.",
-        });
+      return res.status(400).json({
+        message:
+          "No hay configuracion valida guardada para el Balance general.",
+      });
     }
 
-    if (Object.values(balanceGeneral.special).filter(v => v == '').length > 0) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.",
-        });
+    if (
+      Object.values(balanceGeneral.special).filter((v) => v == "").length > 0
+    ) {
+      return res.status(400).json({
+        message:
+          "Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.",
+      });
     }
 
     let catalog = await req.conn
@@ -641,7 +752,16 @@ router.get("/balance-general", async (req, res) => {
 
     const name = `BALANCE GENERAL PARA EL PERÍODO AL  ${format(new Date(endDate), "dd/MM/yyyy")}`;
 
-    return res.json({ name, balanceGeneral });
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      balanceGeneral,
+    });
   } catch (error) {
     console.error(error);
     return res
@@ -661,6 +781,21 @@ router.get("/estado-resultados", async (req, res) => {
   try {
     const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
+    //informacin de signatures
+    const signatures = await req.conn
+      .getRepository("AccountingSetting")
+      .createQueryBuilder("as")
+      .select(["as.id", "as.legal", "as.accountant", "as.auditor"])
+      .where("as.company = :company", { company: req.user.cid })
+      .getOne();
+
+    //informacin de la cmpañia
+    const company = await req.conn
+      .getRepository("Company")
+      .createQueryBuilder("c")
+      .select(["c.name", "c.nrc", "c.nit"])
+      .where("c.id = :id", { id: req.user.cid })
+      .getOne();
 
     let { estadoResultados } = await req.conn
       .getRepository("AccountingSetting")
@@ -727,8 +862,20 @@ router.get("/estado-resultados", async (req, res) => {
         };
       });
 
-    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
-    return res.json({ name, estadoResultados });
+    const name = `ESTADO DE RESULTADOS PARA EL PERÍODO DEL ${format(
+      new Date(startDate),
+      "dd/MM/yyyy"
+    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    return res.json({
+      signatures: {
+        legal: signatures.legal,
+        accountant: signatures.accountant,
+        auditor: signatures.auditor,
+      },
+      company,
+      name,
+      estadoResultados,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
