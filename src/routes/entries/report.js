@@ -554,7 +554,7 @@ router.get("/balance-comprobacion", async (req, res) => {
       .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
 
     const name = `BALANCE DE COMPROBACIÓN AL ${format(
-      date,
+      endOfMonth(date),
       "dd - MMMM - yyyy",
       { locale: es }
     )
@@ -580,7 +580,6 @@ router.get("/balance-comprobacion", async (req, res) => {
 
 router.get("/balance-general", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: false },
     { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
@@ -588,7 +587,6 @@ router.get("/balance-general", async (req, res) => {
   }
 
   try {
-    const startDate = new Date(req.query.startDate);
     const endDate = new Date(req.query.endDate);
 
     //informacin de signatures
@@ -640,7 +638,6 @@ router.get("/balance-general", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
@@ -717,7 +714,7 @@ router.get("/balance-general", async (req, res) => {
                           (b.accountingCatalog.isAcreedora
                             ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
                             : (b.cargo ? b.cargo : 0) -
-                              (b.abono ? b.abono : 0)),
+                            (b.abono ? b.abono : 0)),
                         0
                       );
                     ch.total = totalniveltres;
@@ -753,10 +750,7 @@ router.get("/balance-general", async (req, res) => {
       };
     });
 
-    const name = `BALANCE GENERAL PARA EL PERÍODO DEL ${format(
-      new Date(startDate),
-      "dd/MM/yyyy"
-    )} AL ${format(new Date(endDate), "dd/MM/yyyy")}`;
+    const name = `BALANCE GENERAL PARA EL PERÍODO AL  ${format(new Date(endDate), "dd/MM/yyyy")}`;
 
     return res.json({
       signatures: {
@@ -778,7 +772,6 @@ router.get("/balance-general", async (req, res) => {
 
 router.get("/estado-resultados", async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: false },
     { name: "endDate", type: "date", optional: false },
   ]);
   if (!check.success) {
@@ -815,7 +808,6 @@ router.get("/estado-resultados", async (req, res) => {
       .getRepository("AccountingEntryDetail")
       .createQueryBuilder("d")
       .where("d.company = :company", { company: req.user.cid })
-      .andWhere("e.date >= :startDate", { startDate })
       .andWhere("e.date <= :endDate", { endDate })
       .leftJoinAndSelect("d.accountingEntry", "e")
       .leftJoinAndSelect("d.accountingCatalog", "c")
