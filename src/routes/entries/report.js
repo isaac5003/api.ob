@@ -784,7 +784,6 @@ router.get('/estado-resultados', async (req, res) => {
       estadoResultados,
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       message: 'Error al obtener el reporte de estado de resultados.',
     });
