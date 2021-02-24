@@ -519,14 +519,18 @@ router.get('/balance-comprobacion', async (req, res) => {
   }
 });
 
-router.get('/balance-general', async (req, res) => {
-  const check = checkRequired(req.query, [{ name: 'endDate', type: 'date', optional: false }]);
+router.get("/balance-general", async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "startDate", type: "date", optional: true },
+    { name: "endDate", type: "date", optional: false },
+  ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
-    const endDate = new Date(req.query.endDate);
+    let { startDate, endDate } = req.query
+    endDate = new Date(endDate);
 
     //informacin de signatures
     const signatures = await req.conn
@@ -569,13 +573,20 @@ router.get('/balance-general', async (req, res) => {
       .getMany();
 
     // obtiene los detalles de la partida del rango seleccionado
-    const rangeDetails = await req.conn
-      .getRepository('AccountingEntryDetail')
-      .createQueryBuilder('d')
-      .where('d.company = :company', { company: req.user.cid })
-      .andWhere('e.date <= :endDate', { endDate })
-      .leftJoinAndSelect('d.accountingEntry', 'e')
-      .leftJoinAndSelect('d.accountingCatalog', 'c')
+    let rangeDetails = req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+
+    if (startDate) {
+      rangeDetails = rangeDetails
+        .andWhere("e.date >= :startDate", { startDate: new Date(startDate) })
+    }
+
+    rangeDetails = await rangeDetails
+      .andWhere("e.date <= :endDate", { endDate })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
     balanceGeneral = balanceGeneral.report.map(s => {
@@ -693,14 +704,19 @@ router.get('/balance-general', async (req, res) => {
   }
 });
 
-router.get('/estado-resultados', async (req, res) => {
-  const check = checkRequired(req.query, [{ name: 'endDate', type: 'date', optional: false }]);
+router.get("/estado-resultados", async (req, res) => {
+  const check = checkRequired(req.query, [
+    { name: "startDate", type: "date", optional: true },
+    { name: "endDate", type: "date", optional: false },
+  ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
-    const endDate = new Date(req.query.endDate);
+    let { startDate, endDate } = req.query
+    endDate = new Date(endDate);
+
     //informacin de signatures
     const signatures = await req.conn
       .getRepository('AccountingSetting')
@@ -724,13 +740,19 @@ router.get('/estado-resultados', async (req, res) => {
       .getOne();
 
     // obtiene los detalles de la partida del rango seleccionado
-    const rangeDetails = await req.conn
-      .getRepository('AccountingEntryDetail')
-      .createQueryBuilder('d')
-      .where('d.company = :company', { company: req.user.cid })
-      .andWhere('e.date <= :endDate', { endDate })
-      .leftJoinAndSelect('d.accountingEntry', 'e')
-      .leftJoinAndSelect('d.accountingCatalog', 'c')
+    let rangeDetails = req.conn
+      .getRepository("AccountingEntryDetail")
+      .createQueryBuilder("d")
+      .where("d.company = :company", { company: req.user.cid })
+
+    if (startDate) {
+      rangeDetails = rangeDetails
+        .andWhere("e.date >= :startDate", { startDate: new Date(startDate) })
+    }
+    rangeDetails = await rangeDetails
+      .andWhere("e.date <= :endDate", { endDate })
+      .leftJoinAndSelect("d.accountingEntry", "e")
+      .leftJoinAndSelect("d.accountingCatalog", "c")
       .getMany();
 
     let saldoacumulado = 0;
