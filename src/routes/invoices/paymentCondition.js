@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
     let paymentConditions = req.conn
       .getRepository('InvoicesPaymentsCondition')
       .createQueryBuilder('pc')
-      .select(['pc.id', 'pc.name', 'pc.active'])
+      .select(['pc.id', 'pc.name', 'pc.active', 'pc.cashPayment'])
       .where('pc.company = :company', { company: cid })
       .orderBy('pc.createdAt', 'DESC');
 
