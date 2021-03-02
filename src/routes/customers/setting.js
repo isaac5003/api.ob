@@ -137,7 +137,7 @@ router.get('/integrations', async (req, res) => {
       return res.json({ integrations: { catalog: null } });
     }
 
-    return res.json({ integrations: { catalog: integration.accountingCatalog } });
+    return res.json({ integrations: { catalog: integration.accountingCatalog.id } });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener las configuracines de integración.' });
   }
