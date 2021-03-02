@@ -620,7 +620,7 @@ router.get('/:id/integrations', async (req, res) => {
       return res.status(400).json({ message: 'El cliente seleccionado no existe.' });
     }
 
-    return res.json({ integrations: { catalog: customer.accountingCatalog.id } });
+    return res.json({ integrations: { catalog: customer.accountingCatalog ? customer.accountingCatalog.id : null } });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener el cliente seleccionado.' });
   }
