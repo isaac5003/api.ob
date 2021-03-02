@@ -134,10 +134,9 @@ router.get('/integrations', async (req, res) => {
       .leftJoin('c.accountingCatalog', 'ac')
       .getOne();
 
-    if (!integrations) {
-      return res.json({ integrations: { catalog: null } });
-    }
-    return res.json({ integrations: { catalog: integrations.accountingCatalog.id } });
+    return res.json({
+      integrations: { catalog: integrations.accountingCatalog ? integrations.accountingCatalog.id : null },
+    });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener las configuracines de integración.' });
   }
