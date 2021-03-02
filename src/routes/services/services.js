@@ -292,7 +292,7 @@ router.delete('/:id', async (req, res) => {
 });
 router.put('/:id/integrations', async (req, res) => {
   // Check required field
-  const check = checkRequired(req.body, [{ name: 'accountingCatalog', type: 'uuid', optional: false }]);
+  const check = checkRequired(req.body, [{ name: 'accountingCatalog', optional: false }]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -304,22 +304,8 @@ router.put('/:id/integrations', async (req, res) => {
   const account = await req.conn
     .getRepository('AccountingCatalog')
     .createQueryBuilder('ac')
-    .select([
-      'ac.id',
-      'ac.code',
-      'ac.name',
-      'ac.isAcreedora',
-      'ac.isBalance',
-      'ac.isParent',
-      'ac.description',
-      'sa.id',
-      'pc.code',
-      'pc.name',
-    ])
     .where('ac.company = :company', { company: req.user.cid })
     .andWhere('ac.id  = :id', { id: accountingCatalog })
-    .leftJoin('ac.subAccounts', 'sa')
-    .leftJoin('ac.parentCatalog', 'pc')
     .getOne();
 
   // If no exist
@@ -330,7 +316,7 @@ router.put('/:id/integrations', async (req, res) => {
   // If account exist updates intergations it
   //validate that account can be use
   if (account.isParent) {
-    return res.status(400).json({ message: 'La cuenta selecciona no puede ser utilizada.' });
+    return res.status(400).json({ message: 'La cuenta selecciona no puede ser utilizada ya que no es asignable' });
   }
 
   try {
@@ -339,8 +325,7 @@ router.put('/:id/integrations', async (req, res) => {
       .createQueryBuilder()
       .update('Service')
       .set({ accountingCatalog: account.id })
-
-      .andWhere('id = :id', { id: req.params.id })
+      .where('id = :id', { id: req.params.id })
       .execute();
 
     const user = await req.conn
@@ -354,7 +339,7 @@ router.put('/:id/integrations', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio la cuenta contable: ${account.id} integrado con el servicio ${req.params.id}`,
+      `Se cambio la cuenta contable: ${account.id} integrada con el servicio ${req.params.id}`,
     );
 
     return res.json({
