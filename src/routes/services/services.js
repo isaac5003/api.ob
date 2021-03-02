@@ -372,7 +372,7 @@ router.get('/:id/integrations', async (req, res) => {
     const service = await req.conn
       .getRepository('Service')
       .createQueryBuilder('c')
-      .select(['c.id', 'ac.id', 'ac.code', 'ac.name'])
+      .select(['c.id', 'ac.id'])
       .where('c.company = :company', { company: req.user.cid })
       .andWhere('c.id = :id', { id: req.params.id })
       .leftJoin('c.accountingCatalog', 'ac')
@@ -382,8 +382,9 @@ router.get('/:id/integrations', async (req, res) => {
       return res.status(400).json({ message: 'El servicio seleccionado no existe.' });
     }
 
-    return res.json({ serviceAccount: service.accountingCatalog });
+    return res.json({ integrations: { catalog: service.accountingCatalog ? service.accountingCatalog.id : null } });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: 'Error al obtener el servicio seleccionado.' });
   }
 });
