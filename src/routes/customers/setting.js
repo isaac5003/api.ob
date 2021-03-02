@@ -129,15 +129,15 @@ router.get('/integrations', async (req, res) => {
     const integration = await req.conn
       .getRepository('CustomerSetting')
       .createQueryBuilder('c')
-      .select(['c.id', 'ac.id', 'ac.code', 'ac.name'])
+      .select(['c.id', 'ac.id'])
       .where('c.company = :company', { company: req.user.cid })
       .leftJoin('c.accountingCatalog', 'ac')
       .getOne();
     if (!integration) {
-      return res.json({ integrations: {} });
+      return res.json({ integrations: { catalog: null } });
     }
 
-    return res.json({ integrations: integration.accountingCatalog });
+    return res.json({ integrations: { catalog: integration.accountingCatalog } });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener las configuracines de integración.' });
   }
