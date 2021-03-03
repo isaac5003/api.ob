@@ -304,7 +304,7 @@ router.get('/account-movements', async (req, res) => {
       .where('d.company = :company', { company: req.user.cid })
       .andWhere('e.date >= :startDate', { startDate })
       .andWhere('e.date <= :endDate', { endDate })
-      .andWhere('c.code IN (:...ids)', { ids: JSON.parse(selectedAccounts) })
+      .andWhere('c.id IN (:...ids)', { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect('d.accountingEntry', 'e')
       .leftJoinAndSelect('d.accountingCatalog', 'c')
       .getMany();
@@ -315,7 +315,7 @@ router.get('/account-movements', async (req, res) => {
       .createQueryBuilder('d')
       .where('d.company = :company', { company: req.user.cid })
       .andWhere('e.date < :startDate', { startDate })
-      .andWhere('c.code IN (:...ids)', { ids: JSON.parse(selectedAccounts) })
+      .andWhere('c.id IN (:...ids)', { ids: JSON.parse(selectedAccounts) })
       .leftJoinAndSelect('d.accountingEntry', 'e')
       .leftJoinAndSelect('d.accountingCatalog', 'c')
       .getMany();
@@ -519,17 +519,17 @@ router.get('/balance-comprobacion', async (req, res) => {
   }
 });
 
-router.get("/balance-general", async (req, res) => {
+router.get('/balance-general', async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: true },
-    { name: "endDate", type: "date", optional: false },
+    { name: 'startDate', type: 'date', optional: true },
+    { name: 'endDate', type: 'date', optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
-    let { startDate, endDate } = req.query
+    let { startDate, endDate } = req.query;
     endDate = new Date(endDate);
 
     //informacin de signatures
@@ -574,19 +574,18 @@ router.get("/balance-general", async (req, res) => {
 
     // obtiene los detalles de la partida del rango seleccionado
     let rangeDetails = req.conn
-      .getRepository("AccountingEntryDetail")
-      .createQueryBuilder("d")
-      .where("d.company = :company", { company: req.user.cid })
+      .getRepository('AccountingEntryDetail')
+      .createQueryBuilder('d')
+      .where('d.company = :company', { company: req.user.cid });
 
     if (startDate) {
-      rangeDetails = rangeDetails
-        .andWhere("e.date >= :startDate", { startDate: new Date(startDate) })
+      rangeDetails = rangeDetails.andWhere('e.date >= :startDate', { startDate: new Date(startDate) });
     }
 
     rangeDetails = await rangeDetails
-      .andWhere("e.date <= :endDate", { endDate })
-      .leftJoinAndSelect("d.accountingEntry", "e")
-      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .andWhere('e.date <= :endDate', { endDate })
+      .leftJoinAndSelect('d.accountingEntry', 'e')
+      .leftJoinAndSelect('d.accountingCatalog', 'c')
       .getMany();
 
     balanceGeneral = balanceGeneral.report.map(s => {
@@ -704,17 +703,17 @@ router.get("/balance-general", async (req, res) => {
   }
 });
 
-router.get("/estado-resultados", async (req, res) => {
+router.get('/estado-resultados', async (req, res) => {
   const check = checkRequired(req.query, [
-    { name: "startDate", type: "date", optional: true },
-    { name: "endDate", type: "date", optional: false },
+    { name: 'startDate', type: 'date', optional: true },
+    { name: 'endDate', type: 'date', optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
 
   try {
-    let { startDate, endDate } = req.query
+    let { startDate, endDate } = req.query;
     endDate = new Date(endDate);
 
     //informacin de signatures
@@ -741,18 +740,17 @@ router.get("/estado-resultados", async (req, res) => {
 
     // obtiene los detalles de la partida del rango seleccionado
     let rangeDetails = req.conn
-      .getRepository("AccountingEntryDetail")
-      .createQueryBuilder("d")
-      .where("d.company = :company", { company: req.user.cid })
+      .getRepository('AccountingEntryDetail')
+      .createQueryBuilder('d')
+      .where('d.company = :company', { company: req.user.cid });
 
     if (startDate) {
-      rangeDetails = rangeDetails
-        .andWhere("e.date >= :startDate", { startDate: new Date(startDate) })
+      rangeDetails = rangeDetails.andWhere('e.date >= :startDate', { startDate: new Date(startDate) });
     }
     rangeDetails = await rangeDetails
-      .andWhere("e.date <= :endDate", { endDate })
-      .leftJoinAndSelect("d.accountingEntry", "e")
-      .leftJoinAndSelect("d.accountingCatalog", "c")
+      .andWhere('e.date <= :endDate', { endDate })
+      .leftJoinAndSelect('d.accountingEntry', 'e')
+      .leftJoinAndSelect('d.accountingCatalog', 'c')
       .getMany();
 
     let saldoacumulado = 0;
