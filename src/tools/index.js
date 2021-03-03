@@ -24,6 +24,12 @@ const checkRequired = function(object, fields, nonrequired = false) {
           success: RegEmail.test(value),
           message: 'Debe ser un correo válido.',
         };
+      case 'uuid':
+        const RegUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        return {
+          success: RegUUID.test(value),
+          message: 'Debe ser un uuid válido.',
+        };
       case 'array':
         return {
           success:
