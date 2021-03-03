@@ -343,12 +343,12 @@ router.put('/:id/integrations', async (req, res) => {
     );
 
     return res.json({
-      message: 'La integraciÃ³n con el servicio ha sido actualizado correctamente.',
+      message: 'La integración con el servicio ha sido actualizada correctamente.',
     });
   } catch (error) {
     // return error
     return res.status(500).json({
-      message: 'Error al actualizar la integraciÃ³n. Contacta con tu administrador.',
+      message: 'Error al actualizar la integración. Contacta con tu administrador.',
     });
   }
 });
@@ -369,7 +369,7 @@ router.get('/:id/integrations', async (req, res) => {
 
     return res.json({ integrations: { catalog: service.accountingCatalog ? service.accountingCatalog.id : null } });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return res.status(500).json({ message: 'Error al obtener el servicio seleccionado.' });
   }
 });
