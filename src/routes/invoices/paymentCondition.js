@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   // Verifica los campos requeridos
   const check = checkRequired(req.body, [
-    { name: 'name', type: 'boolean', optional: false },
+    { name: 'name', type: 'string', optional: false },
     { name: 'cashPayment', type: 'boolean', optional: false },
   ]);
   if (!check.success) {
@@ -130,7 +130,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   // Verifica los campos requeridos
   const check = checkRequired(req.body, [
-    { name: 'name', type: 'boolean', optional: false },
+    { name: 'name', type: 'string', optional: false },
     { name: 'cashPayment', type: 'boolean', optional: false },
   ]);
   if (!check.success) {
