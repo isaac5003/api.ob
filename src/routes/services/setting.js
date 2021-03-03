@@ -59,7 +59,7 @@ router.put('/integrations', async (req, res) => {
         req.moduleName,
         `${user.names} ${user.lastnames}`,
         user.id,
-        `Se actulizo la configuración de integración con clientes`,
+        `Se actulizo la configuración de integración con servicios`,
       );
 
       return res.json({
@@ -87,7 +87,7 @@ router.put('/integrations', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio la cuenta contablede la integración`,
+      `Se cambio la cuenta contable de la integración`,
     );
 
     return res.json({
