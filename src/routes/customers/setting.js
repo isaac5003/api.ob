@@ -45,7 +45,7 @@ router.put('/integrations', async (req, res) => {
         .createQueryBuilder()
         .update('CustomerSetting')
         .set({ accountingCatalog: account.id })
-        .where('id =:id', { id: req.user.cid })
+        .where('company =:id', { id: req.user.cid })
         .execute();
 
       const user = await req.conn
