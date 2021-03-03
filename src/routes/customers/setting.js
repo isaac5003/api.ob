@@ -2,15 +2,6 @@ const express = require('express');
 const { checkRequired, addLog } = require('../../tools');
 const router = express.Router();
 
-const configurationExist = async req => {
-  const settings = await req.conn
-    .getRepository('CustomerSetting')
-    .createQueryBuilder('ss')
-    .where('ss.company = :company', { company: req.user.cid })
-    .getOne();
-  return settings ? true : false;
-};
-
 router.put('/integrations', async (req, res) => {
   // Check required field
   const check = checkRequired(req.body, [{ name: 'accountingCatalog', type: 'uuid', optional: false }]);
