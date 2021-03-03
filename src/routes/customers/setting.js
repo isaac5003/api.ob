@@ -104,7 +104,7 @@ router.put('/integrations', async (req, res) => {
     });
   } catch (error) {
     // return error
-    console.log(error);
+    console.error(error);
     return res.status(500).json({
       message: 'Error al actualizar la integración. Contacta con tu administrador.',
     });
