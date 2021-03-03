@@ -25,22 +25,8 @@ router.put('/integrations', async (req, res) => {
   const account = await req.conn
     .getRepository('AccountingCatalog')
     .createQueryBuilder('ac')
-    .select([
-      'ac.id',
-      'ac.code',
-      'ac.name',
-      'ac.isAcreedora',
-      'ac.isBalance',
-      'ac.isParent',
-      'ac.description',
-      'sa.id',
-      'pc.code',
-      'pc.name',
-    ])
     .where('ac.company = :company', { company: req.user.cid })
     .andWhere('ac.id  = :id', { id: accountingCatalog })
-    .leftJoin('ac.subAccounts', 'sa')
-    .leftJoin('ac.parentCatalog', 'pc')
     .getOne();
 
   // If no exist
@@ -51,14 +37,14 @@ router.put('/integrations', async (req, res) => {
   // If account exist updates intergations it
   //validate that account can be use
   if (account.isParent) {
-    return res.status(400).json({ message: 'La cuenta selecciona no puede ser utilizada.' });
+    return res.status(400).json({ message: 'La cuenta selecciona no puede ser utilizada ya que no es asignable' });
   }
 
   try {
     const integrations = await req.conn
       .getRepository('CustomerSetting')
       .createQueryBuilder('c')
-      .select(['c.id', 'ac.id', 'ac.code', 'ac.name'])
+      .select(['c.id', 'ac.id'])
       .where('c.company = :company', { company: req.user.cid })
       .leftJoin('c.accountingCatalog', 'ac')
       .getOne();
@@ -82,7 +68,7 @@ router.put('/integrations', async (req, res) => {
         req.moduleName,
         `${user.names} ${user.lastnames}`,
         user.id,
-        `Se cambio la cuenta contablede la integración`,
+        `Se cambio la configuración de integraciones con clientes`,
       );
 
       return res.json({
@@ -110,7 +96,7 @@ router.put('/integrations', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio la cuenta contablede la integración`,
+      `Se actulizo la configuracion de integración con clientes`,
     );
 
     return res.json({
