@@ -59,11 +59,11 @@ router.put('/integrations', async (req, res) => {
         req.moduleName,
         `${user.names} ${user.lastnames}`,
         user.id,
-        `Se actulizo la configuración de integración con servicios`,
+        `Se actualizo la configuracion de integracion.`,
       );
 
       return res.json({
-        message: 'La integración ha sido actualizada correctamente.',
+        message: 'La configuracion de integración ha sido actualizada correctamente.',
       });
     }
     await req.conn
@@ -87,17 +87,17 @@ router.put('/integrations', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio la cuenta contable de la integración`,
+      `Se agregó la cuenta contable de la integración`,
     );
 
     return res.json({
-      message: 'La integración ha sido agregada correctamente.',
+      message: 'La configuración de integración ha sido agregada correctamente.',
     });
   } catch (error) {
     // return error
     console.error(error);
     return res.status(500).json({
-      message: 'Error al actualizar la integración. Contacta con tu administrador.',
+      message: 'Error al actualizar la configuracion de integración. Contacta con tu administrador.',
     });
   }
 });
@@ -115,7 +115,7 @@ router.get('/integrations', async (req, res) => {
       integrations: { catalog: integrations.accountingCatalog ? integrations.accountingCatalog.id : null },
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Error al obtener las configuracines de integración.' });
+    return res.status(500).json({ message: 'Error al obtener las configuraciones de integración.' });
   }
 });
 
