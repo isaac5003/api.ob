@@ -623,15 +623,15 @@ router.get('/balance-general', async (req, res) => {
             { cargo: 0, abono: 0 },
           );
         add = resacreedora.abono + resdeudora.abono - (resacreedora.cargo + resdeudora.cargo);
+        const current = catalog.find(c =>
+          c.id == (add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost),
+        )
         objaccount = {
-          code: catalog.find(c =>
-            c.id = add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
-          ).code,
-          name: catalog.find(c =>
-            c.id = add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
-          ).name,
+          code: current.code,
+          name: current.name,
           total: parseFloat(add.toFixed(2)),
         };
+        console.log(current, objaccount, balanceGeneral.special)
       }
       return {
         code: s.id,
