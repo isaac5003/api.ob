@@ -631,7 +631,6 @@ router.get('/balance-general', async (req, res) => {
           name: current.name,
           total: parseFloat(add.toFixed(2)),
         };
-        console.log(current, objaccount, balanceGeneral.special)
       }
       return {
         code: s.id,
