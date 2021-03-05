@@ -1,5 +1,6 @@
 const express = require('express');
-const { checkRequired, addLog } = require('../../tools');
+const { checkRequired } = require('../../tools');
+const { parseISO, differenceInMonths } = require('date-fns');
 const router = express.Router();
 
 const configurationExist = async req => {
@@ -44,6 +45,11 @@ router.put('/general', async (req, res) => {
 
   try {
     const { periodStart, peridoEnd } = req.body;
+
+    if (differenceInMonths(parseISO(peridoEnd), parseISO(periodStart)) + 1 != 12) {
+      return res.status(400).json({ message: 'El periodo fiscal debe  contener 12 meses exactos' });
+    }
+
     if (await configurationExist(req)) {
       // Updates
       await req.conn
@@ -65,11 +71,11 @@ router.put('/general', async (req, res) => {
         })
         .execute();
     }
-
     return res.json({
       message: 'Configuracion general del modulo de contabilidad actualizada correctamente.',
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: 'Error al actualizar la configuracion general del modulo de contabilidad.',
     });
