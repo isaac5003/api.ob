@@ -1,6 +1,6 @@
 const { isValid } = require('date-fns');
 
-const checkRequired = function(object, fields, nonrequired = false) {
+const checkRequired = function (object, fields, nonrequired = false) {
   // Define incomplete fields response
 
   // Function to validate types
@@ -110,7 +110,7 @@ const addLog = async (conn, module, userName, userID, detail) => {
       .into('Logger')
       .values({ userID, userName, module, detail })
       .execute();
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const foundRelations = async (conn, table_name, id, exeptions = [], field_name) => {
@@ -358,6 +358,7 @@ module.exports = {
       require('../entities/InvoiceDetail'),
       require('../entities/AccountingSetting'),
       require('../entities/ServiceSetting'),
+      require('../entities/AccountingRegisterType'),
     ],
   },
 };
