@@ -312,17 +312,17 @@ router.put('/integrations', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio la cuenta contable de la integración`,
+      `Se actualizo los datos de integración del modulo de contabilidad`,
     );
 
     return res.json({
-      message: 'La configuración de integración ha sido actualizada correctamente.',
+      message: 'Los datos de integración han sido actualizados correctamente.',
     });
   } catch (error) {
     // return error
     console.log(error);
     return res.status(500).json({
-      message: 'Error al actualizar la integración. Contacta con tu administrador.',
+      message: 'Error al actualizar los datos de la integración. Contacta con tu administrador.',
     });
   }
 });
@@ -331,21 +331,20 @@ router.get('/integrations', async (req, res) => {
     const integrations = await req.conn
       .getRepository('AccountingSetting')
       .createQueryBuilder('as')
-      .select(['as.id', 'ac.id', 'art.id', 'art.name'])
+      .select(['as.id', 'ac.id', 'art.id'])
       .where('as.company = :company', { company: req.user.cid })
       .leftJoin('as.accountingCatalog', 'ac')
       .leftJoin('as.registerType', 'art')
       .getOne();
 
-    console.log(integrations);
     return res.json({
       integrations: {
         catalog: integrations.accountingCatalog ? integrations.accountingCatalog.id : null,
-        registerType: integrations.registerType.id,
+        registerType: integrations.registerType ? integrations.registerType.id : null,
       },
     });
   } catch (error) {
-    return res.status(500).json({ message: 'Error al obtener las configuracines de integración.' });
+    return res.status(500).json({ message: 'Error al obtener las configuraciones de integración.' });
   }
 });
 
