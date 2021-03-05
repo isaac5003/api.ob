@@ -1,64 +1,62 @@
-const { isValid } = require("date-fns");
+const { isValid } = require('date-fns');
 
-const checkRequired = function (object, fields, nonrequired = false) {
+const checkRequired = function(object, fields, nonrequired = false) {
   // Define incomplete fields response
 
   // Function to validate types
   function checkType(value, type) {
     switch (type) {
-      case "date":
+      case 'date':
         const RegDate = /[0-9]{4}-[0-9]{2}-[0-9]{2}/;
         return {
           success: RegDate.test(value) && isValid(new Date(value)),
-          message: "debe ser YYYY-MM-DD",
+          message: 'debe ser YYYY-MM-DD',
         };
-      case "us-phone":
+      case 'us-phone':
         const RegUSPhone = /^[2-9]\d{2}\d{3}\d{4}$/;
         return {
           success: RegUSPhone.test(value),
-          message: "deben ser 10 digitos seguidos de numero de telefono valido",
+          message: 'deben ser 10 digitos seguidos de numero de telefono valido',
         };
-      case "email":
+      case 'email':
         const RegEmail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
         return {
           success: RegEmail.test(value),
-          message: "Debe ser un correo válido.",
+          message: 'Debe ser un correo válido.',
         };
-      case "array":
-        return {
-          success: (Array.isArray(value) || Array.isArray(JSON.parse(value))) && (value.length > 0 || JSON.parse(value).length > 0),
-          message: "Debe ser un arreglo y no estar vacio",
-        };
-      case "object":
+      case 'array':
         return {
           success:
-            !Array.isArray(value) &&
-            typeof value === "object" &&
-            value != null &&
-            Object.keys(value).length > 0,
-          message: "Debe ser un objeto y no estar vacio",
+            (Array.isArray(value) || Array.isArray(JSON.parse(value))) &&
+            (value.length > 0 || JSON.parse(value).length > 0),
+          message: 'Debe ser un arreglo y no estar vacio',
         };
-      case "slug":
+      case 'object':
         return {
-          success: !value.includes(" "),
-          message: "un slug no debe incluir espacios",
+          success: !Array.isArray(value) && typeof value === 'object' && value != null && Object.keys(value).length > 0,
+          message: 'Debe ser un objeto y no estar vacio',
         };
-      case "float":
+      case 'slug':
+        return {
+          success: !value.includes(' '),
+          message: 'un slug no debe incluir espacios',
+        };
+      case 'float':
         const parsedFloat = parseFloat(value);
         return {
           success: value == parsedFloat,
-          message: "debe ser un número flotante.",
+          message: 'debe ser un número flotante.',
         };
-      case "integer":
+      case 'integer':
         const parsedInteger = parseInt(value);
         return {
           success: value == parsedInteger && Number.isInteger(parsedInteger),
-          message: "debe ser un número entero.",
+          message: 'debe ser un número entero.',
         };
-      case "boolean":
+      case 'boolean':
         return {
-          success: value != "true" || value != "false",
-          message: "debe ser un número booleano.",
+          success: value != 'true' || value != 'false',
+          message: 'debe ser un número booleano.',
         };
       default:
         return { success: true };
@@ -69,12 +67,12 @@ const checkRequired = function (object, fields, nonrequired = false) {
   if (Object.keys(object).length == 0) {
     // Check if all fields are not required
     if (nonrequired) return { success: true };
-    return { success: false, message: "Ningún campo recibido." };
+    return { success: false, message: 'Ningún campo recibido.' };
   }
 
   // Loops over all fields
   for (const field of fields) {
-    if (typeof field == "object") {
+    if (typeof field == 'object') {
       // if field field is object
       if (object.hasOwnProperty(field.name)) {
         const checked = checkType(object[field.name], field.type);
@@ -92,8 +90,7 @@ const checkRequired = function (object, fields, nonrequired = false) {
       }
     } else {
       // check if the field is comming in the object provided
-      if (!object.hasOwnProperty(field))
-        return { success: false, message: `El campo '${field}' es requerido.` };
+      if (!object.hasOwnProperty(field)) return { success: false, message: `El campo '${field}' es requerido.` };
     }
   }
   return { success: true };
@@ -104,36 +101,25 @@ const addLog = async (conn, module, userName, userID, detail) => {
     await conn
       .createQueryBuilder()
       .insert()
-      .into("Logger")
+      .into('Logger')
       .values({ userID, userName, module, detail })
       .execute();
-  } catch (error) { }
+  } catch (error) {}
 };
 
-const foundRelations = async (
-  conn,
-  table_name,
-  id,
-  exeptions = [],
-  field_name
-) => {
+const foundRelations = async (conn, table_name, id, exeptions = [], field_name) => {
   // Get a list of tables related to table_name
   let relations = await conn.query(
-    `select table_name from information_schema.table_constraints where constraint_name in (SELECT constraint_name from information_schema.constraint_column_usage where table_name = '${table_name}' and constraint_name like 'FK_%')`
+    `select table_name from information_schema.table_constraints where constraint_name in (SELECT constraint_name from information_schema.constraint_column_usage where table_name = '${table_name}' and constraint_name like 'FK_%')`,
   );
-  relations = relations
-    .map((r) => r.table_name)
-    .filter((r) => !exeptions.includes(r));
+  relations = relations.map(r => r.table_name).filter(r => !exeptions.includes(r));
 
   // created a subquery for each table found
   const subquery = [];
   for (const r of relations) {
-    subquery.push(
-      `select count(*) from ${r} where "${field_name ? field_name : table_name
-      }Id" = '${id}'`
-    );
+    subquery.push(`select count(*) from ${r} where "${field_name ? field_name : table_name}Id" = '${id}'`);
   }
-  let result = await conn.query(subquery.join(" union all "));
+  let result = await conn.query(subquery.join(' union all '));
   return result == null ? false : result.reduce((a, b) => a + b.count, 0) > 0;
 };
 
@@ -143,65 +129,49 @@ const numeroALetras = (num, currency) => {
     numero: num,
     enteros: Math.floor(num),
     centavos: Math.round(num * 100) - Math.floor(num) * 100,
-    letrasCentavos: "",
-    letrasMonedaPlural: currency.plural || "DOLARES",
-    letrasMonedaSingular: currency.singular || "DOLAR",
-    letrasMonedaCentavoPlural: currency.centPlural || "CENTAVOS",
-    letrasMonedaCentavoSingular: currency.centSingular || "CENTAVO",
+    letrasCentavos: '',
+    letrasMonedaPlural: currency.plural || 'DOLARES',
+    letrasMonedaSingular: currency.singular || 'DOLAR',
+    letrasMonedaCentavoPlural: currency.centPlural || 'CENTAVOS',
+    letrasMonedaCentavoSingular: currency.centSingular || 'CENTAVO',
   };
 
   if (data.centavos == 100) {
-    data.letrasCentavos = "00/100";
+    data.letrasCentavos = '00/100';
     data.enteros++;
   } else if (data.centavos > 0) {
-    data.letrasCentavos = `${data.centavos.toString().length == 1 ? "0" : ""}${data.centavos
-      }/100`;
+    data.letrasCentavos = `${data.centavos.toString().length == 1 ? '0' : ''}${data.centavos}/100`;
   } else {
-    data.letrasCentavos = "00/100";
+    data.letrasCentavos = '00/100';
   }
 
-  if (data.enteros == 0)
-    return "CERO " + data.letrasMonedaPlural + " " + data.letrasCentavos;
-  if (data.enteros == 1)
-    return (
-      Millones(data.enteros) +
-      " " +
-      data.letrasMonedaSingular +
-      " " +
-      data.letrasCentavos
-    );
-  else
-    return (
-      Millones(data.enteros) +
-      " " +
-      data.letrasMonedaPlural +
-      " " +
-      data.letrasCentavos
-    );
+  if (data.enteros == 0) return 'CERO ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
+  if (data.enteros == 1) return Millones(data.enteros) + ' ' + data.letrasMonedaSingular + ' ' + data.letrasCentavos;
+  else return Millones(data.enteros) + ' ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
 
   function Unidades(num) {
     switch (num) {
       case 1:
-        return "UN";
+        return 'UN';
       case 2:
-        return "DOS";
+        return 'DOS';
       case 3:
-        return "TRES";
+        return 'TRES';
       case 4:
-        return "CUATRO";
+        return 'CUATRO';
       case 5:
-        return "CINCO";
+        return 'CINCO';
       case 6:
-        return "SEIS";
+        return 'SEIS';
       case 7:
-        return "SIETE";
+        return 'SIETE';
       case 8:
-        return "OCHO";
+        return 'OCHO';
       case 9:
-        return "NUEVE";
+        return 'NUEVE';
     }
 
-    return "";
+    return '';
   }
 
   function Decenas(num) {
@@ -212,48 +182,48 @@ const numeroALetras = (num, currency) => {
       case 1:
         switch (unidad) {
           case 0:
-            return "DIEZ";
+            return 'DIEZ';
           case 1:
-            return "ONCE";
+            return 'ONCE';
           case 2:
-            return "DOCE";
+            return 'DOCE';
           case 3:
-            return "TRECE";
+            return 'TRECE';
           case 4:
-            return "CATORCE";
+            return 'CATORCE';
           case 5:
-            return "QUINCE";
+            return 'QUINCE';
           default:
-            return "DIECI" + Unidades(unidad);
+            return 'DIECI' + Unidades(unidad);
         }
       case 2:
         switch (unidad) {
           case 0:
-            return "VEINTE";
+            return 'VEINTE';
           default:
-            return "VEINTI" + Unidades(unidad);
+            return 'VEINTI' + Unidades(unidad);
         }
       case 3:
-        return DecenasY("TREINTA", unidad);
+        return DecenasY('TREINTA', unidad);
       case 4:
-        return DecenasY("CUARENTA", unidad);
+        return DecenasY('CUARENTA', unidad);
       case 5:
-        return DecenasY("CINCUENTA", unidad);
+        return DecenasY('CINCUENTA', unidad);
       case 6:
-        return DecenasY("SESENTA", unidad);
+        return DecenasY('SESENTA', unidad);
       case 7:
-        return DecenasY("SETENTA", unidad);
+        return DecenasY('SETENTA', unidad);
       case 8:
-        return DecenasY("OCHENTA", unidad);
+        return DecenasY('OCHENTA', unidad);
       case 9:
-        return DecenasY("NOVENTA", unidad);
+        return DecenasY('NOVENTA', unidad);
       case 0:
         return Unidades(unidad);
     }
   } //Unidades()
 
   function DecenasY(strSin, numUnidades) {
-    if (numUnidades > 0) return strSin + " Y " + Unidades(numUnidades);
+    if (numUnidades > 0) return strSin + ' Y ' + Unidades(numUnidades);
 
     return strSin;
   } //DecenasY()
@@ -264,24 +234,24 @@ const numeroALetras = (num, currency) => {
 
     switch (centenas) {
       case 1:
-        if (decenas > 0) return "CIENTO " + Decenas(decenas);
-        return "CIEN";
+        if (decenas > 0) return 'CIENTO ' + Decenas(decenas);
+        return 'CIEN';
       case 2:
-        return "DOSCIENTOS " + Decenas(decenas);
+        return 'DOSCIENTOS ' + Decenas(decenas);
       case 3:
-        return "TRESCIENTOS " + Decenas(decenas);
+        return 'TRESCIENTOS ' + Decenas(decenas);
       case 4:
-        return "CUATROCIENTOS " + Decenas(decenas);
+        return 'CUATROCIENTOS ' + Decenas(decenas);
       case 5:
-        return "QUINIENTOS " + Decenas(decenas);
+        return 'QUINIENTOS ' + Decenas(decenas);
       case 6:
-        return "SEISCIENTOS " + Decenas(decenas);
+        return 'SEISCIENTOS ' + Decenas(decenas);
       case 7:
-        return "SETECIENTOS " + Decenas(decenas);
+        return 'SETECIENTOS ' + Decenas(decenas);
       case 8:
-        return "OCHOCIENTOS " + Decenas(decenas);
+        return 'OCHOCIENTOS ' + Decenas(decenas);
       case 9:
-        return "NOVECIENTOS " + Decenas(decenas);
+        return 'NOVECIENTOS ' + Decenas(decenas);
     }
 
     return Decenas(decenas);
@@ -291,13 +261,13 @@ const numeroALetras = (num, currency) => {
     var cientos = Math.floor(num / divisor);
     var resto = num - cientos * divisor;
 
-    var letras = "";
+    var letras = '';
 
     if (cientos > 0)
-      if (cientos > 1) letras = Centenas(cientos) + " " + strPlural;
+      if (cientos > 1) letras = Centenas(cientos) + ' ' + strPlural;
       else letras = strSingular;
 
-    if (resto > 0) letras += "";
+    if (resto > 0) letras += '';
 
     return letras;
   } //Seccion()
@@ -307,12 +277,12 @@ const numeroALetras = (num, currency) => {
     var cientos = Math.floor(num / divisor);
     var resto = num - cientos * divisor;
 
-    var strMiles = Seccion(num, divisor, "UN MIL", "MIL");
+    var strMiles = Seccion(num, divisor, 'UN MIL', 'MIL');
     var strCentenas = Centenas(resto);
 
-    if (strMiles == "") return strCentenas;
+    if (strMiles == '') return strCentenas;
 
-    return strMiles + " " + strCentenas;
+    return strMiles + ' ' + strCentenas;
   } //Miles()
 
   function Millones(num) {
@@ -320,26 +290,24 @@ const numeroALetras = (num, currency) => {
     var cientos = Math.floor(num / divisor);
     var resto = num - cientos * divisor;
 
-    var strMillones = Seccion(num, divisor, "UN MILLON DE", "MILLONES DE");
+    var strMillones = Seccion(num, divisor, 'UN MILLON DE', 'MILLONES DE');
     var strMiles = Miles(resto);
 
-    if (strMillones == "") return strMiles;
+    if (strMillones == '') return strMiles;
 
-    return strMillones + " " + strMiles;
+    return strMillones + ' ' + strMiles;
   } //Millones()
 };
 
 module.exports = {
-  access_key:
-    "mDsDkZcsjnux*bOBRfBaf%LN8sMkxf*2s7QSvUD1$RIlDJn0&GclG5#8BRV$KNqW4Zx@jo8j4sK7bmtPHqUTjD^rvc^%eIhdh4W",
-  refresh_key:
-    "mDsDkZcsjnux*bOBRfBaf%LN8sMkxf*2s7QSvUD1$RIlDJn0&GclG5#8BRV$KNqW4Zx@jo8j4sK7bmtPHqUTjD^rvc^%eIhdh4W",
+  access_key: 'mDsDkZcsjnux*bOBRfBaf%LN8sMkxf*2s7QSvUD1$RIlDJn0&GclG5#8BRV$KNqW4Zx@jo8j4sK7bmtPHqUTjD^rvc^%eIhdh4W',
+  refresh_key: 'mDsDkZcsjnux*bOBRfBaf%LN8sMkxf*2s7QSvUD1$RIlDJn0&GclG5#8BRV$KNqW4Zx@jo8j4sK7bmtPHqUTjD^rvc^%eIhdh4W',
   checkRequired,
   addLog,
   foundRelations,
   numeroALetras,
   connection: {
-    type: "postgres",
+    type: 'postgres',
     host: process.env.POSTGRES_HOST,
     port: process.env.POSTGRES_PORT,
     username: process.env.POSTGRES_USER,
@@ -348,41 +316,43 @@ module.exports = {
     synchronize: true,
     logging: false,
     entities: [
-      require("../entities/Token"),
-      require("../entities/Country"),
-      require("../entities/State"),
-      require("../entities/City"),
-      require("../entities/User"),
-      require("../entities/Profile"),
-      require("../entities/Gender"),
-      require("../entities/Logger"),
-      require("../entities/Module"),
-      require("../entities/CompanyType"),
-      require("../entities/NaturalType"),
-      require("../entities/TaxerType"),
-      require("../entities/Company"),
-      require("../entities/Branch"),
-      require("../entities/Access"),
-      require("../entities/SellingType"),
-      require("../entities/Service"),
-      require("../entities/Customer"),
-      require("../entities/CustomerBranch"),
-      require("../entities/CustomerType"),
-      require("../entities/CustomerTypeNatural"),
-      require("../entities/CustomerTaxerType"),
-      require("../entities/InvoicesStatus"),
-      require("../entities/InvoicesZone"),
-      require("../entities/AccountingEntryType"),
-      require("../entities/AccountingCatalog"),
-      require("../entities/AccountingEntryDetail"),
-      require("../entities/AccountingEntry"),
-      require("../entities/InvoicesSeller"),
-      require("../entities/InvoicesDocumentType"),
-      require("../entities/InvoicesPaymentsCondition"),
-      require("../entities/InvoicesDocument"),
-      require("../entities/Invoice"),
-      require("../entities/InvoiceDetail"),
-      require("../entities/AccountingSetting"),
+      require('../entities/Token'),
+      require('../entities/Country'),
+      require('../entities/State'),
+      require('../entities/City'),
+      require('../entities/User'),
+      require('../entities/Profile'),
+      require('../entities/Gender'),
+      require('../entities/Logger'),
+      require('../entities/Module'),
+      require('../entities/CompanyType'),
+      require('../entities/NaturalType'),
+      require('../entities/TaxerType'),
+      require('../entities/Company'),
+      require('../entities/Branch'),
+      require('../entities/Access'),
+      require('../entities/SellingType'),
+      require('../entities/Service'),
+      require('../entities/Customer'),
+      require('../entities/CustomerBranch'),
+      require('../entities/CustomerType'),
+      require('../entities/CustomerTypeNatural'),
+      require('../entities/CustomerTaxerType'),
+      require('../entities/InvoicesStatus'),
+      require('../entities/InvoicesZone'),
+      require('../entities/AccountingEntryType'),
+      require('../entities/AccountingCatalog'),
+      require('../entities/AccountingEntryDetail'),
+      require('../entities/AccountingEntry'),
+      require('../entities/InvoicesSeller'),
+      require('../entities/InvoicesDocumentType'),
+      require('../entities/InvoicesPaymentsCondition'),
+      require('../entities/InvoicesDocument'),
+      require('../entities/Invoice'),
+      require('../entities/InvoiceDetail'),
+      require('../entities/AccountingSetting'),
+
+      require('../entities/AccountingRegisterType'),
     ],
   },
 };
