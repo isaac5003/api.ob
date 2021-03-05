@@ -625,10 +625,10 @@ router.get('/balance-general', async (req, res) => {
         add = resacreedora.abono + resdeudora.abono - (resacreedora.cargo + resdeudora.cargo);
         objaccount = {
           code: catalog.find(c =>
-            c.id == add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
+            c.id = add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
           ).code,
           name: catalog.find(c =>
-            c.id == add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
+            c.id = add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost,
           ).name,
           total: parseFloat(add.toFixed(2)),
         };
