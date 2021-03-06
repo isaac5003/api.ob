@@ -290,5 +290,88 @@ router.delete('/:id', async (req, res) => {
     });
   }
 });
+router.put('/:id/integrations', async (req, res) => {
+  // Check required field
+  const check = checkRequired(req.body, [{ name: 'accountingCatalog', optional: false }]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  // Get field
+  const { accountingCatalog } = req.body;
+
+  // Get account
+  const account = await req.conn
+    .getRepository('AccountingCatalog')
+    .createQueryBuilder('ac')
+    .where('ac.company = :company', { company: req.user.cid })
+    .andWhere('ac.id  = :id', { id: accountingCatalog })
+    .getOne();
+
+  // If no exist
+  if (!account) {
+    return res.status(400).json({ message: 'La cuenta selecciona no existe.' });
+  }
+
+  // If account exist updates intergations it
+  //validate that account can be use
+  if (account.isParent) {
+    return res.status(400).json({ message: 'La cuenta selecciona no puede ser utilizada ya que no es asignable' });
+  }
+
+  try {
+    // return success
+    await req.conn
+      .createQueryBuilder()
+      .update('Service')
+      .set({ accountingCatalog: account.id })
+      .where('id = :id', { id: req.params.id })
+      .execute();
+
+    const user = await req.conn
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se cambio la cuenta contable: ${account.id} integrada con el servicio ${req.params.id}`,
+    );
+
+    return res.json({
+      message: 'La integración con el servicio ha sido actualizada correctamente.',
+    });
+  } catch (error) {
+    // return error
+    return res.status(500).json({
+      message: 'Error al actualizar la integración. Contacta con tu administrador.',
+    });
+  }
+});
+router.get('/:id/integrations', async (req, res) => {
+  try {
+    const service = await req.conn
+      .getRepository('Service')
+      .createQueryBuilder('c')
+      .select(['c.id', 'ac.id'])
+      .where('c.company = :company', { company: req.user.cid })
+      .andWhere('c.id = :id', { id: req.params.id })
+      .leftJoin('c.accountingCatalog', 'ac')
+      .getOne();
+
+    if (!service) {
+      return res.status(400).json({ message: 'El servicio seleccionado no existe.' });
+    }
+
+    return res.json({ integrations: { catalog: service.accountingCatalog ? service.accountingCatalog.id : null } });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error al obtener el servicio seleccionado.' });
+  }
+});
 
 module.exports = router;

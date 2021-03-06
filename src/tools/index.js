@@ -1,6 +1,6 @@
 const { isValid } = require('date-fns');
 
-const checkRequired = function(object, fields, nonrequired = false) {
+const checkRequired = function (object, fields, nonrequired = false) {
   // Define incomplete fields response
 
   // Function to validate types
@@ -23,6 +23,12 @@ const checkRequired = function(object, fields, nonrequired = false) {
         return {
           success: RegEmail.test(value),
           message: 'Debe ser un correo válido.',
+        };
+      case 'uuid':
+        const RegUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        return {
+          success: RegUUID.test(value),
+          message: 'Debe ser un uuid válido.',
         };
       case 'array':
         return {
@@ -104,7 +110,7 @@ const addLog = async (conn, module, userName, userID, detail) => {
       .into('Logger')
       .values({ userID, userName, module, detail })
       .execute();
-  } catch (error) {}
+  } catch (error) { }
 };
 
 const foundRelations = async (conn, table_name, id, exeptions = [], field_name) => {
@@ -351,8 +357,9 @@ module.exports = {
       require('../entities/Invoice'),
       require('../entities/InvoiceDetail'),
       require('../entities/AccountingSetting'),
-
       require('../entities/CustomerSetting'),
+      require('../entities/ServiceSetting'),
+      require('../entities/AccountingRegisterType'),
     ],
   },
 };
