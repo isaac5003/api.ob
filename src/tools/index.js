@@ -357,6 +357,7 @@ module.exports = {
       require('../entities/Invoice'),
       require('../entities/InvoiceDetail'),
       require('../entities/AccountingSetting'),
+      require('../entities/CustomerSetting'),
       require('../entities/ServiceSetting'),
       require('../entities/AccountingRegisterType'),
     ],
