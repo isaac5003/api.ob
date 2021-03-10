@@ -1,33 +1,28 @@
-const express = require("express");
-const { format } = require("date-fns");
-const {
-  checkRequired,
-  addLog,
-  numeroALetras,
-  foundRelations,
-} = require("../../tools");
+const express = require('express');
+const { format } = require('date-fns');
+const { checkRequired, addLog, numeroALetras, foundRelations } = require('../../tools');
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const check = checkRequired(
     req.query,
     [
-      { name: "limit", type: "integer", optional: true },
-      { name: "page", type: "integer", optional: true },
-      { name: "search", type: "string", optional: true },
-      { name: "documentType", type: "integer", optional: true },
-      { name: "customer", type: "string", optional: true },
-      { name: "seller", type: "string", optional: true },
-      { name: "zone", type: "string", optional: true },
-      { name: "service", type: "string", optional: true },
-      { name: "status", type: "integer", optional: true },
-      { name: "startDate", type: "date", optional: true },
-      { name: "endDate", type: "date", optional: true },
-      { name: "service", type: "string", optional: true },
-      { name: "prop", type: "string", optional: true },
-      { name: "order", type: "string", optional: true },
+      { name: 'limit', type: 'integer', optional: true },
+      { name: 'page', type: 'integer', optional: true },
+      { name: 'search', type: 'string', optional: true },
+      { name: 'documentType', type: 'integer', optional: true },
+      { name: 'customer', type: 'string', optional: true },
+      { name: 'seller', type: 'string', optional: true },
+      { name: 'zone', type: 'string', optional: true },
+      { name: 'service', type: 'string', optional: true },
+      { name: 'status', type: 'integer', optional: true },
+      { name: 'startDate', type: 'date', optional: true },
+      { name: 'endDate', type: 'date', optional: true },
+      { name: 'service', type: 'string', optional: true },
+      { name: 'prop', type: 'string', optional: true },
+      { name: 'order', type: 'string', optional: true },
     ],
-    true
+    true,
   );
   if (!check.success) {
     return res.status(400).json({ message: check.message });
@@ -53,254 +48,244 @@ router.get("/", async (req, res) => {
 
     // Obtiene el total de facturas
     let query = req.conn
-      .getRepository("Invoice")
-      .createQueryBuilder("i")
-      .select("COUNT(i.id)", "count")
-      .leftJoin("i.documentType", "dt")
-      .leftJoin("i.customer", "cu")
-      .leftJoin("i.invoicesSeller", "sl")
-      .leftJoin("i.invoicesZone", "zo")
-      .leftJoin("i.status", "st")
-      .leftJoin("i.details", "d")
-      .leftJoin("d.service", "s")
-      .where("i.company = :company", { company: cid });
+      .getRepository('Invoice')
+      .createQueryBuilder('i')
+      .select('COUNT(i.id)', 'count')
+      .leftJoin('i.documentType', 'dt')
+      .leftJoin('i.customer', 'cu')
+      .leftJoin('i.invoicesSeller', 'sl')
+      .leftJoin('i.invoicesZone', 'zo')
+      .leftJoin('i.status', 'st')
+      .leftJoin('i.details', 'd')
+      .leftJoin('d.service', 's')
+      .where('i.company = :company', { company: cid });
 
     if (documentType) {
-      query = query.andWhere("dt.id = :documentType", { documentType });
+      query = query.andWhere('dt.id = :documentType', { documentType });
     }
     if (customer) {
-      query = query.andWhere("cu.id = :customer", { customer });
+      query = query.andWhere('cu.id = :customer', { customer });
     }
     if (seller) {
-      query = query.andWhere("sl.id = :seller", { seller });
+      query = query.andWhere('sl.id = :seller', { seller });
     }
     if (zone) {
-      query = query.andWhere("zo.id = :zone", { zone });
+      query = query.andWhere('zo.id = :zone', { zone });
     }
     if (status) {
-      query = query.andWhere("st.id = :status", { status });
+      query = query.andWhere('st.id = :status', { status });
     }
     if (service) {
-      query = query.andWhere("s.id = :service", { service });
+      query = query.andWhere('s.id = :service', { service });
     }
     if (startDate && endDate) {
-      query = query.andWhere("i.invoiceDate >= :startDate", {
+      query = query.andWhere('i.invoiceDate >= :startDate', {
         startDate,
       });
-      query = query.andWhere("i.invoiceDate <= :endDate", { endDate });
+      query = query.andWhere('i.invoiceDate <= :endDate', { endDate });
     }
 
     let { count } = await query.getRawOne();
 
     let invoices = req.conn
-      .getRepository("Invoice")
-      .createQueryBuilder("i")
+      .getRepository('Invoice')
+      .createQueryBuilder('i')
       .select([
-        "i.id",
-        "i.authorization",
-        "i.sequence",
-        "i.invoiceDate",
-        "i.ventaTotal",
-        "i.customerName",
-        "st.id",
-        "st.name",
-        "dt.id",
-        "dt.name",
-        "dt.code",
+        'i.id',
+        'i.authorization',
+        'i.sequence',
+        'i.invoiceDate',
+        'i.ventaTotal',
+        'i.customerName',
+        'i.createdAt',
+        'st.id',
+        'st.name',
+        'dt.id',
+        'dt.name',
+        'dt.code',
       ])
-      .leftJoin("i.documentType", "dt")
-      .leftJoin("i.customer", "cu")
-      .leftJoin("i.invoicesSeller", "sl")
-      .leftJoin("i.invoicesZone", "zo")
-      .leftJoin("i.status", "st")
-      .leftJoin("i.details", "d")
-      .leftJoin("d.service", "s")
-      .where("i.company = :company", { company: cid });
+      .leftJoin('i.documentType', 'dt')
+      .leftJoin('i.customer', 'cu')
+      .leftJoin('i.invoicesSeller', 'sl')
+      .leftJoin('i.invoicesZone', 'zo')
+      .leftJoin('i.status', 'st')
+      .leftJoin('i.details', 'd')
+      .leftJoin('d.service', 's')
+      .where('i.company = :company', { company: cid });
 
     if (prop && order) {
-      invoices = invoices.orderBy(
-        `i.${prop}`,
-        order == "ascending" ? "ASC" : "DESC"
-      );
+      invoices = invoices.orderBy(`i.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
     } else {
-      invoices = invoices.orderBy("i.createdAt", "DESC");
+      invoices = invoices.orderBy('i.createdAt', 'DESC');
     }
 
     let index = 1;
     if (!search) {
-      invoices = invoices
-        .limit(limit)
-        .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      invoices = invoices.take(limit).skip(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
       index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (documentType) {
-      invoices = invoices.andWhere("dt.id = :documentType", { documentType });
+      invoices = invoices.andWhere('dt.id = :documentType', { documentType });
     }
     if (customer) {
-      invoices = invoices.andWhere("cu.id = :customer", { customer });
+      invoices = invoices.andWhere('cu.id = :customer', { customer });
     }
     if (seller) {
-      invoices = invoices.andWhere("sl.id = :seller", { seller });
+      invoices = invoices.andWhere('sl.id = :seller', { seller });
     }
     if (zone) {
-      invoices = invoices.andWhere("zo.id = :zone", { zone });
+      invoices = invoices.andWhere('zo.id = :zone', { zone });
     }
     if (status) {
-      invoices = invoices.andWhere("st.id = :status", { status });
+      invoices = invoices.andWhere('st.id = :status', { status });
     }
     if (service) {
-      invoices = invoices.andWhere("s.id = :service", { service });
+      invoices = invoices.andWhere('s.id = :service', { service });
     }
     if (startDate && endDate) {
-      invoices = invoices.andWhere("i.invoiceDate >= :startDate", {
+      invoices = invoices.andWhere('i.invoiceDate >= :startDate', {
         startDate,
       });
-      invoices = invoices.andWhere("i.invoiceDate <= :endDate", { endDate });
+      invoices = invoices.andWhere('i.invoiceDate <= :endDate', { endDate });
     }
     invoices = await invoices.getMany();
 
     if (search != null) {
       invoices = invoices.filter(
-        (s) =>
+        s =>
           s.authorization.toLowerCase().includes(search) ||
           s.sequence.toLowerCase().includes(search) ||
-          format(new Date(s.invoiceDate), "dd/MM/yyyy")
+          format(new Date(s.invoiceDate), 'dd/MM/yyyy')
             .toLowerCase()
             .includes(search) ||
           s.customerName.toLowerCase().includes(search) ||
           s.customerName.toLowerCase().includes(search) ||
-          s.ventaTotal.toString().includes(search)
+          s.ventaTotal.toString().includes(search),
       );
       count = invoices.length;
     }
 
     return res.json({
       count,
-      invoices: invoices.map((i) => {
+      invoices: invoices.map(i => {
+        delete i.createdAt;
         return {
           index: index++,
           ...i,
           invoiceRawDate: i.invoiceDate,
-          invoiceDate: format(new Date(i.invoiceDate), "dd/MM/yyyy"),
+          invoiceDate: format(new Date(i.invoiceDate), 'dd/MM/yyyy'),
         };
       }),
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error al obtener el listado de ventas." });
+    console.error(error);
+    return res.status(500).json({ message: 'Error al obtener el listado de ventas.' });
   }
 });
 
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const invoice = await req.conn
-      .getRepository("Invoice")
-      .createQueryBuilder("i")
+      .getRepository('Invoice')
+      .createQueryBuilder('i')
       .select([
-        "i.id",
-        "i.authorization",
-        "i.sequence",
-        "i.invoiceDate",
-        "i.customerName",
-        "i.customerAddress1",
-        "i.customerAddress2",
-        "i.customerCountry",
-        "i.customerState",
-        "i.customerCity",
-        "i.customerDui",
-        "i.customerNit",
-        "i.customerNrc",
-        "i.customerGiro",
-        "i.paymentConditionName",
-        "i.sellerName",
-        "i.zoneName",
-        "i.sum",
-        "i.iva",
-        "i.subtotal",
-        "i.ivaRetenido",
-        "i.ventasExentas",
-        "i.ventasNoSujetas",
-        "i.ventaTotal",
-        "i.ventaTotalText",
-        "i.printedDate",
-        "d.id",
-        "d.chargeDescription",
-        "d.quantity",
-        "d.unitPrice",
-        "d.incTax",
-        "d.ventaPrice",
-        "dsv.id",
-        "dsv.name",
-        "dst.id",
-        "dst.name",
-        "c.id",
-        "c.name",
-        "cb.id",
-        "cb.name",
-        "ct.id",
-        "ct.name",
-        "ctn.id",
-        "ctn.name",
-        "dt.id",
-        "dt.name",
-        "dt.code",
-        "ipc.id",
-        "ipc.name",
-        "is.id",
-        "is.name",
-        "iz.id",
-        "iz.name",
-        "s.id",
-        "s.name",
+        'i.id',
+        'i.authorization',
+        'i.sequence',
+        'i.invoiceDate',
+        'i.customerName',
+        'i.customerAddress1',
+        'i.customerAddress2',
+        'i.customerCountry',
+        'i.customerState',
+        'i.customerCity',
+        'i.customerDui',
+        'i.customerNit',
+        'i.customerNrc',
+        'i.customerGiro',
+        'i.paymentConditionName',
+        'i.sellerName',
+        'i.zoneName',
+        'i.sum',
+        'i.iva',
+        'i.subtotal',
+        'i.ivaRetenido',
+        'i.ventasExentas',
+        'i.ventasNoSujetas',
+        'i.ventaTotal',
+        'i.ventaTotalText',
+        'i.printedDate',
+        'd.id',
+        'd.chargeDescription',
+        'd.quantity',
+        'd.unitPrice',
+        'd.incTax',
+        'd.ventaPrice',
+        'dsv.id',
+        'dsv.name',
+        'dst.id',
+        'dst.name',
+        'c.id',
+        'c.name',
+        'cb.id',
+        'cb.name',
+        'ct.id',
+        'ct.name',
+        'ctn.id',
+        'ctn.name',
+        'dt.id',
+        'dt.name',
+        'dt.code',
+        'ipc.id',
+        'ipc.name',
+        'is.id',
+        'is.name',
+        'iz.id',
+        'iz.name',
+        's.id',
+        's.name',
       ])
-      .where("i.company = :company", { company: req.user.cid })
-      .andWhere("i.id = :id", { id: req.params.id })
-      .leftJoin("i.details", "d")
-      .leftJoin("d.service", "dsv")
-      .leftJoin("d.sellingType", "dst")
-      .leftJoin("i.customer", "c")
-      .leftJoin("i.customerBranch", "cb")
-      .leftJoin("i.customerType", "ct")
-      .leftJoin("i.customerTypeNatural", "ctn")
-      .leftJoin("i.documentType", "dt")
-      .leftJoin("i.invoicesPaymentsCondition", "ipc")
-      .leftJoin("i.invoicesSeller", "is")
-      .leftJoin("i.invoicesZone", "iz")
-      .leftJoin("i.status", "s")
+      .where('i.company = :company', { company: req.user.cid })
+      .andWhere('i.id = :id', { id: req.params.id })
+      .leftJoin('i.details', 'd')
+      .leftJoin('d.service', 'dsv')
+      .leftJoin('d.sellingType', 'dst')
+      .leftJoin('i.customer', 'c')
+      .leftJoin('i.customerBranch', 'cb')
+      .leftJoin('i.customerType', 'ct')
+      .leftJoin('i.customerTypeNatural', 'ctn')
+      .leftJoin('i.documentType', 'dt')
+      .leftJoin('i.invoicesPaymentsCondition', 'ipc')
+      .leftJoin('i.invoicesSeller', 'is')
+      .leftJoin('i.invoicesZone', 'iz')
+      .leftJoin('i.status', 's')
       .getOne();
 
     if (!invoice) {
-      return res
-        .status(400)
-        .json({ message: "La venta seleccionada no existe." });
+      return res.status(400).json({ message: 'La venta seleccionada no existe.' });
     }
 
     return res.json({
       invoice: {
         ...invoice,
         invoiceRawDate: invoice.invoiceDate,
-        invoiceDate: format(new Date(invoice.invoiceDate), "dd/MM/yyyy"),
+        invoiceDate: format(new Date(invoice.invoiceDate), 'dd/MM/yyyy'),
         printedRawDate: invoice.printedDate,
-        printedDate: invoice.printedDate
-          ? format(new Date(invoice.printedDate), "dd/MM/yyyy")
-          : null,
+        printedDate: invoice.printedDate ? format(new Date(invoice.printedDate), 'dd/MM/yyyy') : null,
       },
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error al obtener La venta seleccionada." });
+    return res.status(500).json({ message: 'Error al obtener La venta seleccionada.' });
   }
 });
 
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   // valida los objetos header y details
   const check = checkRequired(req.body, [
-    { name: "header", type: "object", optional: false },
-    { name: "details", type: "array", optional: false },
+    { name: 'header', type: 'object', optional: false },
+    { name: 'details', type: 'array', optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
@@ -308,21 +293,21 @@ router.post("/", async (req, res) => {
 
   // valida el objeto header
   const checkHeader = checkRequired(req.body.header, [
-    { name: "customer", optional: false },
-    { name: "customerBranch", optional: false },
-    { name: "invoicesSeller", optional: false },
-    { name: "invoicesPaymentsCondition", optional: false },
-    { name: "documentType", type: "integer", optional: false },
-    { name: "authorization", type: "string", optional: false },
-    { name: "sequence", type: "integer", optional: false },
-    { name: "invoiceDate", type: "date", optional: false },
-    { name: "sum", type: "float", optional: false },
-    { name: "iva", type: "float", optional: false },
-    { name: "subtotal", type: "float", optional: false },
-    { name: "ivaRetenido", type: "float", optional: false },
-    { name: "ventasExentas", type: "float", optional: false },
-    { name: "ventasNoSujetas", type: "float", optional: false },
-    { name: "ventaTotal", type: "float", optional: false },
+    { name: 'customer', optional: false },
+    { name: 'customerBranch', optional: false },
+    { name: 'invoicesSeller', optional: false },
+    { name: 'invoicesPaymentsCondition', optional: false },
+    { name: 'documentType', type: 'integer', optional: false },
+    { name: 'authorization', type: 'string', optional: false },
+    { name: 'sequence', type: 'integer', optional: false },
+    { name: 'invoiceDate', type: 'date', optional: false },
+    { name: 'sum', type: 'float', optional: false },
+    { name: 'iva', type: 'float', optional: false },
+    { name: 'subtotal', type: 'float', optional: false },
+    { name: 'ivaRetenido', type: 'float', optional: false },
+    { name: 'ventasExentas', type: 'float', optional: false },
+    { name: 'ventasNoSujetas', type: 'float', optional: false },
+    { name: 'ventaTotal', type: 'float', optional: false },
   ]);
   if (!checkHeader.success) {
     return res.status(400).json({ message: checkHeader.message });
@@ -330,12 +315,12 @@ router.post("/", async (req, res) => {
   // valida el objeto details
   for (const details of req.body.details) {
     const checkDetails = checkRequired(details, [
-      { name: "service", optional: false },
-      { name: "chargeDescription", optional: false },
-      { name: "quantity", type: "float", optional: false },
-      { name: "unitPrice", type: "float", optional: false },
-      { name: "incTax", type: "boolean", optional: false },
-      { name: "ventaPrice", type: "float", optional: false },
+      { name: 'service', optional: false },
+      { name: 'chargeDescription', optional: false },
+      { name: 'quantity', type: 'float', optional: false },
+      { name: 'unitPrice', type: 'float', optional: false },
+      { name: 'incTax', type: 'boolean', optional: false },
+      { name: 'ventaPrice', type: 'float', optional: false },
     ]);
     if (!checkDetails.success) {
       return res.status(400).json({ message: checkDetails.message });
@@ -345,76 +330,76 @@ router.post("/", async (req, res) => {
   const { header, details } = req.body;
 
   const document = await req.conn
-    .getRepository("InvoicesDocument")
-    .createQueryBuilder("id")
-    .where("id.company = :company", { company: req.user.cid })
-    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+    .getRepository('InvoicesDocument')
+    .createQueryBuilder('id')
+    .where('id.company = :company', { company: req.user.cid })
+    .andWhere('id.isCurrentDocument = :isCurrentDocument', {
       isCurrentDocument: true,
     })
-    .andWhere("dt.id = :documentType", { documentType: header.documentType })
-    .leftJoin("id.documentType", "dt")
+    .andWhere('dt.id = :documentType', { documentType: header.documentType })
+    .leftJoin('id.documentType', 'dt')
     .getOne();
 
   const customer = await req.conn
-    .getRepository("Customer")
-    .createQueryBuilder("c")
-    .where("c.company = :company", { company: req.user.cid })
-    .andWhere("c.id = :id", { id: header.customer })
-    .leftJoinAndSelect("c.customerType", "ct")
-    .leftJoinAndSelect("c.customerTypeNatural", "ctn")
+    .getRepository('Customer')
+    .createQueryBuilder('c')
+    .where('c.company = :company', { company: req.user.cid })
+    .andWhere('c.id = :id', { id: header.customer })
+    .leftJoinAndSelect('c.customerType', 'ct')
+    .leftJoinAndSelect('c.customerTypeNatural', 'ctn')
     .getOne();
 
   const branch = await req.conn
-    .getRepository("CustomerBranch")
-    .createQueryBuilder("cb")
-    .where("cb.customer = :customer", { customer: header.customer })
-    .andWhere("cb.id = :id", { id: header.customerBranch })
-    .leftJoinAndSelect("cb.country", "co")
-    .leftJoinAndSelect("cb.state", "st")
-    .leftJoinAndSelect("cb.city", "ci")
+    .getRepository('CustomerBranch')
+    .createQueryBuilder('cb')
+    .where('cb.customer = :customer', { customer: header.customer })
+    .andWhere('cb.id = :id', { id: header.customerBranch })
+    .leftJoinAndSelect('cb.country', 'co')
+    .leftJoinAndSelect('cb.state', 'st')
+    .leftJoinAndSelect('cb.city', 'ci')
     .getOne();
 
   const condition = await req.conn
-    .getRepository("InvoicesPaymentsCondition")
-    .createQueryBuilder("pc")
-    .where("pc.company = :company", { company: req.user.cid })
-    .andWhere("pc.id = :id", { id: header.invoicesPaymentsCondition })
+    .getRepository('InvoicesPaymentsCondition')
+    .createQueryBuilder('pc')
+    .where('pc.company = :company', { company: req.user.cid })
+    .andWhere('pc.id = :id', { id: header.invoicesPaymentsCondition })
     .getOne();
 
   const seller = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("is")
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.id = :id", { id: header.invoicesSeller })
-    .leftJoinAndSelect("is.invoicesZone", "iz")
+    .getRepository('InvoicesSeller')
+    .createQueryBuilder('is')
+    .where('is.company = :company', { company: req.user.cid })
+    .andWhere('is.id = :id', { id: header.invoicesSeller })
+    .leftJoinAndSelect('is.invoicesZone', 'iz')
     .getOne();
 
-  let message = "";
+  let message = '';
   let sequence = document.current;
   if (header.sequence != sequence) {
     message = `El numero de secuencia asignado fué: ${sequence}`;
   }
 
   const services = await req.conn
-    .getRepository("Service")
-    .createQueryBuilder("s")
-    .select(["s.id", "s.name", "st.id"])
-    .where("s.id IN (:...ids)", { ids: details.map((d) => d.service) })
-    .leftJoin("s.sellingType", "st")
+    .getRepository('Service')
+    .createQueryBuilder('s')
+    .select(['s.id', 's.name', 'st.id'])
+    .where('s.id IN (:...ids)', { ids: details.map(d => d.service) })
+    .leftJoin('s.sellingType', 'st')
     .getMany();
 
   let invoiceSequences = await req.conn
-    .getRepository("Invoice")
-    .createQueryBuilder("is")
-    .select(["is.sequence"])
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.status = :status", { status: 4 })
-    .andWhere("is.documentType = :documentType", {
+    .getRepository('Invoice')
+    .createQueryBuilder('is')
+    .select(['is.sequence'])
+    .where('is.company = :company', { company: req.user.cid })
+    .andWhere('is.status = :status', { status: 4 })
+    .andWhere('is.documentType = :documentType', {
       documentType: header.documentType,
     })
     .getMany();
 
-  const invoicesSequence = invoiceSequences.map((is) => parseInt(is.sequence));
+  const invoicesSequence = invoiceSequences.map(is => parseInt(is.sequence));
 
   //definiendo el valor de sequence
   if (invoicesSequence.includes(sequence)) {
@@ -434,7 +419,7 @@ router.post("/", async (req, res) => {
     invoice = await req.conn
       .createQueryBuilder()
       .insert()
-      .into("Invoice")
+      .into('Invoice')
       .values({
         authorization: document.authorization,
         sequence,
@@ -465,9 +450,7 @@ router.post("/", async (req, res) => {
         customer: header.customer,
         customerBranch: header.customerBranch,
         customerType: customer.customerType.id,
-        customerTypeNatural: customer.customerTypeNatural
-          ? customer.customerTypeNatural.id
-          : null,
+        customerTypeNatural: customer.customerTypeNatural ? customer.customerTypeNatural.id : null,
         documentType: header.documentType,
         invoicesPaymentsCondition: header.invoicesPaymentsCondition,
         invoicesSeller: header.invoicesSeller,
@@ -477,8 +460,7 @@ router.post("/", async (req, res) => {
       .execute();
   } catch (error) {
     return res.status(400).json({
-      message:
-        "Error al registrar el encabezado de La venta, contacta con tu administrador.",
+      message: 'Error al registrar el encabezado de La venta, contacta con tu administrador.',
     });
   }
   //insertando los detalles
@@ -486,22 +468,21 @@ router.post("/", async (req, res) => {
     await req.conn
       .createQueryBuilder()
       .insert()
-      .into("InvoiceDetail")
+      .into('InvoiceDetail')
       .values(
-        details.map((d) => {
+        details.map(d => {
           return {
             ...d,
             invoice: invoice.raw[0].id,
-            sellingType: services.find((s) => s.id == d.service).sellingType.id,
-            chargeName: services.find((s) => s.id == d.service).name,
+            sellingType: services.find(s => s.id == d.service).sellingType.id,
+            chargeName: services.find(s => s.id == d.service).name,
           };
-        })
+        }),
       )
       .execute();
   } catch (error) {
     return res.status(400).json({
-      message:
-        "Error al guardar los detalles de La venta, contacta con tu administrador.",
+      message: 'Error al guardar los detalles de La venta, contacta con tu administrador.',
     });
   }
 
@@ -520,17 +501,17 @@ router.post("/", async (req, res) => {
   // Actualiza el documento
   await req.conn
     .createQueryBuilder()
-    .update("InvoicesDocument")
+    .update('InvoicesDocument')
     .set({ current: nextSequence })
-    .where("company = :company", { company: req.user.cid })
-    .andWhere("isCurrentDocument = :current", { current: true })
-    .andWhere("documentType = :type", { type: header.documentType })
+    .where('company = :company', { company: req.user.cid })
+    .andWhere('isCurrentDocument = :current', { current: true })
+    .andWhere('documentType = :type', { type: header.documentType })
     .execute();
 
   const user = await req.conn
-    .getRepository("User")
-    .createQueryBuilder("u")
-    .where("u.id = :id", { id: req.user.uid })
+    .getRepository('User')
+    .createQueryBuilder('u')
+    .where('u.id = :id', { id: req.user.uid })
     .getOne();
 
   await addLog(
@@ -538,7 +519,7 @@ router.post("/", async (req, res) => {
     req.moduleName,
     `${user.names} ${user.lastnames}`,
     user.id,
-    `Se ha registrado La venta: ${document.authorization} - ${sequence}`
+    `Se ha registrado La venta: ${document.authorization} - ${sequence}`,
   );
 
   return res.json({
@@ -547,28 +528,28 @@ router.post("/", async (req, res) => {
   });
 });
 
-router.post("/reserved", async (req, res) => {
+router.post('/reserved', async (req, res) => {
   // valida los objetos del body
   const check = checkRequired(req.body, [
-    { name: "sequenceFrom", type: "integer", optional: false },
-    { name: "sequenceTo", type: "integer", optional: false },
-    { name: "InvoicesDocument", type: "string", optional: false },
+    { name: 'sequenceFrom', type: 'integer', optional: false },
+    { name: 'sequenceTo', type: 'integer', optional: false },
+    { name: 'InvoicesDocument', type: 'string', optional: false },
   ]);
 
   const { sequenceForm, sequenceTo, documentType } = req.body;
 
   const document = await req.conn
-    .getRepository("InvoicesDocument")
-    .createQueryBuilder("id")
-    .where("id.company = :company", { company: req.user.cid })
-    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+    .getRepository('InvoicesDocument')
+    .createQueryBuilder('id')
+    .where('id.company = :company', { company: req.user.cid })
+    .andWhere('id.isCurrentDocument = :isCurrentDocument', {
       isCurrentDocument: true,
     })
-    .andWhere("dt.id = :documentType", { documentType: documentType })
-    .leftJoin("id.documentType", "dt")
+    .andWhere('dt.id = :documentType', { documentType: documentType })
+    .leftJoin('id.documentType', 'dt')
     .getOne();
 
-  let message = "";
+  let message = '';
   if (sequenceForm < document.current || sequenceTo > document.final) {
     return res.status(400).json({
       message: `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
@@ -580,22 +561,20 @@ router.post("/reserved", async (req, res) => {
   }
 
   let invoiceSequences = await req.conn
-    .getRepository("Invoice")
-    .createQueryBuilder("is")
-    .select(["is.sequence"])
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.status = :status", { status: 4 })
-    .andWhere("is.documentType = :documentType", { documentType: documentType })
+    .getRepository('Invoice')
+    .createQueryBuilder('is')
+    .select(['is.sequence'])
+    .where('is.company = :company', { company: req.user.cid })
+    .andWhere('is.status = :status', { status: 4 })
+    .andWhere('is.documentType = :documentType', { documentType: documentType })
     .getMany();
 
-  const invoicesSequence = invoiceSequences.map((is) => parseInt(is.sequence));
-  const alreadyReserved = invoicesSequence.filter((is) =>
-    sequence.includes(is)
-  );
+  const invoicesSequence = invoiceSequences.map(is => parseInt(is.sequence));
+  const alreadyReserved = invoicesSequence.filter(is => sequence.includes(is));
 
-  let sequenceToReserve = sequence.filter((s) => !alreadyReserved.includes(s));
+  let sequenceToReserve = sequence.filter(s => !alreadyReserved.includes(s));
 
-  let invoiceValues = sequenceToReserve.flatMap((sr) => {
+  let invoiceValues = sequenceToReserve.flatMap(sr => {
     return {
       authorization: document.authorization,
       sequence: sr,
@@ -610,13 +589,12 @@ router.post("/reserved", async (req, res) => {
     invoice = await req.conn
       .createQueryBuilder()
       .insert()
-      .into("Invoice")
+      .into('Invoice')
       .values(invoiceValues)
       .execute();
   } catch (error) {
     return res.status(400).json({
-      message:
-        "Error al reservar los documentos, contacta con tu administrador.",
+      message: 'Error al reservar los documentos, contacta con tu administrador.',
     });
   }
 
@@ -624,18 +602,18 @@ router.post("/reserved", async (req, res) => {
     // Actualiza el documento
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesDocument")
+      .update('InvoicesDocument')
       .set({ current: sequenceTo + 1 })
-      .where("company = :company", { company: req.user.cid })
-      .andWhere("isCurrentDocument = :current", { current: true })
-      .andWhere("documentType = :type", { type: documentType })
+      .where('company = :company', { company: req.user.cid })
+      .andWhere('isCurrentDocument = :current', { current: true })
+      .andWhere('documentType = :type', { type: documentType })
       .execute();
   }
 
   const user = await req.conn
-    .getRepository("User")
-    .createQueryBuilder("u")
-    .where("u.id = :id", { id: req.user.uid })
+    .getRepository('User')
+    .createQueryBuilder('u')
+    .where('u.id = :id', { id: req.user.uid })
     .getOne();
 
   await addLog(
@@ -643,34 +621,28 @@ router.post("/reserved", async (req, res) => {
     req.moduleName,
     `${user.names} ${user.lastnames}`,
     user.id,
-    `Se han reservado los documentos con sequencia: ${sequenceToReserve.join(
-      ", "
-    )}`
+    `Se han reservado los documentos con sequencia: ${sequenceToReserve.join(', ')}`,
   );
 
   return res.json({
     message:
       alreadyReserved.length > 0 && sequenceToReserve.length > 0
         ? `Los documentos ${alreadyReserved.join(
-            ", "
+            ', ',
           )} ya estan reservados, unicamente se reservaron los documentos con sequencia ${sequenceToReserve.join(
-            ", "
+            ', ',
           )} correctamente.`
         : sequenceToReserve.length > 0
-        ? `Los documentos con sequencia ${sequenceToReserve.join(
-            ", "
-          )} han sido reservados correctamente.`
-        : `Los documentos con secuencia ${alreadyReserved.join(
-            ", "
-          )} ya estan reservados`,
+        ? `Los documentos con sequencia ${sequenceToReserve.join(', ')} han sido reservados correctamente.`
+        : `Los documentos con secuencia ${alreadyReserved.join(', ')} ya estan reservados`,
   });
 });
 
-router.put("/:id", async (req, res) => {
+router.put('/:id', async (req, res) => {
   // valida los objetos header y details
   const check = checkRequired(req.body, [
-    { name: "header", type: "object", optional: false },
-    { name: "details", type: "array", optional: false },
+    { name: 'header', type: 'object', optional: false },
+    { name: 'details', type: 'array', optional: false },
   ]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
@@ -678,18 +650,18 @@ router.put("/:id", async (req, res) => {
 
   // valida el objeto header
   const checkHeader = checkRequired(req.body.header, [
-    { name: "customer", optional: false },
-    { name: "customerBranch", optional: false },
-    { name: "invoicesSeller", optional: false },
-    { name: "invoicesPaymentsCondition", optional: false },
-    { name: "invoiceDate", type: "date", optional: false },
-    { name: "sum", type: "float", optional: false },
-    { name: "iva", type: "float", optional: false },
-    { name: "subtotal", type: "float", optional: false },
-    { name: "ivaRetenido", type: "float", optional: false },
-    { name: "ventasExentas", type: "float", optional: false },
-    { name: "ventasNoSujetas", type: "float", optional: false },
-    { name: "ventaTotal", type: "float", optional: false },
+    { name: 'customer', optional: false },
+    { name: 'customerBranch', optional: false },
+    { name: 'invoicesSeller', optional: false },
+    { name: 'invoicesPaymentsCondition', optional: false },
+    { name: 'invoiceDate', type: 'date', optional: false },
+    { name: 'sum', type: 'float', optional: false },
+    { name: 'iva', type: 'float', optional: false },
+    { name: 'subtotal', type: 'float', optional: false },
+    { name: 'ivaRetenido', type: 'float', optional: false },
+    { name: 'ventasExentas', type: 'float', optional: false },
+    { name: 'ventasNoSujetas', type: 'float', optional: false },
+    { name: 'ventaTotal', type: 'float', optional: false },
   ]);
   if (!checkHeader.success) {
     return res.status(400).json({ message: checkHeader.message });
@@ -697,12 +669,12 @@ router.put("/:id", async (req, res) => {
   // valida el objeto details
   for (const details of req.body.details) {
     const checkDetails = checkRequired(details, [
-      { name: "service", optional: false },
-      { name: "chargeDescription", optional: false },
-      { name: "quantity", type: "float", optional: false },
-      { name: "unitPrice", type: "float", optional: false },
-      { name: "incTax", type: "boolean", optional: false },
-      { name: "ventaPrice", type: "float", optional: false },
+      { name: 'service', optional: false },
+      { name: 'chargeDescription', optional: false },
+      { name: 'quantity', type: 'float', optional: false },
+      { name: 'unitPrice', type: 'float', optional: false },
+      { name: 'incTax', type: 'boolean', optional: false },
+      { name: 'ventaPrice', type: 'float', optional: false },
     ]);
     if (!checkDetails.success) {
       return res.status(400).json({ message: checkDetails.message });
@@ -712,57 +684,57 @@ router.put("/:id", async (req, res) => {
   const { header, details } = req.body;
 
   const invoice = await req.conn
-    .getRepository("Invoice")
-    .createQueryBuilder("i")
-    .where("i.company = :company", { company: req.user.cid })
-    .andWhere("i.id = :id", { id: req.params.id })
+    .getRepository('Invoice')
+    .createQueryBuilder('i')
+    .where('i.company = :company', { company: req.user.cid })
+    .andWhere('i.id = :id', { id: req.params.id })
     .getOne();
 
   const customer = await req.conn
-    .getRepository("Customer")
-    .createQueryBuilder("c")
-    .where("c.company = :company", { company: req.user.cid })
-    .andWhere("c.id = :id", { id: header.customer })
+    .getRepository('Customer')
+    .createQueryBuilder('c')
+    .where('c.company = :company', { company: req.user.cid })
+    .andWhere('c.id = :id', { id: header.customer })
     .getOne();
 
   const branch = await req.conn
-    .getRepository("CustomerBranch")
-    .createQueryBuilder("cb")
-    .where("cb.customer = :customer", { customer: header.customer })
-    .andWhere("cb.id = :id", { id: header.customerBranch })
-    .leftJoinAndSelect("cb.country", "co")
-    .leftJoinAndSelect("cb.state", "st")
-    .leftJoinAndSelect("cb.city", "ci")
+    .getRepository('CustomerBranch')
+    .createQueryBuilder('cb')
+    .where('cb.customer = :customer', { customer: header.customer })
+    .andWhere('cb.id = :id', { id: header.customerBranch })
+    .leftJoinAndSelect('cb.country', 'co')
+    .leftJoinAndSelect('cb.state', 'st')
+    .leftJoinAndSelect('cb.city', 'ci')
     .getOne();
 
   const condition = await req.conn
-    .getRepository("InvoicesPaymentsCondition")
-    .createQueryBuilder("pc")
-    .where("pc.company = :company", { company: req.user.cid })
-    .andWhere("pc.id = :id", { id: header.invoicesPaymentsCondition })
+    .getRepository('InvoicesPaymentsCondition')
+    .createQueryBuilder('pc')
+    .where('pc.company = :company', { company: req.user.cid })
+    .andWhere('pc.id = :id', { id: header.invoicesPaymentsCondition })
     .getOne();
 
   const seller = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("is")
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.id = :id", { id: header.invoicesSeller })
-    .leftJoinAndSelect("is.invoicesZone", "iz")
+    .getRepository('InvoicesSeller')
+    .createQueryBuilder('is')
+    .where('is.company = :company', { company: req.user.cid })
+    .andWhere('is.id = :id', { id: header.invoicesSeller })
+    .leftJoinAndSelect('is.invoicesZone', 'iz')
     .getOne();
 
   const services = await req.conn
-    .getRepository("Service")
-    .createQueryBuilder("s")
-    .select(["s.id", "s.name", "st.id"])
-    .where("s.id IN (:...ids)", { ids: details.map((d) => d.service) })
-    .leftJoin("s.sellingType", "st")
+    .getRepository('Service')
+    .createQueryBuilder('s')
+    .select(['s.id', 's.name', 'st.id'])
+    .where('s.id IN (:...ids)', { ids: details.map(d => d.service) })
+    .leftJoin('s.sellingType', 'st')
     .getMany();
 
   // Actualiza el invoice
   try {
     await req.conn
       .createQueryBuilder()
-      .update("Invoice")
+      .update('Invoice')
       .set({
         invoiceDate: header.invoiceDate,
         customerName: customer.name,
@@ -787,12 +759,11 @@ router.put("/:id", async (req, res) => {
         ventaTotal: header.ventaTotal,
         ventaTotalText: numeroALetras(header.ventaTotal),
       })
-      .where("id = :id", { id: req.params.id })
+      .where('id = :id', { id: req.params.id })
       .execute();
   } catch (error) {
     return res.status(400).json({
-      message:
-        "Error al actualilzar el encabezado de la venta, contacta con tu administrador.",
+      message: 'Error al actualilzar el encabezado de la venta, contacta con tu administrador.',
     });
   }
 
@@ -802,37 +773,36 @@ router.put("/:id", async (req, res) => {
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("InvoiceDetail")
-      .where("invoice = :invoice", { invoice: req.params.id })
+      .from('InvoiceDetail')
+      .where('invoice = :invoice', { invoice: req.params.id })
       .execute();
 
     // Inserta todos los detalles nuevamente
     await req.conn
       .createQueryBuilder()
       .insert()
-      .into("InvoiceDetail")
+      .into('InvoiceDetail')
       .values(
-        details.map((d) => {
+        details.map(d => {
           return {
             ...d,
             invoice: req.params.id,
-            sellingType: services.find((s) => s.id == d.service).sellingType.id,
-            chargeName: services.find((s) => s.id == d.service).name,
+            sellingType: services.find(s => s.id == d.service).sellingType.id,
+            chargeName: services.find(s => s.id == d.service).name,
           };
-        })
+        }),
       )
       .execute();
   } catch (error) {
     return res.status(400).json({
-      message:
-        "Error al actualizar los detalles de la venta, contacta con tu administrador.",
+      message: 'Error al actualizar los detalles de la venta, contacta con tu administrador.',
     });
   }
 
   const user = await req.conn
-    .getRepository("User")
-    .createQueryBuilder("u")
-    .where("u.id = :id", { id: req.user.uid })
+    .getRepository('User')
+    .createQueryBuilder('u')
+    .where('u.id = :id', { id: req.user.uid })
     .getOne();
 
   await addLog(
@@ -840,7 +810,7 @@ router.put("/:id", async (req, res) => {
     req.moduleName,
     `${user.names} ${user.lastnames}`,
     user.id,
-    `Se ha registrado la venta: ${invoice.authorization} - ${invoice.sequence}`
+    `Se ha registrado la venta: ${invoice.authorization} - ${invoice.sequence}`,
   );
 
   return res.json({
@@ -848,45 +818,42 @@ router.put("/:id", async (req, res) => {
   });
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete('/:id', async (req, res) => {
   // Get the invoice
   const invoice = await req.conn
-    .getRepository("Invoice")
-    .createQueryBuilder("i")
-    .leftJoinAndSelect("i.documentType", "dt")
-    .leftJoinAndSelect("i.status", "st")
-    .where("i.company = :company", { company: req.user.cid })
-    .andWhere("i.id = :id", { id: req.params.id })
+    .getRepository('Invoice')
+    .createQueryBuilder('i')
+    .leftJoinAndSelect('i.documentType', 'dt')
+    .leftJoinAndSelect('i.status', 'st')
+    .where('i.company = :company', { company: req.user.cid })
+    .andWhere('i.id = :id', { id: req.params.id })
     .getOne();
 
   // If no customer exist
   if (!invoice) {
-    return res.status(400).json({ message: "La venta ingresada no existe." });
+    return res.status(400).json({ message: 'La venta ingresada no existe.' });
   }
 
   // If customer exist
   // Check references in other tables than details
-  const references = await foundRelations(req.conn, "invoice", invoice.id, [
-    "invoice_detail",
-  ]);
+  const references = await foundRelations(req.conn, 'invoice', invoice.id, ['invoice_detail']);
 
   // if references rejects deletion
   if (references) {
     return res.status(400).json({
-      message:
-        "La venta seleccionada no puede ser eliminada porque esta siendo utilizada en el sistema.",
+      message: 'La venta seleccionada no puede ser eliminada porque esta siendo utilizada en el sistema.',
     });
   }
 
   // check if any allowed status to delete
   const allowedStatuses = [1];
   let statuses = await req.conn
-    .getRepository("InvoicesStatus")
-    .createQueryBuilder("st")
+    .getRepository('InvoicesStatus')
+    .createQueryBuilder('st')
     .getMany();
 
   if (!allowedStatuses.includes(invoice.status.id)) {
-    const status = statuses.find((s) => s.id == invoice.status.id);
+    const status = statuses.find(s => s.id == invoice.status.id);
     return res.status(400).json({
       message: `La venta seleccionada no puede ser eliminada mientras tenga estado "${status.name.toUpperCase()}"`,
     });
@@ -894,21 +861,21 @@ router.delete("/:id", async (req, res) => {
 
   // Check if last invoice number
   const document = await req.conn
-    .getRepository("InvoicesDocument")
-    .createQueryBuilder("id")
-    .where("id.documentType = :documentType", {
+    .getRepository('InvoicesDocument')
+    .createQueryBuilder('id')
+    .where('id.documentType = :documentType', {
       documentType: invoice.documentType.id,
     })
-    .andWhere("id.isCurrentDocument = :isCurrentDocument", {
+    .andWhere('id.isCurrentDocument = :isCurrentDocument', {
       isCurrentDocument: true,
     })
-    .andWhere("id.company = :company", { company: req.user.cid })
+    .andWhere('id.company = :company', { company: req.user.cid })
     .getOne();
 
   if (document.current - 1 != invoice.sequence) {
     return res.status(400).json({
       message:
-        "La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.",
+        'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
     });
   }
 
@@ -917,34 +884,34 @@ router.delete("/:id", async (req, res) => {
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("InvoiceDetail")
-      .where("invoice = :invoice", { invoice: req.params.id })
+      .from('InvoiceDetail')
+      .where('invoice = :invoice', { invoice: req.params.id })
       .execute();
 
     // Delete invoices
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("Invoice")
-      .where("id = :id", { id: req.params.id })
-      .andWhere("company = :company", { company: req.user.cid })
+      .from('Invoice')
+      .where('id = :id', { id: req.params.id })
+      .andWhere('company = :company', { company: req.user.cid })
       .execute();
 
     // updates secuence
     // Actualiza el documento
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesDocument")
+      .update('InvoicesDocument')
       .set({ current: document.current - 1 })
-      .where("company = :company", { company: req.user.cid })
-      .andWhere("isCurrentDocument = :current", { current: true })
-      .andWhere("documentType = :type", { type: invoice.documentType.id })
+      .where('company = :company', { company: req.user.cid })
+      .andWhere('isCurrentDocument = :current', { current: true })
+      .andWhere('documentType = :type', { type: invoice.documentType.id })
       .execute();
 
     const user = await req.conn
-      .getRepository("User")
-      .createQueryBuilder("u")
-      .where("u.id = :id", { id: req.user.uid })
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
       .getOne();
 
     await addLog(
@@ -952,15 +919,15 @@ router.delete("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se elimino la venta con referencia: ${invoice.authorization} - ${invoice.sequence}.`
+      `Se elimino la venta con referencia: ${invoice.authorization} - ${invoice.sequence}.`,
     );
 
     return res.json({
-      message: "La venta ha sido eliminada correctamente.",
+      message: 'La venta ha sido eliminada correctamente.',
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Error al eliminar la venta. Conctacta a tu administrador.",
+      message: 'Error al eliminar la venta. Conctacta a tu administrador.',
     });
   }
 });

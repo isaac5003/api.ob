@@ -45,6 +45,9 @@ router.put('/general', async (req, res) => {
 
   try {
     const { periodStart, peridoEnd } = req.body;
+    if (parseISO(peridoEnd) < parseISO(periodStart)) {
+      return res.status(400).json({ message: 'La fecha final no puede ser menor que la fecha inicial' });
+    }
 
     if (differenceInMonths(parseISO(peridoEnd), parseISO(periodStart)) + 1 != 12) {
       return res.status(400).json({ message: 'El periodo fiscal debe  contener 12 meses exactos' });
