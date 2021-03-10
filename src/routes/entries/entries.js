@@ -80,7 +80,13 @@ router.get('/', async (req, res) => {
       .groupBy(['ae.id', 'aet.id']);
 
     if (order && prop) {
-      entries = entries.orderBy(`${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
+      switch (prop) {
+        case 'accountingEntryType':
+          entries = entries.orderBy('ae.accountingEntryType', order == 'ascending' ? 'ASC' : 'DESC');
+          break;
+        default:
+          entries = entries.orderBy(`${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
+      }
     } else {
       entries = entries.orderBy('ae.createdAt', 'DESC');
     }
