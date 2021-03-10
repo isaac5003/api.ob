@@ -1,16 +1,17 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 
 router.use((req, res, next) => {
-  req.moduleName = "Customers";
+  req.moduleName = 'Customers';
   next();
 });
 
-router.use("/types", require("./types"));
-router.use("/taxer-types", require("./taxerTypes"));
-router.use("/type-naturals", require("./typeNaturals"));
-router.use("/:customerId/branches", require("./branches"));
-router.use("/:customerId/tributary", require("./tributary"));
-router.use("/", require("./customers"));
+router.use('/types', require('./types'));
+router.use('/taxer-types', require('./taxerTypes'));
+router.use('/type-naturals', require('./typeNaturals'));
+router.use('/:customerId/branches', require('./branches'));
+router.use('/:customerId/tributary', require('./tributary'));
+router.use('/setting', require('./setting'));
+router.use('/', require('./customers'));
 
 module.exports = router;

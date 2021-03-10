@@ -1,14 +1,12 @@
 const { EntitySchema } = require('typeorm');
 
 module.exports = new EntitySchema({
-  name: 'InvoicesPaymentsCondition',
+  name: 'AccountingRegisterType',
   columns: {
-    id: { type: 'uuid', generated: 'uuid', primary: true },
-    name: { type: 'varchar', nullable: false },
-    active: { type: 'boolean', default: true },
+    id: { type: 'int', generated: true, primary: true },
+    name: { type: 'varchar', nullable: true },
     createdAt: { type: 'timestamp', createDate: true },
     updatedAt: { type: 'timestamp', updateDate: true },
-    cashPayment: { type: 'boolean', nullable: false, default: false },
   },
   relations: {
     company: {
