@@ -1,5 +1,4 @@
 const express = require('express');
-const { composeP } = require('ramda');
 const { checkRequired, addLog } = require('../../tools');
 const router = express.Router();
 
@@ -90,24 +89,24 @@ router.get('/', async (req, res) => {
         .orderBy('idt.id', 'ASC')
         .getMany();
 
-      documents = documentTypes.map(dt => {
-        const found = documents.find(d => d.documentType.id == dt.id);
+      documents = documentTypes.map((dt) => {
+        const found = documents.find((d) => d.documentType.id == dt.id);
         return found
           ? found
           : {
-              id: null,
-              authorization: null,
-              initial: null,
-              final: null,
-              current: null,
-              active: false,
-              documentType: dt,
-            };
+            id: null,
+            authorization: null,
+            initial: null,
+            final: null,
+            current: null,
+            active: false,
+            documentType: dt,
+          };
       });
     }
 
     if (search != null) {
-      documents = documents.filter(s => s.name.toLowerCase().includes(search));
+      documents = documents.filter((s) => s.name.toLowerCase().includes(search));
       count = documents.length;
     }
 
@@ -329,6 +328,102 @@ router.get('/:type/layout', async (req, res) => {
   }
 
   return res.json({ layout: document.documentLayout });
+});
+
+router.put('/documentlayout/:id', async (req, res) => {
+  //validar los objetos necesarios en el req
+  const check = checkRequired(req.body, [
+    { name: 'configuration', type: 'string', optional: false },
+    { name: 'resolution', type: 'array', optional: false },
+    { name: 'header', type: 'array', optional: false },
+    { name: 'details', type: 'object', optional: false },
+    { name: 'totals', type: 'array', optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  //validando el arreglo header
+  for (const header of req.body.header) {
+    // valida el objeto header
+    const checkHeader = checkRequired(header, [
+      { name: 'x', type: 'integer', optional: true },
+      { name: 'y', type: 'integer', optional: true },
+      { name: 'length', type: 'integer', optional: true },
+      { name: 'value', type: 'string', optional: true },
+      { name: 'show', type: 'boolean', optional: false },
+    ]);
+
+    if (!checkHeader.success) {
+      return res.status(400).json({ message: checkHeader.message });
+    }
+  }
+  // valida el objeto details
+  const checkDetails = checkRequired(req.body.details, [
+    { name: 'position_y', optional: false },
+    { name: 'fontSize', optional: false },
+    { name: 'heigth', optional: false },
+    { name: 'quantity', type: 'object', optional: false },
+    { name: 'description', type: 'object', optional: false },
+    { name: 'price', type: 'object', optional: false },
+    { name: 'sujeto', type: 'object', optional: false },
+    { name: 'exento', type: 'object', optional: false },
+    { name: 'afecto', type: 'object', optional: false },
+  ]);
+  if (!checkDetails.success) {
+    return res.status(400).json({ message: checkDetails.message });
+  }
+
+  //validando el arreglo totals
+  for (const totals of req.body.totals) {
+    // valida el objeto header
+    const checkTotals = checkRequired(totals, [
+      { name: 'x', type: 'integer', optional: true },
+      { name: 'y', type: 'integer', optional: true },
+      { name: 'value', type: 'string', optional: true },
+      { name: 'show', type: 'boolean', optional: false },
+    ]);
+
+    if (!checkTotals.success) {
+      return res.status(400).json({ message: checkTotals.message });
+    }
+  }
+
+  //actualiza el campo layout en el documento
+  try {
+    await req.conn
+      .createQueryBuilder()
+      .update('InvoicesDocument')
+      .set({
+        layout: req.body,
+      })
+      .where('documentTypeId= :id', { id: req.params.id })
+      .andWhere('isCurrentDocument = :current', { current: true })
+      .execute();
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({
+      message: 'Error al actualilzar las configuracion del documento, contacta con tu administrador.',
+    });
+  }
+
+  const user = await req.conn
+    .getRepository('User')
+    .createQueryBuilder('u')
+    .where('u.id = :id', { id: req.user.uid })
+    .getOne();
+
+  await addLog(
+    req.conn,
+    req.moduleName,
+    `${user.names} ${user.lastnames}`,
+    user.id,
+    `Se ha guardado la configuracion del documento: ${req.params.id}`,
+  );
+
+  return res.json({
+    message: `La configuracion ha sido guardada correctamente.`,
+  });
 });
 
 router.get('/:id', async (req, res) => {
