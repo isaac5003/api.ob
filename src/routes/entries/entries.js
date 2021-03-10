@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
       });
     }
     if (entryType) {
-      query = query.andWhere('aet.id = :entryType', {
+      query = query.andWhere('ae.accountingEntryTypeId = :entryType', {
         entryType,
       });
     }
