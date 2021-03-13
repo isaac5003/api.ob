@@ -623,9 +623,9 @@ router.get('/balance-general', async (req, res) => {
             { cargo: 0, abono: 0 },
           );
         add = resacreedora.abono + resdeudora.abono - (resacreedora.cargo + resdeudora.cargo);
-        const current = catalog.find(c =>
-          c.id == (add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost),
-        )
+        const current = catalog.find(
+          c => c.id == (add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost),
+        );
         objaccount = {
           code: current.code,
           name: current.name,
@@ -737,6 +737,18 @@ router.get('/estado-resultados', async (req, res) => {
       .where('as.company = :company', { company: req.user.cid })
       .getOne();
 
+    if (!estadoResultados) {
+      return res
+        .status(400)
+        .json({ message: 'El estado de resultados no se puede generar ya que no ha sido configurado' });
+    }
+
+    if (!estadoResultados.map(er => er.children).filter(erc => erc != null && erc.length > 0).length > 0) {
+      return res
+        .status(400)
+        .json({ message: 'El estado de resultados no se puede generar ya que no tiene cuentas contables asignadas' });
+    }
+
     // obtiene los detalles de la partida del rango seleccionado
     let rangeDetails = req.conn
       .getRepository('AccountingEntryDetail')
@@ -803,6 +815,7 @@ router.get('/estado-resultados', async (req, res) => {
       estadoResultados,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: 'Error al obtener el reporte de estado de resultados.',
     });
