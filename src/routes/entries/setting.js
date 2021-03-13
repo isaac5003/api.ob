@@ -258,5 +258,103 @@ router.put('/estado-resultados', async (req, res) => {
     });
   }
 });
+router.put('/integrations', async (req, res) => {
+  // Check required field
+  const check = checkRequired(req.body, [
+    { name: 'accountingCatalog', type: 'uuid', optional: false },
+    { name: 'registerType', type: 'integer', optional: false },
+  ]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+
+  // Get field
+  const { accountingCatalog, registerType } = req.body;
+
+  // Get account
+  const account = await req.conn
+    .getRepository('AccountingCatalog')
+    .createQueryBuilder('ac')
+    .where('ac.company = :company', { company: req.user.cid })
+    .andWhere('ac.id  = :id', { id: accountingCatalog })
+    .getOne();
+
+  // If no exist
+  if (!account) {
+    return res.status(400).json({ message: 'La cuenta seleccionada no existe.' });
+  }
+
+  // If account exist updates intergations it
+  //validate that account can be use
+  if (account.isParent) {
+    return res.status(400).json({ message: 'La cuenta seleccionada no puede ser utilizada ya que no es asignable.' });
+  }
+  // Get register
+  const registers = await req.conn
+    .getRepository('AccountingRegisterType')
+    .createQueryBuilder('art')
+    .where('art.company = :company', { company: req.user.cid })
+    .andWhere('art.id  = :id', { id: registerType })
+    .getOne();
+
+  // If no exist
+  if (!registers) {
+    return res.status(400).json({ message: 'El tipo de registro seleccionado no existe.' });
+  }
+
+  try {
+    await req.conn
+      .createQueryBuilder()
+      .update('AccountingSetting')
+      .set({ accountingCatalog, registerType })
+      .where('company =:id', { id: req.user.cid })
+      .execute();
+
+    const user = await req.conn
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
+      .getOne();
+
+    await addLog(
+      req.conn,
+      req.moduleName,
+      `${user.names} ${user.lastnames}`,
+      user.id,
+      `Se actualizo los datos de integración del modulo de contabilidad`,
+    );
+
+    return res.json({
+      message: 'Los datos de integración han sido actualizados correctamente.',
+    });
+  } catch (error) {
+    // return error
+    console.log(error);
+    return res.status(500).json({
+      message: 'Error al actualizar los datos de la integración. Contacta con tu administrador.',
+    });
+  }
+});
+router.get('/integrations', async (req, res) => {
+  try {
+    const integrations = await req.conn
+      .getRepository('AccountingSetting')
+      .createQueryBuilder('as')
+      .select(['as.id', 'ac.id', 'art.id'])
+      .where('as.company = :company', { company: req.user.cid })
+      .leftJoin('as.accountingCatalog', 'ac')
+      .leftJoin('as.registerType', 'art')
+      .getOne();
+
+    return res.json({
+      integrations: {
+        catalog: integrations.accountingCatalog ? integrations.accountingCatalog.id : null,
+        registerType: integrations.registerType ? integrations.registerType.id : null,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error al obtener las configuraciones de integración.' });
+  }
+});
 
 module.exports = router;
