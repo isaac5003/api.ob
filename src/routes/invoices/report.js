@@ -45,19 +45,19 @@ router.get('/general', async (req, res) => {
       .leftJoinAndSelect('de.service', 'se');
 
     if (customer) {
-      sales = sales.where('cu.id = :customer', { customer });
+      sales = sales.andWhere('cu.id = :customer', { customer });
     }
     if (invoicesSeller) {
-      sales = sales.where('is.id = :invoicesSeller', { invoicesSeller });
+      sales = sales.andWhere('is.id = :invoicesSeller', { invoicesSeller });
     }
     if (invoicesZone) {
-      sales = sales.where('iz.id = :invoicesZone', { invoicesZone });
+      sales = sales.andWhere('iz.id = :invoicesZone', { invoicesZone });
     }
     if (status) {
-      sales = sales.where('st.id = :status', { status });
+      sales = sales.andWhere('st.id = :status', { status });
     }
     if (service) {
-      sales = sales.where('se.id = :service', { service });
+      sales = sales.andWhere('se.id = :service', { service });
     }
 
     sales = await sales.getMany();
@@ -79,17 +79,18 @@ router.get('/general', async (req, res) => {
             total: parseFloat(d.ventaTotal),
           };
         });
+
       return {
         name: dt.name,
         code: dt.code,
         count: documents.length,
         documents,
-        vGravadaTotal: documents.reduce((a, b) => a + b.vGravada, 0),
-        vNSujetaTotal: documents.reduce((a, b) => a + b.vNSujeta, 0),
-        vExentaTotal: documents.reduce((a, b) => a + b.vExenta, 0),
-        ivaTotal: documents.reduce((a, b) => a + b.iva, 0),
-        ivaRetenidoTotal: documents.reduce((a, b) => a + b.ivaRetenido, 0),
-        totalTotal: documents.reduce((a, b) => a + b.total, 0),
+        vGravadaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.total, 0),
       };
     });
 
