@@ -70,7 +70,7 @@ router.get('/general', async (req, res) => {
             customer: d.customerName,
             date: format(new Date(d.invoiceDate), 'dd/MM/yyyy'),
             documentNumber: `${d.authorization} - ${d.sequence}`,
-            statusId: d.status.id,
+            status: { id: d.status.id, name: d.status.name },
             vGravada: parseFloat(d.subtotal),
             vNSujeta: parseFloat(d.ventasNoSujetas),
             vExenta: parseFloat(d.ventasExentas),
@@ -85,12 +85,12 @@ router.get('/general', async (req, res) => {
         code: dt.code,
         count: documents.length,
         documents,
-        vGravadaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vGravada, 0),
-        vNSujetaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vNSujeta, 0),
-        vExentaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.vExenta, 0),
-        ivaTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.iva, 0),
-        ivaRetenidoTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.ivaRetenido, 0),
-        totalTotal: documents.filter(d => d.statusId != '3').reduce((a, b) => a + b.total, 0),
+        vGravadaTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents.filter(d => d.status.id != '3').reduce((a, b) => a + b.total, 0),
       };
     });
 
