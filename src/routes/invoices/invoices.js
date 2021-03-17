@@ -499,15 +499,27 @@ router.post('/', async (req, res) => {
       }
     }
   }
-  // Actualiza el documento
-  await req.conn
-    .createQueryBuilder()
-    .update('InvoicesDocument')
-    .set({ current: nextSequence })
-    .where('company = :company', { company: req.user.cid })
-    .andWhere('isCurrentDocument = :current', { current: true })
-    .andWhere('documentType = :type', { type: header.documentType })
-    .execute();
+  if (document.current == document.initial && !document.used) {
+    // Actualiza el documento
+    await req.conn
+      .createQueryBuilder()
+      .update('InvoicesDocument')
+      .set({ current: nextSequence, used: true })
+      .where('company = :company', { company: req.user.cid })
+      .andWhere('isCurrentDocument = :current', { current: true })
+      .andWhere('documentType = :type', { type: header.documentType })
+      .execute();
+  } else {
+    // Actualiza el documento
+    await req.conn
+      .createQueryBuilder()
+      .update('InvoicesDocument')
+      .set({ current: nextSequence })
+      .where('company = :company', { company: req.user.cid })
+      .andWhere('isCurrentDocument = :current', { current: true })
+      .andWhere('documentType = :type', { type: header.documentType })
+      .execute();
+  }
 
   const user = await req.conn
     .getRepository('User')
