@@ -89,24 +89,24 @@ router.get('/', async (req, res) => {
         .orderBy('idt.id', 'ASC')
         .getMany();
 
-      documents = documentTypes.map((dt) => {
-        const found = documents.find((d) => d.documentType.id == dt.id);
+      documents = documentTypes.map(dt => {
+        const found = documents.find(d => d.documentType.id == dt.id);
         return found
           ? found
           : {
-            id: null,
-            authorization: null,
-            initial: null,
-            final: null,
-            current: null,
-            active: false,
-            documentType: dt,
-          };
+              id: null,
+              authorization: null,
+              initial: null,
+              final: null,
+              current: null,
+              active: false,
+              documentType: dt,
+            };
       });
     }
 
     if (search != null) {
-      documents = documents.filter((s) => s.name.toLowerCase().includes(search));
+      documents = documents.filter(s => s.name.toLowerCase().includes(search));
       count = documents.length;
     }
 
@@ -121,193 +121,155 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.put('/', async (req, res) => {
+router.post('/', async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, [
-    { name: 'authorization', type: 'string', optional: false },
-    { name: 'initial', type: 'integer', optional: false },
-    { name: 'final', type: 'integer', optional: false },
-    { name: 'current', type: 'integer', optional: false },
-    { name: 'documentType', type: 'integer', optional: false },
-  ]);
+  const check = checkRequired(req.body, [{ name: 'documents', type: 'array', optional: false }]);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
-  // Obtiene los campos requeridos
-  const { authorization, initial, final, current, documentType } = req.body;
-
-  let document = await req.conn
-    .getRepository('InvoicesDocument')
-    .createQueryBuilder('id')
-    .where('id.company = :company', { company: req.user.cid })
-    .andWhere('id.isCurrentDocument = :isCurrentDocument', {
-      isCurrentDocument: true,
-    })
-    .andWhere('id.documentTypeId = :documentType', { documentType: documentType })
-    .andWhere('id.authorization = :authorization', { authorization: authorization })
-    .getOne();
-
-  console.log(document);
-  let message = '';
-  if (
-    !Array.isArray(document) &&
-    typeof document === 'object' &&
-    document != null &&
-    Object.keys(document).length > 0
-  ) {
-    if (document.used == true) {
-      return res.json({ message: 'No puedes actualizar este documento porque esta en uso' });
-    }
-    if (document.authorization == authorization) {
-      //actualiza el documento fiscal
-      try {
-        // return success
-        await req.conn
-          .createQueryBuilder()
-          .update('InvoicesDocument')
-          .set({
-            authorization: authorization,
-            initial: initial,
-            final: final,
-            current: current,
-            documentType: documentType,
-          })
-          .where('company = :company', { company: req.user.cid })
-          .andWhere('id = :id', { id: document.id })
-          .execute();
-
-        const user = await req.conn
-          .getRepository('User')
-          .createQueryBuilder('u')
-          .where('u.id = :id', { id: req.user.uid })
-          .getOne();
-
-        await addLog(
-          req.conn,
-          req.moduleName,
-          `${user.names} ${user.lastnames}`,
-          user.id,
-          `Se actualizo la información del documento: ${document.id}.`,
-        );
-
-        return res.json({
-          message: 'El documento ha sido actualizado correctamente.',
-        });
-      } catch (error) {
-        // return error
-        console.error(error);
-        return res.status(500).json({
-          message: 'Error al actualizar el documento. Contacta con tu administrador.',
-        });
-      }
-    }
-    // Inserta el documento
-    try {
-      // Set active and isCurrentDocument to false for all documents with similar type
-      await req.conn
-        .createQueryBuilder()
-        .update('InvoicesDocument')
-        .set({
-          active: false,
-          isCurrentDocument: false,
-        })
-        .where('documentType = :documentType', { documentType })
-        .execute();
-
-      // 3. Inserta el nuevo tipo de documento
-      const document = await req.conn
-        .createQueryBuilder()
-        .insert()
-        .into('InvoicesDocument')
-        .values({
-          authorization,
-          initial,
-          final,
-          current,
-          documentType,
-          isCurrentDocument: true,
-          company: req.user.cid,
-        })
-        .execute();
-
-      const user = await req.conn
-        .getRepository('User')
-        .createQueryBuilder('u')
-        .where('u.id = :id', { id: req.user.uid })
-        .getOne();
-
-      await addLog(
-        req.conn,
-        req.moduleName,
-        `${user.names} ${user.lastnames}`,
-        user.id,
-        `Se ha creado el docuento con autorizacion : ${authorization}`,
-      );
-
-      // On success
-      return res.json({
-        message: 'El documento se ha creado correctamente.',
-        id: document.raw[0].id,
-      });
-    } catch (error) {
-      // On errror
-      return res.status(400).json({
-        message: 'Error al guardar el nuevo documento, contacta con tu administrador.',
-      });
+  // valida el array documents
+  for (const documents of req.body.documents) {
+    const checkDocuments = checkRequired(documents, [
+      { name: 'authorization', type: 'string', optional: false },
+      { name: 'initial', type: 'integer', optional: false },
+      { name: 'final', type: 'integer', optional: false },
+      { name: 'current', type: 'integer', optional: false },
+      { name: 'documentType', type: 'integer', optional: false },
+    ]);
+    if (!checkDocuments.success) {
+      return res.status(400).json({ message: checkDocuments.message });
     }
   }
+  // Obtiene los campos requeridos
+  const documents = req.body.documents;
+
   // Inserta el documento
   try {
-    // Set active and isCurrentDocument to false for all documents with similar type
-    await req.conn
-      .createQueryBuilder()
-      .update('InvoicesDocument')
-      .set({
-        active: false,
+    // // Set active and isCurrentDocument to false for all documents with similar type
+    // await req.conn
+    //   .createQueryBuilder()
+    //   .update('InvoicesDocument')
+    //   .set({
+    //     active: false,
+    //     isCurrentDocument: false,
+    //   })
+    //   .where('documentType IN (...:documentType)', {documentType: documents.map(dt=> dt.documentType) })
+    //   .execute();
+    const newDocuments = documents.map(d => {
+      return {
+        ...d,
+        company: req.user.cid,
         isCurrentDocument: false,
-      })
-      .where('documentType = :documentType', { documentType })
-      .execute();
-
+      };
+    });
     // 3. Inserta el nuevo tipo de documento
     const document = await req.conn
       .createQueryBuilder()
       .insert()
       .into('InvoicesDocument')
-      .values({
-        authorization,
-        initial,
-        final,
-        current,
-        documentType,
-        isCurrentDocument: true,
-        company: req.user.cid,
-      })
+      .values(newDocuments)
       .execute();
+    const user = await req.conn
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
+      .getOne();
+    for (const documents of newDocuments) {
+      await addLog(
+        req.conn,
+        req.moduleName,
+        `${user.names} ${user.lastnames}`,
+        user.id,
+        `Se ha creado el documento con autorizacion : ${documents.authorization}`,
+      );
+    }
+    // On success
+    return res.json({
+      message: 'Los documentos se han creado correctamente.',
+      dids: document.raw.map(dr => dr.id).join(',', ''),
+    });
+  } catch (error) {
+    // On errror
+    return res.status(400).json({
+      message: 'Error al guardar el nuevo documento, contacta con tu administrador.',
+    });
+  }
+});
+router.put('/:ids', async (req, res) => {
+  // Verifica los campos requeridos
+  const check = checkRequired(req.body, [{ name: 'documents', type: 'array', optional: false }]);
+  if (!check.success) {
+    return res.status(400).json({ message: check.message });
+  }
+  // valida el array documents
+  for (const documents of req.body.documents) {
+    const checkDocuments = checkRequired(documents, [
+      { name: 'id', type: 'uuid', optional: false },
+      { name: 'authorization', type: 'string', optional: false },
+      { name: 'initial', type: 'integer', optional: false },
+      { name: 'final', type: 'integer', optional: false },
+      { name: 'current', type: 'integer', optional: false },
+      { name: 'documentType', type: 'integer', optional: false },
+    ]);
+    if (!checkDocuments.success) {
+      return res.status(400).json({ message: checkDocuments.message });
+    }
+  }
+  // Obtiene los campos requeridos
+  const documents = req.body.documents;
+  const ids = req.params.ids.split(',');
+
+  // Inserta el documento
+  try {
+    // // Set active and isCurrentDocument to false for all documents with similar type
+    // await req.conn
+    //   .createQueryBuilder()
+    //   .update('InvoicesDocument')
+    //   .set({
+    //     active: false,
+    //     isCurrentDocument: false,
+    //   })
+    //   .where('documentType IN (...:documentType)', {documentType: documents.map(dt=> dt.documentType) })
+    //   .execute();
 
     const user = await req.conn
       .getRepository('User')
       .createQueryBuilder('u')
       .where('u.id = :id', { id: req.user.uid })
       .getOne();
+    const newDocuments = documents.map(d => {
+      return {
+        ...d,
+        company: req.user.cid,
+      };
+    });
+    for (const documentToUpdate of newDocuments) {
+      // 3. actualiza el nuevo tipo de documento
+      const document = await req.conn
+        .createQueryBuilder()
+        .update('InvoicesDocument')
+        .set(documentToUpdate)
+        .where('id=:id', { id: documentToUpdate.id })
+        .andWhere('used=:used', { used: false })
+        .execute();
 
-    await addLog(
-      req.conn,
-      req.moduleName,
-      `${user.names} ${user.lastnames}`,
-      user.id,
-      `Se ha creado el docuento con autorizacion : ${authorization}`,
-    );
-
+      await addLog(
+        req.conn,
+        req.moduleName,
+        `${user.names} ${user.lastnames}`,
+        user.id,
+        `Se ha actualizado el documento con id: ${documentToUpdate.id}`,
+      );
+    }
     // On success
     return res.json({
-      message: 'El documento se ha creado correctamente.',
-      id: document.raw[0].id,
+      message: 'Los documentos se han editado correctamente.',
     });
   } catch (error) {
     // On errror
+    console.error(error);
     return res.status(400).json({
-      message: 'Error al guardar el nuevo documento, contacta con tu administrador.',
+      message: 'Error al actualizar los documentos, contacta con tu administrador.',
     });
   }
 });
