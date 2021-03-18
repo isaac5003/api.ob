@@ -1,4 +1,5 @@
 const express = require('express');
+const { indexOf } = require('ramda');
 const { checkRequired, addLog } = require('../../tools');
 const router = express.Router();
 
@@ -195,7 +196,7 @@ router.post('/', async (req, res) => {
     });
   }
 });
-router.put('/:ids', async (req, res) => {
+router.put('/', async (req, res) => {
   // Verifica los campos requeridos
   const check = checkRequired(req.body, [{ name: 'documents', type: 'array', optional: false }]);
   if (!check.success) {
@@ -217,53 +218,61 @@ router.put('/:ids', async (req, res) => {
   }
   // Obtiene los campos requeridos
   const documents = req.body.documents;
-  const ids = req.params.ids.split(',');
 
   // Inserta el documento
   try {
-    // // Set active and isCurrentDocument to false for all documents with similar type
-    // await req.conn
-    //   .createQueryBuilder()
-    //   .update('InvoicesDocument')
-    //   .set({
-    //     active: false,
-    //     isCurrentDocument: false,
-    //   })
-    //   .where('documentType IN (...:documentType)', {documentType: documents.map(dt=> dt.documentType) })
-    //   .execute();
-
     const user = await req.conn
       .getRepository('User')
       .createQueryBuilder('u')
       .where('u.id = :id', { id: req.user.uid })
       .getOne();
+
     const newDocuments = documents.map(d => {
       return {
         ...d,
         company: req.user.cid,
       };
     });
+    let documentsIds = [];
     for (const documentToUpdate of newDocuments) {
       // 3. actualiza el nuevo tipo de documento
-      const document = await req.conn
+      let document = await req.conn
         .createQueryBuilder()
         .update('InvoicesDocument')
         .set(documentToUpdate)
         .where('id=:id', { id: documentToUpdate.id })
         .andWhere('used=:used', { used: false })
+        .returning('id')
         .execute();
-
+      if (document.raw.length > 0) {
+        documentsIds.push(document.raw[0].id);
+      }
       await addLog(
         req.conn,
         req.moduleName,
         `${user.names} ${user.lastnames}`,
         user.id,
-        `Se ha actualizado el documento con id: ${documentToUpdate.id}`,
+        `Se ha actualizado el documento con id: ${document}`,
       );
+    }
+    let documentCantUpdate = [];
+    for (const document of documents.map(d => d.id)) {
+      if (!documentsIds.includes(document)) {
+        documentCantUpdate.push(document);
+      }
     }
     // On success
     return res.json({
-      message: 'Los documentos se han editado correctamente.',
+      message:
+        !Object.keys(documentCantUpdate) > 0
+          ? 'Los documentos se han actualizado correctamente.'
+          : `Se actualizaron los documentos con id:${documentsIds.join(
+              ',',
+              ' ',
+            )}, y no se pudieron actualizar los documentos con id:${documentCantUpdate.join(
+              ',',
+              ' ',
+            )} porque no existe o esta en uso`,
     });
   } catch (error) {
     // On errror
@@ -426,7 +435,7 @@ router.put('/status/:id', async (req, res) => {
 
   // If no exist
   if (!document) {
-    return res.status(400).json({ message: 'El documento seleccionada no existe.' });
+    return res.status(400).json({ message: 'El documento seleccionado no existe.' });
   }
 
   // If document exist updates it
@@ -451,7 +460,7 @@ router.put('/status/:id', async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del documento: ${document.name} a ${status ? 'ACTIVO' : 'INACTIVO'}.`,
+      `Se cambio el estado del documento: ${document.active} a ${status ? 'ACTIVO' : 'INACTIVO'}.`,
     );
 
     return res.json({
@@ -461,75 +470,75 @@ router.put('/status/:id', async (req, res) => {
     // return error
     console.error(error);
     return res.status(500).json({
-      message: 'Error al actualizar el documento. Contacta con tu administrador.',
+      message: 'Error al actualizar el estado del documento. Contacta con tu administrador.',
     });
   }
 });
 
-router.delete('/:id', async (req, res) => {
-  // Get the document
-  const document = await req.conn
-    .getRepository('InvoicesDocument')
-    .createQueryBuilder('d')
-    .where('d.company = :company', { company: req.user.cid })
-    .andWhere('d.id = :id', { id: req.params.id })
-    .getOne();
+// router.delete('/:id', async (req, res) => {
+//   // Get the document
+//   const document = await req.conn
+//     .getRepository('InvoicesDocument')
+//     .createQueryBuilder('d')
+//     .where('d.company = :company', { company: req.user.cid })
+//     .andWhere('d.id = :id', { id: req.params.id })
+//     .getOne();
 
-  // If no document exist
-  if (!document) {
-    return res.status(400).json({ message: 'El documento ingresado no existe' });
-  }
+//   // If no document exist
+//   if (!document) {
+//     return res.status(400).json({ message: 'El documento ingresado no existe' });
+//   }
 
-  // If document exist
-  // Check references in other tables
-  // const references = await foundRelations(
-  //   req.conn,
-  //   "invoices_document",
-  //   document.id,
-  //   [],
-  //   "invoicesZone"
-  // );
+//   // If document exist
+//   // Check references in other tables
+//   // const references = await foundRelations(
+//   //   req.conn,
+//   //   "invoices_document",
+//   //   document.id,
+//   //   [],
+//   //   "invoicesZone"
+//   // );
 
-  // // if references rejects deletion
-  // if (references) {
-  //   return res.status(400).json({
-  //     message:
-  //       "La zona no puede ser eliminada porque esta siendo utilizado en el sistema.",
-  //   });
-  // }
+//   // // if references rejects deletion
+//   // if (references) {
+//   //   return res.status(400).json({
+//   //     message:
+//   //       "La zona no puede ser eliminada porque esta siendo utilizado en el sistema.",
+//   //   });
+//   // }
 
-  // If no references deletes
-  try {
-    await req.conn
-      .createQueryBuilder()
-      .delete()
-      .from('InvoicesDocument')
-      .where('id = :id', { id: req.params.id })
-      .andWhere('company = :company', { company: req.user.cid })
-      .execute();
+//   // If no references deletes
+//   try {
+//     await req.conn
+//       .createQueryBuilder()
+//       .delete()
+//       .from('InvoicesDocument')
+//       .where('id = :id', { id: req.params.id })
+//       .andWhere('company = :company', { company: req.user.cid })
+//       .execute();
 
-    const user = await req.conn
-      .getRepository('User')
-      .createQueryBuilder('u')
-      .where('u.id = :id', { id: req.user.uid })
-      .getOne();
+//     const user = await req.conn
+//       .getRepository('User')
+//       .createQueryBuilder('u')
+//       .where('u.id = :id', { id: req.user.uid })
+//       .getOne();
 
-    await addLog(
-      req.conn,
-      req.moduleName,
-      `${user.names} ${user.lastnames}`,
-      user.id,
-      `Se elimino el documeto con authorizacion: ${document.authorization}.`,
-    );
+//     await addLog(
+//       req.conn,
+//       req.moduleName,
+//       `${user.names} ${user.lastnames}`,
+//       user.id,
+//       `Se elimino el documeto con authorizacion: ${document.authorization}.`,
+//     );
 
-    return res.json({
-      message: 'El documento ha sido eliminado correctamente.',
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: 'Error al eliminar el documento. Conctacta a tu administrador.',
-    });
-  }
-});
+//     return res.json({
+//       message: 'El documento ha sido eliminado correctamente.',
+//     });
+//   } catch (error) {
+//     return res.status(500).json({
+//       message: 'Error al eliminar el documento. Conctacta a tu administrador.',
+//     });
+//   }
+// });
 
 module.exports = router;
