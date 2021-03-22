@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsBooleanString, IsInt, IsOptional } from 'class-validator';
 
-export class FilterDto {
+export class FilterDTO {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsInt()

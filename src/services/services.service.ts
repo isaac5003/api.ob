@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ServiceFilterDto } from './dtos/service-filter.dto';
+import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './Service.entity';
 import { ServiceRepository } from './Service.repository';
 
@@ -10,7 +10,12 @@ export class ServicesService {
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
   ) {}
-  async getServices(filterDto: ServiceFilterDto): Promise<Service[]> {
+
+  async getServices(filterDto: ServiceFilterDTO): Promise<Service[]> {
     return this.serviceRepository.getServices(filterDto);
+  }
+
+  async getService(id: string): Promise<Service> {
+    return this.serviceRepository.getService(id);
   }
 }
