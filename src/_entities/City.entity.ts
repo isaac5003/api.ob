@@ -29,5 +29,5 @@ export class City extends BaseEntity {
   state: State;
 
   @OneToMany(() => User, (user) => user.city)
-  cities: User[];
+  users: User[];
 }
