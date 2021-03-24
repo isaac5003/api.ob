@@ -41,7 +41,7 @@ export class Service extends BaseEntity {
   @ManyToOne(() => SellingType, (sellingType) => sellingType.services)
   sellingType: SellingType;
 }
-
+//TODO
 //   relations: {
 //     company: {
 //       target: 'Company',

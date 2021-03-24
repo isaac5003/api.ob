@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional, IsBooleanString } from 'class-validator';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 
 export class ServiceFilterDTO extends FilterDTO {
@@ -15,4 +15,9 @@ export class ServiceFilterDTO extends FilterDTO {
   @IsOptional()
   @Transform(({ value }) => parseFloat(value))
   toAmount: number;
+
+  @IsOptional()
+  @Transform(({ value }) => value.toLowerCase())
+  @IsBooleanString()
+  active: boolean;
 }

@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBooleanString, IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional } from 'class-validator';
 
 export class FilterDTO {
   @IsOptional()
@@ -11,11 +11,6 @@ export class FilterDTO {
   @Transform(({ value }) => parseInt(value))
   @IsInt()
   page: number;
-
-  @IsOptional()
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString()
-  active: boolean;
 
   @IsOptional()
   @Transform(({ value }) => value.toLowerCase())
