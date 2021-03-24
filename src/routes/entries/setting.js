@@ -23,8 +23,8 @@ router.get('/general', async (req, res) => {
 
     return res.json({
       general: {
-        periodStart: settings.periodStart,
-        peridoEnd: settings.peridoEnd,
+        periodStart: settings ? settings.periodStart : null,
+        peridoEnd: settings ? settings.peridoEnd : null,
       },
     });
   } catch (error) {
@@ -96,9 +96,9 @@ router.get('/signatures', async (req, res) => {
 
     return res.json({
       signatures: {
-        legal: settings.legal,
-        accountant: settings.accountant,
-        auditor: settings.auditor,
+        legal: settings ? settings.legal : null,
+        accountant: settings ? settings.accountant : null,
+        auditor: settings ? settings.auditor : null,
       },
     });
   } catch (error) {
@@ -153,14 +153,14 @@ router.put('/signatures', async (req, res) => {
 
 router.get('/balance-general', async (req, res) => {
   try {
-    const { balanceGeneral } = await req.conn
+    const settings = await req.conn
       .getRepository('AccountingSetting')
       .createQueryBuilder('as')
       .select('as.balanceGeneral')
       .where('as.company = :company', { company: req.user.cid })
       .getOne();
 
-    return res.json({ balanceGeneral });
+    return res.json({ balanceGeneral: settings ? settings.balanceGeneral : null });
   } catch (error) {
     return res.status(500).json({
       message: 'Error al obtener la configuracion de balance general.',
@@ -207,14 +207,14 @@ router.put('/balance-general', async (req, res) => {
 
 router.get('/estado-resultados', async (req, res) => {
   try {
-    const { estadoResultados } = await req.conn
+    const settings = await req.conn
       .getRepository('AccountingSetting')
       .createQueryBuilder('as')
       .select('as.estadoResultados')
       .where('as.company = :company', { company: req.user.cid })
       .getOne();
 
-    return res.json({ estadoResultados });
+    return res.json({ estadoResultados: settings ? settings.estadoResultados : null });
   } catch (error) {
     return res.status(500).json({
       message: 'Error al obtener la configuracion del estado de resultados.',
