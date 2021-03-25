@@ -11,9 +11,6 @@ export class Token {
   @Column('character varying', { name: 'active' })
   active: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 }

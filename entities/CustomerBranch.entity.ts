@@ -14,27 +14,21 @@ export class CustomerBranch {
   name: string;
 
   @Column('character varying', { name: 'contactName', nullable: true })
-  contactName: string | null;
+  contactName: string;
 
   @Column('json', { name: 'contactInfo', nullable: true })
-  contactInfo: object | null;
+  contactInfo: string;
 
   @Column('character varying', { name: 'address1', nullable: true })
-  address1: string | null;
+  address1: string;
 
   @Column('character varying', { name: 'address2', nullable: true })
-  address2: string | null;
+  address2: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @Column('boolean', { name: 'default', default: () => 'true' })

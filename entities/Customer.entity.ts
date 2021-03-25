@@ -30,27 +30,21 @@ export class Customer {
   isActiveProvider: boolean;
 
   @Column('character varying', { name: 'dui', nullable: true })
-  dui: string | null;
+  dui: string;
 
   @Column('character varying', { name: 'nrc', nullable: true })
-  nrc: string | null;
+  nrc: string;
 
   @Column('character varying', { name: 'nit', nullable: true })
-  nit: string | null;
+  nit: string;
 
   @Column('character varying', { name: 'giro', nullable: true })
-  giro: string | null;
+  giro: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => Company, (company) => company.customers)

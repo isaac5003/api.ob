@@ -1,4 +1,3 @@
-import { User } from 'src/auth/User.entity';
 import {
   BaseEntity,
   Column,
@@ -8,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from 'src/auth/User.entity';
 import { State } from './State.entity';
 
 @Entity()

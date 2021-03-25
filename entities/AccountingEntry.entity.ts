@@ -1,49 +1,49 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { AccountingEntryType } from './AccountingEntryType';
-import { Company } from './Company';
-import { AccountingEntryDetail } from './AccountingEntryDetail';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { AccountingEntryType } from './AccountingEntryType.entity';
+import { Company } from './Company.entity';
+import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
 
-@Entity('accounting_entry')
+@Entity()
 export class AccountingEntry {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'serie' })
+  @Column()
   serie: string;
 
-  @Column('character varying', { name: 'title' })
+  @Column()
   title: string;
 
-  @Column('date', { name: 'date' })
+  @Column()
   date: string;
 
-  @Column('boolean', { name: 'squared' })
+  @Column()
   squared: boolean;
 
-  @Column('boolean', { name: 'accounted' })
+  @Column()
   accounted: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(
     () => AccountingEntryType,
     (accountingEntryType) => accountingEntryType.accountingEntries,
   )
-  @JoinColumn([{ name: 'accountingEntryTypeId', referencedColumnName: 'id' }])
   accountingEntryType: AccountingEntryType;
 
   @ManyToOne(() => Company, (company) => company.accountingEntries)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
 
   @OneToMany(

@@ -1,51 +1,51 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Company } from './Company';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Company } from './Company.entity';
 
-@Entity('accounting_setting')
+@Entity()
 export class AccountingSetting {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'type', nullable: true })
-  type: string | null;
+  @Column({ nullable: true })
+  type: string;
 
   @Column('json', { name: 'settings', nullable: true })
-  settings: object | null;
+  settings: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @Column('json', { name: 'balanceGeneral', nullable: true })
-  balanceGeneral: object | null;
+  balanceGeneral: string;
 
   @Column('json', { name: 'estadoResultados', nullable: true })
-  estadoResultados: object | null;
+  estadoResultados: string;
 
   @Column('date', { name: 'periodStart', nullable: true })
-  periodStart: string | null;
+  periodStart: string;
 
   @Column('date', { name: 'peridoEnd', nullable: true })
-  peridoEnd: string | null;
+  peridoEnd: string;
 
-  @Column('character varying', { name: 'legal', nullable: true })
-  legal: string | null;
+  @Column({ nullable: true })
+  legal: string;
 
-  @Column('character varying', { name: 'accountant', nullable: true })
-  accountant: string | null;
+  @Column({ nullable: true })
+  accountant: string;
 
-  @Column('character varying', { name: 'auditor', nullable: true })
-  auditor: string | null;
+  @Column({ nullable: true })
+  auditor: string;
 
   @ManyToOne(() => Company, (company) => company.accountingSettings)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
 }

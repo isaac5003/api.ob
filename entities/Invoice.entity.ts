@@ -45,16 +45,16 @@ export class Invoice {
   customerCity: string;
 
   @Column('character varying', { name: 'customerDui', nullable: true })
-  customerDui: string | null;
+  customerDui: string;
 
   @Column('character varying', { name: 'customerNit', nullable: true })
-  customerNit: string | null;
+  customerNit: string;
 
   @Column('character varying', { name: 'customerNrc', nullable: true })
-  customerNrc: string | null;
+  customerNrc: string;
 
   @Column('character varying', { name: 'customerGiro', nullable: true })
-  customerGiro: string | null;
+  customerGiro: string;
 
   @Column('character varying', { name: 'paymentConditionName' })
   paymentConditionName: string;
@@ -75,13 +75,13 @@ export class Invoice {
   subtotal: string;
 
   @Column('numeric', { name: 'ivaRetenido', nullable: true })
-  ivaRetenido: string | null;
+  ivaRetenido: string;
 
   @Column('numeric', { name: 'ventasExentas', nullable: true })
-  ventasExentas: string | null;
+  ventasExentas: string;
 
   @Column('numeric', { name: 'ventasNoSujetas', nullable: true })
-  ventasNoSujetas: string | null;
+  ventasNoSujetas: string;
 
   @Column('numeric', { name: 'ventaTotal' })
   ventaTotal: string;
@@ -93,18 +93,12 @@ export class Invoice {
     name: 'printedDate',
     nullable: true,
   })
-  printedDate: Date | null;
+  printedDate: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => Branch, (branch) => branch.invoices)

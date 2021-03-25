@@ -1,28 +1,30 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { AccountingEntry } from './AccountingEntry';
-import { Company } from './Company';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { AccountingEntry } from './AccountingEntry.entity';
+import { Company } from './Company.entity';
 
-@Entity('accounting_entry_type')
+@Entity()
 export class AccountingEntryType {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column()
   name: string;
 
-  @Column('character varying', { name: 'code' })
+  @Column()
   code: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(
@@ -32,6 +34,5 @@ export class AccountingEntryType {
   accountingEntries: AccountingEntry[];
 
   @ManyToOne(() => Company, (company) => company.accountingEntryTypes)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
 }

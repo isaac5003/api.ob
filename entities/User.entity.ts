@@ -26,7 +26,7 @@ export class User {
   lastnames: string;
 
   @Column('date', { name: 'dob', nullable: true })
-  dob: string | null;
+  dob: string;
 
   @Column('boolean', { name: 'changePassword', default: () => 'true' })
   changePassword: boolean;
@@ -35,18 +35,12 @@ export class User {
   isActive: boolean;
 
   @Column('character varying', { name: 'avatarURL', nullable: true })
-  avatarUrl: string | null;
+  avatarUrl: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => City, (city) => city.users)

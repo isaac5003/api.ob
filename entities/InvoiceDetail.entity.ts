@@ -23,16 +23,10 @@ export class InvoiceDetail {
   @Column('double precision', { name: 'ventaPrice', precision: 53 })
   ventaPrice: number;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.invoiceDetails)

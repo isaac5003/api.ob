@@ -1,27 +1,28 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Branch } from "./Branch";
-import { CustomerBranch } from "./CustomerBranch";
-import { State } from "./State";
-import { User } from "./User";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Branch } from './Branch.entity';
+import { CustomerBranch } from './CustomerBranch.entity';
+import { State } from './State.entity';
+import { User } from './User.entity';
 
-@Entity("country")
+@Entity()
 export class Country {
-  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column("character varying", { name: "name" })
+  @Column()
   name: string;
 
-  @Column("timestamp without time zone", {
-    name: "createdAt",
-    default: () => "now()",
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column("timestamp without time zone", {
-    name: "updatedAt",
-    default: () => "now()",
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Branch, (branch) => branch.country)

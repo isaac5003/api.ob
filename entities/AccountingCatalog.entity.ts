@@ -1,56 +1,56 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Company } from './Company';
-import { AccountingEntryDetail } from './AccountingEntryDetail';
-import { CustomerSetting } from './CustomerSetting';
-import { ServiceSetting } from './ServiceSetting';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Company } from './Company.entity';
+import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
+import { CustomerSetting } from './CustomerSetting.entity';
+import { ServiceSetting } from './ServiceSetting.entity';
 
-@Entity('accounting_catalog')
+@Entity()
 export class AccountingCatalog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'code' })
+  @Column()
   code: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column()
   name: string;
 
-  @Column('character varying', { name: 'description', nullable: true })
-  description: string | null;
+  @Column({ nullable: true })
+  description: string;
 
-  @Column('integer', { name: 'level', nullable: true })
-  level: number | null;
+  @Column({ nullable: true })
+  level: number;
 
-  @Column('boolean', { name: 'isParent', default: () => 'false' })
+  @Column({ default: false })
   isParent: boolean;
 
-  @Column('boolean', { name: 'isAcreedora', nullable: true })
-  isAcreedora: boolean | null;
+  @Column({ nullable: true })
+  isAcreedora: boolean;
 
-  @Column('boolean', { name: 'isBalance', nullable: true })
-  isBalance: boolean | null;
+  @Column({ nullable: true })
+  isBalance: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => Company, (company) => company.accountingCatalogs)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
 
   @ManyToOne(
     () => AccountingCatalog,
     (accountingCatalog) => accountingCatalog.accountingCatalogs,
   )
-  @JoinColumn([{ name: 'parentCatalogId', referencedColumnName: 'id' }])
   parentCatalog: AccountingCatalog;
 
   @OneToMany(

@@ -1,12 +1,12 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
-  JoinColumn,
-  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Access } from './Access.entity';
 import { AccountingCatalog } from './AccountingCatalog.entity';
@@ -30,54 +30,48 @@ import { Profile } from './Profile.entity';
 import { Service } from './Service.entity';
 import { ServiceSetting } from './ServiceSetting.entity';
 
-@Entity('company')
+@Entity()
 export class Company {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'unique' })
+  @Column()
   unique: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column()
   name: string;
 
-  @Column('character varying', { name: 'shortName' })
+  @Column()
   shortName: string;
 
-  @Column('boolean', { name: 'outsourcer', default: () => 'false' })
+  @Column({ default: false })
   outsourcer: boolean;
 
-  @Column('character varying', { name: 'nrc', nullable: true })
-  nrc: string | null;
+  @Column({ nullable: true })
+  nrc: string;
 
-  @Column('character varying', { name: 'nit', nullable: true })
-  nit: string | null;
+  @Column({ nullable: true })
+  nit: string;
 
-  @Column('character varying', { name: 'dui', nullable: true })
-  dui: string | null;
+  @Column({ nullable: true })
+  dui: string;
 
-  @Column('character varying', { name: 'giro', nullable: true })
-  giro: string | null;
+  @Column({ nullable: true })
+  giro: string;
 
-  @Column('character varying', { name: 'logo', nullable: true })
-  logo: string | null;
+  @Column({ nullable: true })
+  logo: string;
 
-  @Column('character varying', { name: 'security' })
+  @Column()
   security: string;
 
-  @Column('boolean', { name: 'active', default: () => 'true' })
+  @Column({ default: true })
   active: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Access, (access) => access.company)
@@ -123,15 +117,12 @@ export class Company {
   branches: Branch[];
 
   @ManyToOne(() => CompanyType, (companyType) => companyType.companies)
-  @JoinColumn([{ name: 'companyTypeId', referencedColumnName: 'id' }])
   companyType: CompanyType;
 
   @ManyToOne(() => NaturalType, (naturalType) => naturalType.companies)
-  @JoinColumn([{ name: 'naturalTypeId', referencedColumnName: 'id' }])
   naturalType: NaturalType;
 
   @ManyToOne(() => TaxerType, (taxerType) => taxerType.companies)
-  @JoinColumn([{ name: 'taxerTypeId', referencedColumnName: 'id' }])
   taxerType: TaxerType;
 
   @OneToMany(() => Customer, (customer) => customer.company)
@@ -165,12 +156,6 @@ export class Company {
   invoicesZones: InvoicesZone[];
 
   @ManyToMany(() => Profile, (profile) => profile.companies)
-  @JoinTable({
-    name: 'profile_companies_company',
-    joinColumns: [{ name: 'companyId', referencedColumnName: 'id' }],
-    inverseJoinColumns: [{ name: 'profileId', referencedColumnName: 'id' }],
-    schema: 'public',
-  })
   profiles: Profile[];
 
   @OneToMany(() => Service, (service) => service.company)

@@ -9,16 +9,10 @@ export class NaturalType {
   @Column('character varying', { name: 'name' })
   name: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Company, (company) => company.naturalType)

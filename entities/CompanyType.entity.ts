@@ -1,24 +1,25 @@
-import { Column, Entity, OneToMany } from 'typeorm';
-import { Company } from './Company';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Company } from './Company.entity';
 
-@Entity('company_type')
+@Entity()
 export class CompanyType {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column()
   name: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Company, (company) => company.companyType)

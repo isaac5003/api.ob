@@ -13,16 +13,10 @@ export class InvoicesPaymentsCondition {
   @Column('boolean', { name: 'active', default: () => 'true' })
   active: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Invoice, (invoice) => invoice.invoicesPaymentsCondition)

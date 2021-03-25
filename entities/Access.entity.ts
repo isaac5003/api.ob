@@ -1,33 +1,29 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
-import { Branch } from './Branch';
-import { Company } from './Company';
-import { Module } from './Module';
-import { Profile } from './Profile';
+import { Branch } from './Branch.entity';
+import { Company } from './Company.entity';
+import { Module } from './Module.entity';
+import { Profile } from './Profile.entity';
 
-@Entity('access')
+@Entity()
 export class Access {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('json', { name: 'permissions' })
-  permissions: object;
+  @Column()
+  permissions: string;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @ManyToOne(() => Branch, (branch) => branch.accesses)

@@ -18,16 +18,10 @@ export class Profile {
   @Column('boolean', { name: 'editable', default: () => 'true' })
   editable: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @Column('boolean', { name: 'admin', default: () => 'false' })

@@ -13,7 +13,7 @@ export class Module {
   description: string;
 
   @Column('json', { name: 'access' })
-  access: object;
+  access: string;
 
   @Column('boolean', { name: 'reserved', default: () => 'false' })
   reserved: boolean;
@@ -21,16 +21,10 @@ export class Module {
   @Column('boolean', { name: 'system', default: () => 'false' })
   system: boolean;
 
-  @Column('timestamp without time zone', {
-    name: 'createdAt',
-    default: () => 'now()',
-  })
+  @CreateDateColumn({ select: false })
   createdAt: Date;
 
-  @Column('timestamp without time zone', {
-    name: 'updatedAt',
-    default: () => 'now()',
-  })
+  @UpdateDateColumn({ select: false })
   updatedAt: Date;
 
   @OneToMany(() => Access, (access) => access.module)
