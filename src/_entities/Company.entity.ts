@@ -22,7 +22,7 @@ import { TaxerType } from './TaxerType.entity';
 import { CompanyType } from './CompanyType.entity';
 import { Customer } from '../customers/Customer.entity';
 import { CustomerSetting } from '../customers/CustomerSetting.entity';
-import { Invoice } from '../invoices/Invoice.entity';
+import { Invoice } from '../invoices/entities/Invoice.entity';
 import { InvoicesDocument } from '../invoices/InvoicesDocument.entity';
 import { InvoicesPaymentsCondition } from '../invoices/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../invoices/InvoicesSeller.entity';

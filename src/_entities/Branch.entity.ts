@@ -14,7 +14,7 @@ import { Company } from './Company.entity';
 import { City } from './City.entity';
 import { Country } from './Country.entity';
 import { State } from './State.entity';
-import { Invoice } from '../invoices/Invoice.entity';
+import { Invoice } from '../invoices/entities/Invoice.entity';
 //TODO
 import { Profile } from './Profile.entity';
 
