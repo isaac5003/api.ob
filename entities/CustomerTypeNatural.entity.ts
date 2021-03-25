@@ -6,15 +6,12 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Customer } from "./Customer";
-import { CustomerType } from "./CustomerType";
-import { Invoice } from "./Invoice";
+import { Customer } from "./CustomerEntity";
+import { CustomerType } from "./CustomerTypeEntity";
+import { Invoice } from "./InvoiceEntity";
 
 @Entity("customer_type_natural")
 export class CustomerTypeNatural {
-  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
-  id: number;
-
   @Column("character varying", { name: "name" })
   name: string;
 
@@ -29,6 +26,9 @@ export class CustomerTypeNatural {
     default: () => "now()",
   })
   updatedAt: Date;
+
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id: number;
 
   @OneToMany(() => Customer, (customer) => customer.customerTypeNatural)
   customers: Customer[];

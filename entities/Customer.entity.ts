@@ -1,14 +1,19 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Company } from './Company';
-import { CustomerTaxerType } from './CustomerTaxerType';
-import { CustomerType } from './CustomerType';
-import { CustomerTypeNatural } from './CustomerTypeNatural';
-import { CustomerBranch } from './CustomerBranch';
-import { Invoice } from './Invoice';
+import { AccountingCatalog } from './AccountingCatalogEntity';
+import { Company } from './CompanyEntity';
+import { CustomerTaxerType } from './CustomerTaxerTypeEntity';
+import { CustomerType } from './CustomerTypeEntity';
+import { CustomerTypeNatural } from './CustomerTypeNaturalEntity';
+import { CustomerBranch } from './CustomerBranchEntity';
+import { Invoice } from './InvoiceEntity';
 
 @Entity('customer')
 export class Customer {
-  @PrimaryGeneratedColumn('uuid')
+  @Column('uuid', {
+    primary: true,
+    name: 'id',
+    default: () => 'uuid_generate_v4()',
+  })
   id: string;
 
   @Column('character varying', { name: 'name' })
@@ -17,17 +22,11 @@ export class Customer {
   @Column('character varying', { name: 'shortName' })
   shortName: string;
 
-  @Column('boolean', { name: 'isCustomer' })
-  isCustomer: boolean;
-
   @Column('boolean', { name: 'isProvider' })
   isProvider: boolean;
 
-  @Column('boolean', { name: 'isActiveCustomer', default: () => 'true' })
-  isActiveCustomer: boolean;
-
-  @Column('boolean', { name: 'isActiveProvider', default: () => 'true' })
-  isActiveProvider: boolean;
+  @Column('boolean', { name: 'isCustomer' })
+  isCustomer: boolean;
 
   @Column('character varying', { name: 'dui', nullable: true })
   dui: string;
@@ -41,11 +40,30 @@ export class Customer {
   @Column('character varying', { name: 'giro', nullable: true })
   giro: string;
 
-  @CreateDateColumn({ select: false })
+  @Column('boolean', { name: 'isActiveCustomer', default: () => 'true' })
+  isActiveCustomer: boolean;
+
+  @Column('boolean', { name: 'isActiveProvider', default: () => 'true' })
+  isActiveProvider: boolean;
+
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
   updatedAt: Date;
+
+  @ManyToOne(
+    () => AccountingCatalog,
+    (accountingCatalog) => accountingCatalog.customers,
+  )
+  @JoinColumn([{ name: 'accountingCatalogId', referencedColumnName: 'id' }])
+  accountingCatalog: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.customers)
   @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])

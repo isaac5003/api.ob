@@ -1,12 +1,9 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { InvoiceDetail } from "./InvoiceDetail";
-import { Service } from "./Service";
+import { InvoiceDetail } from "./InvoiceDetailEntity";
+import { Service } from "./ServiceEntity";
 
 @Entity("selling_type")
 export class SellingType {
-  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
-  id: number;
-
   @Column("character varying", { name: "name" })
   name: string;
 
@@ -21,6 +18,9 @@ export class SellingType {
     default: () => "now()",
   })
   updatedAt: Date;
+
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id: number;
 
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.sellingType)
   invoiceDetails: InvoiceDetail[];

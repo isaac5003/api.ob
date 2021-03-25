@@ -1,20 +1,24 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Branch } from './Branch';
-import { Company } from './Company';
-import { CustomerBranch } from './CustomerBranch';
-import { Customer } from './Customer';
-import { CustomerType } from './CustomerType';
-import { CustomerTypeNatural } from './CustomerTypeNatural';
-import { InvoicesDocumentType } from './InvoicesDocumentType';
-import { InvoicesPaymentsCondition } from './InvoicesPaymentsCondition';
-import { InvoicesSeller } from './InvoicesSeller';
-import { InvoicesZone } from './InvoicesZone';
-import { InvoicesStatus } from './InvoicesStatus';
-import { InvoiceDetail } from './InvoiceDetail';
+import { Branch } from './BranchEntity';
+import { Company } from './CompanyEntity';
+import { CustomerBranch } from './CustomerBranchEntity';
+import { Customer } from './CustomerEntity';
+import { InvoicesPaymentsCondition } from './InvoicesPaymentsConditionEntity';
+import { InvoicesSeller } from './InvoicesSellerEntity';
+import { InvoicesZone } from './InvoicesZoneEntity';
+import { InvoicesStatus } from './InvoicesStatusEntity';
+import { CustomerType } from './CustomerTypeEntity';
+import { CustomerTypeNatural } from './CustomerTypeNaturalEntity';
+import { InvoicesDocumentType } from './InvoicesDocumentTypeEntity';
+import { InvoiceDetail } from './InvoiceDetailEntity';
 
 @Entity('invoice')
 export class Invoice {
-  @PrimaryGeneratedColumn('uuid')
+  @Column('uuid', {
+    primary: true,
+    name: 'id',
+    default: () => 'uuid_generate_v4()',
+  })
   id: string;
 
   @Column('character varying', { name: 'authorization' })
@@ -23,25 +27,22 @@ export class Invoice {
   @Column('character varying', { name: 'sequence' })
   sequence: string;
 
-  @Column('date', { name: 'invoiceDate' })
-  invoiceDate: string;
-
-  @Column('character varying', { name: 'customerName' })
+  @Column('character varying', { name: 'customerName', nullable: true })
   customerName: string;
 
-  @Column('character varying', { name: 'customerAddress1' })
+  @Column('character varying', { name: 'customerAddress1', nullable: true })
   customerAddress1: string;
 
-  @Column('character varying', { name: 'customerAddress2' })
+  @Column('character varying', { name: 'customerAddress2', nullable: true })
   customerAddress2: string;
 
-  @Column('character varying', { name: 'customerCountry' })
+  @Column('character varying', { name: 'customerCountry', nullable: true })
   customerCountry: string;
 
-  @Column('character varying', { name: 'customerState' })
+  @Column('character varying', { name: 'customerState', nullable: true })
   customerState: string;
 
-  @Column('character varying', { name: 'customerCity' })
+  @Column('character varying', { name: 'customerCity', nullable: true })
   customerCity: string;
 
   @Column('character varying', { name: 'customerDui', nullable: true })
@@ -56,22 +57,13 @@ export class Invoice {
   @Column('character varying', { name: 'customerGiro', nullable: true })
   customerGiro: string;
 
-  @Column('character varying', { name: 'paymentConditionName' })
-  paymentConditionName: string;
-
-  @Column('character varying', { name: 'sellerName' })
-  sellerName: string;
-
-  @Column('character varying', { name: 'zoneName' })
-  zoneName: string;
-
-  @Column('numeric', { name: 'sum' })
+  @Column('numeric', { name: 'sum', nullable: true })
   sum: string;
 
-  @Column('numeric', { name: 'iva' })
+  @Column('numeric', { name: 'iva', nullable: true })
   iva: string;
 
-  @Column('numeric', { name: 'subtotal' })
+  @Column('numeric', { name: 'subtotal', nullable: true })
   subtotal: string;
 
   @Column('numeric', { name: 'ivaRetenido', nullable: true })
@@ -83,10 +75,10 @@ export class Invoice {
   @Column('numeric', { name: 'ventasNoSujetas', nullable: true })
   ventasNoSujetas: string;
 
-  @Column('numeric', { name: 'ventaTotal' })
+  @Column('numeric', { name: 'ventaTotal', nullable: true })
   ventaTotal: string;
 
-  @Column('character varying', { name: 'ventaTotalText' })
+  @Column('character varying', { name: 'ventaTotalText', nullable: true })
   ventaTotalText: string;
 
   @Column('timestamp without time zone', {
@@ -95,11 +87,29 @@ export class Invoice {
   })
   printedDate: Date;
 
-  @CreateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
   updatedAt: Date;
+
+  @Column('date', { name: 'invoiceDate', nullable: true })
+  invoiceDate: string;
+
+  @Column('character varying', { name: 'paymentConditionName', nullable: true })
+  paymentConditionName: string;
+
+  @Column('character varying', { name: 'sellerName', nullable: true })
+  sellerName: string;
+
+  @Column('character varying', { name: 'zoneName', nullable: true })
+  zoneName: string;
 
   @ManyToOne(() => Branch, (branch) => branch.invoices)
   @JoinColumn([{ name: 'branchId', referencedColumnName: 'id' }])
@@ -116,24 +126,6 @@ export class Invoice {
   @ManyToOne(() => Customer, (customer) => customer.invoices)
   @JoinColumn([{ name: 'customerId', referencedColumnName: 'id' }])
   customer: Customer;
-
-  @ManyToOne(() => CustomerType, (customerType) => customerType.invoices)
-  @JoinColumn([{ name: 'customerTypeId', referencedColumnName: 'id' }])
-  customerType: CustomerType;
-
-  @ManyToOne(
-    () => CustomerTypeNatural,
-    (customerTypeNatural) => customerTypeNatural.invoices,
-  )
-  @JoinColumn([{ name: 'customerTypeNaturalId', referencedColumnName: 'id' }])
-  customerTypeNatural: CustomerTypeNatural;
-
-  @ManyToOne(
-    () => InvoicesDocumentType,
-    (invoicesDocumentType) => invoicesDocumentType.invoices,
-  )
-  @JoinColumn([{ name: 'documentTypeId', referencedColumnName: 'id' }])
-  documentType: InvoicesDocumentType;
 
   @ManyToOne(
     () => InvoicesPaymentsCondition,
@@ -155,6 +147,24 @@ export class Invoice {
   @ManyToOne(() => InvoicesStatus, (invoicesStatus) => invoicesStatus.invoices)
   @JoinColumn([{ name: 'statusId', referencedColumnName: 'id' }])
   status: InvoicesStatus;
+
+  @ManyToOne(() => CustomerType, (customerType) => customerType.invoices)
+  @JoinColumn([{ name: 'customerTypeId', referencedColumnName: 'id' }])
+  customerType: CustomerType;
+
+  @ManyToOne(
+    () => CustomerTypeNatural,
+    (customerTypeNatural) => customerTypeNatural.invoices,
+  )
+  @JoinColumn([{ name: 'customerTypeNaturalId', referencedColumnName: 'id' }])
+  customerTypeNatural: CustomerTypeNatural;
+
+  @ManyToOne(
+    () => InvoicesDocumentType,
+    (invoicesDocumentType) => invoicesDocumentType.invoices,
+  )
+  @JoinColumn([{ name: 'documentTypeId', referencedColumnName: 'id' }])
+  documentType: InvoicesDocumentType;
 
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.invoice)
   invoiceDetails: InvoiceDetail[];

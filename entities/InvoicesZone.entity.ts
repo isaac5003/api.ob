@@ -1,35 +1,45 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { Invoice } from './Invoice';
-import { InvoicesSeller } from './InvoicesSeller';
-import { Company } from './Company';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { Invoice } from "./InvoiceEntity";
+import { InvoicesSeller } from "./InvoicesSellerEntity";
+import { Company } from "./CompanyEntity";
 
-@Entity('invoices_zone')
+@Entity("invoices_zone")
 export class InvoicesZone {
-  @PrimaryGeneratedColumn('uuid')
+  @Column("uuid", {
+    primary: true,
+    name: "id",
+    default: () => "uuid_generate_v4()",
+  })
   id: string;
 
-  @Column('character varying', { name: 'name' })
+  @Column("character varying", { name: "name" })
   name: string;
 
-  @Column('boolean', { name: 'active', default: () => 'true' })
-  active: boolean;
-
-  @CreateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "createdAt",
+    default: () => "now()",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "updatedAt",
+    default: () => "now()",
+  })
   updatedAt: Date;
+
+  @Column("boolean", { name: "active", default: () => "true" })
+  active: boolean;
 
   @OneToMany(() => Invoice, (invoice) => invoice.invoicesZone)
   invoices: Invoice[];
 
   @OneToMany(
     () => InvoicesSeller,
-    (invoicesSeller) => invoicesSeller.invoicesZone,
+    (invoicesSeller) => invoicesSeller.invoicesZone
   )
   invoicesSellers: InvoicesSeller[];
 
   @ManyToOne(() => Company, (company) => company.invoicesZones)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
+  @JoinColumn([{ name: "companyId", referencedColumnName: "id" }])
   company: Company;
 }

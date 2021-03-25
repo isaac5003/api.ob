@@ -9,10 +9,13 @@ import {
 } from 'typeorm';
 import { Company } from './Company.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
+import { AccountingSetting } from './AccountingSetting.entity';
+import { Customer } from './Customer.entity';
 import { CustomerSetting } from './CustomerSetting.entity';
+import { Service } from './Service.entity';
 import { ServiceSetting } from './ServiceSetting.entity';
 
-@Entity()
+@Entity('accounting_catalog')
 export class AccountingCatalog {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -66,10 +69,22 @@ export class AccountingCatalog {
   accountingEntryDetails: AccountingEntryDetail[];
 
   @OneToMany(
+    () => AccountingSetting,
+    (accountingSetting) => accountingSetting.accountingCatalog,
+  )
+  accountingSettings: AccountingSetting[];
+
+  @OneToMany(() => Customer, (customer) => customer.accountingCatalog)
+  customers: Customer[];
+
+  @OneToMany(
     () => CustomerSetting,
     (customerSetting) => customerSetting.accountingCatalog,
   )
   customerSettings: CustomerSetting[];
+
+  @OneToMany(() => Service, (service) => service.accountingCatalog)
+  services: Service[];
 
   @OneToMany(
     () => ServiceSetting,

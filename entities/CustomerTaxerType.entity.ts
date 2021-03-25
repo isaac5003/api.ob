@@ -1,11 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Customer } from "./Customer";
+import { Customer } from "./CustomerEntity";
 
 @Entity("customer_taxer_type")
 export class CustomerTaxerType {
-  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
-  id: number;
-
   @Column("character varying", { name: "name" })
   name: string;
 
@@ -20,6 +17,9 @@ export class CustomerTaxerType {
     default: () => "now()",
   })
   updatedAt: Date;
+
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id: number;
 
   @OneToMany(() => Customer, (customer) => customer.customerTaxerType)
   customers: Customer[];

@@ -1,27 +1,41 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
 } from 'typeorm';
-import { Company } from './Company.entity';
+import { Company } from './CompanyEntity';
+import { AccountingSetting } from './AccountingSettingEntity';
 
-@Entity()
+@Entity('accounting_register_type')
 export class AccountingRegisterType {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
-  @Column({ nullable: true })
+  @Column('character varying', { name: 'name', nullable: true })
   name: string;
 
-  @CreateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
   updatedAt: Date;
 
   @ManyToOne(() => Company, (company) => company.accountingRegisterTypes)
+  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
+
+  @OneToMany(
+    () => AccountingSetting,
+    (accountingSetting) => accountingSetting.registerType,
+  )
+  accountingSettings: AccountingSetting[];
 }

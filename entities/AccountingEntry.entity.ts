@@ -1,54 +1,58 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { AccountingEntryType } from './AccountingEntryType.entity';
-import { Company } from './Company.entity';
-import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
+import { AccountingEntryType } from "./AccountingEntryTypeEntity";
+import { Company } from "./CompanyEntity";
+import { AccountingEntryDetail } from "./AccountingEntryDetailEntity";
 
-@Entity()
+@Entity("accounting_entry")
 export class AccountingEntry {
-  @PrimaryGeneratedColumn('uuid')
+  @Column("uuid", {
+    primary: true,
+    name: "id",
+    default: () => "uuid_generate_v4()",
+  })
   id: string;
 
-  @Column()
+  @Column("character varying", { name: "serie" })
   serie: string;
 
-  @Column()
+  @Column("character varying", { name: "title" })
   title: string;
 
-  @Column()
+  @Column("date", { name: "date" })
   date: string;
 
-  @Column()
+  @Column("boolean", { name: "squared" })
   squared: boolean;
 
-  @Column()
+  @Column("boolean", { name: "accounted" })
   accounted: boolean;
 
-  @CreateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "createdAt",
+    default: () => "now()",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "updatedAt",
+    default: () => "now()",
+  })
   updatedAt: Date;
 
   @ManyToOne(
     () => AccountingEntryType,
-    (accountingEntryType) => accountingEntryType.accountingEntries,
+    (accountingEntryType) => accountingEntryType.accountingEntries
   )
+  @JoinColumn([{ name: "accountingEntryTypeId", referencedColumnName: "id" }])
   accountingEntryType: AccountingEntryType;
 
   @ManyToOne(() => Company, (company) => company.accountingEntries)
+  @JoinColumn([{ name: "companyId", referencedColumnName: "id" }])
   company: Company;
 
   @OneToMany(
     () => AccountingEntryDetail,
-    (accountingEntryDetail) => accountingEntryDetail.accountingEntry,
+    (accountingEntryDetail) => accountingEntryDetail.accountingEntry
   )
   accountingEntryDetails: AccountingEntryDetail[];
 }

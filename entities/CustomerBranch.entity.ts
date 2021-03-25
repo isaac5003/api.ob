@@ -1,13 +1,17 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { City } from './City';
-import { Country } from './Country';
-import { Customer } from './Customer';
-import { State } from './State';
-import { Invoice } from './Invoice';
+import { Customer } from './CustomerEntity';
+import { City } from './CityEntity';
+import { Country } from './CountryEntity';
+import { State } from './StateEntity';
+import { Invoice } from './InvoiceEntity';
 
 @Entity('customer_branch')
 export class CustomerBranch {
-  @PrimaryGeneratedColumn('uuid')
+  @Column('uuid', {
+    primary: true,
+    name: 'id',
+    default: () => 'uuid_generate_v4()',
+  })
   id: string;
 
   @Column('character varying', { name: 'name' })
@@ -17,7 +21,7 @@ export class CustomerBranch {
   contactName: string;
 
   @Column('json', { name: 'contactInfo', nullable: true })
-  contactInfo: string;
+  contactInfo: object;
 
   @Column('character varying', { name: 'address1', nullable: true })
   address1: string;
@@ -25,14 +29,26 @@ export class CustomerBranch {
   @Column('character varying', { name: 'address2', nullable: true })
   address2: string;
 
-  @CreateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
   updatedAt: Date;
 
   @Column('boolean', { name: 'default', default: () => 'true' })
   default: boolean;
+
+  @ManyToOne(() => Customer, (customer) => customer.customerBranches, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'customerId', referencedColumnName: 'id' }])
+  customer: Customer;
 
   @ManyToOne(() => City, (city) => city.customerBranches)
   @JoinColumn([{ name: 'cityId', referencedColumnName: 'id' }])
@@ -41,12 +57,6 @@ export class CustomerBranch {
   @ManyToOne(() => Country, (country) => country.customerBranches)
   @JoinColumn([{ name: 'countryId', referencedColumnName: 'id' }])
   country: Country;
-
-  @ManyToOne(() => Customer, (customer) => customer.customerBranches, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn([{ name: 'customerId', referencedColumnName: 'id' }])
-  customer: Customer;
 
   @ManyToOne(() => State, (state) => state.customerBranches)
   @JoinColumn([{ name: 'stateId', referencedColumnName: 'id' }])

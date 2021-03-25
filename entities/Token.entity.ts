@@ -1,16 +1,23 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity } from "typeorm";
 
-@Entity('token')
+@Entity("token")
 export class Token {
-  @PrimaryGeneratedColumn('uuid')
+  @Column("uuid", {
+    primary: true,
+    name: "id",
+    default: () => "uuid_generate_v4()",
+  })
   id: string;
 
-  @Column('character varying', { name: 'token' })
+  @Column("character varying", { name: "token" })
   token: string;
 
-  @Column('character varying', { name: 'active' })
+  @Column("character varying", { name: "active" })
   active: string;
 
-  @CreateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "createdAt",
+    default: () => "now()",
+  })
   createdAt: Date;
 }

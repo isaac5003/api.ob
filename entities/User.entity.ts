@@ -1,13 +1,17 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { City } from './City';
-import { Country } from './Country';
-import { Gender } from './Gender';
-import { Profile } from './Profile';
-import { State } from './State';
+import { Gender } from './GenderEntity';
+import { Profile } from './ProfileEntity';
+import { City } from './CityEntity';
+import { Country } from './CountryEntity';
+import { State } from './StateEntity';
 
 @Entity('user')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @Column('uuid', {
+    primary: true,
+    name: 'id',
+    default: () => 'uuid_generate_v4()',
+  })
   id: string;
 
   @Column('character varying', { name: 'unique' })
@@ -37,19 +41,17 @@ export class User {
   @Column('character varying', { name: 'avatarURL', nullable: true })
   avatarUrl: string;
 
-  @CreateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
   updatedAt: Date;
-
-  @ManyToOne(() => City, (city) => city.users)
-  @JoinColumn([{ name: 'cityId', referencedColumnName: 'id' }])
-  city: City;
-
-  @ManyToOne(() => Country, (country) => country.users)
-  @JoinColumn([{ name: 'countryId', referencedColumnName: 'id' }])
-  country: Country;
 
   @ManyToOne(() => Gender, (gender) => gender.users)
   @JoinColumn([{ name: 'genderId', referencedColumnName: 'id' }])
@@ -58,6 +60,14 @@ export class User {
   @ManyToOne(() => Profile, (profile) => profile.users)
   @JoinColumn([{ name: 'profileId', referencedColumnName: 'id' }])
   profile: Profile;
+
+  @ManyToOne(() => City, (city) => city.users)
+  @JoinColumn([{ name: 'cityId', referencedColumnName: 'id' }])
+  city: City;
+
+  @ManyToOne(() => Country, (country) => country.users)
+  @JoinColumn([{ name: 'countryId', referencedColumnName: 'id' }])
+  country: Country;
 
   @ManyToOne(() => State, (state) => state.users)
   @JoinColumn([{ name: 'stateId', referencedColumnName: 'id' }])

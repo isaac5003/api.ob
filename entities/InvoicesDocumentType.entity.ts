@@ -1,12 +1,9 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Invoice } from "./Invoice";
-import { InvoicesDocument } from "./InvoicesDocument";
+import { Invoice } from "./InvoiceEntity";
+import { InvoicesDocument } from "./InvoicesDocumentEntity";
 
 @Entity("invoices_document_type")
 export class InvoicesDocumentType {
-  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
-  id: number;
-
   @Column("character varying", { name: "name" })
   name: string;
 
@@ -24,6 +21,9 @@ export class InvoicesDocumentType {
     default: () => "now()",
   })
   updatedAt: Date;
+
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id: number;
 
   @OneToMany(() => Invoice, (invoice) => invoice.documentType)
   invoices: Invoice[];

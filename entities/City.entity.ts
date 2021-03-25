@@ -1,35 +1,41 @@
 import {
   Column,
-  CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Branch } from './Branch.entity';
-import { State } from './State.entity';
-import { CustomerBranch } from './CustomerBranch.entity';
-import { User } from './User.entity';
+} from "typeorm";
+import { Branch } from "./BranchEntity";
+import { State } from "./StateEntity";
+import { CustomerBranch } from "./CustomerBranchEntity";
+import { User } from "./UserEntity";
 
-@Entity('')
+@Entity("city")
 export class City {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+  @Column("character varying", { name: "name" })
   name: string;
 
-  @CreateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "createdAt",
+    default: () => "now()",
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
+  @Column("timestamp without time zone", {
+    name: "updatedAt",
+    default: () => "now()",
+  })
   updatedAt: Date;
+
+  @PrimaryGeneratedColumn({ type: "integer", name: "id" })
+  id: number;
 
   @OneToMany(() => Branch, (branch) => branch.city)
   branches: Branch[];
 
   @ManyToOne(() => State, (state) => state.cities)
+  @JoinColumn([{ name: "stateId", referencedColumnName: "id" }])
   state: State;
 
   @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.city)
