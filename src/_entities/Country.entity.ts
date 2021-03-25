@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -7,12 +6,15 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from 'src/auth/User.entity';
+import { Branch } from './Branch.entity';
+import { CustomerBranch } from '../customers/CustomerBranch.entity';
 import { State } from './State.entity';
+//TODO
+import { User } from './User.entity';
 
 @Entity()
-export class Country extends BaseEntity {
-  @PrimaryGeneratedColumn()
+export class Country {
+  @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
   @Column()
@@ -23,6 +25,12 @@ export class Country extends BaseEntity {
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
+
+  @OneToMany(() => Branch, (branch) => branch.country)
+  branches: Branch[];
+
+  @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.country)
+  customerBranches: CustomerBranch[];
 
   @OneToMany(() => State, (state) => state.country)
   states: State[];

@@ -2,19 +2,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { User } from './User.entity';
+
 @Entity()
-export class Gender {
+export class Logger {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-
-  @Column()
-  name: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
@@ -22,6 +17,15 @@ export class Gender {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => User, (user) => user.gender)
-  users: User[];
+  @Column()
+  userId: string;
+
+  @Column()
+  module: string;
+
+  @Column()
+  detail: string;
+
+  @Column()
+  userName: string;
 }

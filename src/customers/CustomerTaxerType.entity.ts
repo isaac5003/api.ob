@@ -6,22 +6,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { User } from './User.entity';
+import { Customer } from './Customer.entity';
+
 @Entity()
-export class Gender {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class CustomerTaxerType {
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
-
   @CreateDateColumn({ select: false })
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => User, (user) => user.gender)
-  users: User[];
+  @OneToMany(() => Customer, (customer) => customer.customerTaxerType)
+  customers: Customer[];
 }

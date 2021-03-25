@@ -1,14 +1,16 @@
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+//TODO
+import { Access } from './Access.entity';
 
 @Entity()
-export class Module extends BaseEntity {
+export class Module {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -17,14 +19,14 @@ export class Module extends BaseEntity {
 
   @Column()
   description: string;
+  //TODO
+  @Column('json', { name: 'access' })
+  access: object;
 
-  @Column({ type: 'json' })
-  access: string;
-
-  @Column({ type: 'boolean', default: false })
+  @Column({ default: false })
   reserved: boolean;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ default: false })
   system: boolean;
 
   @CreateDateColumn({ select: false })
@@ -32,4 +34,7 @@ export class Module extends BaseEntity {
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
+
+  @OneToMany(() => Access, (access) => access.module)
+  accesses: Access[];
 }

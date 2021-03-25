@@ -1,16 +1,19 @@
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { InvoiceDetail } from '../invoices/InvoiceDetail.entity';
+import { AccountingCatalog } from '../entries/AccountingCatalog.entity';
+import { Company } from '../_entities/Company.entity';
 import { SellingType } from './SellingType.entity';
 
 @Entity()
-export class Service extends BaseEntity {
+export class Service {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -20,17 +23,11 @@ export class Service extends BaseEntity {
   @Column()
   description: string;
 
-  @Column({ type: 'float' })
+  @Column()
   cost: number;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ default: true })
   active: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  incIva: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  incRenta: boolean;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
@@ -38,25 +35,24 @@ export class Service extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
+  @Column({ default: false })
+  incIva: boolean;
+
+  @Column({ default: false })
+  incRenta: boolean;
+
+  @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.service)
+  invoiceDetails: InvoiceDetail[];
+
+  @ManyToOne(
+    () => AccountingCatalog,
+    (accountingCatalog) => accountingCatalog.services,
+  )
+  accountingCatalog: AccountingCatalog;
+
+  @ManyToOne(() => Company, (company) => company.services)
+  company: Company;
+
   @ManyToOne(() => SellingType, (sellingType) => sellingType.services)
   sellingType: SellingType;
 }
-//TODO
-//   relations: {
-//     company: {
-//       target: 'Company',
-//       type: 'many-to-one',
-//       joinTable: true,
-//     },
-//     sellingType: {
-//       target: 'SellingType',
-//       type: 'many-to-one',
-//       joinTable: true,
-//     },
-//     accountingCatalog: {
-//       target: 'AccountingCatalog',
-//       type: 'many-to-one',
-//       joinTable: true,
-//     },
-//   },
-// });

@@ -1,68 +1,75 @@
-import { City } from 'src/_entities/City.entity';
-import { Country } from 'src/_entities/Country.entity';
-import { Gender } from 'src/_entities/Gender.entity';
-import { State } from 'src/_entities/State.entity';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
-import { Profile } from './Profile.entity';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Gender } from './GenderEntity';
+import { Profile } from './ProfileEntity';
+import { City } from './CityEntity';
+import { Country } from './CountryEntity';
+import { State } from './StateEntity';
 
-@Entity()
-export class User extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+@Entity('user')
+export class User {
+  @Column('uuid', {
+    primary: true,
+    name: 'id',
+    default: () => 'uuid_generate_v4()',
+  })
   id: string;
 
-  @Column()
+  @Column('character varying', { name: 'unique' })
   unique: string;
 
-  @Column()
+  @Column('character varying', { name: 'email' })
   email: string;
 
-  @Column()
+  @Column('character varying', { name: 'password' })
   password: string;
 
-  @Column()
+  @Column('character varying', { name: 'names' })
   names: string;
 
-  @Column()
+  @Column('character varying', { name: 'lastnames' })
   lastnames: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column('date', { name: 'dob', nullable: true })
   dob: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column('boolean', { name: 'changePassword', default: () => 'true' })
   changePassword: boolean;
 
-  @Column({ type: 'boolean', default: true })
+  @Column('boolean', { name: 'isActive', default: () => 'true' })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  avatarURL: string;
+  @Column('character varying', { name: 'avatarURL', nullable: true })
+  avatarUrl: string;
 
-  @CreateDateColumn({ select: false })
-  createdAt: string;
+  @Column('timestamp without time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
+  })
+  createdAt: Date;
 
-  @UpdateDateColumn({ select: false })
-  updatedAt: string;
+  @Column('timestamp without time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
+  })
+  updatedAt: Date;
 
   @ManyToOne(() => Gender, (gender) => gender.users)
+  @JoinColumn([{ name: 'genderId', referencedColumnName: 'id' }])
   gender: Gender;
 
   @ManyToOne(() => Profile, (profile) => profile.users)
+  @JoinColumn([{ name: 'profileId', referencedColumnName: 'id' }])
   profile: Profile;
 
+  @ManyToOne(() => City, (city) => city.users)
+  @JoinColumn([{ name: 'cityId', referencedColumnName: 'id' }])
+  city: City;
+
   @ManyToOne(() => Country, (country) => country.users)
+  @JoinColumn([{ name: 'countryId', referencedColumnName: 'id' }])
   country: Country;
 
   @ManyToOne(() => State, (state) => state.users)
+  @JoinColumn([{ name: 'stateId', referencedColumnName: 'id' }])
   state: State;
-
-  @ManyToOne(() => City, (city) => city.users)
-  city: City;
 }

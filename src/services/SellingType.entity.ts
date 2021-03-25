@@ -1,5 +1,4 @@
 import {
-  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -7,10 +6,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { InvoiceDetail } from '../invoices/InvoiceDetail.entity';
 import { Service } from './Service.entity';
 
 @Entity()
-export class SellingType extends BaseEntity {
+export class SellingType {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -22,6 +22,9 @@ export class SellingType extends BaseEntity {
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
+
+  @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.sellingType)
+  invoiceDetails: InvoiceDetail[];
 
   @OneToMany(() => Service, (service) => service.sellingType)
   services: Service[];
