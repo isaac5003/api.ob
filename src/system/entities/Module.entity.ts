@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Access } from '../auth/entities/Access.entity';
+import { Access } from '../../auth/entities/Access.entity';
 
 @Entity()
 export class Module extends BaseEntity {
@@ -19,7 +19,8 @@ export class Module extends BaseEntity {
 
   @Column()
   description: string;
-  @Column()
+
+  @Column({ type: 'json' })
   access: string;
 
   @Column({ default: false })

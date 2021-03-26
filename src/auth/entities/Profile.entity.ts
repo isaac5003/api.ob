@@ -1,3 +1,5 @@
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   Column,
@@ -9,8 +11,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Access } from './Access.entity';
-import { Branch } from '../../_entities/Branch.entity';
-import { Company } from '../../_entities/Company.entity';
 import { User } from './User.entity';
 
 @Entity()

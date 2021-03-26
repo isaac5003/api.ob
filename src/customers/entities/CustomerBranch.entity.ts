@@ -9,9 +9,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Customer } from './Customer.entity';
-import { City } from '../../_entities/City.entity';
-import { Country } from '../../_entities/Country.entity';
-import { State } from '../../_entities/State.entity';
+import { City } from '../../system/entities/City.entity';
+import { Country } from '../../system/entities/Country.entity';
+import { State } from '../../system/entities/State.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 
 @Entity()
@@ -25,7 +25,7 @@ export class CustomerBranch extends BaseEntity {
   @Column({ nullable: true })
   contactName: string;
 
-  @Column()
+  @Column({ type: 'json' })
   contactInfo: string;
 
   @Column({ nullable: true })

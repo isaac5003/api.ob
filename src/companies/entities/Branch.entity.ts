@@ -1,3 +1,9 @@
+import { Access } from 'src/auth/entities/Access.entity';
+import { Profile } from 'src/auth/entities/Profile.entity';
+import { Invoice } from 'src/invoices/entities/Invoice.entity';
+import { City } from 'src/system/entities/City.entity';
+import { Country } from 'src/system/entities/Country.entity';
+import { State } from 'src/system/entities/State.entity';
 import {
   BaseEntity,
   Column,
@@ -9,20 +15,14 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Access } from '../auth/entities/Access.entity';
 import { Company } from './Company.entity';
-import { City } from './City.entity';
-import { Country } from './Country.entity';
-import { State } from './State.entity';
-import { Invoice } from '../invoices/entities/Invoice.entity';
-import { Profile } from '../auth/entities//Profile.entity';
 
 @Entity()
 export class Branch extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   contactInfo: string;
 
   @Column()

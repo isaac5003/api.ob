@@ -6,8 +6,19 @@ import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { EntriesModule } from './entries/entries.module';
+import { CompaniesModule } from './companies/companies.module';
+import { SystemModule } from './system/system.module';
 
 @Module({
-  imports: [TypeOrmModule.forRoot(typeOrmConfig), ServicesModule, AuthModule, CustomersModule, InvoicesModule, EntriesModule],
+  imports: [
+    TypeOrmModule.forRoot(typeOrmConfig),
+    ServicesModule,
+    AuthModule,
+    CustomersModule,
+    InvoicesModule,
+    EntriesModule,
+    CompaniesModule,
+    SystemModule,
+  ],
 })
 export class AppModule {}

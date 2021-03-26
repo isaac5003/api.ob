@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 import { InvoiceDetail } from '../../invoices/entities/InvoiceDetail.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
-import { Company } from '../../_entities/Company.entity';
 import { SellingType } from './SellingType.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Entity()
 export class Service extends BaseEntity {
@@ -24,7 +24,7 @@ export class Service extends BaseEntity {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ type: 'float' })
   cost: number;
 
   @Column({ default: true })

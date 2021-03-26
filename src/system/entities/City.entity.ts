@@ -9,10 +9,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Branch } from './Branch.entity';
 import { State } from './State.entity';
-import { CustomerBranch } from '../customers/entities/CustomerBranch.entity';
-import { User } from '../auth/entities/User.entity';
+import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
+import { User } from '../../auth/entities/User.entity';
+import { Branch } from 'src/companies/entities/Branch.entity';
 
 @Entity()
 export class City extends BaseEntity {

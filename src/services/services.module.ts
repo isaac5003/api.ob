@@ -4,10 +4,15 @@ import { ServiceRepository } from './repositories/Service.repository';
 import { SellingTypeRepository } from './repositories/SellingType.repository';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
+import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ServiceRepository, SellingTypeRepository]),
+    TypeOrmModule.forFeature([
+      ServiceRepository,
+      SellingTypeRepository,
+      ServiceSettingRepository,
+    ]),
   ],
   controllers: [ServicesController],
   providers: [ServicesService],

@@ -1,3 +1,5 @@
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   Column,
@@ -7,9 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Company } from 'src/_entities/Company.entity';
-import { Branch } from '../../_entities/Branch.entity';
-import { Module } from '../../_entities/Module.entity';
+import { Module } from '../../system/entities/Module.entity';
 import { Profile } from './Profile.entity';
 
 @Entity()
@@ -17,7 +17,7 @@ export class Access extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'json' })
   permissions: string;
 
   @CreateDateColumn({ select: false })

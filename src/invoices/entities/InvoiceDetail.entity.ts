@@ -16,16 +16,16 @@ export class InvoiceDetail extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'float' })
   quantity: number;
 
-  @Column()
+  @Column({ type: 'float' })
   unitPrice: number;
 
   @Column()
   incTax: boolean;
 
-  @Column()
+  @Column({ type: 'float' })
   ventaPrice: number;
 
   @CreateDateColumn({ select: false })

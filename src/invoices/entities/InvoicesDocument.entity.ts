@@ -1,3 +1,4 @@
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   Column,
@@ -7,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Company } from '../../_entities/Company.entity';
 import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 
 @Entity()

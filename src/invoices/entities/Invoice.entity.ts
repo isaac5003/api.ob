@@ -8,8 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Branch } from '../../_entities/Branch.entity';
-import { Company } from '../../_entities/Company.entity';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { InvoicesPaymentsCondition } from './InvoicesPaymentsCondition.entity';
@@ -20,6 +18,8 @@ import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 import { InvoiceDetail } from './InvoiceDetail.entity';
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Entity()
 export class Invoice extends BaseEntity {
@@ -30,7 +30,7 @@ export class Invoice extends BaseEntity {
   authorization: string;
 
   @Column()
-  sequence: number;
+  sequence: string;
 
   @Column()
   customerName: string;

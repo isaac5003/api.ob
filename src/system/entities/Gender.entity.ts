@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../auth/entities/User.entity';
+import { User } from '../../auth/entities/User.entity';
 @Entity()
 export class Gender extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')

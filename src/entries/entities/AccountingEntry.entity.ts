@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AccountingEntryType } from './AccountingEntryType.entity';
-import { Company } from '../../_entities/Company.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Entity()
 export class AccountingEntry extends BaseEntity {
@@ -23,7 +23,7 @@ export class AccountingEntry extends BaseEntity {
   @Column()
   title: string;
 
-  @Column()
+  @Column({ type: 'date' })
   date: string;
 
   @Column()

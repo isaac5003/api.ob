@@ -1,3 +1,4 @@
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   Column,
@@ -10,7 +11,6 @@ import {
 } from 'typeorm';
 import { Invoice } from './Invoice.entity';
 import { InvoicesSeller } from './InvoicesSeller.entity';
-import { Company } from '../../_entities/Company.entity';
 
 @Entity()
 export class InvoicesZone extends BaseEntity {

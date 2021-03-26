@@ -7,11 +7,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Gender } from '../../_entities/Gender.entity';
+import { Gender } from '../../system/entities/Gender.entity';
 import { Profile } from './Profile.entity';
-import { City } from '../../_entities/City.entity';
-import { Country } from '../../_entities/Country.entity';
-import { State } from '../../_entities/State.entity';
+import { City } from '../../system/entities/City.entity';
+import { Country } from '../../system/entities/Country.entity';
+import { State } from '../../system/entities/State.entity';
 
 @Entity('user')
 export class User extends BaseEntity {

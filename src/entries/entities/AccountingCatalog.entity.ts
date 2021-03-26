@@ -8,13 +8,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Company } from '../../_entities/Company.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
 import { AccountingSetting } from './AccountingSetting.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Entity()
 export class AccountingCatalog extends BaseEntity {

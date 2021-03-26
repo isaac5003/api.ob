@@ -1,3 +1,4 @@
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   Column,
@@ -8,7 +9,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AccountingCatalog } from './AccountingCatalog.entity';
-import { Company } from '../../_entities/Company.entity';
 import { AccountingRegisterType } from './AccountingRegisterType.entity';
 
 @Entity('')

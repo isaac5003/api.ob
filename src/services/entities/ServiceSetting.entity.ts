@@ -1,3 +1,4 @@
+import { Company } from 'src/companies/entities/Company.entity';
 import {
   BaseEntity,
   CreateDateColumn,
@@ -7,7 +8,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
-import { Company } from '../../_entities/Company.entity';
 
 @Entity()
 export class ServiceSetting extends BaseEntity {
