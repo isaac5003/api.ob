@@ -7,21 +7,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../auth/entities/User.entity';
+import { Customer } from './Customer.entity';
+
 @Entity()
-export class Gender extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class CustomerTaxerType extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
-
   @CreateDateColumn({ select: false })
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => User, (user) => user.gender)
-  users: User[];
+  @OneToMany(() => Customer, (customer) => customer.customerTaxerType)
+  customers: Customer[];
 }

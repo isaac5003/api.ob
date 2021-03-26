@@ -7,12 +7,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Branch } from './Branch.entity';
-import { Company } from './Company.entity';
-import { Module } from './Module.entity';
+import { Branch } from '../../_entities/Branch.entity';
+import { Company } from '../../../entities/Company.entity';
+import { Module } from '../../_entities/Module.entity';
 import { Profile } from './Profile.entity';
 
-@Entity('access')
+@Entity()
 export class Access extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;

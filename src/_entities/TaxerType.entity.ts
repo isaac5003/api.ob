@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Company } from './Company.entity';
 
 @Entity()
 export class TaxerType extends BaseEntity {
@@ -20,4 +22,7 @@ export class TaxerType extends BaseEntity {
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
+
+  @OneToMany(() => Company, (company) => company.taxerType)
+  companies: Company[];
 }

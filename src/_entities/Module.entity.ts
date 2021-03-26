@@ -3,9 +3,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Access } from '../auth/entities/Access.entity';
 
 @Entity()
 export class Module extends BaseEntity {
@@ -17,14 +19,13 @@ export class Module extends BaseEntity {
 
   @Column()
   description: string;
-
-  @Column({ type: 'json' })
+  @Column()
   access: string;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ default: false })
   reserved: boolean;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ default: false })
   system: boolean;
 
   @CreateDateColumn({ select: false })
@@ -32,4 +33,7 @@ export class Module extends BaseEntity {
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
+
+  @OneToMany(() => Access, (access) => access.module)
+  accesses: Access[];
 }

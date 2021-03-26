@@ -1,4 +1,3 @@
-import { User } from 'src/auth/User.entity';
 import {
   BaseEntity,
   Column,
@@ -9,8 +8,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Branch } from './Branch.entity';
 import { City } from './City.entity';
+import { CustomerBranch } from '../customers/entities/CustomerBranch.entity';
 import { Country } from './Country.entity';
+import { User } from '../auth/entities/User.entity';
 
 @Entity()
 export class State extends BaseEntity {
@@ -19,18 +21,23 @@ export class State extends BaseEntity {
 
   @Column()
   name: string;
-
   @CreateDateColumn({ select: false })
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @ManyToOne(() => Country, (country) => country.states)
-  country: Country;
+  @OneToMany(() => Branch, (branch) => branch.state)
+  branches: Branch[];
 
   @OneToMany(() => City, (city) => city.state)
   cities: City[];
+
+  @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.state)
+  customerBranches: CustomerBranch[];
+
+  @ManyToOne(() => Country, (country) => country.states)
+  country: Country;
 
   @OneToMany(() => User, (user) => user.state)
   users: User[];

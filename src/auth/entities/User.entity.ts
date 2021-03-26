@@ -1,7 +1,3 @@
-import { City } from 'src/_entities/City.entity';
-import { Country } from 'src/_entities/Country.entity';
-import { Gender } from 'src/_entities/Gender.entity';
-import { State } from 'src/_entities/State.entity';
 import {
   BaseEntity,
   Column,
@@ -11,9 +7,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Gender } from '../../_entities/Gender.entity';
 import { Profile } from './Profile.entity';
+import { City } from '../../_entities/City.entity';
+import { Country } from '../../_entities/Country.entity';
+import { State } from '../../_entities/State.entity';
 
-@Entity()
+@Entity('user')
 export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,17 +33,17 @@ export class User extends BaseEntity {
   @Column()
   lastnames: string;
 
-  @Column({ type: 'date', nullable: true })
+  @Column({ nullable: true })
   dob: string;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ default: true })
   changePassword: boolean;
 
-  @Column({ type: 'boolean', default: true })
+  @Column({ default: true })
   isActive: boolean;
 
   @Column({ nullable: true })
-  avatarURL: string;
+  avatarUrl: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
@@ -57,12 +57,12 @@ export class User extends BaseEntity {
   @ManyToOne(() => Profile, (profile) => profile.users)
   profile: Profile;
 
+  @ManyToOne(() => City, (city) => city.users)
+  city: City;
+
   @ManyToOne(() => Country, (country) => country.users)
   country: Country;
 
   @ManyToOne(() => State, (state) => state.users)
   state: State;
-
-  @ManyToOne(() => City, (city) => city.users)
-  city: City;
 }

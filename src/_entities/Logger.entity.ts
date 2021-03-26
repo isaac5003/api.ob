@@ -3,19 +3,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Service } from './Service.entity';
 
 @Entity()
-export class SellingType extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  name: string;
+export class Logger extends BaseEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
@@ -23,6 +18,15 @@ export class SellingType extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => Service, (service) => service.sellingType)
-  services: Service[];
+  @Column()
+  userId: string;
+
+  @Column()
+  module: string;
+
+  @Column()
+  detail: string;
+
+  @Column()
+  userName: string;
 }
