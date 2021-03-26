@@ -9,7 +9,7 @@ import {
 import { plainToClass } from 'class-transformer';
 import { ResponseListDTO } from 'src/_dtos/responseList.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
-import { Service } from './Service.entity';
+import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
 
 @Controller('services')
@@ -25,8 +25,8 @@ export class ServicesController {
     return new ResponseListDTO(plainToClass(Service, services));
   }
 
-  @Get('/:id')
-  async getService(@Param('id') id: string) {
-    return this.servicesService.getService(id);
-  }
+  // @Get('/:id')
+  // async getService(@Param('id') id: string) {
+  //   return this.servicesService.getService(id);
+  // }
 }

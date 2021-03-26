@@ -7,8 +7,8 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Company } from 'src/_entities/Company.entity';
 import { Branch } from '../../_entities/Branch.entity';
-import { Company } from '../../../entities/Company.entity';
 import { Module } from '../../_entities/Module.entity';
 import { Profile } from './Profile.entity';
 

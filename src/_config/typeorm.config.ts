@@ -8,5 +8,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: 'super_complicated_password',
   database: 'local_openbox_database',
   autoLoadEntities: true,
-  synchronize: false,
+  synchronize: true,
 };
