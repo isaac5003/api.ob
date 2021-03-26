@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -10,7 +11,7 @@ import { Invoice } from './Invoice.entity';
 import { InvoicesDocument } from './InvoicesDocument.entity';
 
 @Entity()
-export class InvoicesDocumentType {
+export class InvoicesDocumentType extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 

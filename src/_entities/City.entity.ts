@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -14,7 +15,7 @@ import { CustomerBranch } from '../customers/entities/CustomerBranch.entity';
 import { User } from '../auth/entities/User.entity';
 
 @Entity()
-export class City {
+export class City extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

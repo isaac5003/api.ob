@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -11,7 +12,7 @@ import { Company } from '../../_entities/Company.entity';
 import { AccountingRegisterType } from './AccountingRegisterType.entity';
 
 @Entity('')
-export class AccountingSetting {
+export class AccountingSetting extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -7,7 +8,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Logger {
+export class Logger extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -6,7 +7,7 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Token {
+export class Token extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

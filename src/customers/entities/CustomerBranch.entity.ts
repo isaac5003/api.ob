@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -14,7 +15,7 @@ import { State } from '../../_entities/State.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 
 @Entity()
-export class CustomerBranch {
+export class CustomerBranch extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

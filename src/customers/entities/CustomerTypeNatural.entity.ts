@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -12,7 +13,7 @@ import { CustomerType } from './CustomerType.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 
 @Entity()
-export class CustomerTypeNatural {
+export class CustomerTypeNatural extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

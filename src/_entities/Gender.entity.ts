@@ -1,4 +1,5 @@
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
@@ -8,7 +9,7 @@ import {
 } from 'typeorm';
 import { User } from '../auth/entities/User.entity';
 @Entity()
-export class Gender {
+export class Gender extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
