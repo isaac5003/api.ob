@@ -20,11 +20,10 @@ export class AccountingEntryDetail {
 
   @Column()
   concept: string;
-  //TODO
-  @Column('double precision', { name: 'cargo', nullable: true, precision: 53 })
+  @Column({ nullable: true })
   cargo: number;
 
-  @Column('double precision', { name: 'abono', nullable: true, precision: 53 })
+  @Column({ nullable: true })
   abono: number;
 
   @CreateDateColumn({ select: false })
@@ -33,7 +32,7 @@ export class AccountingEntryDetail {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column('integer', { name: 'order', nullable: true })
+  @Column({ nullable: true })
   order: number;
 
   @ManyToOne(

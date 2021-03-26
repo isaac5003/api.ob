@@ -7,14 +7,13 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Branch } from './Branch.entity';
-import { CustomerBranch } from '../customers/CustomerBranch.entity';
+import { CustomerBranch } from '../customers/entities/CustomerBranch.entity';
 import { State } from './State.entity';
-//TODO
-import { User } from './User.entity';
+import { User } from '../auth/entities/User.entity';
 
 @Entity()
 export class Country {
-  @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()

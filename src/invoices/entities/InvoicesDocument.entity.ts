@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -10,7 +9,7 @@ import {
 import { Company } from '../../_entities/Company.entity';
 import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 
-@Entity('invoices_document')
+@Entity()
 export class InvoicesDocument {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -49,13 +48,11 @@ export class InvoicesDocument {
   layout: string;
 
   @ManyToOne(() => Company, (company) => company.invoicesDocuments)
-  @JoinColumn([{ name: 'companyId', referencedColumnName: 'id' }])
   company: Company;
 
   @ManyToOne(
     () => InvoicesDocumentType,
     (invoicesDocumentType) => invoicesDocumentType.invoicesDocuments,
   )
-  @JoinColumn([{ name: 'documentTypeId', referencedColumnName: 'id' }])
   documentType: InvoicesDocumentType;
 }

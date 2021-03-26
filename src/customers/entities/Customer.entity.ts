@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AccountingCatalog } from '../../entries/AccountingCatalog.entity';
+import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { Company } from '../../_entities/Company.entity';
 import { CustomerTaxerType } from './CustomerTaxerType.entity';
 import { CustomerType } from './CustomerType.entity';

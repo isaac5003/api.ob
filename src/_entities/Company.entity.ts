@@ -8,30 +8,27 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { Access } from './Access.entity';
-import { AccountingCatalog } from '../entries/AccountingCatalog.entity';
-import { AccountingEntry } from '../entries/AccountingEntry.entity';
-import { AccountingEntryDetail } from '../entries/AccountingEntryDetail.entity';
-import { AccountingEntryType } from '../entries/AccountingEntryType.entity';
-import { AccountingRegisterType } from '../entries/AccountingRegisterType.entity';
-import { AccountingSetting } from '../entries/AccountingSetting.entity';
+import { Access } from '../auth/entities//Access.entity';
+import { AccountingCatalog } from '../entries/entities/AccountingCatalog.entity';
+import { AccountingEntry } from '../entries/entities/AccountingEntry.entity';
+import { AccountingEntryDetail } from '../entries/entities/AccountingEntryDetail.entity';
+import { AccountingEntryType } from '../entries/entities/AccountingEntryType.entity';
+import { AccountingRegisterType } from '../entries/entities/AccountingRegisterType.entity';
+import { AccountingSetting } from '../entries/entities/AccountingSetting.entity';
 import { Branch } from './Branch.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { CompanyType } from './CompanyType.entity';
-import { Customer } from '../customers/Customer.entity';
-import { CustomerSetting } from '../customers/CustomerSetting.entity';
+import { Customer } from '../customers/entities/Customer.entity';
+import { CustomerSetting } from '../customers/entities/CustomerSetting.entity';
 import { Invoice } from '../invoices/entities/Invoice.entity';
-import { InvoicesDocument } from '../invoices/InvoicesDocument.entity';
-import { InvoicesPaymentsCondition } from '../invoices/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../invoices/InvoicesSeller.entity';
-import { InvoicesZone } from '../invoices/InvoicesZone.entity';
-//TODO
-import { Profile } from './Profile.entity';
-import { Service } from '../services/Service.entity';
-//TODO
-import { ServiceSetting } from '../services/ServiceSetting.entity';
+import { InvoicesDocument } from '../invoices/entities/InvoicesDocument.entity';
+import { InvoicesPaymentsCondition } from '../invoices/entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSeller } from '../invoices/entities/InvoicesSeller.entity';
+import { InvoicesZone } from '../invoices/entities/InvoicesZone.entity';
+import { Profile } from '../auth/entities/Profile.entity';
+import { Service } from '../services/entities/Service.entity';
+import { ServiceSetting } from '../services/entities/ServiceSetting.entity';
 
 @Entity('company')
 export class Company {

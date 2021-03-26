@@ -8,23 +8,21 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { Access } from './Access.entity';
+import { Access } from '../auth/entities/Access.entity';
 import { Company } from './Company.entity';
 import { City } from './City.entity';
 import { Country } from './Country.entity';
 import { State } from './State.entity';
 import { Invoice } from '../invoices/entities/Invoice.entity';
-//TODO
-import { Profile } from './Profile.entity';
+import { Profile } from '../auth/entities//Profile.entity';
 
 @Entity()
 export class Branch {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  //TODO
-  @Column('json', { name: 'contactInfo' })
-  contactInfo: object;
+
+  @Column()
+  contactInfo: string;
 
   @Column()
   name: string;

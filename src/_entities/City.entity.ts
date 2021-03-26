@@ -10,13 +10,12 @@ import {
 } from 'typeorm';
 import { Branch } from './Branch.entity';
 import { State } from './State.entity';
-import { CustomerBranch } from '../customers/CustomerBranch.entity';
-// TODO
-import { User } from './User.entity';
+import { CustomerBranch } from '../customers/entities/CustomerBranch.entity';
+import { User } from '../auth/entities/User.entity';
 
 @Entity()
 export class City {
-  @PrimaryGeneratedColumn({ type: 'integer' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()

@@ -6,8 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { Access } from './Access.entity';
+import { Access } from '../auth/entities/Access.entity';
 
 @Entity()
 export class Module {
@@ -19,9 +18,8 @@ export class Module {
 
   @Column()
   description: string;
-  //TODO
-  @Column('json', { name: 'access' })
-  access: object;
+  @Column()
+  access: string;
 
   @Column({ default: false })
   reserved: boolean;

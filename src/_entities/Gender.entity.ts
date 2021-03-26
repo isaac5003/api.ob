@@ -6,8 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-//TODO
-import { User } from './User.entity';
+import { User } from '../auth/entities/User.entity';
 @Entity()
 export class Gender {
   @PrimaryGeneratedColumn('uuid')
