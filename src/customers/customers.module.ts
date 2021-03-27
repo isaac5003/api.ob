@@ -6,6 +6,8 @@ import { CustomerSettingRepository } from './repositories/CustomerSetting.reposi
 import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
 import { CustomerTypeRepository } from './repositories/CustomerType.repository';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
+import { CustomersService } from './customers.service';
+import { CustomersController } from './customers.controller';
 
 @Module({
   imports: [
@@ -18,5 +20,7 @@ import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatura
       CustomerTypeNaturalRepository,
     ]),
   ],
+  controllers: [CustomersController],
+  providers: [CustomersService],
 })
 export class CustomersModule {}
