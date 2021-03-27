@@ -15,7 +15,7 @@ export class ServicesService {
     return this.serviceRepository.getServices(filterDto);
   }
 
-  // async getService(id: string): Promise<Service> {
-  //   return this.serviceRepository.getService(id);
-  // }
+  async getService(id: string): Promise<Service> {
+    return this.serviceRepository.getService(id);
+  }
 }
