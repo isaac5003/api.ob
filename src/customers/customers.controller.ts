@@ -1,12 +1,13 @@
 import {
   Controller,
   Get,
+  Param,
   Query,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { ResponseListDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
@@ -22,5 +23,14 @@ export class CustomersController {
   ): Promise<ResponseListDTO<Customer>> {
     const customers = await this.customersService.getCustomers(filterDto);
     return new ResponseListDTO(plainToClass(Customer, customers));
+  }
+
+  @Get('/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getCustomer(
+    @Param('id') id: string,
+  ): Promise<ResponseSingleDTO<Customer>> {
+    const customer = await this.customersService.getCustomer(id);
+    return new ResponseSingleDTO(plainToClass(Customer, customer));
   }
 }

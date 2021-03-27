@@ -1,3 +1,4 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
@@ -6,7 +7,9 @@ import { Customer } from '../entities/Customer.entity';
 export class CustomerRepository extends Repository<Customer> {
   async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
     const { active, limit, page, search, order, prop } = filterDto;
-    const query = this.createQueryBuilder('customer');
+    const query = this.createQueryBuilder('customer')
+      .leftJoinAndSelect('customer.customerType', 'customerType')
+      .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural');
 
     if (active) {
       query.andWhere('customer.isActiveCustomer = :active', { active });
@@ -29,5 +32,29 @@ export class CustomerRepository extends Repository<Customer> {
     }
 
     return await query.getMany();
+  }
+
+  async getCustomer(id: string): Promise<Customer> {
+    let customer: Customer;
+    try {
+      customer = await this.createQueryBuilder('customer')
+        .where('customer.id = :id', { id })
+        .leftJoinAndSelect('customer.customerType', 'customerType')
+        .leftJoinAndSelect(
+          'customer.customerTypeNatural',
+          'customerTypeNatural',
+        )
+        .getOne();
+    } catch (error) {
+      throw new BadRequestException(
+        'Error al obtener el servicio seleccionado.',
+      );
+    }
+
+    if (!customer) {
+      throw new NotFoundException('El servicio seleccionado no existe.');
+    }
+
+    return customer;
   }
 }

@@ -14,4 +14,8 @@ export class CustomersService {
   async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
     return this.customerRepository.getCustomers(filterDto);
   }
+
+  async getCustomer(id: string): Promise<Customer> {
+    return this.customerRepository.getCustomer(id);
+  }
 }
