@@ -200,7 +200,6 @@ router.put('/', async (req, res) => {
         documentCantUpdate.push(document);
       }
     }
-    console.log(documentCantUpdate.length);
     // On success
     return res.json({
       message:
