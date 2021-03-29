@@ -1,50 +1,13 @@
 const express = require('express');
-const { indexOf } = require('ramda');
 const { checkRequired, addLog } = require('../../tools');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const check = checkRequired(
-    req.query,
-    [
-      { name: 'limit', type: 'integer', optional: true },
-      { name: 'page', type: 'integer', optional: true },
-      { name: 'active', type: 'boolean', optional: true },
-      { name: 'search', type: 'string', optional: true },
-      { name: 'type', type: 'integer', optional: true },
-    ],
-    true,
-  );
-  if (!check.success) {
-    return res.status(400).json({ message: check.message });
-  }
 
   try {
     const { cid } = req.user;
-    const { limit, page, active, search, type } = req.query;
 
-    let query = req.conn
-      .getRepository('InvoicesDocument')
-      .createQueryBuilder('id')
-      .where('id.company = :company', { company: cid })
-      .andWhere('id.isCurrentDocument = :isCurrentDocument', {
-        isCurrentDocument: true,
-      })
-      .leftJoin('id.documentType', 'dt')
-      .select('COUNT(id.id)', 'count');
-
-    if (active != null) {
-      query = query.andWhere('id.active = :active', {
-        active: active == 'true',
-      });
-    }
-    if (type) {
-      query = query.andWhere('dt.id = :type', { type });
-    }
-
-    let { count } = await query.getRawOne();
-
-    let documents = req.conn
+    let documents = await req.conn
       .getRepository('InvoicesDocument')
       .createQueryBuilder('id')
       .select([
@@ -64,58 +27,34 @@ router.get('/', async (req, res) => {
       .andWhere('id.isCurrentDocument = :isCurrentDocument', {
         isCurrentDocument: true,
       })
-      .orderBy('id.createdAt', 'DESC');
+      .orderBy('id.createdAt', 'DESC')
+      .getMany();
 
-    let index = 1;
-    if (search == null) {
-      documents = documents.limit(limit).offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
-      index = index * page ? (page - 1) * limit + 1 : 1;
-    }
 
-    if (active) {
-      documents = documents.andWhere('id.active = :active', {
-        active: active == 'true',
-      });
-    }
-    if (type) {
-      documents = documents.andWhere('dt.id = :type', { type });
-    }
-    documents = await documents.getMany();
+    const documentTypes = await req.conn
+      .getRepository('InvoicesDocumentType')
+      .createQueryBuilder('idt')
+      .select(['idt.id', 'idt.name'])
+      .orderBy('idt.id', 'ASC')
+      .getMany();
 
-    if (!active && !type) {
-      const documentTypes = await req.conn
-        .getRepository('InvoicesDocumentType')
-        .createQueryBuilder('idt')
-        .select(['idt.id', 'idt.name'])
-        .orderBy('idt.id', 'ASC')
-        .getMany();
-
-      documents = documentTypes.map(dt => {
-        const found = documents.find(d => d.documentType.id == dt.id);
-        return found
-          ? found
-          : {
-              id: null,
-              authorization: null,
-              initial: null,
-              final: null,
-              current: null,
-              active: false,
-              documentType: dt,
-            };
-      });
-    }
-
-    if (search != null) {
-      documents = documents.filter(s => s.name.toLowerCase().includes(search));
-      count = documents.length;
-    }
+    documents = documentTypes.map(dt => {
+      const found = documents.find(d => d.documentType.id == dt.id);
+      return found
+        ? found
+        : {
+          id: null,
+          authorization: null,
+          initial: null,
+          final: null,
+          current: null,
+          active: false,
+          documentType: dt,
+        };
+    });
 
     return res.json({
-      count,
-      documents: documents.map(d => {
-        return { index: index++, ...d };
-      }),
+      documents
     });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener el listado de los documentos.' });
@@ -160,7 +99,7 @@ router.post('/', async (req, res) => {
       return {
         ...d,
         company: req.user.cid,
-        isCurrentDocument: false,
+        isCurrentDocument: true,
       };
     });
     // 3. Inserta el nuevo tipo de documento
@@ -196,6 +135,7 @@ router.post('/', async (req, res) => {
     });
   }
 });
+
 router.put('/', async (req, res) => {
   // Verifica los campos requeridos
   const check = checkRequired(req.body, [{ name: 'documents', type: 'array', optional: false }]);
@@ -267,12 +207,12 @@ router.put('/', async (req, res) => {
         !Object.keys(documentCantUpdate) > 0
           ? 'Los documentos se han actualizado correctamente.'
           : `Se actualizaron los documentos con id:${documentsIds.join(
-              ',',
-              ' ',
-            )}, y no se pudieron actualizar los documentos con id:${documentCantUpdate.join(
-              ',',
-              ' ',
-            )} porque no existe o esta en uso`,
+            ',',
+            ' ',
+          )}, y no se pudieron actualizar los documentos con id:${documentCantUpdate.join(
+            ',',
+            ' ',
+          )} porque no existe o esta en uso`,
     });
   } catch (error) {
     // On errror
