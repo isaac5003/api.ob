@@ -200,12 +200,13 @@ router.put('/', async (req, res) => {
         documentCantUpdate.push(document);
       }
     }
+    console.log(documentCantUpdate.length);
     // On success
     return res.json({
       message:
-        !Object.keys(documentCantUpdate) > 0
+        documentCantUpdate.length == 0
           ? 'Los documentos se han actualizado correctamente.'
-          : !documentCantUpdate.length == documents.length
+          : documentCantUpdate.length != documents.length
           ? `Se actualizaron los documentos con id:${documentsIds.join(
               ',',
               ' ',
