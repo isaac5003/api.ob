@@ -3,7 +3,6 @@ const { checkRequired, addLog } = require('../../tools');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-
   try {
     const { cid } = req.user;
 
@@ -30,7 +29,6 @@ router.get('/', async (req, res) => {
       .orderBy('id.createdAt', 'DESC')
       .getMany();
 
-
     const documentTypes = await req.conn
       .getRepository('InvoicesDocumentType')
       .createQueryBuilder('idt')
@@ -43,18 +41,18 @@ router.get('/', async (req, res) => {
       return found
         ? found
         : {
-          id: null,
-          authorization: null,
-          initial: null,
-          final: null,
-          current: null,
-          active: false,
-          documentType: dt,
-        };
+            id: null,
+            authorization: null,
+            initial: null,
+            final: null,
+            current: null,
+            active: false,
+            documentType: dt,
+          };
     });
 
     return res.json({
-      documents
+      documents,
     });
   } catch (error) {
     return res.status(500).json({ message: 'Error al obtener el listado de los documentos.' });
@@ -85,16 +83,17 @@ router.post('/', async (req, res) => {
 
   // Inserta el documento
   try {
-    // // Set active and isCurrentDocument to false for all documents with similar type
-    // await req.conn
-    //   .createQueryBuilder()
-    //   .update('InvoicesDocument')
-    //   .set({
-    //     active: false,
-    //     isCurrentDocument: false,
-    //   })
-    //   .where('documentType IN (...:documentType)', {documentType: documents.map(dt=> dt.documentType) })
-    //   .execute();
+    // Set active and isCurrentDocument to false for all documents with similar type
+    await req.conn
+      .createQueryBuilder()
+      .update('InvoicesDocument')
+      .set({
+        active: false,
+        isCurrentDocument: false,
+      })
+      .where('documentType IN (:...documentType)', { documentType: documents.map(dt => dt.documentType) })
+      .execute();
+
     const newDocuments = documents.map(d => {
       return {
         ...d,
@@ -159,7 +158,7 @@ router.put('/', async (req, res) => {
   // Obtiene los campos requeridos
   const documents = req.body.documents;
 
-  // Inserta el documento
+  // actualiza el documento
   try {
     const user = await req.conn
       .getRepository('User')
@@ -175,7 +174,7 @@ router.put('/', async (req, res) => {
     });
     let documentsIds = [];
     for (const documentToUpdate of newDocuments) {
-      // 3. actualiza el nuevo tipo de documento
+      // 3. actualiza el tipo de documento
       let document = await req.conn
         .createQueryBuilder()
         .update('InvoicesDocument')
@@ -206,13 +205,18 @@ router.put('/', async (req, res) => {
       message:
         !Object.keys(documentCantUpdate) > 0
           ? 'Los documentos se han actualizado correctamente.'
-          : `Se actualizaron los documentos con id:${documentsIds.join(
-            ',',
-            ' ',
-          )}, y no se pudieron actualizar los documentos con id:${documentCantUpdate.join(
-            ',',
-            ' ',
-          )} porque no existe o esta en uso`,
+          : !documentCantUpdate.length == documents.length
+          ? `Se actualizaron los documentos con id:${documentsIds.join(
+              ',',
+              ' ',
+            )}, y no se pudieron actualizar los documentos con id:${documentCantUpdate.join(
+              ',',
+              ' ',
+            )} porque no existe o esta en uso`
+          : `No se pudieron actualizar los documentos con id: ${documentCantUpdate.join(
+              ',',
+              ' ',
+            )} porque estan en uso o no existen`,
     });
   } catch (error) {
     // On errror
