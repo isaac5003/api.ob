@@ -16,7 +16,7 @@ import { JwtStrategy } from './jwt.strategy';
       secret:
         'mDsDkZcsjnux*bOBRfBaf%LN8sMkxf*2s7QSvUD1$RIlDJn0&GclG5#8BRV$KNqW4Zx@jo8j4sK7bmtPHqUTjD^rvc^%eIhdh4W',
       signOptions: {
-        expiresIn: '2s',
+        expiresIn: '2h',
       },
     }),
     TypeOrmModule.forFeature([
