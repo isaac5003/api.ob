@@ -38,6 +38,7 @@ export class CustomersController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
     @Body() validatorCustomerDto: CustomerAddDTO,
   ): Promise<{ message: string }> {

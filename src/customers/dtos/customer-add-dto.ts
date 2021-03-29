@@ -1,15 +1,20 @@
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsOptional,
   IsBooleanString,
   IsString,
-  IsDefined,
+  IsNotEmpty,
+  IsInt,
+  ValidateNested,
 } from 'class-validator';
+import { BranchAddDTO } from './branch-add-dto';
 
 export class CustomerAddDTO {
+  @IsNotEmpty()
   @IsString()
   name: string;
 
+  @IsNotEmpty()
   @IsString()
   shortName: string;
 
@@ -34,17 +39,19 @@ export class CustomerAddDTO {
   @IsString()
   giro: string;
 
-  @IsString()
-  customerType: string;
+  @IsNotEmpty()
+  @IsInt()
+  customerType: number;
 
   @IsOptional()
-  @IsString()
-  customerTaxerType: string;
+  @IsInt()
+  customerTaxerType: number;
 
   @IsOptional()
-  @IsString()
-  customerTypeNatural: string;
+  @IsInt()
+  customerTypeNatural: number;
 
-  @IsDefined()
-  branch: string;
+  @ValidateNested()
+  @Type(() => BranchAddDTO)
+  branch: BranchAddDTO;
 }
