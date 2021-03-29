@@ -34,7 +34,7 @@ export class CustomerRepository extends Repository<Customer> {
     return await query.getMany();
   }
 
-  async getCustomer(id: string): Promise<Customer> {
+  async getCustomerById(id: string): Promise<Customer> {
     let customer: Customer;
     try {
       customer = await this.createQueryBuilder('customer')

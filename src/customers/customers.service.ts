@@ -16,6 +16,6 @@ export class CustomersService {
   }
 
   async getCustomer(id: string): Promise<Customer> {
-    return this.customerRepository.getCustomer(id);
+    return this.customerRepository.getCustomerById(id);
   }
 }
