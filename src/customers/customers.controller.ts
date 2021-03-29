@@ -1,7 +1,9 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
+  Post,
   Query,
   UsePipes,
   ValidationPipe,
@@ -9,6 +11,7 @@ import {
 import { plainToClass } from 'class-transformer';
 import { ResponseListDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
+import { CustomerAddDTO } from './dtos/customer-add-dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 
@@ -32,5 +35,12 @@ export class CustomersController {
   ): Promise<ResponseSingleDTO<Customer>> {
     const customer = await this.customersService.getCustomer(id);
     return new ResponseSingleDTO(plainToClass(Customer, customer));
+  }
+
+  @Post()
+  async createCustomer(
+    @Body() validatorCustomerDto: CustomerAddDTO,
+  ): Promise<{ message: string }> {
+    return this.customersService.createCustomer(validatorCustomerDto);
   }
 }

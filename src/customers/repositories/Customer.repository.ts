@@ -1,5 +1,6 @@
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
+import { CustomerAddDTO } from '../dtos/customer-add-dto';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
 
@@ -56,5 +57,100 @@ export class CustomerRepository extends Repository<Customer> {
     }
 
     return customer;
+  }
+
+  async createCustomer(
+    validatorCustomerDTO: CustomerAddDTO,
+  ): Promise<{ message: string }> {
+    try {
+      const {
+        name,
+        shortName,
+        isProvider,
+        dui,
+        nrc,
+        nit,
+        giro,
+        customerType,
+        customerTaxerType,
+        customerTypeNatural,
+      } = validatorCustomerDTO;
+
+      const customer = await this.createQueryBuilder()
+        .insert()
+        .into('Customer')
+        .values({
+          name,
+          shortName,
+          isProvider,
+          isCustomer: true,
+          dui,
+          nrc,
+          nit,
+          giro,
+          isActiveProvider: false,
+          customerTaxerType,
+          customerType,
+          customerTypeNatural,
+        })
+        .execute();
+
+      // const user = await req.conn
+      // .getRepository('User')
+      // .createQueryBuilder('u')
+      // .where('u.id = :id', { id: req.user.uid })
+      // .getOne();
+
+      // // crea sucursal
+      //   try {
+      //     // obtiene los campos requeridos
+      //     let { contactName, contactInfo, address1, address2, country, state, city } = validatorCustomerDTO.branch;
+
+      //     await this
+      //       .createQueryBuilder()
+      //       .insert()
+      //       .into('CustomerBranch')
+      //       .values({
+      //         name: 'Sucursal Principal',
+      //         contactName,
+      //         contactInfo,
+      //         address1,
+      //         address2,
+      //         customer: customer.raw[0].id,
+      //         country,
+      //         state,
+      //         city,
+      //       })
+      //       .execute();
+
+      //     await addLog(
+      //       req.conn,
+      //       req.moduleName,
+      //       `${user.names} ${user.lastnames}`,
+      //       user.id,
+      //       `Se ha creado la sucursal: Sucursal Principal`,
+      //     );
+
+      //     return res.json({
+      //       message: 'Se ha creado el cliente correctamente.',
+      //       id: customer.raw[0].id,
+      //     });
+      //   } catch (error) {
+      //     // on error
+      //     return res.status(500).json({
+      //       message: 'Error al crear la sucursal del cliente. Contacta con tu administrador.',
+      //     });
+      //   }
+      return {
+        message: 'Se ha creado el cliente correctamente.',
+      };
+      //id: customer.raw[0].id,
+    } catch (error) {
+      // on error
+      console.error(error);
+      return {
+        message: 'Error al crear el cliente. Contacta con tu administrador',
+      };
+    }
   }
 }

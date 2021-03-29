@@ -18,4 +18,8 @@ export class CustomersService {
   async getCustomer(id: string): Promise<Customer> {
     return this.customerRepository.getCustomerById(id);
   }
+
+  async createCustomer(validatorCustomerDto): Promise<{ message: string }> {
+    return this.customerRepository.createCustomer(validatorCustomerDto);
+  }
 }
