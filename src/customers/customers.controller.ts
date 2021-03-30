@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   UsePipes,
   ValidationPipe,
@@ -11,9 +12,10 @@ import {
 import { plainToClass } from 'class-transformer';
 import { ResponseListDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
-import { CustomerAddDTO } from './dtos/customer-add-dto';
+import { CustomerValidateDTO } from './dtos/customer-validator-dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
+import { CustomerValidateStatusDTO } from './dtos/status-validator-dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -40,8 +42,37 @@ export class CustomersController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
-    @Body() validatorCustomerDto: CustomerAddDTO,
-  ): Promise<{ message: string }> {
+    @Body() validatorCustomerDto: CustomerValidateDTO,
+  ): Promise<{ message: string; id: string }> {
     return this.customersService.createCustomer(validatorCustomerDto);
+  }
+
+  @Put('/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomer(
+    id: string,
+    @Body() validatorCustomerDto: CustomerValidateDTO,
+  ): Promise<{ message: string }> {
+    return this.customersService.updateCustomer(id, validatorCustomerDto);
+  }
+
+  @Put('/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerStatus(
+    id: string,
+    @Body() validatorCustomerStatusDto: CustomerValidateStatusDTO,
+  ): Promise<{ message: string }> {
+    return this.customersService.updateCustomerStatus(
+      id,
+      validatorCustomerStatusDto,
+    );
+  }
+
+  @Get('/:id/integrations')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getCustomerIntegration(
+    @Param('id') id: string,
+  ): Promise<{ integrations: any | null }> {
+    return await this.customersService.getCustomerIntegration(id);
   }
 }

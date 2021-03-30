@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
     customers = await customers.getMany();
 
     if (search != null) {
-      customers = customers.filter(s => {
+      customers = customers.filter((s) => {
         return s.name.toLowerCase().includes(search);
       });
       count = customers.length;
@@ -89,7 +89,7 @@ router.get('/', async (req, res) => {
 
     return res.json({
       count,
-      customers: customers.map(c => {
+      customers: customers.map((c) => {
         return { index: index++, ...c };
       }),
     });
@@ -580,13 +580,13 @@ router.put('/:id/integrations', async (req, res) => {
     );
 
     return res.json({
-      message: 'La integración ha sido actualizada correctamente.',
+      message: 'La integraciï¿½n ha sido actualizada correctamente.',
     });
   } catch (error) {
     // return error
 
     return res.status(500).json({
-      message: 'Error al actualizar la integración. Contacta con tu administrador.',
+      message: 'Error al actualizar la integraciï¿½n. Contacta con tu administrador.',
     });
   }
 });

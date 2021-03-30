@@ -19,7 +19,32 @@ export class CustomersService {
     return this.customerRepository.getCustomerById(id);
   }
 
-  async createCustomer(validatorCustomerDto): Promise<{ message: string }> {
+  async createCustomer(
+    validatorCustomerDto,
+  ): Promise<{ message: string; id: string }> {
     return this.customerRepository.createCustomer(validatorCustomerDto);
+  }
+
+  async updateCustomer(
+    id: string,
+    validatorCustomerDto,
+  ): Promise<{ message: string }> {
+    return this.customerRepository.updateCustomer(id, validatorCustomerDto);
+  }
+
+  async updateCustomerStatus(
+    id: string,
+    validatorCustomerStatusDto,
+  ): Promise<{ message: string }> {
+    return this.customerRepository.updateCustomerStatus(
+      id,
+      validatorCustomerStatusDto,
+    );
+  }
+
+  async getCustomerIntegration(
+    id: string,
+  ): Promise<{ integrations: any | null }> {
+    return this.customerRepository.getCustomerIntegration(id);
   }
 }

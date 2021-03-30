@@ -1,8 +1,13 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { CustomerAddDTO } from '../dtos/customer-add-dto';
+import { CustomerValidateDTO } from '../dtos/customer-validator-dto';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
+import { CustomerValidateStatusDTO } from '../dtos/status-validator-dto';
 
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
@@ -60,8 +65,8 @@ export class CustomerRepository extends Repository<Customer> {
   }
 
   async createCustomer(
-    validatorCustomerDTO: CustomerAddDTO,
-  ): Promise<{ message: string }> {
+    validatorCustomerDTO: CustomerValidateDTO,
+  ): Promise<{ message: string; id: string }> {
     try {
       const {
         name,
@@ -94,63 +99,284 @@ export class CustomerRepository extends Repository<Customer> {
           customerTypeNatural,
         })
         .execute();
-
+      //TODO
       // const user = await req.conn
       // .getRepository('User')
       // .createQueryBuilder('u')
       // .where('u.id = :id', { id: req.user.uid })
       // .getOne();
 
-      // // crea sucursal
-      //   try {
-      //     // obtiene los campos requeridos
-      //     let { contactName, contactInfo, address1, address2, country, state, city } = validatorCustomerDTO.branch;
+      // crea sucursal
+      try {
+        // obtiene los campos requeridos
+        const {
+          contactName,
+          contactInfo,
+          address1,
+          address2,
+          country,
+          state,
+          city,
+        } = validatorCustomerDTO.branch;
 
-      //     await this
-      //       .createQueryBuilder()
-      //       .insert()
-      //       .into('CustomerBranch')
-      //       .values({
-      //         name: 'Sucursal Principal',
-      //         contactName,
-      //         contactInfo,
-      //         address1,
-      //         address2,
-      //         customer: customer.raw[0].id,
-      //         country,
-      //         state,
-      //         city,
-      //       })
-      //       .execute();
+        await this.createQueryBuilder()
+          .insert()
+          .into('CustomerBranch')
+          .values({
+            name: 'Sucursal Principal',
+            contactName,
+            contactInfo,
+            address1,
+            address2,
+            customer: customer.raw[0].id,
+            country,
+            state,
+            city,
+          })
+          .execute();
 
-      //     await addLog(
-      //       req.conn,
-      //       req.moduleName,
-      //       `${user.names} ${user.lastnames}`,
-      //       user.id,
-      //       `Se ha creado la sucursal: Sucursal Principal`,
-      //     );
+        //TODO
+        // await addLog(
+        //   req.conn,
+        //   req.moduleName,
+        //   `${user.names} ${user.lastnames}`,
+        //   user.id,
+        //   `Se ha creado la sucursal: Sucursal Principal`,
+        // );
 
-      //     return res.json({
-      //       message: 'Se ha creado el cliente correctamente.',
-      //       id: customer.raw[0].id,
-      //     });
-      //   } catch (error) {
-      //     // on error
-      //     return res.status(500).json({
-      //       message: 'Error al crear la sucursal del cliente. Contacta con tu administrador.',
-      //     });
-      //   }
-      return {
-        message: 'Se ha creado el cliente correctamente.',
-      };
-      //id: customer.raw[0].id,
+        return {
+          message: 'Se ha creado el cliente correctamente.',
+          id: customer.raw[0].id,
+        };
+      } catch (error) {
+        // on error
+        throw new InternalServerErrorException(
+          'Error al crear la sucursal del cliente. Contacta con tu administrador.',
+        );
+      }
     } catch (error) {
       // on error
       console.error(error);
+      throw new InternalServerErrorException(
+        'Error al crear el cliente. Contacta con tu administrador',
+      );
+    }
+  }
+
+  async updateCustomer(
+    id: string,
+    validatorCustomerDTO: CustomerValidateDTO,
+  ): Promise<{ message: string }> {
+    try {
+      const {
+        name,
+        shortName,
+        isProvider,
+        dui,
+        nrc,
+        nit,
+        giro,
+        customerType,
+        customerTaxerType,
+        customerTypeNatural,
+      } = validatorCustomerDTO;
+
+      const customer = await this.createQueryBuilder()
+        .update('Customer')
+        .set({
+          name,
+          shortName,
+          isProvider,
+          dui,
+          nrc,
+          nit,
+          giro,
+          customerType,
+          customerTaxerType,
+          customerTypeNatural,
+        })
+        .where('id = :id', { id })
+        .execute();
+
+      //TODO
+      // const user = await req.conn
+      // .getRepository('User')
+      // .createQueryBuilder('u')
+      // .where('u.id = :id', { id: req.user.uid })
+      // .getOne();
+
+      // crea sucursal
+      try {
+        // obtiene los campos requeridos
+        const {
+          contactName,
+          contactInfo,
+          address1,
+          address2,
+          country,
+          state,
+          city,
+        } = validatorCustomerDTO.branch;
+
+        await this.createQueryBuilder()
+          .update('CustomerBranch')
+          .set({
+            contactName,
+            contactInfo,
+            address1,
+            address2,
+            country,
+            state,
+            city,
+          })
+          .where('id = :id', { id })
+          .execute();
+
+        //TODO
+        // await addLog(
+        //   req.conn,
+        //   req.moduleName,
+        //   `${user.names} ${user.lastnames}`,
+        //   user.id,
+        //   `Se ha creado la sucursal: Sucursal Principal`,
+        // );
+
+        return {
+          message: 'Se ha actualizado el cliente correctamente.',
+        };
+      } catch (error) {
+        // on error
+        throw new InternalServerErrorException(
+          'Error al actualizar la sucursal del cliente. Contacta con tu administrador.',
+        );
+      }
+    } catch (error) {
+      // on error
+      console.error(error);
+      throw new InternalServerErrorException(
+        'Error al actualizar el cliente. Contacta con tu administrador',
+      );
+    }
+  }
+
+  // async deleteCustomer(id: string): Promise<{ message: string }> {
+  //   // If no references deletes
+  //   try {
+  //     await this.createQueryBuilder()
+  //       .delete()
+  //       .from('Customer')
+  //       .where('id = :id', { id })
+  //       // .andWhere('company = :company', { company: req.user.cid })
+  //       .execute();
+
+  //     // const user = await req.conn
+  //     //   .getRepository('User')
+  //     //   .createQueryBuilder('u')
+  //     //   .where('u.id = :id', { id: req.user.uid })
+  //     //   .getOne();
+
+  //     // await addLog(
+  //     //   req.conn,
+  //     //   req.moduleName,
+  //     //   `${user.names} ${user.lastnames}`,
+  //     //   user.id,
+  //     //   `Se elimino el cliente con nombre: ${customer.name}.`,
+  //     // );
+
+  //     return {
+  //       message: 'El cliente ha sido eliminado correctamente.',
+  //     };
+  //   } catch (error) {
+  //     console.error(error);
+  //     // on error
+  //     console.error(error);
+  //     throw new InternalServerErrorException(
+  //       'Error al eliminar el cliente. Contacta con tu administrador',
+  //     );
+  //   }
+  // }
+
+  async updateCustomerStatus(
+    id: string,
+    validatorCustomerStatusDTO: CustomerValidateStatusDTO,
+  ): Promise<{ message: string }> {
+    const { status } = validatorCustomerStatusDTO;
+
+    const customer = await this.createQueryBuilder('customer')
+      .where('customer.id = :id', { id })
+      .getOne();
+    console.log(customer);
+
+    if (!customer) {
+      throw new BadRequestException('El cliente seleccionado no existe.');
+    }
+
+    // If customer exist updates it
+    try {
+      // return success
+      await this.createQueryBuilder()
+        .update('Customer')
+        .set({ isActiveCustomer: status })
+        //TODO
+        // .where('company = :company', { company: req.user.cid })
+        .where('id = :id', { id })
+        .execute();
+
+      //TODO
+      // const user = await req.conn
+      //   .getRepository('User')
+      //   .createQueryBuilder('u')
+      //   .where('u.id = :id', { id: req.user.uid })
+      //   .getOne();
+
+      // await addLog(
+      //   req.conn,
+      //   req.moduleName,
+      //   `${user.names} ${user.lastnames}`,
+      //   user.id,
+      //   `Se cambio el estado del cliente: ${customer.name} a ${
+      //     status ? 'ACTIVO' : 'INACTIVO'
+      //   }.`,
+      // );
+
       return {
-        message: 'Error al crear el cliente. Contacta con tu administrador',
+        message: 'El estado del cliente ha sido actualizado correctamente.',
       };
+    } catch (error) {
+      // return error
+      throw new InternalServerErrorException(
+        'Error al actualizar el estado del cliente. Contacta con tu administrador.',
+      );
+    }
+  }
+
+  async getCustomerIntegration(
+    id: string,
+  ): Promise<{ integrations: any | null }> {
+    try {
+      const customer = await this.createQueryBuilder('customer')
+        // .select(['customer.id', 'ac.id'])
+        // .where('c.company = :company', { company: req.user.cid })
+        .where('customer.id = :id', { id })
+        .leftJoin('customer.accountingCatalog', 'ac')
+        .getOne();
+
+      if (!customer) {
+        throw new BadRequestException('El cliente seleccionado no existe.');
+      }
+
+      return {
+        integrations: {
+          catalog: customer.accountingCatalog
+            ? customer.accountingCatalog.id
+            : null,
+        },
+      };
+    } catch (error) {
+      // return error
+      throw new InternalServerErrorException(
+        'Error al actualizar el estado del cliente. Contacta con tu administrador.',
+      );
     }
   }
 }
