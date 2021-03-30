@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { CustomerAccountingValidateDTO } from './dtos/accounting-validator.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerRepository } from './repositories/Customer.repository';
@@ -9,6 +11,9 @@ export class CustomersService {
   constructor(
     @InjectRepository(CustomerRepository)
     private customerRepository: CustomerRepository,
+
+    @InjectRepository(AccountingCatalogRepository)
+    private accountingCatalogRepository: AccountingCatalogRepository,
   ) {}
 
   async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
@@ -46,5 +51,13 @@ export class CustomersService {
     id: string,
   ): Promise<{ integrations: any | null }> {
     return this.customerRepository.getCustomerIntegration(id);
+  }
+
+  async updateCustomerIntegration(id: string, validatorCustomerAccountingDTO) {
+    const { accountingCatalog } = validatorCustomerAccountingDTO;
+    const account = await this.accountingCatalogRepository.getAccountingCatalogById(
+      accountingCatalog,
+    );
+    return this.customerRepository.updateCustomerIntegration(id, account);
   }
 }

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { CustomerValidateDTO } from '../dtos/customer-validator-dto';
+import { CustomerValidateDTO } from '../dtos/customer-validator.dto';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
 import { CustomerValidateStatusDTO } from '../dtos/status-validator-dto';
@@ -12,32 +12,44 @@ import { CustomerValidateStatusDTO } from '../dtos/status-validator-dto';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
   async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
-    const { active, limit, page, search, order, prop } = filterDto;
-    const query = this.createQueryBuilder('customer')
-      .leftJoinAndSelect('customer.customerType', 'customerType')
-      .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural');
+    try {
+      const { active, limit, page, search, order, prop } = filterDto;
+      const query = this.createQueryBuilder('customer')
+        .leftJoinAndSelect('customer.customerType', 'customerType')
+        .leftJoinAndSelect(
+          'customer.customerTypeNatural',
+          'customerTypeNatural',
+        );
 
-    if (active) {
-      query.andWhere('customer.isActiveCustomer = :active', { active });
+      if (active) {
+        query.andWhere('customer.isActiveCustomer = :active', { active });
+      }
+
+      if (search) {
+        query.andWhere('(LOWER(customer.name) LIKE :search)', {
+          search: `%${search}%`,
+        });
+      }
+
+      if (limit && page) {
+        query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
+      }
+
+      if (order && prop) {
+        query.orderBy(
+          `customer.${prop}`,
+          order == 'ascending' ? 'ASC' : 'DESC',
+        );
+      } else {
+        query.orderBy('customer.createdAt', 'DESC');
+      }
+
+      return await query.getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener el listado de clientes. Contacta con tu administrador',
+      );
     }
-
-    if (search) {
-      query.andWhere('(LOWER(customer.name) LIKE :search)', {
-        search: `%${search}%`,
-      });
-    }
-
-    if (limit && page) {
-      query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
-    }
-
-    if (order && prop) {
-      query.orderBy(`customer.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
-    } else {
-      query.orderBy('customer.createdAt', 'DESC');
-    }
-
-    return await query.getMany();
   }
 
   async getCustomerById(id: string): Promise<Customer> {
@@ -50,10 +62,11 @@ export class CustomerRepository extends Repository<Customer> {
           'customer.customerTypeNatural',
           'customerTypeNatural',
         )
+        .leftJoinAndSelect('customer.accountingCatalog', 'ac')
         .getOne();
     } catch (error) {
-      throw new BadRequestException(
-        'Error al obtener el servicio seleccionado.',
+      throw new InternalServerErrorException(
+        'Error al obtener el cliente seleccionado.',
       );
     }
 
@@ -167,6 +180,8 @@ export class CustomerRepository extends Repository<Customer> {
     id: string,
     validatorCustomerDTO: CustomerValidateDTO,
   ): Promise<{ message: string }> {
+    await this.getCustomerById(id);
+
     try {
       const {
         name,
@@ -181,7 +196,7 @@ export class CustomerRepository extends Repository<Customer> {
         customerTypeNatural,
       } = validatorCustomerDTO;
 
-      const customer = await this.createQueryBuilder()
+      await this.createQueryBuilder()
         .update('Customer')
         .set({
           name,
@@ -302,11 +317,7 @@ export class CustomerRepository extends Repository<Customer> {
   ): Promise<{ message: string }> {
     const { status } = validatorCustomerStatusDTO;
 
-    const customer = await this.getCustomerById(id);
-    if (!customer) {
-      throw new BadRequestException('El cliente seleccionado no existe.');
-    }
-
+    await this.getCustomerById(id);
     // If customer exist updates it
     try {
       // return success
@@ -349,18 +360,8 @@ export class CustomerRepository extends Repository<Customer> {
   async getCustomerIntegration(
     id: string,
   ): Promise<{ integrations: any | null }> {
+    const customer = await this.getCustomerById(id);
     try {
-      const customer = await this.createQueryBuilder('customer')
-        // .select(['customer.id', 'ac.id'])
-        // .where('c.company = :company', { company: req.user.cid })
-        .where('customer.id = :id', { id })
-        .leftJoin('customer.accountingCatalog', 'ac')
-        .getOne();
-
-      if (!customer) {
-        throw new BadRequestException('El cliente seleccionado no existe.');
-      }
-
       return {
         integrations: {
           catalog: customer.accountingCatalog
@@ -371,7 +372,53 @@ export class CustomerRepository extends Repository<Customer> {
     } catch (error) {
       // return error
       throw new InternalServerErrorException(
-        'Error al actualizar el estado del cliente. Contacta con tu administrador.',
+        'Error al obtener la configuracion de integración del cliente. Contacta con tu administrador.',
+      );
+    }
+  }
+
+  async updateCustomerIntegration(
+    id: string,
+    account: any | null,
+  ): Promise<{ message: string }> {
+    await this.getCustomerById(id);
+    //validate that account can be use
+    if (account.isParent) {
+      throw new BadRequestException(
+        'La cuenta selecciona no puede ser utilizada ya que no es asignable',
+      );
+    }
+
+    // If account exist updates intergations it
+    try {
+      // return success
+      await this.createQueryBuilder()
+        .update('Customer')
+        .set({ accountingCatalog: account.id })
+        .where('id = :id', { id })
+        .execute();
+
+      // const user = await req.conn
+      //   .getRepository('User')
+      //   .createQueryBuilder('u')
+      //   .where('u.id = :id', { id: req.user.uid })
+      //   .getOne();
+
+      // await addLog(
+      //   req.conn,
+      //   req.moduleName,
+      //   `${user.names} ${user.lastnames}`,
+      //   user.id,
+      //   `Se cambio la cuenta contable: ${account.id}. para el cliente ${user.id}`,
+      // );
+
+      return {
+        message: 'La integración ha sido actualizada correctamente.',
+      };
+    } catch (error) {
+      // return error
+      throw new InternalServerErrorException(
+        'Error al actualizar la integración. Contacta con tu administrador.',
       );
     }
   }

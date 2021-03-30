@@ -12,10 +12,11 @@ import {
 import { plainToClass } from 'class-transformer';
 import { ResponseListDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
-import { CustomerValidateDTO } from './dtos/customer-validator-dto';
+import { CustomerValidateDTO } from './dtos/customer-validator.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerValidateStatusDTO } from './dtos/status-validator-dto';
+import { CustomerAccountingValidateDTO } from './dtos/accounting-validator.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -50,7 +51,7 @@ export class CustomersController {
   @Put('/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomer(
-    id: string,
+    @Param('id') id: string,
     @Body() validatorCustomerDto: CustomerValidateDTO,
   ): Promise<{ message: string }> {
     return this.customersService.updateCustomer(id, validatorCustomerDto);
@@ -74,5 +75,17 @@ export class CustomersController {
     @Param('id') id: string,
   ): Promise<{ integrations: any | null }> {
     return await this.customersService.getCustomerIntegration(id);
+  }
+
+  @Put('/:id/integrations')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerIntegration(
+    @Param('id') id: string,
+    @Body() validatorCustomerAccountingDto: CustomerAccountingValidateDTO,
+  ): Promise<{ message: string }> {
+    return await this.customersService.updateCustomerIntegration(
+      id,
+      validatorCustomerAccountingDto,
+    );
   }
 }

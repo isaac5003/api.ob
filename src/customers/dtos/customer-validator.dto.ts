@@ -7,7 +7,7 @@ import {
   IsInt,
   ValidateNested,
 } from 'class-validator';
-import { BranchAddDTO } from './branch-add-dto';
+import { BranchAddDTO } from './branch-add.dto';
 
 export class CustomerValidateDTO {
   @IsNotEmpty({ message: 'name es campo requerido' })
