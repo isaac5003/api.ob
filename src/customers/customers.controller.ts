@@ -59,7 +59,7 @@ export class CustomersController {
   @Put('/status/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerStatus(
-    id: string,
+    @Param('id') id: string,
     @Body() validatorCustomerStatusDto: CustomerValidateStatusDTO,
   ): Promise<{ message: string }> {
     return this.customersService.updateCustomerStatus(

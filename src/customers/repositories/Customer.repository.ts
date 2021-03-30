@@ -58,7 +58,7 @@ export class CustomerRepository extends Repository<Customer> {
     }
 
     if (!customer) {
-      throw new NotFoundException('El servicio seleccionado no existe.');
+      throw new NotFoundException('El cliente seleccionado no existe.');
     }
 
     return customer;
@@ -302,11 +302,7 @@ export class CustomerRepository extends Repository<Customer> {
   ): Promise<{ message: string }> {
     const { status } = validatorCustomerStatusDTO;
 
-    const customer = await this.createQueryBuilder('customer')
-      .where('customer.id = :id', { id })
-      .getOne();
-    console.log(customer);
-
+    const customer = await this.getCustomerById(id);
     if (!customer) {
       throw new BadRequestException('El cliente seleccionado no existe.');
     }
