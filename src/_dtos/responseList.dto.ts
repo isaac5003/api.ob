@@ -20,3 +20,8 @@ export class ResponseSingleDTO<T> {
     this.data = data;
   }
 }
+
+export class ResponseMinimalDTO {
+  id?: string;
+  message: string;
+}

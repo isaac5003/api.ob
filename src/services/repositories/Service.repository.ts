@@ -1,37 +1,128 @@
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Company } from 'src/companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
+import { serviceDataDTO } from '../dtos/service-data.dto';
 import { ServiceFilterDTO } from '../dtos/service-filter.dto';
 import { Service } from '../entities/Service.entity';
+import { logDatabaseError } from '../../_tools/index';
+import { serviceStatusDTO } from '../dtos/service-status.dto';
+import { ServiceIntegrationDTO } from '../dtos/service-integration.dto';
 
+const reponame = 'servicio';
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
-  async getServices(filterDto: ServiceFilterDTO): Promise<Service[]> {
+  async getServices(
+    company: Company,
+    filterDto: ServiceFilterDTO,
+  ): Promise<Service[]> {
     const {
       limit,
       page,
       search,
+      active,
       prop,
       order,
-      active,
       type,
       fromAmount,
       toAmount,
     } = filterDto;
 
-    const query = this.createQueryBuilder('service');
+    try {
+      const query = this.createQueryBuilder('s').where({ company });
 
-    if (search) {
-      query.andWhere(
-        'LOWER(service.name) LIKE :search OR LOWER(service.description) LIKE :search',
-        {
-          search: `%${search}%`,
-        },
+      // filter by search value
+      if (search) {
+        query.andWhere(
+          'LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search',
+          {
+            search: `%${search}%`,
+          },
+        );
+      }
+
+      // filter by status
+      if (active) {
+        query.andWhere('s.active = :active', { active });
+      }
+
+      // filter by range of amounts
+      if (fromAmount && toAmount) {
+        query.andWhere('s.cost >= :fromAmount', { fromAmount });
+        query.andWhere('s.cost >= :toAmount', { toAmount });
+      }
+
+      // applies pagination
+      if (limit && page) {
+        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
+      }
+
+      // filter by type
+      if (type) {
+        query.andWhere('s.sellingType = :type', { type });
+      }
+
+      // sort by prop}
+      if (order && prop) {
+        query.orderBy(`s.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
+      } else {
+        query.orderBy('s.createdAt', 'DESC');
+      }
+
+      return await query.getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener el listado de servicios.',
       );
     }
+  }
 
-    if (limit && page) {
-      query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
+  async getService(company: Company, id: string): Promise<Service> {
+    let service: Service;
+    try {
+      service = await this.findOne({ id, company });
+    } catch (error) {
+      throw new BadRequestException('despues lo busco');
     }
 
-    return await query.getMany();
+    if (!service) {
+      throw new NotFoundException('no encontrado');
+    }
+    return service;
+  }
+
+  async createService(
+    company: Company,
+    createDTO: serviceDataDTO,
+  ): Promise<Service> {
+    let response: Service;
+    try {
+      const service = this.create({ company, ...createDTO });
+      response = await this.save(service);
+    } catch (error) {
+      throw new BadRequestException('bad request');
+    }
+    return await response;
+  }
+
+  async updateService(
+    company: Company,
+    updateDTO: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
+    id: string,
+  ): Promise<any> {
+    return this.update({ id, company }, updateDTO);
+  }
+
+  async deleteService(company: Company, id: string): Promise<boolean> {
+    const service = await this.getService(company, id);
+    try {
+      await this.delete(service);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+    return true;
   }
 }
