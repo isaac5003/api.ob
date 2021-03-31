@@ -3,6 +3,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  JoinTable,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -45,14 +47,15 @@ export class Service extends BaseEntity {
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.service)
   invoiceDetails: InvoiceDetail[];
 
+  @ManyToOne(() => Company, (company) => company.services)
+  @JoinColumn({ name: 'company_id' })
+  company: Company;
+
   @ManyToOne(
     () => AccountingCatalog,
     (accountingCatalog) => accountingCatalog.services,
   )
   accountingCatalog: AccountingCatalog;
-
-  @ManyToOne(() => Company, (company) => company.services)
-  company: Company;
 
   @ManyToOne(() => SellingType, (sellingType) => sellingType.services)
   sellingType: SellingType;

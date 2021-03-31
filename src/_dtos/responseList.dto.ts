@@ -1,3 +1,5 @@
+import { Service } from 'src/services/entities/Service.entity';
+
 export class ResponseListDTO<T> {
   count: number;
   data: T[];
@@ -19,4 +21,9 @@ export class ResponseSingleDTO<T> {
   constructor(data: T) {
     this.data = data;
   }
+}
+
+export class ResponseMinimalDTO {
+  id: string;
+  message: string;
 }

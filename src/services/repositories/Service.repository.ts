@@ -1,14 +1,20 @@
 import {
   BadRequestException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
+import { Company } from 'src/companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
+import { serviceCreateDTO } from '../dtos/service-create.dto';
 import { ServiceFilterDTO } from '../dtos/service-filter.dto';
 import { Service } from '../entities/Service.entity';
 
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
-  async getServices(company, filterDto: ServiceFilterDTO): Promise<Service[]> {
+  async getServices(
+    company: Company,
+    filterDto: ServiceFilterDTO,
+  ): Promise<Service[]> {
     const {
       limit,
       page,
@@ -70,21 +76,31 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async getService(id): Promise<Service> {
+  async getService(company: Company, id: string): Promise<Service> {
     let service: Service;
     try {
-      service = await this.createQueryBuilder('s')
-        .where({ id })
-        .leftJoinAndSelect('s.sellingType', 'st')
-        .getOne();
+      service = await this.findOne({ id, company });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener el servicio seleccionado.',
-      );
+      throw new BadRequestException('despues lo busco');
     }
+
     if (!service) {
-      throw new BadRequestException('El servicio seleccionado no existe.');
+      throw new NotFoundException('no encontrado');
     }
     return service;
   }
+
+  async createService(
+    company: Company,
+    createDTO: serviceCreateDTO,
+  ): Promise<Service> {
+    const newService = this.create({ company, ...createDTO });
+    const response = await this.save(newService);
+    console.log(response);
+    return response;
+  }
+
+  // async updateService(company: string): Promise<Service> {}
+
+  // async deleteService(company: string): Promise<Service> {}
 }
