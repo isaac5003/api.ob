@@ -2,8 +2,9 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { Company } from 'src/companies/entities/Company.entity';
+import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { JwtPayloadDTO } from './dtos/jwtPayload.dto';
-import { User } from './entities/User.entity';
 import { UserRepository } from './repositories/User.repository';
 
 @Injectable()
@@ -11,6 +12,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
+
+    @InjectRepository(CompanyRepository)
+    private companyRepository: CompanyRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -19,14 +23,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayloadDTO): Promise<User> {
-    const { uid } = payload;
-    const user = this.userRepository.getUserById(uid);
+  async validate(payload: JwtPayloadDTO): Promise<Company> {
+    const { uid, cid } = payload;
+    const user = await this.userRepository.getUserById(uid);
+    const company = await this.companyRepository.getCompanyById(cid);
     if (!user) {
       throw new UnauthorizedException(
         'Debes iniciar sesión para poder realizar esta acción.',
       );
     }
-    return user;
+    return company;
   }
 }

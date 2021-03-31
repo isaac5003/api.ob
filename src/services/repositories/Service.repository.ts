@@ -8,7 +8,7 @@ import { Service } from '../entities/Service.entity';
 
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
-  async getServices(filterDto: ServiceFilterDTO): Promise<Service[]> {
+  async getServices(company, filterDto: ServiceFilterDTO): Promise<Service[]> {
     const {
       limit,
       page,
@@ -22,7 +22,7 @@ export class ServiceRepository extends Repository<Service> {
     } = filterDto;
 
     try {
-      const query = this.createQueryBuilder('s');
+      const query = this.createQueryBuilder('s').where({ company });
 
       // filter by search value
       if (search) {

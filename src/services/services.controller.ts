@@ -13,6 +13,8 @@ import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
 import { AuthGuard } from '@nestjs/passport';
+import { GetCompany } from 'src/auth/get-company.decorator';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Controller('services')
 @UseGuards(AuthGuard())
@@ -23,8 +25,12 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getServices(
     @Query() filterDto: ServiceFilterDTO,
+    @GetCompany() company: Company,
   ): Promise<ResponseListDTO<Service>> {
-    const services = await this.servicesService.getServices(filterDto);
+    const services = await this.servicesService.getServices(
+      company.id,
+      filterDto,
+    );
     return new ResponseListDTO(plainToClass(Service, services));
   }
 
