@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -21,7 +22,7 @@ import { ServicesService } from './services.service';
 import { AuthGuard } from '@nestjs/passport';
 import { GetCompany } from 'src/auth/get-company.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
-import { serviceCreateDTO } from './dtos/service-create.dto';
+import { serviceDataDTO } from './dtos/service-data.dto';
 
 @Controller('services')
 @UseGuards(AuthGuard())
@@ -48,10 +49,19 @@ export class ServicesController {
   }
 
   @Post('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async createService(
-    @Body() createDTO: serviceCreateDTO,
+    @Body() createDTO: serviceDataDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.servicesService.createService(company, createDTO);
+  }
+
+  @Delete('/:id')
+  async deleteService(
+    @Param('id') id: string,
+    @GetCompany() company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.servicesService.deleteService(company, id);
   }
 }

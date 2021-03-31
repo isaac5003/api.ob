@@ -5,10 +5,14 @@ import {
 } from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { serviceCreateDTO } from '../dtos/service-create.dto';
+import { serviceDataDTO } from '../dtos/service-data.dto';
 import { ServiceFilterDTO } from '../dtos/service-filter.dto';
 import { Service } from '../entities/Service.entity';
+import { logDatabaseError } from '../../_tools/index';
+import { serviceStatusDTO } from '../dtos/service-status.dto';
+import { ServiceIntegrationDTO } from '../dtos/service-integration.dto';
 
+const reponame = 'servicio';
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
   async getServices(
@@ -92,15 +96,33 @@ export class ServiceRepository extends Repository<Service> {
 
   async createService(
     company: Company,
-    createDTO: serviceCreateDTO,
+    createDTO: serviceDataDTO,
   ): Promise<Service> {
-    const newService = this.create({ company, ...createDTO });
-    const response = await this.save(newService);
-    console.log(response);
-    return response;
+    let response: Service;
+    try {
+      const service = this.create({ company, ...createDTO });
+      response = await this.save(service);
+    } catch (error) {
+      throw new BadRequestException('bad request');
+    }
+    return await response;
   }
 
-  // async updateService(company: string): Promise<Service> {}
+  async updateService(
+    company: Company,
+    updateDTO: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
+    id: string,
+  ): Promise<any> {
+    return this.update({ id, company }, updateDTO);
+  }
 
-  // async deleteService(company: string): Promise<Service> {}
+  async deleteService(company: Company, id: string): Promise<boolean> {
+    const service = await this.getService(company, id);
+    try {
+      await this.delete(service);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+    return true;
+  }
 }
