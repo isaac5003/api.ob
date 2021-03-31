@@ -14,3 +14,16 @@ export function logDatabaseError(type: string, error: any): void {
   }
   throw new BadRequestException(message);
 }
+
+export function validationMessage(fieldname: string, type: string): string {
+  switch (type) {
+    case 'IsBooleanString':
+      return `El campo '${fieldname}' debe ser del valor "true" o "false"`;
+    case 'IsInt':
+      return `El campo '${fieldname}' debe ser un numero entero.`;
+    case 'IsNotEmpty':
+      return `El campo '${fieldname}' es requerido.`;
+    case 'IsString':
+      return `El campo '${fieldname}' debe ser del tipo texto.`;
+  }
+}
