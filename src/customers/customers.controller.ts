@@ -69,23 +69,23 @@ export class CustomersController {
     );
   }
 
-  @Get('/:id/integrations')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getCustomerIntegration(
-    @Param('id') id: string,
-  ): Promise<{ integrations: any | null }> {
-    return await this.customersService.getCustomerIntegration(id);
-  }
+  // @Get('/:id/integrations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async getCustomerIntegration(
+  //   @Param('id') id: string,
+  // ): Promise<{ integrations: any | null }> {
+  //   return await this.customersService.getCustomerIntegration(id);
+  // }
 
-  @Put('/:id/integrations')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCustomerIntegration(
-    @Param('id') id: string,
-    @Body() validatorCustomerAccountingDto: CustomerAccountingValidateDTO,
-  ): Promise<{ message: string }> {
-    return await this.customersService.updateCustomerIntegration(
-      id,
-      validatorCustomerAccountingDto,
-    );
-  }
+  // @Put('/:id/integrations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async updateCustomerIntegration(
+  //   @Param('id') id: string,
+  //   @Body() validatorCustomerAccountingDto: CustomerAccountingValidateDTO,
+  // ): Promise<{ message: string }> {
+  //   return await this.customersService.updateCustomerIntegration(
+  //     id,
+  //     validatorCustomerAccountingDto,
+  //   );
+  // }
 }

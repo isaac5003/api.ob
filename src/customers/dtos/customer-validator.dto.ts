@@ -51,6 +51,7 @@ export class CustomerValidateDTO {
   @IsInt()
   customerTypeNatural: number;
 
+  @IsNotEmpty({ message: 'branch es campo requerido' })
   @ValidateNested()
   @Type(() => BranchAddDTO)
   branch: BranchAddDTO;
