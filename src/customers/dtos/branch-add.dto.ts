@@ -1,31 +1,39 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { City } from 'src/system/entities/City.entity';
+import { Country } from 'src/system/entities/Country.entity';
+import { State } from 'src/system/entities/State.entity';
+import { validationMessage } from 'src/_tools';
 
 export class BranchAddDTO {
-  @IsNotEmpty({ message: 'contacName es campo requerido' })
-  @IsString({ message: 'contactName debe ser de tipo string' })
+  @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('name', 'IsString') })
+  name: string;
+
+  @IsNotEmpty({ message: validationMessage('contactName', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('contactName', 'IsString') })
   contactName: string;
 
   @IsOptional()
-  @IsString({ message: 'contactInfo debe ser de tipo string' })
+  @IsString({ message: validationMessage('contactInfo', 'IsBooleanString') })
   contactInfo: string;
 
-  @IsNotEmpty({ message: 'address1 es campo requerido' })
-  @IsString({ message: 'address1 debe ser de tipo string' })
+  @IsNotEmpty({ message: validationMessage('address1', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('address1', 'IsString') })
   address1: string;
 
   @IsOptional()
-  @IsString({ message: 'address2 debe ser de tipo string' })
+  @IsString({ message: validationMessage('address2', 'IsString') })
   address2: string;
 
-  @IsNotEmpty({ message: 'country es campo requerido' })
-  @IsInt({ message: 'country debe ser de tipo integer' })
-  country: number;
+  @IsNotEmpty({ message: validationMessage('country', 'IsNotEmpty') })
+  @IsInt({ message: validationMessage('country', 'IsInt') })
+  country: Country;
 
-  @IsNotEmpty({ message: 'state es campo requerido' })
-  @IsInt({ message: 'state debe ser de tipo integer' })
-  state: number;
+  @IsNotEmpty({ message: validationMessage('state', 'IsNotEmpty') })
+  @IsInt({ message: validationMessage('state', 'IsInt') })
+  state: State;
 
-  @IsNotEmpty({ message: 'city es campo requerido' })
-  @IsInt({ message: 'city debe ser de tipo integer' })
-  city: number;
+  @IsNotEmpty({ message: validationMessage('city', 'IsNotEmpty') })
+  @IsInt({ message: validationMessage('city', 'IsInt') })
+  city: City;
 }

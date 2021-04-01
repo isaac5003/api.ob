@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Company } from 'src/companies/entities/Company.entity';
+import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { CustomerAccountingValidateDTO } from './dtos/accounting-validator.dto';
+import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerRepository } from './repositories/Customer.repository';
@@ -24,14 +27,16 @@ export class CustomersService {
     return this.customerRepository.getCustomers(filterDto);
   }
 
-  async getCustomer(id: string): Promise<Customer> {
-    return this.customerRepository.getCustomerById(id);
+  async getCustomer(company: Company, id: string): Promise<Customer> {
+    return this.customerRepository.getCustomer(company, id);
   }
 
   async createCustomer(
+    company: Company,
     validatorCustomerDto,
-  ): Promise<{ message: string; id: string }> {
+  ): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.createCustomer(
+      company,
       validatorCustomerDto,
     );
     const { id } = customer;
@@ -39,32 +44,30 @@ export class CustomersService {
       id,
       validatorCustomerDto.branch,
     );
-    return customer;
+    return {
+      id: customer.id,
+      message: 'Se ha creado el cliente correctamente',
+    };
   }
 
   async updateCustomer(
+    company: Company,
     id: string,
     validatorCustomerDto,
-  ): Promise<{ message: string }> {
-    const customer = await this.customerRepository.updateCustomer(
-      id,
-      validatorCustomerDto,
-    );
+  ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.updateBranch(
       id,
       validatorCustomerDto.branch,
     );
-    return customer;
-  }
-
-  async updateCustomerStatus(
-    id: string,
-    validatorCustomerStatusDto,
-  ): Promise<{ message: string }> {
-    return this.customerRepository.updateCustomerStatus(
+    delete validatorCustomerDto.branch;
+    await this.customerRepository.updateCustomer(
+      company,
       id,
-      validatorCustomerStatusDto,
+      validatorCustomerDto,
     );
+    return {
+      message: 'El cliente se actualizo correctamente',
+    };
   }
 
   // async getCustomerIntegration(

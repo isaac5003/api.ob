@@ -7,8 +7,13 @@ import { EntityRepository, Repository } from 'typeorm';
 import { CustomerValidateDTO } from '../dtos/customer-validator.dto';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
-import { CustomerValidateStatusDTO } from '../dtos/status-validator-dto';
+import { CustomerStatusDTO } from '../dtos/status-validator-dto';
+import { CustomerIntegrationDTO } from '../dtos/customer-integration.dto';
+import { Company } from 'src/companies/entities/Company.entity';
+import { CustomerBranch } from '../entities/CustomerBranch.entity';
+import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 
+const reponame = 'clientes';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
   async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
@@ -52,26 +57,12 @@ export class CustomerRepository extends Repository<Customer> {
     }
   }
 
-  async getCustomerById(id: string, selection?: string[]): Promise<Customer> {
-    let customer;
+  async getCustomer(company: Company, id: string): Promise<Customer> {
+    let customer: Customer;
     try {
-      customer = this.createQueryBuilder('c').where('c.id = :id', { id });
-
-      if (!selection) {
-        customer
-          .leftJoinAndSelect('c.customerType', 'ct')
-          .leftJoinAndSelect('c.customerTypeNatural', 'ctn')
-          .leftJoinAndSelect('c.accountingCatalog', 'ac');
-      } else {
-        customer
-          .select(selection)
-          .leftJoin('c.customerType', 'ct')
-          .leftJoin('c.customerTypeNatural', 'ctn')
-          .leftJoin('c.accountingCatalog', 'ac');
-      }
-      customer = await customer.getOne();
+      customer = await this.findOne({ id, company });
     } catch (error) {
-      throw new InternalServerErrorException(
+      throw new BadRequestException(
         'Error al obtener el cliente seleccionado.',
       );
     }
@@ -80,202 +71,115 @@ export class CustomerRepository extends Repository<Customer> {
       throw new NotFoundException('El cliente seleccionado no existe.');
     }
 
-    return await customer;
+    return customer;
   }
 
   async createCustomer(
+    company: Company,
     validatorCustomerDTO: CustomerValidateDTO,
-  ): Promise<{ message: string; id: string }> {
+  ): Promise<Customer> {
+    let response: Customer;
     try {
-      const {
-        name,
-        shortName,
-        isProvider,
-        dui,
-        nrc,
-        nit,
-        giro,
-        customerType,
-        customerTaxerType,
-        customerTypeNatural,
-      } = validatorCustomerDTO;
-
-      const customer = await this.createQueryBuilder()
-        .insert()
-        .into('Customer')
-        .values({
-          name,
-          shortName,
-          isProvider,
-          isCustomer: true,
-          dui,
-          nrc,
-          nit,
-          giro,
-          isActiveProvider: false,
-          customerTaxerType,
-          customerType,
-          customerTypeNatural,
-        })
-        .execute();
-
-      return {
-        message: 'El cliente se creo correctamente',
-        id: customer.raw[0].id,
-      };
+      const customer = this.create({ company, ...validatorCustomerDTO });
+      response = await this.save(customer);
     } catch (error) {
-      // on error
-      throw new InternalServerErrorException(
-        'Error al crear el cliente. Contacta con tu administrador.',
-      );
-    }
-
-    //TODO
-    // const user = await req.conn
-    // .getRepository('User')
-    // .createQueryBuilder('u')
-    // .where('u.id = :id', { id: req.user.uid })
-    // .getOne();
-  }
-
-  async updateCustomer(
-    id: string,
-    validatorCustomerDTO: CustomerValidateDTO,
-  ): Promise<{ message: string }> {
-    await this.getCustomerById(id);
-    try {
-      const {
-        name,
-        shortName,
-        isProvider,
-        dui,
-        nrc,
-        nit,
-        giro,
-        customerType,
-        customerTaxerType,
-        customerTypeNatural,
-      } = validatorCustomerDTO;
-
-      await this.createQueryBuilder()
-        .update('Customer')
-        .set({
-          name,
-          shortName,
-          isProvider,
-          isCustomer: true,
-          dui,
-          nrc,
-          nit,
-          giro,
-          isActiveProvider: false,
-          customerTaxerType,
-          customerType,
-          customerTypeNatural,
-        })
-        .where('id = :id', { id })
-        .execute();
-
-      return {
-        message: 'Se ha actualizado el cliente correctamente.',
-      };
-      //     //TODO
-      //     // const user = await req.conn
-      //     // .getRepository('User')
-      //     // .createQueryBuilder('u')
-      //     // .where('u.id = :id', { id: req.user.uid })
-      //     // .getOne();
-    } catch (error) {
-      // on error
       console.error(error);
-      throw new InternalServerErrorException(
-        'Error al actualizar el cliente. Contacta con tu administrador',
+      throw new BadRequestException(
+        'Error al crear el cliente, se ha notificado a su administrador.',
       );
     }
+    return await response;
   }
-
-  // // async deleteCustomer(id: string): Promise<{ message: string }> {
-  // //   // If no references deletes
-  // //   try {
-  // //     await this.createQueryBuilder()
-  // //       .delete()
-  // //       .from('Customer')
-  // //       .where('id = :id', { id })
-  // //       // .andWhere('company = :company', { company: req.user.cid })
-  // //       .execute();
-
-  // //     // const user = await req.conn
-  // //     //   .getRepository('User')
-  // //     //   .createQueryBuilder('u')
-  // //     //   .where('u.id = :id', { id: req.user.uid })
-  // //     //   .getOne();
-
-  // //     // await addLog(
-  // //     //   req.conn,
-  // //     //   req.moduleName,
-  // //     //   `${user.names} ${user.lastnames}`,
-  // //     //   user.id,
-  // //     //   `Se elimino el cliente con nombre: ${customer.name}.`,
-  // //     // );
-
-  // //     return {
-  // //       message: 'El cliente ha sido eliminado correctamente.',
-  // //     };
-  // //   } catch (error) {
-  // //     console.error(error);
-  // //     // on error
-  // //     console.error(error);
-  // //     throw new InternalServerErrorException(
-  // //       'Error al eliminar el cliente. Contacta con tu administrador',
-  // //     );
-  // //   }
-  // // }
-
-  async updateCustomerStatus(
+  async updateCustomer(
+    company: Company,
     id: string,
-    validatorCustomerStatusDTO: CustomerValidateStatusDTO,
-  ): Promise<{ message: string }> {
-    const { status } = validatorCustomerStatusDTO;
-
-    await this.getCustomerById(id);
-    // If customer exist updates it
-    try {
-      // return success
-      await this.createQueryBuilder()
-        .update('Customer')
-        .set({ isActiveCustomer: status })
-        //TODO
-        // .where('company = :company', { company: req.user.cid })
-        .where('id = :id', { id })
-        .execute();
-
-      //TODO
-      // const user = await req.conn
-      //   .getRepository('User')
-      //   .createQueryBuilder('u')
-      //   .where('u.id = :id', { id: req.user.uid })
-      //   .getOne();
-
-      // await addLog(
-      //   req.conn,
-      //   req.moduleName,
-      //   `${user.names} ${user.lastnames}`,
-      //   user.id,
-      //   `Se cambio el estado del cliente: ${customer.name} a ${
-      //     status ? 'ACTIVO' : 'INACTIVO'
-      //   }.`,
-      // );
-
-      return {
-        message: 'El estado del cliente ha sido actualizado correctamente.',
-      };
-    } catch (error) {
-      // return error
-      throw new InternalServerErrorException(
-        'Error al actualizar el estado del cliente. Contacta con tu administrador.',
-      );
-    }
+    updateDTO: CustomerValidateDTO | CustomerStatusDTO | CustomerIntegrationDTO,
+  ): Promise<any> {
+    return this.update({ id, company }, updateDTO);
   }
+
+  // // // async deleteCustomer(id: string): Promise<{ message: string }> {
+  // // //   // If no references deletes
+  // // //   try {
+  // // //     await this.createQueryBuilder()
+  // // //       .delete()
+  // // //       .from('Customer')
+  // // //       .where('id = :id', { id })
+  // // //       // .andWhere('company = :company', { company: req.user.cid })
+  // // //       .execute();
+
+  // // //     // const user = await req.conn
+  // // //     //   .getRepository('User')
+  // // //     //   .createQueryBuilder('u')
+  // // //     //   .where('u.id = :id', { id: req.user.uid })
+  // // //     //   .getOne();
+
+  // // //     // await addLog(
+  // // //     //   req.conn,
+  // // //     //   req.moduleName,
+  // // //     //   `${user.names} ${user.lastnames}`,
+  // // //     //   user.id,
+  // // //     //   `Se elimino el cliente con nombre: ${customer.name}.`,
+  // // //     // );
+
+  // // //     return {
+  // // //       message: 'El cliente ha sido eliminado correctamente.',
+  // // //     };
+  // // //   } catch (error) {
+  // // //     console.error(error);
+  // // //     // on error
+  // // //     console.error(error);
+  // // //     throw new InternalServerErrorException(
+  // // //       'Error al eliminar el cliente. Contacta con tu administrador',
+  // // //     );
+  // // //   }
+  // // // }
+
+  // async updateCustomerStatus(
+  //   id: string,
+  //   validatorCustomerStatusDTO: CustomerValidateStatusDTO,
+  // ): Promise<{ message: string }> {
+  //   const { status } = validatorCustomerStatusDTO;
+
+  //   await this.getCustomerById(id);
+  //   // If customer exist updates it
+  //   try {
+  //     // return success
+  //     await this.createQueryBuilder()
+  //       .update('Customer')
+  //       .set({ isActiveCustomer: status })
+  //       //TODO
+  //       // .where('company = :company', { company: req.user.cid })
+  //       .where('id = :id', { id })
+  //       .execute();
+
+  //     //TODO
+  //     // const user = await req.conn
+  //     //   .getRepository('User')
+  //     //   .createQueryBuilder('u')
+  //     //   .where('u.id = :id', { id: req.user.uid })
+  //     //   .getOne();
+
+  //     // await addLog(
+  //     //   req.conn,
+  //     //   req.moduleName,
+  //     //   `${user.names} ${user.lastnames}`,
+  //     //   user.id,
+  //     //   `Se cambio el estado del cliente: ${customer.name} a ${
+  //     //     status ? 'ACTIVO' : 'INACTIVO'
+  //     //   }.`,
+  //     // );
+
+  //     return {
+  //       message: 'El estado del cliente ha sido actualizado correctamente.',
+  //     };
+  //   } catch (error) {
+  //     // return error
+  //     throw new InternalServerErrorException(
+  //       'Error al actualizar el estado del cliente. Contacta con tu administrador.',
+  //     );
+  //   }
+  // }
 
   // async getCustomerIntegration(
   //   id: string,

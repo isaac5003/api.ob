@@ -6,19 +6,28 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { ResponseListDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import {
+  ResponseListDTO,
+  ResponseMinimalDTO,
+  ResponseSingleDTO,
+} from 'src/_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
 import { CustomerValidateDTO } from './dtos/customer-validator.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
-import { CustomerValidateStatusDTO } from './dtos/status-validator-dto';
-import { CustomerAccountingValidateDTO } from './dtos/accounting-validator.dto';
+import { CustomerStatusDTO } from './dtos/status-validator-dto';
+import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
+import { GetCompany } from 'src/auth/get-company.decorator';
+import { Company } from 'src/companies/entities/Company.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('customers')
+@UseGuards(AuthGuard())
 export class CustomersController {
   constructor(private customersService: CustomersService) {}
 
@@ -35,8 +44,9 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomer(
     @Param('id') id: string,
+    @GetCompany() company: Company,
   ): Promise<ResponseSingleDTO<Customer>> {
-    const customer = await this.customersService.getCustomer(id);
+    const customer = await this.customersService.getCustomer(company, id);
     return new ResponseSingleDTO(plainToClass(Customer, customer));
   }
 
@@ -44,8 +54,9 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
     @Body() validatorCustomerDto: CustomerValidateDTO,
-  ): Promise<{ message: string; id: string }> {
-    return this.customersService.createCustomer(validatorCustomerDto);
+    @GetCompany() company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.createCustomer(company, validatorCustomerDto);
   }
 
   @Put('/:id')
@@ -53,21 +64,26 @@ export class CustomersController {
   async updateCustomer(
     @Param('id') id: string,
     @Body() validatorCustomerDto: CustomerValidateDTO,
-  ): Promise<{ message: string }> {
-    return this.customersService.updateCustomer(id, validatorCustomerDto);
-  }
-
-  @Put('/status/:id')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCustomerStatus(
-    @Param('id') id: string,
-    @Body() validatorCustomerStatusDto: CustomerValidateStatusDTO,
-  ): Promise<{ message: string }> {
-    return this.customersService.updateCustomerStatus(
+    @GetCompany() company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateCustomer(
+      company,
       id,
-      validatorCustomerStatusDto,
+      validatorCustomerDto,
     );
   }
+
+  // @Put('/status/:id')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async updateCustomerStatus(
+  //   @Param('id') id: string,
+  //   @Body() validatorCustomerStatusDto: CustomerValidateStatusDTO,
+  // ): Promise<{ message: string }> {
+  //   return this.customersService.updateCustomerStatus(
+  //     id,
+  //     validatorCustomerStatusDto,
+  //   );
+  // }
 
   // @Get('/:id/integrations')
   // @UsePipes(new ValidationPipe({ transform: true }))

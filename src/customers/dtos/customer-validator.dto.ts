@@ -7,52 +7,71 @@ import {
   IsInt,
   ValidateNested,
 } from 'class-validator';
+import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
+import { validationMessage } from 'src/_tools';
+import { CustomerBranch } from '../entities/CustomerBranch.entity';
+import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';
+import { CustomerType } from '../entities/CustomerType.entity';
+import { CustomerTypeNatural } from '../entities/CustomerTypeNatural.entity';
 import { BranchAddDTO } from './branch-add.dto';
 
 export class CustomerValidateDTO {
-  @IsNotEmpty({ message: 'name es campo requerido' })
-  @IsString({ message: 'name debe ser de tipo string' })
+  @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('name', 'IsString') })
   name: string;
 
-  @IsNotEmpty({ message: 'shortName es campo requerido' })
-  @IsString({ message: 'shortName debe ser de tipo string' })
+  @IsNotEmpty({ message: validationMessage('shortName', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('shortName', 'IsString') })
   shortName: string;
 
   @IsOptional()
   @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({ message: 'isProvider debe ser de tipo boolean' })
+  @IsBooleanString({
+    message: validationMessage('isProvider', 'IsBooleanString'),
+  })
   isProvider: boolean;
 
+  @IsNotEmpty({ message: validationMessage('isCustomer', 'IsNotEmpty') })
+  @Transform(({ value }) => value.toLowerCase())
+  @IsBooleanString({
+    message: validationMessage('isCustomer', 'IsBooleanString'),
+  })
+  isCustomer: boolean;
+
   @IsOptional()
-  @IsString({ message: 'dui debe ser de tipo string' })
+  @IsString({ message: validationMessage('dui', 'IsString') })
   dui: string;
 
   @IsOptional()
-  @IsString({ message: 'nit debe ser de tipo string' })
+  @IsString({ message: validationMessage('nit', 'IsString') })
   nit: string;
 
   @IsOptional()
-  @IsString({ message: 'nrc debe ser de tipo string' })
+  @IsString({ message: validationMessage('nrc', 'IsString') })
   nrc: string;
 
   @IsOptional()
-  @IsString({ message: 'giro debe ser de tipo string' })
+  @IsString({ message: validationMessage('giro', 'IsString') })
   giro: string;
 
-  @IsNotEmpty({ message: 'customerType es campo requerido' })
-  @IsInt({ message: 'customerType debe ser de tipo integer' })
-  customerType: number;
+  @IsNotEmpty({ message: validationMessage(' customerType', 'IsNotEmpty') })
+  @IsInt({ message: validationMessage('customerType', 'IsInt') })
+  customerType: CustomerType;
 
   @IsOptional()
-  @IsInt({ message: 'customerTaxerType debe ser de tipo integer' })
-  customerTaxerType: number;
+  @IsInt({ message: validationMessage('customerTaxerType', 'IsInt') })
+  customerTaxerType: CustomerTaxerType;
 
   @IsOptional({ message: 'customerTypeNatural debe ser de tipo integer' })
-  @IsInt()
-  customerTypeNatural: number;
+  @IsInt({ message: validationMessage('customerTypeNatural', 'IsInt') })
+  customerTypeNatural: CustomerTypeNatural;
 
-  @IsNotEmpty({ message: 'branch es campo requerido' })
+  @IsNotEmpty({ message: validationMessage('branch', 'IsNotEmpty') })
   @ValidateNested()
   @Type(() => BranchAddDTO)
   branch: BranchAddDTO;
+
+  @IsOptional()
+  @IsString({ message: validationMessage('accountingCatalog', 'IsString') })
+  accountingCatalog: AccountingCatalog;
 }

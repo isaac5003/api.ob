@@ -69,19 +69,27 @@ export class Customer extends BaseEntity {
   @ManyToOne(
     () => CustomerTaxerType,
     (customerTaxerType) => customerTaxerType.customers,
+    { eager: true },
   )
   customerTaxerType: CustomerTaxerType;
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.customers)
+  @ManyToOne(() => CustomerType, (customerType) => customerType.customers, {
+    eager: true,
+  })
   customerType: CustomerType;
 
   @ManyToOne(
     () => CustomerTypeNatural,
     (customerTypeNatural) => customerTypeNatural.customers,
+    { eager: true },
   )
   customerTypeNatural: CustomerTypeNatural;
 
-  @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.customer)
+  @OneToMany(
+    () => CustomerBranch,
+    (customerBranch) => customerBranch.customer,
+    { eager: true },
+  )
   customerBranches: CustomerBranch[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.customer)

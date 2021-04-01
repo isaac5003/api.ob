@@ -9,9 +9,11 @@ import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatura
 import { CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       CustomerRepository,
       CustomerBranchRepository,
