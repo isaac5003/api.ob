@@ -16,7 +16,10 @@ import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 const reponame = 'clientes';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
+  async getCustomers(
+    company: Company,
+    filterDto: CustomerFilterDTO,
+  ): Promise<Customer[]> {
     try {
       const { active, limit, page, search, order, prop } = filterDto;
       const query = this.createQueryBuilder('customer')
@@ -24,7 +27,8 @@ export class CustomerRepository extends Repository<Customer> {
         .leftJoinAndSelect(
           'customer.customerTypeNatural',
           'customerTypeNatural',
-        );
+        )
+        .where({ company });
 
       if (active) {
         query.andWhere('customer.isActiveCustomer = :active', { active });
@@ -95,7 +99,7 @@ export class CustomerRepository extends Repository<Customer> {
     id: string,
     updateDTO: CustomerValidateDTO | CustomerStatusDTO | CustomerIntegrationDTO,
   ): Promise<any> {
-    return this.update({ id, company }, updateDTO);
+    return this.update({ id, company }, { ...updateDTO });
   }
 
   // // // async deleteCustomer(id: string): Promise<{ message: string }> {

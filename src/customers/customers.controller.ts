@@ -35,8 +35,12 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomers(
     @Query() filterDto: CustomerFilterDTO,
+    @GetCompany() company: Company,
   ): Promise<ResponseListDTO<Customer>> {
-    const customers = await this.customersService.getCustomers(filterDto);
+    const customers = await this.customersService.getCustomers(
+      company,
+      filterDto,
+    );
     return new ResponseListDTO(plainToClass(Customer, customers));
   }
 
@@ -53,7 +57,8 @@ export class CustomersController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
-    @Body() validatorCustomerDto: CustomerValidateDTO,
+    @Body()
+    validatorCustomerDto: CustomerValidateDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.createCustomer(company, validatorCustomerDto);
@@ -63,7 +68,11 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomer(
     @Param('id') id: string,
-    @Body() validatorCustomerDto: CustomerValidateDTO,
+    @Body()
+    validatorCustomerDto:
+      | CustomerValidateDTO
+      | CustomerStatusDTO
+      | CustomerIntegrationDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.updateCustomer(

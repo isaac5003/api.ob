@@ -23,8 +23,11 @@ export class CustomersService {
     private customerBranchRepository: CustomerBranchRepository,
   ) {}
 
-  async getCustomers(filterDto: CustomerFilterDTO): Promise<Customer[]> {
-    return this.customerRepository.getCustomers(filterDto);
+  async getCustomers(
+    company: Company,
+    filterDto: CustomerFilterDTO,
+  ): Promise<Customer[]> {
+    return this.customerRepository.getCustomers(company, filterDto);
   }
 
   async getCustomer(company: Company, id: string): Promise<Customer> {
