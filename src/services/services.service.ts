@@ -4,6 +4,8 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
+import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
+import { serviceStatusDTO } from './dtos/service-status.dto';
 import { Service } from './entities/Service.entity';
 import { ServiceRepository } from './repositories/Service.repository';
 
@@ -16,27 +18,54 @@ export class ServicesService {
 
   async getServices(
     company: Company,
-    filterDto: ServiceFilterDTO,
+    filter: ServiceFilterDTO,
   ): Promise<Service[]> {
-    return this.serviceRepository.getServices(company, filterDto);
+    return this.serviceRepository.getServices(company, filter);
   }
 
   async getService(company: Company, id: string): Promise<Service> {
     return this.serviceRepository.getService(company, id);
-    // return this.serviceRepository.getService(company.id, id);
+  }
+
+  async getServiceIntegrations(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    const {
+      accountingCatalog,
+    } = await this.serviceRepository.getService(company, id, ['ac']);
+
+    return {
+      integrations: {
+        catalog: accountingCatalog ? accountingCatalog.id : null,
+      },
+    };
   }
 
   async createService(
     company: Company,
-    createDTO: serviceDataDTO,
+    data: serviceDataDTO,
   ): Promise<ResponseMinimalDTO> {
-    const service = await this.serviceRepository.createService(
+    const service = await this.serviceRepository.createService(company, data);
+    return {
+      id: service.id,
+      message: 'El servicio se ha creado correctamente',
+    };
+  }
+
+  async updateService(
+    company: Company,
+    id: string,
+    data: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const service = await this.serviceRepository.updateService(
       company,
-      createDTO,
+      data,
+      id,
     );
     return {
       id: service.id,
-      message: 'Se ha creado el servicio correctamente',
+      message: 'El servicio se ha actualizado correctamente.',
     };
   }
 

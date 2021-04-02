@@ -23,5 +23,6 @@ export class ResponseSingleDTO<T> {
 
 export class ResponseMinimalDTO {
   id?: string;
-  message: string;
+  integrations?: any;
+  message?: string;
 }

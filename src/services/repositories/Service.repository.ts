@@ -80,10 +80,34 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async getService(company: Company, id: string): Promise<Service> {
+  async getService(
+    company: Company,
+    id: string,
+    joins: string[] = [],
+  ): Promise<Service> {
     let service: Service;
+    const leftJoinAndSelect = {
+      st: 's.sellingType',
+    };
+
+    for (const table of joins) {
+      switch (table) {
+        case 'ac':
+          leftJoinAndSelect['ac'] = 's.accountingCatalog';
+          break;
+      }
+    }
+
     try {
-      service = await this.findOne({ id, company });
+      service = await this.findOne(
+        { id, company },
+        {
+          join: {
+            alias: 's',
+            leftJoinAndSelect,
+          },
+        },
+      );
     } catch (error) {
       throw new BadRequestException('despues lo busco');
     }
@@ -110,10 +134,10 @@ export class ServiceRepository extends Repository<Service> {
 
   async updateService(
     company: Company,
-    updateDTO: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
+    data: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
     id: string,
   ): Promise<any> {
-    return this.update({ id, company }, updateDTO);
+    return this.update({ id, company }, data);
   }
 
   async deleteService(company: Company, id: string): Promise<boolean> {

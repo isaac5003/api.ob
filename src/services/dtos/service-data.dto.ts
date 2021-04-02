@@ -1,5 +1,5 @@
 import {
-  IsBooleanString,
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -28,20 +28,38 @@ export class serviceDataDTO {
   description: string;
 
   @IsNotEmpty({ message: validationMessage('incIva', 'IsNotEmpty') })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({ message: validationMessage('incIva', 'IsBooleanString') })
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('incIva', 'IsBoolean') })
   incIva: boolean;
 
   @IsNotEmpty({ message: validationMessage('incRenta', 'IsNotEmpty') })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({
-    message: validationMessage('incRenta', 'IsBooleanString'),
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({
+    message: validationMessage('incRenta', 'IsBoolean'),
   })
   incRenta: boolean;
 
   @IsOptional()
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({ message: validationMessage('active', 'IsBooleanString') })
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
   active: boolean;
 
   @IsOptional()
