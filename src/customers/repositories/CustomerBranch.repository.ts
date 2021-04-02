@@ -28,7 +28,7 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
     return await response;
   }
 
-  async updateBranch(id: string, updateDTO: BranchAddDTO): Promise<any> {
-    return this.update({ id }, updateDTO);
+  async updateBranch(id: string, data: BranchAddDTO): Promise<any> {
+    return this.update({ id }, data);
   }
 }

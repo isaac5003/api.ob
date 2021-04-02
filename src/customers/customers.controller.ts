@@ -68,18 +68,10 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomer(
     @Param('id') id: string,
-    @Body()
-    validatorCustomerDto:
-      | CustomerValidateDTO
-      | CustomerStatusDTO
-      | CustomerIntegrationDTO,
+    @Body() data: CustomerValidateDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomer(
-      company,
-      id,
-      validatorCustomerDto,
-    );
+    return this.customersService.updateCustomer(company, id, data);
   }
 
   @Put('/status/:id')

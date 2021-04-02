@@ -97,9 +97,10 @@ export class CustomerRepository extends Repository<Customer> {
   async updateCustomer(
     company: Company,
     id: string,
-    updateDTO: CustomerValidateDTO | CustomerStatusDTO | CustomerIntegrationDTO,
+
+    data: CustomerValidateDTO | CustomerStatusDTO | CustomerIntegrationDTO,
   ): Promise<any> {
-    return this.update({ id, company }, { ...updateDTO });
+    return this.update({ id, company }, data);
   }
 
   // // // async deleteCustomer(id: string): Promise<{ message: string }> {

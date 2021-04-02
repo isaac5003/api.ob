@@ -9,6 +9,8 @@ import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerRepository } from './repositories/Customer.repository';
 import { CustomerBranchRepository } from './repositories/CustomerBranch.repository';
+import { CustomerStatusDTO } from './dtos/status-validator-dto';
+import { CustomerValidateDTO } from './dtos/customer-validator.dto';
 
 @Injectable()
 export class CustomersService {
@@ -25,9 +27,9 @@ export class CustomersService {
 
   async getCustomers(
     company: Company,
-    filterDto: CustomerFilterDTO,
+    data: CustomerFilterDTO,
   ): Promise<Customer[]> {
-    return this.customerRepository.getCustomers(company, filterDto);
+    return this.customerRepository.getCustomers(company, data);
   }
 
   async getCustomer(company: Company, id: string): Promise<Customer> {
@@ -54,20 +56,14 @@ export class CustomersService {
   }
 
   async updateCustomer(
-    company: Company,
     id: string,
-    validatorCustomerDto,
+    data: CustomerValidateDTO,
+    company: Company,
   ): Promise<ResponseMinimalDTO> {
-    await this.customerBranchRepository.updateBranch(
-      id,
-      validatorCustomerDto.branch,
-    );
-    delete validatorCustomerDto.branch;
-    await this.customerRepository.updateCustomer(
-      company,
-      id,
-      validatorCustomerDto,
-    );
+    await this.customerBranchRepository.updateBranch(id, data.branch);
+    delete data.branch;
+
+    await this.customerRepository.updateCustomer(company, id, data);
     return {
       message: 'El cliente se actualizo correctamente',
     };
