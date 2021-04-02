@@ -1,8 +1,3 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { serviceDataDTO } from '../dtos/service-data.dto';
@@ -17,7 +12,7 @@ const reponame = 'servicio';
 export class ServiceRepository extends Repository<Service> {
   async getServices(
     company: Company,
-    filterDto: ServiceFilterDTO,
+    filter: ServiceFilterDTO,
   ): Promise<Service[]> {
     const {
       limit,
@@ -29,7 +24,7 @@ export class ServiceRepository extends Repository<Service> {
       type,
       fromAmount,
       toAmount,
-    } = filterDto;
+    } = filter;
 
     try {
       const query = this.createQueryBuilder('s').where({ company });
@@ -74,46 +69,70 @@ export class ServiceRepository extends Repository<Service> {
 
       return await query.getMany();
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener el listado de servicios.',
-      );
+      logDatabaseError(reponame, error);
     }
   }
 
-  async getService(company: Company, id: string): Promise<Service> {
+  async getService(
+    company: Company,
+    id: string,
+    joins: string[] = [],
+  ): Promise<Service> {
     let service: Service;
-    try {
-      service = await this.findOne({ id, company });
-    } catch (error) {
-      throw new BadRequestException('despues lo busco');
+
+    const leftJoinAndSelect = {
+      st: 's.sellingType',
+    };
+
+    for (const table of joins) {
+      switch (table) {
+        case 'ac':
+          leftJoinAndSelect['ac'] = 's.accountingCatalog';
+          break;
+      }
     }
 
-    if (!service) {
-      throw new NotFoundException('no encontrado');
+    try {
+      service = await this.findOneOrFail(
+        { id, company },
+        {
+          join: {
+            alias: 's',
+            leftJoinAndSelect,
+          },
+        },
+      );
+    } catch (error) {
+      logDatabaseError(reponame, error);
     }
     return service;
   }
 
   async createService(
     company: Company,
-    createDTO: serviceDataDTO,
+    data: serviceDataDTO,
   ): Promise<Service> {
     let response: Service;
     try {
-      const service = this.create({ company, ...createDTO });
+      const service = this.create({ company, ...data });
       response = await this.save(service);
     } catch (error) {
-      throw new BadRequestException('bad request');
+      logDatabaseError(reponame, error);
     }
     return await response;
   }
 
   async updateService(
     company: Company,
-    updateDTO: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
+    data: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
     id: string,
   ): Promise<any> {
-    return this.update({ id, company }, updateDTO);
+    try {
+      const service = await this.update({ id, company }, data);
+      return service;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 
   async deleteService(company: Company, id: string): Promise<boolean> {
