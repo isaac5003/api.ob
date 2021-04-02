@@ -1,17 +1,29 @@
-import { BadRequestException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;
-  switch (error.code) {
-    case '23503':
-      message = `El ${type} no se puede eliminar ya que está siendo utilizado en el sistema.`;
-      break;
+  switch (error.name) {
+    case 'QueryFailedError':
+      switch (error.code) {
+        case '23503':
+          message = `El ${type} no se puede eliminar ya que está siendo utilizado en el sistema.`;
+          break;
+        case '22P02':
+          message = `El formato de id para el ${type} seleccionado es incorrecto.`;
+          break;
+        default:
+          message = 'Error no identificada en la base de datos.';
+          break;
+      }
+      throw new BadRequestException(message);
+    case 'EntityNotFound':
+      throw new BadRequestException(`El ${type} seleccionado no existe.`);
     default:
-      message =
-        'Error al realizar la acción, se ha notificado al administrador.';
-      break;
+      throw new InternalServerErrorException('Error no identificado');
   }
-  throw new BadRequestException(message);
 }
 
 export function validationMessage(fieldname: string, type: string): string {

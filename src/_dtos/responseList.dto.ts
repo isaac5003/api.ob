@@ -13,6 +13,7 @@ export class ResponseListDTO<T> {
     });
   }
 }
+
 export class ResponseSingleDTO<T> {
   data: T;
 

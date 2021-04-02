@@ -1,8 +1,3 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { serviceDataDTO } from '../dtos/service-data.dto';
@@ -17,7 +12,7 @@ const reponame = 'servicio';
 export class ServiceRepository extends Repository<Service> {
   async getServices(
     company: Company,
-    filterDto: ServiceFilterDTO,
+    filter: ServiceFilterDTO,
   ): Promise<Service[]> {
     const {
       limit,
@@ -29,7 +24,7 @@ export class ServiceRepository extends Repository<Service> {
       type,
       fromAmount,
       toAmount,
-    } = filterDto;
+    } = filter;
 
     try {
       const query = this.createQueryBuilder('s').where({ company });
@@ -74,9 +69,7 @@ export class ServiceRepository extends Repository<Service> {
 
       return await query.getMany();
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener el listado de servicios.',
-      );
+      logDatabaseError(reponame, error);
     }
   }
 
@@ -86,6 +79,7 @@ export class ServiceRepository extends Repository<Service> {
     joins: string[] = [],
   ): Promise<Service> {
     let service: Service;
+
     const leftJoinAndSelect = {
       st: 's.sellingType',
     };
@@ -99,7 +93,7 @@ export class ServiceRepository extends Repository<Service> {
     }
 
     try {
-      service = await this.findOne(
+      service = await this.findOneOrFail(
         { id, company },
         {
           join: {
@@ -109,25 +103,21 @@ export class ServiceRepository extends Repository<Service> {
         },
       );
     } catch (error) {
-      throw new BadRequestException('despues lo busco');
-    }
-
-    if (!service) {
-      throw new NotFoundException('no encontrado');
+      logDatabaseError(reponame, error);
     }
     return service;
   }
 
   async createService(
     company: Company,
-    createDTO: serviceDataDTO,
+    data: serviceDataDTO,
   ): Promise<Service> {
     let response: Service;
     try {
-      const service = this.create({ company, ...createDTO });
+      const service = this.create({ company, ...data });
       response = await this.save(service);
     } catch (error) {
-      throw new BadRequestException('bad request');
+      logDatabaseError(reponame, error);
     }
     return await response;
   }
@@ -137,7 +127,12 @@ export class ServiceRepository extends Repository<Service> {
     data: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
     id: string,
   ): Promise<any> {
-    return this.update({ id, company }, data);
+    try {
+      const service = await this.update({ id, company }, data);
+      return service;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 
   async deleteService(company: Company, id: string): Promise<boolean> {

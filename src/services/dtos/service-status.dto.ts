@@ -7,7 +7,7 @@ export class serviceStatusDTO {
   @Transform(({ value }) =>
     value.toLowerCase() === 'true'
       ? true
-      : value.toLowerCase() == 'false'
+      : value.toLowerCase() === 'false'
       ? false
       : null,
   )
