@@ -1,4 +1,3 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
@@ -22,6 +21,7 @@ import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.re
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class CustomersService {
@@ -197,9 +197,9 @@ export class CustomersService {
     };
   }
 
-  async minimalUpdateCustomer(
+  async UpdateStatusCustomer(
     id: string,
-    data: CustomerIntegrationDTO | CustomerStatusDTO,
+    data: CustomerStatusDTO,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
     await this.customerRepository.updateCustomer(id, data, company);
@@ -208,6 +208,20 @@ export class CustomersService {
     };
   }
 
+  async UpdateCustomerIntegration(
+    id: string,
+    data: CustomerIntegrationDTO,
+    company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+      data,
+      company,
+    );
+    await this.customerRepository.updateCustomer(id, data, company);
+    return {
+      message: 'El cliente se actualizo correctamente',
+    };
+  }
   async deleteCustomer(
     company: Company,
     id: string,

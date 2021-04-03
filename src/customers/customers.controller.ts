@@ -149,7 +149,7 @@ export class CustomersController {
     @Body() data: CustomerStatusDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.minimalUpdateCustomer(id, data, company);
+    return this.customersService.UpdateStatusCustomer(id, data, company);
   }
 
   @Put('/:id/integrations')
@@ -159,7 +159,11 @@ export class CustomersController {
     @Body() data: CustomerIntegrationDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.minimalUpdateCustomer(id, data, company);
+    return await this.customersService.UpdateCustomerIntegration(
+      id,
+      data,
+      company,
+    );
   }
 
   @Delete('/:id')

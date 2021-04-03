@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
-import { logDatabaseError, validationMessage } from 'src/_tools';
+import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
 
