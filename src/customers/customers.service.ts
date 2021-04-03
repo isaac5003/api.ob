@@ -1,16 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
-import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import {
+  ResponseListDTO,
+  ResponseMinimalDTO,
+  ResponseSingleDTO,
+} from 'src/_dtos/responseList.dto';
 import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerRepository } from './repositories/Customer.repository';
 import { CustomerBranchRepository } from './repositories/CustomerBranch.repository';
-import { CustomerStatusDTO } from './dtos/status-validator-dto';
-import { CustomerValidateDTO } from './dtos/customer-validator.dto';
+import { CustomerStatusDTO } from './dtos/customer-status.dto';
+import { CustomerDataDTO } from './dtos/customer-data.dto';
+import { plainToClass } from 'class-transformer';
+import { CustomerBranch } from './entities/CustomerBranch.entity';
+import { CustomerType } from './entities/CustomerType.entity';
+import { CustomerTypeRepository } from './repositories/CustomerType.repository';
+import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
+import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
+import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
+import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
+import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
 
 @Injectable()
 export class CustomersService {
@@ -23,6 +35,18 @@ export class CustomersService {
 
     @InjectRepository(CustomerBranchRepository)
     private customerBranchRepository: CustomerBranchRepository,
+
+    @InjectRepository(CustomerTaxerTypeRepository)
+    private customerTaxerTypeRepository: CustomerTaxerTypeRepository,
+
+    @InjectRepository(CustomerTypeRepository)
+    private customerTypeRepository: CustomerTypeRepository,
+
+    @InjectRepository(CustomerTypeNaturalRepository)
+    private customerTypeNaturalRepository: CustomerTypeNaturalRepository,
+
+    @InjectRepository(CustomerSettingRepository)
+    private customerSettingRepository: CustomerSettingRepository,
   ) {}
 
   async getCustomers(
@@ -33,7 +57,115 @@ export class CustomersService {
   }
 
   async getCustomer(company: Company, id: string): Promise<Customer> {
-    return this.customerRepository.getCustomer(company, id);
+    return this.customerRepository.getCustomer(id, company);
+  }
+
+  async getCustomerIntegration(
+    id: string,
+    company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    const { accountingCatalog } = await this.customerRepository.getCustomer(
+      id,
+      company,
+      ['ac'],
+    );
+
+    return {
+      integrations: {
+        catalog: accountingCatalog ? accountingCatalog.id : null,
+      },
+    };
+  }
+
+  async getCustomerSettingIntegrations(
+    company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
+      company,
+    );
+    console.log(settings);
+
+    return {
+      integrations: {
+        catalog: settings && settings.id ? settings.id : null,
+      },
+    };
+  }
+
+  async updateCustomerSetingIntegrations(
+    company: Company,
+    data: CustomerIntegrationDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const account = await this.accountingCatalogRepository.getAccountingCatalogById(
+      data,
+      company,
+    );
+    if (account.isParent) {
+      throw new BadRequestException(
+        'La cuenta selecciona no puede ser utilizada ya que no es asignable',
+      );
+    }
+
+    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
+      company,
+    );
+    if (settings) {
+      await this.customerSettingRepository.updateCustomerSetting(company, data);
+      return {
+        message: 'La integración ha sido actualizada correctamente.',
+      };
+    }
+
+    await this.customerSettingRepository.createSettingIntegration(
+      company,
+      data,
+    );
+    return {
+      message: 'La integración ha sido agregada correctamente.',
+    };
+  }
+
+  async getCustomerTributary(
+    id: string,
+    company: Company,
+  ): Promise<ResponseSingleDTO<Customer>> {
+    const {
+      dui,
+      nit,
+      nrc,
+      giro,
+      customerType,
+      customerTaxerType,
+      customerTypeNatural,
+    } = await this.customerRepository.getCustomer(id, company);
+    const tributary = {
+      dui,
+      nit,
+      nrc,
+      giro,
+      customerType,
+      customerTaxerType,
+      customerTypeNatural,
+    };
+    return new ResponseSingleDTO(plainToClass(Customer, tributary));
+  }
+
+  async getCustomerBranches(id: string): Promise<CustomerBranch[]> {
+    return this.customerBranchRepository.getCustomerBranches(id);
+  }
+
+  async getCustomerTypes(): Promise<CustomerType[]> {
+    console.log(this.customerTypeRepository.getCustomerTypes());
+
+    return this.customerTypeRepository.getCustomerTypes();
+  }
+
+  async getCustomerTaxerTypes(): Promise<CustomerTaxerType[]> {
+    return this.customerTaxerTypeRepository.getCustomerTaxerTypes();
+  }
+
+  async getCustomerTypeNaturals(): Promise<CustomerTypeNatural[]> {
+    return this.customerTypeNaturalRepository.getCustomerTypeNaturals();
   }
 
   async createCustomer(
@@ -57,29 +189,38 @@ export class CustomersService {
 
   async updateCustomer(
     id: string,
-    data: CustomerValidateDTO,
+    data: CustomerDataDTO,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.updateBranch(id, data.branch);
     delete data.branch;
 
-    await this.customerRepository.updateCustomer(company, id, data);
+    await this.customerRepository.updateCustomer(id, data, company);
     return {
       message: 'El cliente se actualizo correctamente',
     };
   }
 
-  // async getCustomerIntegration(
-  //   id: string,
-  // ): Promise<{ integrations: any | null }> {
-  //   return this.customerRepository.getCustomerIntegration(id);
-  // }
+  async minimalUpdateCustomer(
+    id: string,
+    data: CustomerIntegrationDTO | CustomerStatusDTO,
+    company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    await this.customerRepository.updateCustomer(id, data, company);
+    return {
+      message: 'El cliente se actualizo correctamente',
+    };
+  }
 
-  // async updateCustomerIntegration(id: string, validatorCustomerAccountingDTO) {
-  //   const { accountingCatalog } = validatorCustomerAccountingDTO;
-  //   const account = await this.accountingCatalogRepository.getAccountingCatalogById(
-  //     accountingCatalog,
-  //   );
-  //   return this.customerRepository.updateCustomerIntegration(id, account);
-  // }
+  async deleteCustomer(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    const result = await this.customerRepository.deleteCustomer(company, id);
+    return {
+      message: result
+        ? 'Se ha eliminado el servicio correctamente'
+        : 'No se ha podido eliminar el servicio',
+    };
+  }
 }

@@ -4,7 +4,7 @@ import { Country } from 'src/system/entities/Country.entity';
 import { State } from 'src/system/entities/State.entity';
 import { validationMessage } from 'src/_tools';
 
-export class BranchAddDTO {
+export class BranchDataDTO {
   @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })
   @IsString({ message: validationMessage('name', 'IsString') })
   name: string;

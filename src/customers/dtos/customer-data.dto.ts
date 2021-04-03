@@ -1,21 +1,20 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsOptional,
-  IsBooleanString,
   IsString,
   IsNotEmpty,
   IsInt,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
 import { validationMessage } from 'src/_tools';
-import { CustomerBranch } from '../entities/CustomerBranch.entity';
 import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';
 import { CustomerType } from '../entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../entities/CustomerTypeNatural.entity';
-import { BranchAddDTO } from './branch-add.dto';
+import { BranchDataDTO } from './customer-branch.dto';
 
-export class CustomerValidateDTO {
+export class CustomerDataDTO {
   @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })
   @IsString({ message: validationMessage('name', 'IsString') })
   name: string;
@@ -25,17 +24,25 @@ export class CustomerValidateDTO {
   shortName: string;
 
   @IsOptional()
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({
-    message: validationMessage('isProvider', 'IsBooleanString'),
-  })
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
   isProvider: boolean;
 
   @IsNotEmpty({ message: validationMessage('isCustomer', 'IsNotEmpty') })
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({
-    message: validationMessage('isCustomer', 'IsBooleanString'),
-  })
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('isCustomer', 'IsBoolean') })
   isCustomer: boolean;
 
   @IsOptional()
@@ -68,8 +75,8 @@ export class CustomerValidateDTO {
 
   @IsNotEmpty({ message: validationMessage('branch', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => BranchAddDTO)
-  branch: BranchAddDTO;
+  @Type(() => BranchDataDTO)
+  branch: BranchDataDTO;
 
   @IsOptional()
   @IsString({ message: validationMessage('accountingCatalog', 'IsString') })

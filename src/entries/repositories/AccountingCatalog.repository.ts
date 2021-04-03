@@ -1,21 +1,25 @@
-import { BadRequestException } from '@nestjs/common';
+import { Company } from 'src/companies/entities/Company.entity';
+import { CustomerIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
+import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
 
+const reponame = 'catalogo de cuentas';
 @EntityRepository(AccountingCatalog)
 export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
-  async getAccountingCatalogById(id: string): Promise<AccountingCatalog> {
-    // Get account
-    const account = await this.createQueryBuilder('ac')
-      // .where('ac.company = :company', { company: req.user.cid })
-      .andWhere('ac.id  = :id', { id })
-      .getOne();
-
-    // If no exist
-    if (!account) {
-      throw new BadRequestException('La cuenta seleccionada no existe.');
+  async getAccountingCatalogById(
+    id: CustomerIntegrationDTO,
+    company: Company,
+  ): Promise<AccountingCatalog> {
+    let account: AccountingCatalog;
+    try {
+      const { accountingCatalog } = id;
+      account = await this.findOne({
+        where: { id: accountingCatalog, company },
+      });
+    } catch (error) {
+      logDatabaseError(reponame, error);
     }
-
     return account;
   }
 }

@@ -1,34 +1,34 @@
-import { InternalServerErrorException } from '@nestjs/common';
-import { Branch } from 'src/companies/entities/Branch.entity';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { BranchAddDTO } from '../dtos/branch-add.dto';
-import { Customer } from '../entities/Customer.entity';
+import { BranchDataDTO } from '../dtos/customer-branch.dto';
 import { CustomerBranch } from '../entities/CustomerBranch.entity';
 
+const reponame = 'sucursal';
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
-  async createBranch(
-    id: string,
-    validatorBranchDTO: BranchAddDTO,
-  ): Promise<CustomerBranch> {
+  async getCustomerBranches(id: string): Promise<CustomerBranch[]> {
+    let branches: CustomerBranch[];
+    try {
+      branches = await this.find({ id });
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+    return branches;
+  }
+
+  async createBranch(id: string, data: BranchDataDTO): Promise<CustomerBranch> {
     // crea sucursal
     let response: CustomerBranch;
     try {
-      const branch = this.create({ id, ...validatorBranchDTO });
+      const branch = this.create({ id, ...data });
       response = await this.save(branch);
     } catch (error) {
-      // on error
-      console.error(error);
-
-      throw new InternalServerErrorException(
-        'Error al crear la sucursal del cliente. Contacta con tu administrador.',
-      );
+      logDatabaseError(reponame, error);
     }
     return await response;
   }
 
-  async updateBranch(id: string, data: BranchAddDTO): Promise<any> {
+  async updateBranch(id: string, data: BranchDataDTO): Promise<any> {
     return this.update({ id }, data);
   }
 }
