@@ -1,12 +1,16 @@
 import { Transform } from 'class-transformer';
-import { IsBooleanString, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsBooleanString, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class CustomerStatusDTO {
-  @IsNotEmpty()
-  @Transform(({ value }) => value.toLowerCase())
-  @IsBooleanString({
-    message: validationMessage('isActiveCustomer', 'IsBooleanString'),
-  })
+  @IsNotEmpty({ message: validationMessage('isActiveCustomer', 'IsNotEmpty') })
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('isActiveCustomer', 'IsBoolean') })
   isActiveCustomer: boolean;
 }

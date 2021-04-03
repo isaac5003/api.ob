@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 import {
-  ResponseListDTO,
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
@@ -83,28 +82,25 @@ export class CustomersService {
     const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
       company,
     );
-    console.log(settings);
 
     return {
       integrations: {
-        catalog: settings && settings.id ? settings.id : null,
+        catalog:
+          settings && settings.accountingCatalog
+            ? settings.accountingCatalog.id
+            : null,
       },
     };
   }
 
-  async updateCustomerSetingIntegrations(
+  async updateCustomerSettingsIntegrations(
     company: Company,
     data: CustomerIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    const account = await this.accountingCatalogRepository.getAccountingCatalogById(
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
       data,
       company,
     );
-    if (account.isParent) {
-      throw new BadRequestException(
-        'La cuenta selecciona no puede ser utilizada ya que no es asignable',
-      );
-    }
 
     const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
       company,

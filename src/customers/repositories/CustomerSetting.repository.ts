@@ -11,15 +11,22 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     company: Company,
   ): Promise<CustomerSetting> {
     let settingIntegrations: CustomerSetting;
+    const leftJoinAndSelect = {
+      csi: 'cs.accountingCatalog',
+    };
+
     try {
-      settingIntegrations = await this.findOne({
-        where: { company },
-        select: ['id', 'accountingCatalog'],
-      });
-      console.log(settingIntegrations);
+      settingIntegrations = await this.findOne(
+        { company },
+        {
+          join: {
+            alias: 'cs',
+            leftJoinAndSelect,
+          },
+        },
+      );
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
     return settingIntegrations;
@@ -43,6 +50,10 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     company: Company,
     data: CustomerIntegrationDTO,
   ): Promise<any> {
-    return this.update({ company }, data);
+    try {
+      return this.update({ company }, data);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 }

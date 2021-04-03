@@ -85,7 +85,6 @@ export class CustomerRepository extends Repository<Customer> {
       );
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
     return customer;
@@ -93,11 +92,11 @@ export class CustomerRepository extends Repository<Customer> {
 
   async createCustomer(
     company: Company,
-    validatorCustomerDTO: CustomerDataDTO,
+    data: CustomerDataDTO,
   ): Promise<Customer> {
     let response: Customer;
     try {
-      const customer = this.create({ company, ...validatorCustomerDTO });
+      const customer = this.create({ company, ...data });
       response = await this.save(customer);
     } catch (error) {
       logDatabaseError(reponame, error);

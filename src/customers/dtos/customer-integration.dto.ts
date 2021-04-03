@@ -1,8 +1,9 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
+import { validationMessage } from 'src/_tools';
 
 export class CustomerIntegrationDTO {
-  @IsNotEmpty()
-  @IsString({ message: 'accountingCatalog debe ser de tipo string' })
-  accountingCatalog: AccountingCatalogRepository;
+  @IsNotEmpty({ message: validationMessage('accountingCatalog', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('accountingCatalog', 'IsString') })
+  accountingCatalog: AccountingCatalog;
 }

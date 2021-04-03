@@ -30,7 +30,6 @@ import { CustomerBranch } from './entities/CustomerBranch.entity';
 import { CustomerType } from './entities/CustomerType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
-import { CustomerSetting } from './entities/CustomerSetting.entity';
 
 @Controller('customers')
 @UseGuards(AuthGuard())
@@ -67,11 +66,10 @@ export class CustomersController {
   @Put('/setting/integrations')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerIntegrations(
-    @Param('id') id: string,
     @Body() data: CustomerIntegrationDTO,
     @GetCompany() company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSetingIntegrations(
+    return this.customersService.updateCustomerSettingsIntegrations(
       company,
       data,
     );
