@@ -23,7 +23,7 @@ import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerStatusDTO } from './dtos/customer-status.dto';
 import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
-import { GetCompany } from 'src/auth/get-company.decorator';
+import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { CustomerBranch } from './entities/CustomerBranch.entity';
@@ -58,7 +58,7 @@ export class CustomersController {
 
   @Get('/setting/integrations')
   async getCustomerSettingIntegrations(
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return await this.customersService.getCustomerSettingIntegrations(company);
   }
@@ -67,7 +67,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerIntegrations(
     @Body() data: CustomerIntegrationDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.updateCustomerSettingsIntegrations(
       company,
@@ -79,7 +79,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomers(
     @Query() filter: CustomerFilterDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Customer>> {
     const customers = await this.customersService.getCustomers(company, filter);
     return new ResponseListDTO(plainToClass(Customer, customers));
@@ -89,7 +89,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomer(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Customer>> {
     const customer = await this.customersService.getCustomer(company, id);
     return new ResponseSingleDTO(plainToClass(Customer, customer));
@@ -99,7 +99,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerIntegration(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return await this.customersService.getCustomerIntegration(id, company);
   }
@@ -108,7 +108,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerTributary(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Customer>> {
     return await this.customersService.getCustomerTributary(id, company);
   }
@@ -127,7 +127,7 @@ export class CustomersController {
   async createCustomer(
     @Body()
     data: CustomerDataDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.createCustomer(company, data);
   }
@@ -137,7 +137,7 @@ export class CustomersController {
   async updateCustomer(
     @Param('id') id: string,
     @Body() data: CustomerDataDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.updateCustomer(id, data, company);
   }
@@ -147,7 +147,7 @@ export class CustomersController {
   async updateCustomerStatus(
     @Param('id') id: string,
     @Body() data: CustomerStatusDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.UpdateStatusCustomer(id, data, company);
   }
@@ -157,7 +157,7 @@ export class CustomersController {
   async updateCustomerIntegration(
     @Param('id') id: string,
     @Body() data: CustomerIntegrationDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return await this.customersService.UpdateCustomerIntegration(
       id,
@@ -169,7 +169,7 @@ export class CustomersController {
   @Delete('/:id')
   async deleteCustomer(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.deleteCustomer(company, id);
   }
