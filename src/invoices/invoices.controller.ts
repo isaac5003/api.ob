@@ -22,6 +22,7 @@ import {
 } from 'src/_dtos/responseList.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
+import { Branch } from 'src/companies/entities/Branch.entity';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -51,7 +52,8 @@ export class InvoicesController {
   async createService(
     @Body() data: InvoiceDataDTO,
     @GetAuthData('company') company: Company,
+    @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
-    return this.invoice.createInvoice(company, data);
+    return this.invoice.createInvoice(company, data, branch);
   }
 }

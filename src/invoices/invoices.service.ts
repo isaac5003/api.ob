@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
+import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
@@ -118,6 +119,7 @@ export class InvoicesService {
   async createInvoice(
     company: Company,
     data: InvoiceDataDTO,
+    branch: Branch,
   ): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.getCustomer(
       data.header.customer,
@@ -161,7 +163,7 @@ export class InvoicesService {
       paymentConditionName: data.header,
       sellerName: invoiceSeller.name,
       zoneName: invoiceSeller.invoicesZone.name,
-      branch: data.header.customerBranch,
+      branch: branch,
       company: company,
       customerBranch: customerBranch,
       customer: customer,
