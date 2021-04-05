@@ -72,7 +72,7 @@ export class Customer extends BaseEntity {
   )
   customerTaxerType: CustomerTaxerType;
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.customers)
+  @ManyToOne(() => CustomerType, (customerType) => customerType.customers, {})
   customerType: CustomerType;
 
   @ManyToOne(
