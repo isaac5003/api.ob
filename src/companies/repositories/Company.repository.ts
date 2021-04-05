@@ -4,7 +4,7 @@ import { Company } from '../entities/Company.entity';
 
 @EntityRepository(Company)
 export class CompanyRepository extends Repository<Company> {
-  async getCompanyById(id: string): Promise<Company> {
+  async GetAuthDataById(id: string): Promise<Company> {
     try {
       const company = await this.createQueryBuilder('c').where({ id }).getOne();
       return company;
