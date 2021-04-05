@@ -8,9 +8,13 @@ import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaym
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
+import { InvoicesService } from './invoices.service';
+import { InvoicesController } from './invoices.controller';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoiceDetailRepository,
@@ -22,5 +26,7 @@ import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
       InvoicesZoneRepository,
     ]),
   ],
+  providers: [InvoicesService],
+  controllers: [InvoicesController],
 })
 export class InvoicesModule {}

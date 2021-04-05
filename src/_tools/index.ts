@@ -36,5 +36,7 @@ export function validationMessage(fieldname: string, type: string): string {
       return `El campo '${fieldname}' es requerido.`;
     case 'IsString':
       return `El campo '${fieldname}' debe ser del tipo texto.`;
+    case 'IsDate':
+      return `El campo '${fieldname}' debe ser una fecha en el formato "yyyy/MM/dd".`;
   }
 }
