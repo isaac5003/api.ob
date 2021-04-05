@@ -5,6 +5,7 @@ import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
+import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import {
   ResponseMinimalDTO,
   ResponseSingleDTO,
@@ -29,6 +30,9 @@ export class InvoicesService {
 
     @InjectRepository(InvoicesSellerRepository)
     private invoiceSellerRepository: InvoicesSellerRepository,
+
+    @InjectRepository(ServiceRepository)
+    private serviceRepository: ServiceRepository,
   ) {}
 
   async getInvoices(
@@ -118,8 +122,8 @@ export class InvoicesService {
 
   async createInvoice(
     company: Company,
-    data: InvoiceDataDTO,
     branch: Branch,
+    data: InvoiceDataDTO,
   ): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.getCustomer(
       data.header.customer,
@@ -176,7 +180,17 @@ export class InvoicesService {
       documentType: data.header,
       invoiceDetails: data.header,
     };
-    const { details } = data;
+    const details = [];
+    for (const detail of details) {
+      const service = this.serviceRepository.getService(
+        company,
+        detail.service,
+      );
+      details.push({
+        ...detail,
+        service,
+      });
+    }
 
     // const invoice = await this.invoiceRepository.createInvoice(company, data);
     // console.log(invoice);

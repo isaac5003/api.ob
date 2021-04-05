@@ -13,6 +13,7 @@ import { InvoicesController } from './invoices.controller';
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
+import { ServiceRepository } from 'src/services/repositories/Service.repository';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBra
       InvoicesZoneRepository,
       CustomerRepository,
       CustomerBranchRepository,
+      ServiceRepository,
     ]),
   ],
   providers: [InvoicesService],

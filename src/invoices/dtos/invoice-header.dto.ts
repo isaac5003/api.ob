@@ -23,8 +23,7 @@ export class InvoiceHeaderDTO {
   invoicesPaymentsCondition: InvoicesPaymentsCondition;
 
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('documentType', 'IsString') })
-  documentType: InvoicesDocumentType;
+  documentType: string;
 
   @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
   @IsString({ message: validationMessage('authorization', 'IsString') })
@@ -46,6 +45,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('sum', 'IsNotEmpty') })
   sum: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('iva', 'IsNumber') },
@@ -53,6 +53,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('iva', 'IsNotEmpty') })
   iva: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('subTotal', 'IsNumber') },
@@ -60,6 +61,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('subTotal', 'IsNotEmpty') })
   subTotal: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('ivaRetenido', 'IsNumber') },
@@ -67,6 +69,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('ivaRetenido', 'IsNotEmpty') })
   ivaRetenido: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('ventasExentas', 'IsNumber') },
@@ -74,6 +77,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('ventasExentas', 'IsNotEmpty') })
   ventasExentas: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('ventasNoSujetas', 'IsNumber') },
@@ -81,6 +85,7 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('ventasNoSujetas', 'IsNotEmpty') })
   ventasNoSujetas: number;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('ventaTotal', 'IsNumber') },

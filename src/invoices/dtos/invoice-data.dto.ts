@@ -8,5 +8,5 @@ export class InvoiceDataDTO {
   header: InvoiceHeaderDTO;
 
   @IsNotEmpty({ message: validationMessage('details', 'IsNotEmpty') })
-  details: InvoiceDetailDTO;
+  details: InvoiceDetailDTO[];
 }

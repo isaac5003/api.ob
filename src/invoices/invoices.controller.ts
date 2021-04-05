@@ -54,6 +54,6 @@ export class InvoicesController {
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
-    return this.invoice.createInvoice(company, data, branch);
+    return this.invoice.createInvoice(company, branch, data);
   }
 }
