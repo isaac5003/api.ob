@@ -21,7 +21,7 @@ import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
 import { AuthGuard } from '@nestjs/passport';
-import { GetAuthData } from 'src/auth/get-company.decorator';
+import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
