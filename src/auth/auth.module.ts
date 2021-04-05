@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { CompanyRepository } from 'src/companies/repositories/Company.repository';
+import { BranchRepository } from 'src/companies/repositories/Branch.repository';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { CompanyRepository } from 'src/companies/repositories/Company.repository
       ProfileRepository,
       UserRepository,
       CompanyRepository,
+      BranchRepository,
+      ProfileRepository,
     ]),
   ],
   exports: [JwtStrategy, PassportModule],

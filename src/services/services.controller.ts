@@ -21,7 +21,7 @@ import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
 import { AuthGuard } from '@nestjs/passport';
-import { GetCompany } from 'src/auth/get-company.decorator';
+import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
@@ -36,7 +36,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getServices(
     @Query() filter: ServiceFilterDTO,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
   ): Promise<ResponseListDTO<Service>> {
     const services = await this.service.getServices(company, filter);
     return new ResponseListDTO(plainToClass(Service, services));
@@ -45,7 +45,7 @@ export class ServicesController {
   @Get('/:id')
   async getService(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
   ): Promise<ResponseSingleDTO<Service>> {
     const service = await this.service.getService(company, id);
     return new ResponseSingleDTO(plainToClass(Service, service));
@@ -54,7 +54,7 @@ export class ServicesController {
   @Get('/:id/integrations')
   async getServiceIntegrations(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.getServiceIntegrations(company, id);
   }
@@ -63,7 +63,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createService(
     @Body() data: serviceDataDTO,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.createService(company, data);
   }
@@ -72,7 +72,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateService(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
     @Body() data: serviceDataDTO,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateService(company, id, data);
@@ -82,7 +82,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateServiceIntegrations(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
     @Body() data: ServiceIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateService(company, id, data);
@@ -92,7 +92,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateServiceStatus(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
     @Body() data: serviceStatusDTO,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateService(company, id, data);
@@ -101,7 +101,7 @@ export class ServicesController {
   @Delete('/:id')
   async deleteService(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData() company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.deleteService(company, id);
   }

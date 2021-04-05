@@ -2,19 +2,29 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy, ExtractJwt } from 'passport-jwt';
+import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
+import { BranchRepository } from 'src/companies/repositories/Branch.repository';
 import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { JwtPayloadDTO } from './dtos/jwtPayload.dto';
+import { Profile } from './entities/Profile.entity';
+import { User } from './entities/User.entity';
+import { ProfileRepository } from './repositories/Profile.repository';
 import { UserRepository } from './repositories/User.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @InjectRepository(UserRepository)
-    private userRepository: UserRepository,
+    @InjectRepository(UserRepository) private userRepository: UserRepository,
 
     @InjectRepository(CompanyRepository)
     private companyRepository: CompanyRepository,
+
+    @InjectRepository(BranchRepository)
+    private branchRepository: BranchRepository,
+
+    @InjectRepository(ProfileRepository)
+    private profileRepository: ProfileRepository,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -23,15 +33,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: JwtPayloadDTO): Promise<Company> {
-    const { uid, cid } = payload;
+  async validate(
+    payload: JwtPayloadDTO,
+  ): Promise<{
+    company: Company;
+    user: User;
+    branch: Branch;
+    profile: Profile;
+  }> {
+    const { uid, cid, bid, pid } = payload;
     const user = await this.userRepository.getUserById(uid);
-    const company = await this.companyRepository.getCompanyById(cid);
+    const company = await this.companyRepository.GetAuthDataById(cid);
+    const branch = await this.branchRepository.getBranchById(bid);
+    const profile = await this.profileRepository.getProfileById(pid);
     if (!user) {
       throw new UnauthorizedException(
         'Debes iniciar sesión para poder realizar esta acción.',
       );
     }
-    return company;
+    return { user, company, branch, profile };
   }
 }
