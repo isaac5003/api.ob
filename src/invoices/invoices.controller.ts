@@ -13,7 +13,7 @@ import { Invoice } from './entities/Invoice.entity';
 import { InvoicesService } from './invoices.service';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
-import { GetCompany } from 'src/auth/get-company.decorator';
+import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import {
   ResponseListDTO,
@@ -32,7 +32,7 @@ export class InvoicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getInvoices(
     @Query() filter: InvoiceFilterDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Invoice>> {
     const invoices = await this.invoice.getInvoices(company, filter);
     return new ResponseListDTO(plainToClass(Invoice, invoices));
@@ -41,7 +41,7 @@ export class InvoicesController {
   @Get('/:id')
   async getInvoice(
     @Param('id') id: string,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Invoice>> {
     return await this.invoice.getInvoice(company, id);
   }
@@ -50,7 +50,7 @@ export class InvoicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createService(
     @Body() data: InvoiceDataDTO,
-    @GetCompany() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.invoice.createInvoice(company, data);
   }

@@ -11,6 +11,8 @@ import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
 import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import { AuthModule } from 'src/auth/auth.module';
+import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
+import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AuthModule } from 'src/auth/auth.module';
       InvoicesSellerRepository,
       InvoicesStatusRepository,
       InvoicesZoneRepository,
+      CustomerRepository,
+      CustomerBranchRepository,
     ]),
   ],
   providers: [InvoicesService],

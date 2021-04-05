@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, IsDate, IsNumber } from 'class-validator';
 import { Customer } from 'src/customers/entities/Customer.entity';
 import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
@@ -8,13 +9,13 @@ import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 
 export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
-  customer: Customer;
+  customer: string;
 
   @IsNotEmpty({ message: validationMessage('customerBranch', 'IsNotEmpty') })
-  customerBranch: CustomerBranch;
+  customerBranch: string;
 
   @IsNotEmpty({ message: validationMessage('invoicesSeller', 'IsNotEmpty') })
-  invoicesSeller: InvoicesSeller;
+  invoicesSeller: string;
 
   @IsNotEmpty({
     message: validationMessage('InvoicesPaymentsCondition', 'IsNotEmpty'),
@@ -37,6 +38,7 @@ export class InvoiceHeaderDTO {
   @IsDate({ message: validationMessage('invoiceDate', 'IsDate') })
   invoiceDate: string;
 
+  @Transform(({ value }) => parseFloat(value))
   @IsNumber(
     { maxDecimalPlaces: 2 },
     { message: validationMessage('sum', 'IsNumber') },
