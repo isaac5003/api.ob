@@ -49,7 +49,7 @@ export class InvoicesController {
 
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createService(
+  async createInvoice(
     @Body() data: InvoiceDataDTO,
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
