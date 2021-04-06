@@ -103,6 +103,8 @@ export class ServiceRepository extends Repository<Service> {
         },
       );
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
     return service;

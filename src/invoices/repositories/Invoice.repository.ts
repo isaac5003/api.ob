@@ -1,9 +1,8 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceDataDTO } from '../dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { InvoiceHeaderDTO } from '../dtos/invoice-header.dto';
+import { InvoiceHeaderDataDTO } from '../dtos/invoice-header-data.dto';
 import { Invoice } from '../entities/Invoice.entity';
 
 const reponame = 'documento';
@@ -166,12 +165,17 @@ export class InvoiceRepository extends Repository<Invoice> {
     return invoice;
   }
 
-  async createInvoice(company: Company, data: Invoice): Promise<Invoice> {
+  async createInvoice(
+    company: Company,
+    data: InvoiceHeaderDataDTO,
+  ): Promise<Invoice> {
     let response: Invoice;
     try {
-      // const invoice = this.create({ company, data });
-      // response = await this.save(invoice);
+      const invoice = this.create({ company, ...data });
+      response = await this.save(invoice);
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
     return await response;

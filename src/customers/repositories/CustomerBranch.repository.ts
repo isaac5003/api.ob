@@ -1,4 +1,3 @@
-import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { BranchDataDTO } from '../dtos/customer-branch.dto';

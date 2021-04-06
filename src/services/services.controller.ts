@@ -36,7 +36,7 @@ export class ServicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getServices(
     @Query() filter: ServiceFilterDTO,
-    @GetAuthData() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Service>> {
     const services = await this.service.getServices(company, filter);
     return new ResponseListDTO(plainToClass(Service, services));
@@ -45,7 +45,7 @@ export class ServicesController {
   @Get('/:id')
   async getService(
     @Param('id') id: string,
-    @GetAuthData() company: Company,
+    @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Service>> {
     const service = await this.service.getService(company, id);
     return new ResponseSingleDTO(plainToClass(Service, service));

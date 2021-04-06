@@ -164,19 +164,13 @@ export class CustomersService {
     return this.customerTypeNaturalRepository.getCustomerTypeNaturals();
   }
 
-  async createCustomer(
-    company: Company,
-    validatorCustomerDto,
-  ): Promise<ResponseMinimalDTO> {
+  async createCustomer(company: Company, data): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.createCustomer(
       company,
-      validatorCustomerDto,
+      data,
     );
     const { id } = customer;
-    await this.customerBranchRepository.createBranch(
-      id,
-      validatorCustomerDto.branch,
-    );
+    await this.customerBranchRepository.createBranch(id, data.branch);
     return {
       id: customer.id,
       message: 'Se ha creado el cliente correctamente',

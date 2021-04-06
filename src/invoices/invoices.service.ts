@@ -14,7 +14,11 @@ import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
+import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
+import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
+import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
+import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 
 @Injectable()
 export class InvoicesService {
@@ -33,6 +37,18 @@ export class InvoicesService {
 
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
+
+    @InjectRepository(InvoicesStatusRepository)
+    private invoiceStatusRepository: InvoicesStatusRepository,
+
+    @InjectRepository(InvoicesPaymentsConditionRepository)
+    private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionRepository,
+
+    @InjectRepository(InvoicesDocumentTypeRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+
+    @InjectRepository(InvoiceDetailRepository)
+    private invoiceDetailRepository: InvoiceDetailRepository,
   ) {}
 
   async getInvoices(
@@ -137,10 +153,16 @@ export class InvoicesService {
       company,
       data.header.invoicesSeller,
     );
-
-    console.log(customerBranch);
-    console.log(company);
-    console.log(invoiceSeller);
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
+      1,
+    );
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+      data.header.invoicesPaymentsCondition,
+      company,
+    );
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
+      parseInt(data.header.documentType),
+    );
 
     const header = {
       authorization: data.header.authorization,
@@ -157,46 +179,52 @@ export class InvoicesService {
       customerGiro: customer.giro,
       sum: data.header.sum,
       iva: data.header.iva,
-      subtotal: data.header.subTotal,
+      subTotal: data.header.subTotal,
       ivaRetenido: data.header.ivaRetenido,
       ventasExentas: data.header.ventasExentas,
       ventasNoSujetas: data.header.ventasNoSujetas,
       ventaTotal: data.header.ventaTotal,
-      ventaTotalText: data.header.ventaTotal,
+      ventaTotalText: 'data.header.ventaTotal',
       invoiceDate: data.header.invoiceDate,
-      paymentConditionName: data.header,
+      paymentConditionName: invoicesPaymentCondition.name,
       sellerName: invoiceSeller.name,
       zoneName: invoiceSeller.invoicesZone.name,
       branch: branch,
       company: company,
       customerBranch: customerBranch,
       customer: customer,
-      invoicesPaymentsCondition: data.header,
+      invoicesPaymentsCondition: invoicesPaymentCondition,
       invoicesSeller: invoiceSeller,
       invoicesZone: invoiceSeller.invoicesZone,
-      status: data.header,
-      customerType: data.header,
-      customerTypeNatural: data.header,
-      documentType: data.header,
-      invoiceDetails: data.header,
+      status: invoiceStatus,
+      customerType: customer.customerType,
+      customerTypeNatural: customer.customerTypeNatural,
+      documentType: documentType,
     };
+
+    const invoiceHeader = await this.invoiceRepository.createInvoice(
+      company,
+      header,
+    );
+
     const details = [];
-    for (const detail of details) {
-      const service = this.serviceRepository.getService(
+    for (const detail of data.details) {
+      const service = await this.serviceRepository.getService(
         company,
-        detail.service,
+        detail.selectedService,
       );
       details.push({
         ...detail,
         service,
+        sellingType: service.sellingType,
+        invoice: invoiceHeader,
       });
     }
 
-    // const invoice = await this.invoiceRepository.createInvoice(company, data);
-    // console.log(invoice);
-
+    await this.invoiceDetailRepository.createInvoiceDetail(details);
     return {
-      message: 'El servicio se ha creado correctamente',
+      id: invoiceHeader.id,
+      message: 'El documento se ha creado correctamente',
     };
   }
 }

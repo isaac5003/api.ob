@@ -1,13 +1,20 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsDate, IsNumber } from 'class-validator';
-import { Customer } from 'src/customers/entities/Customer.entity';
-import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 import { validationMessage } from 'src/_tools';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 
 export class InvoiceHeaderDTO {
+  @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('documentType', 'IsString') })
+  documentType: string;
+
+  @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('authorization', 'IsString') })
+  authorization: string;
+
+  @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
+  @IsString({ message: validationMessage('sequence', 'IsString') })
+  sequence: string;
+
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
   customer: string;
 
@@ -20,21 +27,10 @@ export class InvoiceHeaderDTO {
   @IsNotEmpty({
     message: validationMessage('InvoicesPaymentsCondition', 'IsNotEmpty'),
   })
-  invoicesPaymentsCondition: InvoicesPaymentsCondition;
-
-  @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
-  documentType: string;
-
-  @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('authorization', 'IsString') })
-  authorization: string;
-
-  @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('sequence', 'IsString') })
-  sequence: string;
+  invoicesPaymentsCondition: string;
 
   @IsNotEmpty({ message: validationMessage('invoiceDate', 'IsNotEmpty') })
-  @IsDate({ message: validationMessage('invoiceDate', 'IsDate') })
+  @IsString({ message: validationMessage('invoiceDate', 'IsString') })
   invoiceDate: string;
 
   @Transform(({ value }) => parseFloat(value))
