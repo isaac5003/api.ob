@@ -163,7 +163,6 @@ export class InvoicesService {
       message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
     }
 
-    const nextSequence = parseInt(invoiceHeader.sequence) + 1;
     const details = [];
     for (const detail of data.details) {
       const service = await this.serviceRepository.getService(
@@ -178,6 +177,22 @@ export class InvoicesService {
       });
     }
     await this.invoiceDetailRepository.createInvoiceDetail(details);
+
+    let nextSequence = parseInt(invoiceHeader.sequence) + 1;
+    if (
+      allInvoicesReserved
+        .map((ir) => parseInt(ir.sequence))
+        .includes(nextSequence)
+    ) {
+      for (const is of allInvoicesReserved.map((ir) => parseInt(ir.sequence))) {
+        for (let s = nextSequence; s <= document.final; s++) {
+          if (s != is) {
+            nextSequence = s;
+            s = document.final;
+          }
+        }
+      }
+    }
     await this.invoicesDocumentRepository.updateInvoiceDocument(
       document.id,
       { current: nextSequence },
@@ -303,14 +318,18 @@ export class InvoicesService {
     }
     const detailsIds = invoice.invoiceDetails.map((id) => id.id);
 
-    const resultDetail = await this.invoiceDetailRepository.deleteInvoiceDetail(
-      detailsIds,
-    );
+    await this.invoiceDetailRepository.deleteInvoiceDetail(detailsIds);
 
     const result = await this.invoiceRepository.deleteInvoice(
       company,
       id,
       invoice,
+    );
+
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { current: document.current - 1 },
+      company,
     );
 
     return {
