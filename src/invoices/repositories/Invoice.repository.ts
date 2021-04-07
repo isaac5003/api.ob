@@ -10,7 +10,7 @@ const reponame = 'documento';
 export class InvoiceRepository extends Repository<Invoice> {
   async getInvoices(
     company: Company,
-    filter: InvoiceFilterDTO,
+    filter: Partial<InvoiceFilterDTO>,
   ): Promise<Invoice[]> {
     const {
       limit,

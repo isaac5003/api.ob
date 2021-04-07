@@ -10,11 +10,13 @@ import {
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
+import { numeroALetras } from 'src/_tools';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
 import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
+import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
@@ -49,6 +51,9 @@ export class InvoicesService {
 
     @InjectRepository(InvoiceDetailRepository)
     private invoiceDetailRepository: InvoiceDetailRepository,
+
+    @InjectRepository(InvoicesDocumentRepository)
+    private invoicesDocumentRepository: InvoicesDocumentRepository,
   ) {}
 
   async getInvoices(
@@ -148,7 +153,6 @@ export class InvoicesService {
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
     );
-
     const invoiceSeller = await this.invoiceSellerRepository.getSeller(
       company,
       data.header.invoicesSeller,
@@ -164,9 +168,46 @@ export class InvoicesService {
       parseInt(data.header.documentType),
     );
 
+    const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
+      company,
+    );
+
+    const document = documents.find(
+      (id) =>
+        id.isCurrentDocument == true &&
+        id.documentType.id == parseInt(data.header.documentType),
+    );
+
+    const allInvoices = await this.invoiceRepository.getInvoices(company, {
+      status: 4,
+      documentType: parseInt(data.header.documentType),
+    });
+
+    let message = '';
+    const sequence = document.current;
+    if (parseInt(data.header.sequence) != sequence) {
+      message = `El numero de secuencia asignado fué: ${sequence}`;
+    }
+    let nextSequence = sequence + 1;
+    if (allInvoices.length > 0) {
+      const invoicesSequence = allInvoices.map((is) => parseInt(is.sequence));
+
+      //definiendo el valor de sequence
+      if (invoicesSequence.includes(sequence)) {
+        for (const is of invoicesSequence) {
+          for (let s = sequence; s <= document.final; s++) {
+            if (s != is) {
+              nextSequence = s;
+              s = document.final;
+            }
+          }
+        }
+      }
+    }
+
     const header = {
       authorization: data.header.authorization,
-      sequence: data.header.sequence,
+      sequence: `${sequence}`,
       customerName: customer.name,
       customerAddress1: customerBranch.address1,
       customerAddress2: customerBranch.address2,
@@ -184,7 +225,7 @@ export class InvoicesService {
       ventasExentas: data.header.ventasExentas,
       ventasNoSujetas: data.header.ventasNoSujetas,
       ventaTotal: data.header.ventaTotal,
-      ventaTotalText: 'data.header.ventaTotal',
+      ventaTotalText: numeroALetras(data.header.ventaTotal),
       invoiceDate: data.header.invoiceDate,
       paymentConditionName: invoicesPaymentCondition.name,
       sellerName: invoiceSeller.name,
@@ -220,11 +261,16 @@ export class InvoicesService {
         invoice: invoiceHeader,
       });
     }
-
     await this.invoiceDetailRepository.createInvoiceDetail(details);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { current: nextSequence },
+      company,
+    );
+
     return {
       id: invoiceHeader.id,
-      message: 'El documento se ha creado correctamente',
+      message: `La venta ha sido registrada correctamente. ${message}`,
     };
   }
 }
