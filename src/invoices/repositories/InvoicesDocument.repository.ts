@@ -57,7 +57,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
         where: { company, isCurrentDocument: true, documentType },
       });
       let sequence = document.current;
-      if (sequenceReserved.length > 0) {
+      if (sequenceReserved) {
         if (sequenceReserved.includes(sequence)) {
           for (const is of sequenceReserved) {
             for (let s = sequence; s <= document.final; s++) {
@@ -75,6 +75,8 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
         current: sequence,
       };
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
 

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { Branch } from 'src/companies/entities/Branch.entity';
@@ -13,6 +13,7 @@ import {
 import { numeroALetras } from 'src/_tools';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
 import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
@@ -119,7 +120,7 @@ export class InvoicesService {
       data.header.invoicesSeller,
     );
     const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-      4,
+      1,
     );
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
       data.header.invoicesPaymentsCondition,
@@ -147,7 +148,6 @@ export class InvoicesService {
       company,
       branch,
       data.header,
-      'invoice',
       customer,
       customerBranch,
       invoiceSeller,
@@ -187,6 +187,95 @@ export class InvoicesService {
     return {
       id: invoiceHeader.id,
       message: `La venta ha sido registrada correctamente. ${message}`,
+    };
+  }
+
+  async createInvoiceReserve(
+    company: Company,
+    branch: Branch,
+    data: InvoiceReserveDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
+      data.documentType,
+    );
+
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
+      4,
+    );
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      data.documentType,
+    );
+    if (
+      data.sequenceForm < document.current ||
+      data.sequenceTo > document.final
+    ) {
+      throw new BadRequestException(
+        `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
+      );
+    }
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(
+      company,
+      {
+        status: 4,
+        documentType: data.documentType,
+      },
+    );
+
+    const sequence = [];
+    for (let s = data.sequenceForm; s <= data.sequenceTo; s++) {
+      sequence.push(s);
+    }
+
+    const invoicesSequence = allInvoicesReserved.map((is) =>
+      parseInt(is.sequence),
+    );
+    const alreadyReserved = invoicesSequence.filter((is) =>
+      sequence.includes(is),
+    );
+    const sequenceToReserve = sequence.filter(
+      (s) => !alreadyReserved.includes(s),
+    );
+
+    const invoiceValues = sequenceToReserve.map((sr) => {
+      return {
+        authorization: document.authorization,
+        sequence: sr,
+        company: company,
+        documentType: documentType,
+        status: invoiceStatus,
+      };
+    });
+
+    await this.invoiceRepository.createReserveInvoice(
+      company,
+      branch,
+      invoiceValues,
+    );
+
+    if (data.sequenceForm == document.current) {
+      await this.invoicesDocumentRepository.updateInvoiceDocument(
+        document.id,
+        { current: data.sequenceTo + 1 },
+        company,
+      );
+    }
+
+    return {
+      message:
+        alreadyReserved.length > 0 && sequenceToReserve.length > 0
+          ? `Los documentos ${alreadyReserved.join(
+              ', ',
+            )} ya estan reservados, unicamente se reservaron los documentos con sequencia ${sequenceToReserve.join(
+              ', ',
+            )} correctamente.`
+          : sequenceToReserve.length > 0
+          ? `Los documentos con sequencia ${sequenceToReserve.join(
+              ', ',
+            )} han sido reservados correctamente.`
+          : `Los documentos con secuencia ${alreadyReserved.join(
+              ', ',
+            )} ya estan reservados`,
     };
   }
 }

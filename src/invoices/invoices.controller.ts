@@ -23,6 +23,7 @@ import {
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { Branch } from 'src/companies/entities/Branch.entity';
+import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -55,5 +56,15 @@ export class InvoicesController {
     @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
     return this.invoice.createInvoice(company, branch, data);
+  }
+
+  @Post('/reserved')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createInvoiceReserve(
+    @Body() data: InvoiceReserveDataDTO,
+    @GetAuthData('company') company: Company,
+    @GetAuthData('branch') branch: Branch,
+  ): Promise<ResponseMinimalDTO> {
+    return this.invoice.createInvoiceReserve(company, branch, data);
   }
 }

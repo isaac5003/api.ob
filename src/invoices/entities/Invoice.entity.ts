@@ -32,7 +32,7 @@ export class Invoice extends BaseEntity {
   @Column()
   sequence: string;
 
-  @Column()
+  @Column({ nullable: true })
   customerName: string;
 
   @Column({ nullable: true })

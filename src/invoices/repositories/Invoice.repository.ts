@@ -185,14 +185,13 @@ export class InvoiceRepository extends Repository<Invoice> {
     company: Company,
     branch: Branch,
     data: Partial<InvoiceHeaderDTO>,
-    type: string,
-    customer?: Customer,
-    customerBranch?: CustomerBranch,
-    invoiceSeller?: InvoicesSeller,
-    invoicesPaymentCondition?: InvoicesPaymentsCondition,
-    documentType?: InvoicesDocumentType,
-    document?: InvoicesDocument,
-    invoiceStatus?: InvoicesStatus,
+    customer: Customer,
+    customerBranch: CustomerBranch,
+    invoiceSeller: InvoicesSeller,
+    invoicesPaymentCondition: InvoicesPaymentsCondition,
+    documentType: InvoicesDocumentType,
+    document: InvoicesDocument,
+    invoiceStatus: InvoicesStatus,
   ): Promise<Invoice> {
     let response: Invoice;
 
@@ -234,12 +233,25 @@ export class InvoiceRepository extends Repository<Invoice> {
       documentType: documentType,
     };
     try {
-      switch (type) {
-        case 'invoice':
-          const invoice = this.create({ company, ...header });
-          response = await this.save(invoice);
-        case 'reserveInvoice':
-      }
+      const invoice = this.create({ company, ...header });
+      response = await this.save(invoice);
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return await response;
+  }
+
+  async createReserveInvoice(
+    company: Company,
+    branch: Branch,
+    data: any,
+  ): Promise<Partial<Invoice[]>> {
+    let response;
+    try {
+      const invoice = this.create([...data]);
+      response = await this.save(invoice);
     } catch (error) {
       console.error(error);
 

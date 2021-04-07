@@ -38,6 +38,8 @@ export function validationMessage(fieldname: string, type: string): string {
       return `El campo '${fieldname}' debe ser del tipo texto.`;
     case 'IsISO8601':
       return `El campo '${fieldname}' debe ser una fecha en el formato "yyyy-MM-dd".`;
+    case 'IsUUID':
+      return `El campo '${fieldname}' debe ser del tipo uuid".`;
   }
 }
 
