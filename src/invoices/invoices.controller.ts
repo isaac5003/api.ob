@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -66,5 +67,13 @@ export class InvoicesController {
     @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
     return this.invoice.createInvoiceReserve(company, branch, data);
+  }
+
+  @Delete('/:id')
+  async deleteInvoice(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.invoice.deleteInvoice(company, id);
   }
 }

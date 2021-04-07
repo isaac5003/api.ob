@@ -20,4 +20,17 @@ export class InvoiceDetailRepository extends Repository<InvoiceDetail[]> {
     }
     return await response;
   }
+
+  async deleteInvoiceDetail(ids: string[]): Promise<boolean> {
+    try {
+      if (ids.length > 0) {
+        await this.delete(ids);
+      }
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return true;
+  }
 }

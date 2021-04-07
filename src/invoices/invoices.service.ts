@@ -278,4 +278,45 @@ export class InvoicesService {
             )} ya estan reservados`,
     };
   }
+
+  async deleteInvoice(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
+
+    const allowedStatuses = [1];
+    if (!allowedStatuses.includes(invoice.status.id)) {
+      throw new BadRequestException(
+        `La venta seleccionada no puede ser eliminada mientras tenga estado "${invoice.status.name.toUpperCase()}"`,
+      );
+    }
+
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      invoice.documentType.id,
+    );
+    if (document.current - 1 != parseInt(invoice.sequence)) {
+      throw new BadRequestException(
+        'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
+      );
+    }
+    const detailsIds = invoice.invoiceDetails.map((id) => id.id);
+
+    const resultDetail = await this.invoiceDetailRepository.deleteInvoiceDetail(
+      detailsIds,
+    );
+
+    const result = await this.invoiceRepository.deleteInvoice(
+      company,
+      id,
+      invoice,
+    );
+
+    return {
+      message: result
+        ? 'Se ha eliminado la venta correctamente'
+        : 'No se ha podido eliminar venta',
+    };
+  }
 }

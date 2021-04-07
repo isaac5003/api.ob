@@ -5,7 +5,6 @@ import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { InvoiceHeaderDataDTO } from '../dtos/invoice-header-data.dto';
 import { InvoiceHeaderDTO } from '../dtos/invoice-header.dto';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
@@ -258,5 +257,20 @@ export class InvoiceRepository extends Repository<Invoice> {
       logDatabaseError(reponame, error);
     }
     return await response;
+  }
+
+  async deleteInvoice(
+    company: Company,
+    id: string,
+    invoice: Invoice,
+  ): Promise<boolean> {
+    try {
+      await this.delete(invoice.id);
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return true;
   }
 }
