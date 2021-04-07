@@ -10,9 +10,21 @@ import { ServiceIntegrationDTO } from '../dtos/service-integration.dto';
 const reponame = 'servicio';
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
-  async getServices(
+  async getServices(company: Company): Promise<Service[]> {
+    try {
+      const services = await this.find({
+        where: { company },
+        join: { alias: 's', leftJoinAndSelect: { st: 's.sellingType' } },
+      });
+      return services;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+  }
+
+  async getFilteredServices(
     company: Company,
-    filter: ServiceFilterDTO,
+    filter?: ServiceFilterDTO,
   ): Promise<Service[]> {
     const {
       limit,
@@ -27,7 +39,9 @@ export class ServiceRepository extends Repository<Service> {
     } = filter;
 
     try {
-      const query = this.createQueryBuilder('s').where({ company });
+      const query = this.createQueryBuilder('s')
+        .where({ company })
+        .leftJoinAndSelect('s.sellingType', 'st');
 
       // filter by search value
       if (search) {

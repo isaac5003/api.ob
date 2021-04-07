@@ -5,6 +5,7 @@ import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
+import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { Service } from './entities/Service.entity';
 import { ServiceRepository } from './repositories/Service.repository';
@@ -20,7 +21,7 @@ export class ServicesService {
     company: Company,
     filter: ServiceFilterDTO,
   ): Promise<Service[]> {
-    return this.serviceRepository.getServices(company, filter);
+    return this.serviceRepository.getFilteredServices(company, filter);
   }
 
   async getService(company: Company, id: string): Promise<Service> {
@@ -78,6 +79,16 @@ export class ServicesService {
       message: result
         ? 'Se ha eliminado el servicio correctamente'
         : 'No se ha podido eliminar el servicio',
+    };
+  }
+
+  async reportGeneral(company: Company): Promise<ServiceReportGeneralDTO> {
+    const { name, nit, nrc } = company;
+    const services = await this.serviceRepository.getServices(company);
+
+    return {
+      company: { name, nit, nrc },
+      services,
     };
   }
 }
