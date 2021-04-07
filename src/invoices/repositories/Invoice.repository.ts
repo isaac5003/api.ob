@@ -1,9 +1,18 @@
+import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
-import { logDatabaseError } from 'src/_tools';
+import { Customer } from 'src/customers/entities/Customer.entity';
+import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
+import { logDatabaseError, numeroALetras } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { InvoiceHeaderDataDTO } from '../dtos/invoice-header-data.dto';
+import { InvoiceHeaderDTO } from '../dtos/invoice-header.dto';
 import { Invoice } from '../entities/Invoice.entity';
+import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
+import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
+import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -174,11 +183,57 @@ export class InvoiceRepository extends Repository<Invoice> {
 
   async createInvoice(
     company: Company,
-    data: InvoiceHeaderDataDTO,
+    branch: Branch,
+    data: Partial<InvoiceHeaderDTO>,
+    customer?: Customer,
+    customerBranch?: CustomerBranch,
+    invoiceSeller?: InvoicesSeller,
+    invoicesPaymentCondition?: InvoicesPaymentsCondition,
+    documentType?: InvoicesDocumentType,
+    document?: InvoicesDocument,
+    invoiceStatus?: InvoicesStatus,
   ): Promise<Invoice> {
     let response: Invoice;
+
+    const header = {
+      authorization: data.authorization,
+      sequence: `${document.current}`,
+      customerName: customer.name,
+      customerAddress1: customerBranch.address1,
+      customerAddress2: customerBranch.address2,
+      customerCountry: customerBranch.country.name,
+      customerState: customerBranch.state.name,
+      customerCity: customerBranch.city.name,
+      customerDui: customer.dui,
+      customerNit: customer.nit,
+      customerNrc: customer.nrc,
+      customerGiro: customer.giro,
+      sum: data.sum,
+      iva: data.iva,
+      subTotal: data.subTotal,
+      ivaRetenido: data.ivaRetenido,
+      ventasExentas: data.ventasExentas,
+      ventasNoSujetas: data.ventasNoSujetas,
+      ventaTotal: data.ventaTotal,
+      ventaTotalText: numeroALetras(data.ventaTotal),
+      invoiceDate: data.invoiceDate,
+      paymentConditionName: invoicesPaymentCondition.name,
+      sellerName: invoiceSeller.name,
+      zoneName: invoiceSeller.invoicesZone.name,
+      branch: branch,
+      company: company,
+      customerBranch: customerBranch,
+      customer: customer,
+      invoicesPaymentsCondition: invoicesPaymentCondition,
+      invoicesSeller: invoiceSeller,
+      invoicesZone: invoiceSeller.invoicesZone,
+      status: invoiceStatus,
+      customerType: customer.customerType,
+      customerTypeNatural: customer.customerTypeNatural,
+      documentType: documentType,
+    };
     try {
-      const invoice = this.create({ company, ...data });
+      const invoice = this.create({ company, ...header });
       response = await this.save(invoice);
     } catch (error) {
       console.error(error);

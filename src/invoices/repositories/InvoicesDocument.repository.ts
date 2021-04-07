@@ -38,4 +38,46 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
       logDatabaseError(reponame, error);
     }
   }
+
+  async getSequenceAvailable(
+    company: Company,
+    documentType: number,
+    sequenceReserved?: number[],
+  ): Promise<InvoicesDocument> {
+    let document;
+    const leftJoinAndSelect = {
+      dt: 'i.documentType',
+    };
+    try {
+      document = await this.findOne({
+        join: {
+          alias: 'i',
+          leftJoinAndSelect,
+        },
+        where: { company, isCurrentDocument: true, documentType },
+      });
+      let sequence = document.current;
+      if (sequenceReserved.length > 0) {
+        if (sequenceReserved.includes(sequence)) {
+          for (const is of sequenceReserved) {
+            for (let s = sequence; s <= document.final; s++) {
+              if (s != is) {
+                sequence = s;
+                s = document.final;
+              }
+            }
+          }
+        }
+      }
+
+      document = {
+        ...document,
+        current: sequence,
+      };
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+
+    return document;
+  }
 }

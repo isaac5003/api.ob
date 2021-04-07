@@ -68,9 +68,7 @@ export class InvoicesService {
     id: string,
   ): Promise<ResponseSingleDTO<Invoice>> {
     const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
-    console.log(invoiceAll);
 
-    // TODO Refactor code
     const details = invoiceAll.invoiceDetails.map((d) => {
       const { id, name } = d.service;
       delete d.service;
@@ -81,10 +79,26 @@ export class InvoicesService {
     });
 
     delete invoiceAll.invoiceDetails;
+    delete invoiceAll.invoicesPaymentsCondition.active;
+    delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+    delete invoiceAll.invoicesSeller.active;
+    delete invoiceAll.invoicesZone.active;
+
     const invoice = {
       ...invoiceAll,
       details,
+      customer: {
+        id: invoiceAll.customer.id,
+        name: invoiceAll.customer.name,
+      },
+      customerBranch: {
+        id: invoiceAll.customerBranch.id,
+        name: invoiceAll.customerBranch.name,
+      },
     };
+
+    delete invoiceAll.customerBranch;
+    delete invoiceAll.customer;
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
 
@@ -105,96 +119,50 @@ export class InvoicesService {
       data.header.invoicesSeller,
     );
     const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-      1,
+      4,
     );
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
       data.header.invoicesPaymentsCondition,
       company,
     );
     const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-      parseInt(data.header.documentType),
+      data.header.documentType,
     );
 
-    const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(
       company,
+      {
+        status: 4,
+        documentType: data.header.documentType,
+      },
     );
 
-    const document = documents.find(
-      (id) =>
-        id.isCurrentDocument == true &&
-        id.documentType.id == parseInt(data.header.documentType),
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      data.header.documentType,
+      allInvoicesReserved.map((ir) => parseInt(ir.sequence)),
     );
-
-    const allInvoices = await this.invoiceRepository.getInvoices(company, {
-      status: 4,
-      documentType: parseInt(data.header.documentType),
-    });
-
-    let message = '';
-    const sequence = document.current;
-    if (parseInt(data.header.sequence) != sequence) {
-      message = `El numero de secuencia asignado fué: ${sequence}`;
-    }
-    let nextSequence = sequence + 1;
-    if (allInvoices.length > 0) {
-      const invoicesSequence = allInvoices.map((is) => parseInt(is.sequence));
-
-      //definiendo el valor de sequence
-      if (invoicesSequence.includes(sequence)) {
-        for (const is of invoicesSequence) {
-          for (let s = sequence; s <= document.final; s++) {
-            if (s != is) {
-              nextSequence = s;
-              s = document.final;
-            }
-          }
-        }
-      }
-    }
-
-    const header = {
-      authorization: data.header.authorization,
-      sequence: `${sequence}`,
-      customerName: customer.name,
-      customerAddress1: customerBranch.address1,
-      customerAddress2: customerBranch.address2,
-      customerCountry: customerBranch.country.name,
-      customerState: customerBranch.state.name,
-      customerCity: customerBranch.city.name,
-      customerDui: customer.dui,
-      customerNit: customer.nit,
-      customerNrc: customer.nrc,
-      customerGiro: customer.giro,
-      sum: data.header.sum,
-      iva: data.header.iva,
-      subTotal: data.header.subTotal,
-      ivaRetenido: data.header.ivaRetenido,
-      ventasExentas: data.header.ventasExentas,
-      ventasNoSujetas: data.header.ventasNoSujetas,
-      ventaTotal: data.header.ventaTotal,
-      ventaTotalText: numeroALetras(data.header.ventaTotal),
-      invoiceDate: data.header.invoiceDate,
-      paymentConditionName: invoicesPaymentCondition.name,
-      sellerName: invoiceSeller.name,
-      zoneName: invoiceSeller.invoicesZone.name,
-      branch: branch,
-      company: company,
-      customerBranch: customerBranch,
-      customer: customer,
-      invoicesPaymentsCondition: invoicesPaymentCondition,
-      invoicesSeller: invoiceSeller,
-      invoicesZone: invoiceSeller.invoicesZone,
-      status: invoiceStatus,
-      customerType: customer.customerType,
-      customerTypeNatural: customer.customerTypeNatural,
-      documentType: documentType,
-    };
 
     const invoiceHeader = await this.invoiceRepository.createInvoice(
       company,
-      header,
+      branch,
+      data.header,
+      customer,
+      customerBranch,
+      invoiceSeller,
+      invoicesPaymentCondition,
+      documentType,
+      document,
+      invoiceStatus,
     );
 
+    let message = '';
+
+    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+      message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
+    }
+
+    const nextSequence = parseInt(invoiceHeader.sequence) + 1;
     const details = [];
     for (const detail of data.details) {
       const service = await this.serviceRepository.getService(
