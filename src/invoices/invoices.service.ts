@@ -147,6 +147,7 @@ export class InvoicesService {
       company,
       branch,
       data.header,
+      'invoice',
       customer,
       customerBranch,
       invoiceSeller,

@@ -185,6 +185,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     company: Company,
     branch: Branch,
     data: Partial<InvoiceHeaderDTO>,
+    type: string,
     customer?: Customer,
     customerBranch?: CustomerBranch,
     invoiceSeller?: InvoicesSeller,
@@ -233,8 +234,12 @@ export class InvoiceRepository extends Repository<Invoice> {
       documentType: documentType,
     };
     try {
-      const invoice = this.create({ company, ...header });
-      response = await this.save(invoice);
+      switch (type) {
+        case 'invoice':
+          const invoice = this.create({ company, ...header });
+          response = await this.save(invoice);
+        case 'reserveInvoice':
+      }
     } catch (error) {
       console.error(error);
 
