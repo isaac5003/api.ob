@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsISO8601, IsOptional, IsString } from 'class-validator';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { validationMessage } from 'src/_tools';
 
@@ -31,10 +31,10 @@ export class InvoiceFilterDTO extends FilterDTO {
   status: number;
 
   @IsOptional()
-  @IsString({ message: validationMessage('startDate', 'IsString') })
+  @IsISO8601({}, { message: validationMessage('startDate', 'IsISO8601') })
   startDate: string;
 
   @IsOptional()
-  @IsString({ message: validationMessage('endDate', 'IsString') })
+  @IsISO8601({}, { message: validationMessage('endDate', 'IsISO8601') })
   endDate: string;
 }

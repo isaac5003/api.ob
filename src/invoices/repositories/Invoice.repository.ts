@@ -38,17 +38,12 @@ export class InvoiceRepository extends Repository<Invoice> {
           'i.ventaTotal',
           'i.customerName',
           'i.createdAt',
-          'st.id',
-          'st.name',
-          'dt.id',
-          'dt.name',
-          'dt.code',
         ])
-        .leftJoin('i.documentType', 'dt')
+        .leftJoinAndSelect('i.documentType', 'dt')
+        .leftJoinAndSelect('i.status', 'st')
         .leftJoin('i.customer', 'cu')
         .leftJoin('i.invoicesSeller', 'sl')
         .leftJoin('i.invoicesZone', 'zo')
-        .leftJoin('i.status', 'st')
         .leftJoin('i.invoiceDetails', 'd')
         .leftJoin('d.service', 's')
         .where({ company });
@@ -83,16 +78,28 @@ export class InvoiceRepository extends Repository<Invoice> {
       }
 
       // filter by range of dates
-      if (startDate && endDate) {
+      if (startDate) {
         query.andWhere('i.invoiceDate >= :startDate', {
           startDate,
         });
+      }
+      if (endDate) {
         query.andWhere('i.invoiceDate <= :endDate', { endDate });
       }
 
+      // TODO Completar filtros
       // sort by prop}
       if (order && prop) {
-        query.orderBy(`i.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
+        let field = `i.${prop}`;
+        switch (prop) {
+          case 'service':
+            field = `s.id`;
+            break;
+          case 'customer':
+            field = `c.id`;
+            break;
+        }
+        query.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
         query.orderBy('i.createdAt', 'DESC');
       }

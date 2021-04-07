@@ -68,75 +68,22 @@ export class InvoicesService {
     id: string,
   ): Promise<ResponseSingleDTO<Invoice>> {
     const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
+    console.log(invoiceAll);
+
+    // TODO Refactor code
+    const details = invoiceAll.invoiceDetails.map((d) => {
+      const { id, name } = d.service;
+      delete d.service;
+      return {
+        ...d,
+        service: { id, name },
+      };
+    });
+
+    delete invoiceAll.invoiceDetails;
     const invoice = {
-      id: invoiceAll.id,
-      authorization: invoiceAll.authorization,
-      sequence: invoiceAll.sequence,
-      customerName: invoiceAll.customerName,
-      customerAddress1: invoiceAll.customerAddress1,
-      customerAddress2: invoiceAll.customerAddress2,
-      customerCountry: invoiceAll.customerCountry,
-      customerState: invoiceAll.customerState,
-      customerCity: invoiceAll.customerCity,
-      customerDui: invoiceAll.customerDui,
-      customerNit: invoiceAll.customerNit,
-      customerNrc: invoiceAll.customerNrc,
-      customerGiro: invoiceAll.customerGiro,
-      sum: invoiceAll.sum,
-      iva: invoiceAll.iva,
-      subtotal: invoiceAll.subtotal,
-      ivaRetenido: invoiceAll.ivaRetenido,
-      ventasExentas: invoiceAll.ventasExentas,
-      ventasNoSujetas: invoiceAll.ventasNoSujetas,
-      ventaTotal: invoiceAll.ventaTotal,
-      ventaTotalText: invoiceAll.ventaTotalText,
-      invoiceDate: invoiceAll.invoiceDate,
-      paymentConditionName: invoiceAll.paymentConditionName,
-      sellerName: invoiceAll.sellerName,
-      zoneName: invoiceAll.zoneName,
-      invoiceDetails: invoiceAll.invoiceDetails.map((id) => {
-        const detail = {
-          id: id.id,
-          quantity: id.quantity,
-          unitPrice: id.unitPrice,
-          incTax: id.incTax,
-          ventaPrice: id.ventaPrice,
-          chargeDescription: id.chargeDescription,
-          service: {
-            id: id.service.id,
-            name: id.service.name,
-          },
-          sellingType: {
-            id: id.sellingType.id,
-            name: id.sellingType.name,
-          },
-        };
-        return detail;
-      }),
-      customer: {
-        id: invoiceAll.customer.id,
-        name: invoiceAll.customer.name,
-      },
-      customerBranch: {
-        id: invoiceAll.customerBranch.id,
-        name: invoiceAll.customerBranch.name,
-      },
-      customerType: invoiceAll.customerType,
-      customerTypeNatural: invoiceAll.customerTypeNatural,
-      documentType: invoiceAll.documentType,
-      invoicesPaymantsCondition: {
-        id: invoiceAll.invoicesPaymentsCondition.id,
-        name: invoiceAll.invoicesPaymentsCondition.name,
-      },
-      invoicesSeller: {
-        id: invoiceAll.invoicesSeller.id,
-        name: invoiceAll.invoicesSeller.name,
-      },
-      invoicesZone: {
-        id: invoiceAll.invoicesZone.id,
-        name: invoiceAll.invoicesZone.name,
-      },
-      status: invoiceAll.status,
+      ...invoiceAll,
+      details,
     };
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
