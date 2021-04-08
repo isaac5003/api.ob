@@ -1,22 +1,8 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsNumber, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class InvoiceHeaderDTO {
-  @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('documentType', 'IsInt') })
-  documentType: number;
-
-  @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('authorization', 'IsString') })
-  authorization: string;
-
-  @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('sequence', 'IsInt') })
-  sequence: number;
-
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
   customer: string;
 

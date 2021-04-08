@@ -6,15 +6,20 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 import {
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
-import { numeroALetras } from 'src/_tools';
+import { numeroALetras, validationMessage } from 'src/_tools';
+import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { Invoice } from './entities/Invoice.entity';
+import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
+import { InvoicesStatus } from './entities/InvoicesStatus.entity';
+import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
 import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
@@ -22,6 +27,7 @@ import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentT
 import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
+import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
 
 @Injectable()
 export class InvoicesService {
@@ -55,6 +61,9 @@ export class InvoicesService {
 
     @InjectRepository(InvoicesDocumentRepository)
     private invoicesDocumentRepository: InvoicesDocumentRepository,
+
+    @InjectRepository(InvoicesZoneRepository)
+    private invoicesZoneRepository: InvoicesZoneRepository,
   ) {}
 
   async getInvoices(
@@ -101,6 +110,66 @@ export class InvoicesService {
     delete invoiceAll.customerBranch;
     delete invoiceAll.customer;
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
+  }
+
+  async getInvoiceDocumentsType(): Promise<InvoicesDocumentType[]> {
+    return await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+  }
+
+  async getInvoiceStatuses(): Promise<InvoicesStatus[]> {
+    return await this.invoiceStatusRepository.getInvoicesStatus();
+  }
+
+  async getInvoiceZones(
+    company: Company,
+    filter: Partial<FilterDTO>,
+  ): Promise<InvoicesZone[]> {
+    return await this.invoicesZoneRepository.getInvoicesZones(company, filter);
+  }
+
+  async createInvoiceZone(
+    company: Company,
+    data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    const invoiceZone = await this.invoicesZoneRepository.createInvoiceZone(
+      company,
+      data,
+    );
+    return {
+      id: invoiceZone.id,
+      message: 'La zona se creo correctamente.',
+    };
+  }
+
+  async updateInvoiceZone(
+    id: string,
+    company: Company,
+    data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesZoneRepository.getInvoiceZone(company, id);
+
+    await this.invoicesZoneRepository.updateInvoiceZone(id, company, data);
+    return {
+      message: 'La zona se actualizo correctamente',
+    };
+  }
+
+  async deleteInvoiceZone(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesZoneRepository.getInvoiceZone(company, id);
+
+    const result = await this.invoicesZoneRepository.deleteInvoicesZone(
+      company,
+      id,
+    );
+
+    return {
+      message: result
+        ? 'Se ha eliminado la zona correctamente'
+        : 'No se ha podido eliminar zona',
+    };
   }
 
   async createInvoice(
@@ -291,6 +360,142 @@ export class InvoicesService {
           : `Los documentos con secuencia ${alreadyReserved.join(
               ', ',
             )} ya estan reservados`,
+    };
+  }
+
+  async updateInvoice(
+    company: Company,
+    id: string,
+    data: InvoiceDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
+
+    const customer = await this.customerRepository.getCustomer(
+      data.header.customer,
+      company,
+    );
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
+      data.header.customerBranch,
+    );
+    const invoiceSeller = await this.invoiceSellerRepository.getSeller(
+      company,
+      data.header.invoicesSeller,
+    );
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+      data.header.invoicesPaymentsCondition,
+      company,
+    );
+
+    const header = {
+      customerName: customer.name,
+      customerAddress1: customerBranch.address1,
+      customerAddress2: customerBranch.address2,
+      customerCountry: customerBranch.country.name,
+      customerState: customerBranch.state.name,
+      customerCity: customerBranch.city.name,
+      customerDui: customer.dui,
+      customerNit: customer.nit,
+      customerNrc: customer.nrc,
+      customerGiro: customer.giro,
+      sum: data.header.sum,
+      iva: data.header.iva,
+      subtotal: data.header.subTotal,
+      ivaRetenido: data.header.ivaRetenido,
+      ventasExentas: data.header.ventasExentas,
+      ventasNoSujetas: data.header.ventasNoSujetas,
+      ventaTotal: data.header.ventaTotal,
+      ventaTotalText: numeroALetras(data.header.ventaTotal),
+      invoiceDate: data.header.invoiceDate,
+      paymentConditionName: invoicesPaymentCondition.name,
+      sellerName: invoiceSeller.name,
+      zoneName: invoiceSeller.invoicesZone.name,
+      customerBranch: customerBranch,
+      customer: customer,
+      invoicesPaymentsCondition: invoicesPaymentCondition,
+      invoicesSeller: invoiceSeller,
+      invoicesZone: invoiceSeller.invoicesZone,
+      customerType: customer.customerType,
+      customerTypeNatural: customer.customerTypeNatural,
+    };
+
+    await this.invoiceRepository.updateInvoice(id, company, header);
+    const ids = invoice.invoiceDetails.map((id) => id.id);
+    await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
+    const details = [];
+    for (const detail of data.details) {
+      const service = await this.serviceRepository.getService(
+        company,
+        detail.selectedService,
+      );
+      details.push({
+        ...detail,
+        service,
+        sellingType: service.sellingType,
+        invoice: invoice,
+      });
+    }
+    await this.invoiceDetailRepository.createInvoiceDetail(details);
+
+    return {
+      message: 'La venta se actualizo correctamente.',
+    };
+  }
+
+  async updateInvoiceStatus(
+    company: Company,
+    id: string,
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
+
+    let status: InvoicesStatus;
+    let statuses = [];
+
+    switch (type) {
+      case 'void':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(3);
+        // Verifica que tenga uno de los estados que pueden anularse
+        statuses = [1, 2];
+        break;
+      case 'printed':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(2);
+        statuses = [1, 2];
+        break;
+      case 'paid':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(5);
+        statuses = [2];
+        break;
+      case 'reverse':
+        let newStatus = null;
+        switch (invoice.status.id) {
+          case 2:
+            newStatus = 1;
+            break;
+          case 3:
+            newStatus = 2;
+            break;
+          case 5:
+            newStatus = 2;
+            break;
+        }
+
+        status = await this.invoiceStatusRepository.getInvoiceStatus(newStatus);
+        statuses = [2, 3, 5];
+        break;
+    }
+
+    if (!statuses.includes(invoice.status.id)) {
+      throw new BadRequestException(
+        validationMessage(status.name.toLowerCase(), 'status'),
+      );
+    }
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+
+    return {
+      message:
+        type == 'reverse'
+          ? `La venta ha sido marcada como ${status.name.toLowerCase()}, se revertio correctamente.`
+          : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
     };
   }
 

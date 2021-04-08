@@ -35,27 +35,35 @@ export class InvoiceHeaderDataDTO {
   @IsOptional()
   @IsString({ message: validationMessage('customerAddress1', 'IsString') })
   customerAddress1: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerAddress2', 'IsString') })
   customerAddress2: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerCountry', 'IsString') })
   customerCountry: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerState', 'IsString') })
   customerState: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerCity', 'IsString') })
   customerCity: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerDui', 'IsString') })
   customerDui: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerNit', 'IsString') })
   customerNit: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerNrc', 'IsString') })
   customerNrc: string;
+
   @IsOptional()
   @IsString({ message: validationMessage('customerGiro', 'IsString') })
   customerGiro: string;
@@ -138,28 +146,38 @@ export class InvoiceHeaderDataDTO {
 
   @IsNotEmpty({ message: validationMessage('branch', 'IsNotEmpty') })
   branch: Branch;
+
   @IsNotEmpty({ message: validationMessage('company', 'IsNotEmpty') })
   company: Company;
+
   @IsNotEmpty({ message: validationMessage('customerBranch', 'IsNotEmpty') })
   customerBranch: CustomerBranch;
+
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
   customer: Customer;
+
   @IsNotEmpty({
     message: validationMessage('invoicesPaymentsCondition', 'IsNotEmpty'),
   })
   invoicesPaymentsCondition: InvoicesPaymentsCondition;
+
   @IsNotEmpty({ message: validationMessage('invoicesSeller', 'IsNotEmpty') })
   invoicesSeller: InvoicesSeller;
+
   @IsNotEmpty({ message: validationMessage('invoicesZone', 'IsNotEmpty') })
   invoicesZone: InvoicesZone;
+
   @IsNotEmpty({ message: validationMessage('status', 'IsNotEmpty') })
   status: InvoicesStatus;
+
   @IsNotEmpty({ message: validationMessage('customerType', 'IsNotEmpty') })
   customerType: CustomerType;
+
   @IsNotEmpty({
     message: validationMessage('customerTypeNatural', 'IsNotEmpty'),
   })
   customerTypeNatural: CustomerTypeNatural;
+
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
   documentType: InvoicesDocumentType;
 }

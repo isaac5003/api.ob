@@ -5,7 +5,8 @@ import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { InvoiceHeaderDTO } from '../dtos/invoice-header.dto';
+import { InvoiceHeaderCreateDTO } from '../dtos/invoice-header-create.dto';
+import { InvoiceHeaderDataDTO } from '../dtos/invoice-header-data.dto';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
@@ -183,7 +184,7 @@ export class InvoiceRepository extends Repository<Invoice> {
   async createInvoice(
     company: Company,
     branch: Branch,
-    data: Partial<InvoiceHeaderDTO>,
+    data: InvoiceHeaderCreateDTO,
     customer: Customer,
     customerBranch: CustomerBranch,
     invoiceSeller: InvoicesSeller,
@@ -209,7 +210,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       customerGiro: customer.giro,
       sum: data.sum,
       iva: data.iva,
-      subTotal: data.subTotal,
+      subtotal: data.subTotal,
       ivaRetenido: data.ivaRetenido,
       ventasExentas: data.ventasExentas,
       ventasNoSujetas: data.ventasNoSujetas,
@@ -257,6 +258,19 @@ export class InvoiceRepository extends Repository<Invoice> {
       logDatabaseError(reponame, error);
     }
     return await response;
+  }
+
+  async updateInvoice(
+    id: string,
+    company: Company,
+    data: Partial<InvoiceHeaderDataDTO>,
+  ): Promise<any> {
+    try {
+      const invoice = this.update({ id, company }, data);
+      return invoice;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 
   async deleteInvoice(

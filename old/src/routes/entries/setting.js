@@ -329,7 +329,6 @@ router.put('/integrations', async (req, res) => {
     });
   } catch (error) {
     // return error
-    console.log(error);
     return res.status(500).json({
       message: 'Error al actualizar los datos de la integración. Contacta con tu administrador.',
     });

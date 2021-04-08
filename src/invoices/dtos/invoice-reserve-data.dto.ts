@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class InvoiceReserveDataDTO {
