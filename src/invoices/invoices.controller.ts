@@ -33,6 +33,7 @@ import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
+import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -100,6 +101,58 @@ export class InvoicesController {
     @Param('id') id: string,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.deleteInvoiceZone(company, id);
+  }
+
+  @Get('/payment-condition')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getInvoicesPaymentConditions(
+    @GetAuthData('company') company: Company,
+    @Body() filter: FilterDTO,
+  ): Promise<ResponseListDTO<InvoicesPaymentsCondition>> {
+    const invoicesPaymentCondition = await this.invoice.getInvoicePaymentConditions(
+      company,
+      filter,
+    );
+    return new ResponseListDTO(
+      plainToClass(InvoicesPaymentsCondition, invoicesPaymentCondition),
+    );
+  }
+
+  @Post('/payment-condition')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createInvoicePaymentCondition(
+    @GetAuthData('company') company: Company,
+    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createInvoicePaymentCondition(company, data);
+  }
+
+  @Put('/payment-condition/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateInvoicePaymentCondition(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateInvoicePaymentCondition(id, company, data);
+  }
+
+  @Put('/payment-condition/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateInvoicePaymentConditionStatus(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateInvoicePaymentCondition(id, company, data);
+  }
+
+  @Delete('/payment-condition/:id')
+  async deleteInvoicePaymentCondition(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.deleteInvoicePaymentCondition(company, id);
   }
 
   @Get()

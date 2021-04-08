@@ -18,6 +18,7 @@ import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
+import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
@@ -119,6 +120,63 @@ export class InvoicesService {
   async getInvoiceStatuses(): Promise<InvoicesStatus[]> {
     return await this.invoiceStatusRepository.getInvoicesStatus();
   }
+  async updateInvoiceStatus(
+    company: Company,
+    id: string,
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
+
+    let status: InvoicesStatus;
+    let statuses = [];
+
+    switch (type) {
+      case 'void':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(3);
+        // Verifica que tenga uno de los estados que pueden anularse
+        statuses = [1, 2];
+        break;
+      case 'printed':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(2);
+        statuses = [1, 2];
+        break;
+      case 'paid':
+        status = await this.invoiceStatusRepository.getInvoiceStatus(5);
+        statuses = [2];
+        break;
+      case 'reverse':
+        let newStatus = null;
+        switch (invoice.status.id) {
+          case 2:
+            newStatus = 1;
+            break;
+          case 3:
+            newStatus = 2;
+            break;
+          case 5:
+            newStatus = 2;
+            break;
+        }
+
+        status = await this.invoiceStatusRepository.getInvoiceStatus(newStatus);
+        statuses = [2, 3, 5];
+        break;
+    }
+
+    if (!statuses.includes(invoice.status.id)) {
+      throw new BadRequestException(
+        validationMessage(status.name.toLowerCase(), 'status'),
+      );
+    }
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+
+    return {
+      message:
+        type == 'reverse'
+          ? `La venta ha sido marcada como ${status.name.toLowerCase()}, se revertio correctamente.`
+          : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
+    };
+  }
 
   async getInvoiceZones(
     company: Company,
@@ -169,6 +227,71 @@ export class InvoicesService {
       message: result
         ? 'Se ha eliminado la zona correctamente'
         : 'No se ha podido eliminar zona',
+    };
+  }
+
+  async getInvoicePaymentConditions(
+    company: Company,
+    filter: Partial<FilterDTO>,
+  ): Promise<InvoicesPaymentsCondition[]> {
+    return await this.invoicesPaymentsConditionRepository.getInvoicePaymentConditions(
+      company,
+      filter,
+    );
+  }
+
+  async createInvoicePaymentCondition(
+    company: Company,
+    data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    const invoicePayment = await this.invoicesPaymentsConditionRepository.createInvoicePaymentCondition(
+      company,
+      data,
+    );
+    return {
+      id: invoicePayment.id,
+      message: 'La condicion de pago se creo correctamente.',
+    };
+  }
+
+  async updateInvoicePaymentCondition(
+    id: string,
+    company: Company,
+    data: Partial<InvoiceAuxiliarDataDTO>,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+      id,
+      company,
+    );
+
+    await this.invoicesPaymentsConditionRepository.updateInvoicePaymentCondition(
+      id,
+      company,
+      data,
+    );
+    return {
+      message: 'La condicion de pago se actualizo correctamente',
+    };
+  }
+
+  async deleteInvoicePaymentCondition(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+      id,
+      company,
+    );
+
+    const result = await this.invoicesPaymentsConditionRepository.deleteInvoicePaymentCondition(
+      company,
+      id,
+    );
+
+    return {
+      message: result
+        ? 'Se ha eliminado la condicion de pago correctamente correctamente'
+        : 'No se ha podido eliminar condicion de pago correctamente',
     };
   }
 
@@ -438,64 +561,6 @@ export class InvoicesService {
 
     return {
       message: 'La venta se actualizo correctamente.',
-    };
-  }
-
-  async updateInvoiceStatus(
-    company: Company,
-    id: string,
-    type: string,
-  ): Promise<ResponseMinimalDTO> {
-    const invoice = await this.invoiceRepository.getInvoice(company, id);
-
-    let status: InvoicesStatus;
-    let statuses = [];
-
-    switch (type) {
-      case 'void':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(3);
-        // Verifica que tenga uno de los estados que pueden anularse
-        statuses = [1, 2];
-        break;
-      case 'printed':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(2);
-        statuses = [1, 2];
-        break;
-      case 'paid':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(5);
-        statuses = [2];
-        break;
-      case 'reverse':
-        let newStatus = null;
-        switch (invoice.status.id) {
-          case 2:
-            newStatus = 1;
-            break;
-          case 3:
-            newStatus = 2;
-            break;
-          case 5:
-            newStatus = 2;
-            break;
-        }
-
-        status = await this.invoiceStatusRepository.getInvoiceStatus(newStatus);
-        statuses = [2, 3, 5];
-        break;
-    }
-
-    if (!statuses.includes(invoice.status.id)) {
-      throw new BadRequestException(
-        validationMessage(status.name.toLowerCase(), 'status'),
-      );
-    }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
-
-    return {
-      message:
-        type == 'reverse'
-          ? `La venta ha sido marcada como ${status.name.toLowerCase()}, se revertio correctamente.`
-          : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
     };
   }
 
