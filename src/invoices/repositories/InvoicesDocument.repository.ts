@@ -2,7 +2,9 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDocumentDataDTO } from '../dtos/invoice-document-data.dto';
+import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 
 const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
@@ -25,20 +27,6 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     }
     return documents;
   }
-
-  async updateInvoiceDocument(
-    id: string,
-    data: Partial<InvoiceDocumentDataDTO>,
-    company: Company,
-  ): Promise<any> {
-    try {
-      const document = this.update({ id, company }, data);
-      return document;
-    } catch (error) {
-      logDatabaseError(reponame, error);
-    }
-  }
-
   async getSequenceAvailable(
     company: Company,
     documentType: number,
@@ -81,5 +69,66 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     }
 
     return document;
+  }
+
+  async getDocumentsByIds(
+    company: Company,
+    id: string[],
+  ): Promise<InvoicesDocument[]> {
+    let invoiceDocuments: InvoicesDocument[];
+    const leftJoinAndSelect = {
+      dt: 'i.documentType',
+    };
+    try {
+      invoiceDocuments = await this.findByIds(id, {
+        where: { company, used: false },
+        join: {
+          alias: 'i',
+          leftJoinAndSelect,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return invoiceDocuments;
+  }
+
+  async createUpdateDocument(
+    company: Company,
+    documents: any,
+    type: string,
+  ): Promise<InvoicesDocument[]> {
+    let response;
+    try {
+      let document;
+      switch (type) {
+        case 'create':
+          document = this.create([...documents]);
+          break;
+        case 'update':
+          document = documents;
+          break;
+      }
+      response = await this.save(document);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+
+    return response;
+  }
+
+  async updateInvoiceDocument(
+    id: string,
+    data: Partial<InvoiceDocumentDBDTO>,
+    company: Company,
+  ): Promise<any> {
+    try {
+      const document = this.update({ id, company }, data);
+      return document;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 }

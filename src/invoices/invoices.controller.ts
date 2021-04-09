@@ -39,6 +39,10 @@ import { InvoicesSeller } from './entities/InvoicesSeller.entity';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
+import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
+import { InvoicesDocument } from './entities/InvoicesDocument.entity';
+import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
+import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -160,11 +164,11 @@ export class InvoicesController {
     return await this.invoice.deleteInvoicePaymentCondition(company, id);
   }
 
-  @Get('sellers')
+  @Get('/sellers')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getSellers(
     @GetAuthData('company') company: Company,
-    @Body() filter: FilterDTO,
+    @Query() filter: FilterDTO,
   ): Promise<ResponseListDTO<InvoicesSeller>> {
     const sellers = await this.invoice.getSellers(company, filter);
     return new ResponseListDTO(plainToClass(InvoicesSeller, sellers));
@@ -197,6 +201,40 @@ export class InvoicesController {
     @Param('id') id: string,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.updateSeller(id, company, data, 'status');
+  }
+
+  @Delete('/sellers/:id')
+  async deleteInvoiceSeller(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.invoice.deleteSeller(company, id);
+  }
+
+  @Get('/documents')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getInvoiceDocuments(
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseListDTO<InvoicesDocument>> {
+    return await this.invoice.getDocuments(company);
+  }
+
+  @Post('/documents')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createDocument(
+    @Body('documents') data: InvoiceDocumentDataDTO[],
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createDocument(company, data, 'create');
+  }
+
+  @Put('/documents')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateInvoiceDocument(
+    @GetAuthData('company') company: Company,
+    @Body('documents') data: DocumentUpdateDTO[],
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createDocument(company, data, 'update');
   }
 
   @Get()

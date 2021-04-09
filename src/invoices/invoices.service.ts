@@ -8,6 +8,7 @@ import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBra
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import {
+  ResponseListDTO,
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
@@ -15,12 +16,16 @@ import { numeroALetras, validationMessage } from 'src/_tools';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
+import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
+import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
+import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { SellerCreateDTO } from './dtos/invoice-seller-create.dto';
 import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
 import { Invoice } from './entities/Invoice.entity';
+import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
@@ -71,52 +76,6 @@ export class InvoicesService {
     @InjectRepository(InvoicesZoneRepository)
     private invoicesZoneRepository: InvoicesZoneRepository,
   ) {}
-
-  async getInvoices(
-    company: Company,
-    filter: InvoiceFilterDTO,
-  ): Promise<Invoice[]> {
-    return this.invoiceRepository.getInvoices(company, filter);
-  }
-
-  async getInvoice(
-    company: Company,
-    id: string,
-  ): Promise<ResponseSingleDTO<Invoice>> {
-    const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
-
-    const details = invoiceAll.invoiceDetails.map((d) => {
-      const { id, name } = d.service;
-      delete d.service;
-      return {
-        ...d,
-        service: { id, name },
-      };
-    });
-
-    delete invoiceAll.invoiceDetails;
-    delete invoiceAll.invoicesPaymentsCondition.active;
-    delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-    delete invoiceAll.invoicesSeller.active;
-    delete invoiceAll.invoicesZone.active;
-
-    const invoice = {
-      ...invoiceAll,
-      details,
-      customer: {
-        id: invoiceAll.customer.id,
-        name: invoiceAll.customer.name,
-      },
-      customerBranch: {
-        id: invoiceAll.customerBranch.id,
-        name: invoiceAll.customerBranch.name,
-      },
-    };
-
-    delete invoiceAll.customerBranch;
-    delete invoiceAll.customer;
-    return new ResponseSingleDTO(plainToClass(Invoice, invoice));
-  }
 
   async getInvoiceDocumentsType(): Promise<InvoicesDocumentType[]> {
     return await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
@@ -364,6 +323,203 @@ export class InvoicesService {
     };
   }
 
+  async deleteSeller(
+    company: Company,
+    id: string,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoiceSellerRepository.getSeller(company, id);
+
+    const result = await this.invoiceSellerRepository.deleteSeller(company, id);
+
+    return {
+      message: result
+        ? 'Se ha eliminado el vendedor correctamente'
+        : 'No se ha podido eliminar el vendedor',
+    };
+  }
+
+  async getDocuments(
+    company: Company,
+  ): Promise<ResponseListDTO<InvoicesDocument>> {
+    const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
+      company,
+    );
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+
+    const doc = documentTypes.map((dt) => {
+      const found = documents.find((d) => d.documentType.id == dt.id);
+      return found
+        ? found
+        : {
+            id: null,
+            authorization: null,
+            initial: null,
+            final: null,
+            current: null,
+            active: false,
+            documentType: dt,
+          };
+    });
+    return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
+  }
+
+  async createDocument(
+    company: Company,
+    data: any[],
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
+      data.map((d) => d.documentType),
+    );
+
+    let documentsToUpdate;
+    let documentsNotExist;
+    let document = [];
+    switch (type) {
+      case 'create':
+        let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
+          company,
+        );
+        documents = documents.filter((d) =>
+          documentTypes.map((dt) => dt.id).includes(d.documentType.id),
+        );
+
+        const documentToUpdate = documents.map((d) => {
+          return {
+            ...d,
+            isCurrentDocument: false,
+            active: false,
+          };
+        });
+
+        const documentUpdated = await this.invoicesDocumentRepository.createUpdateDocument(
+          company,
+          documentToUpdate,
+          'update',
+        );
+
+        document = data.map((d) => {
+          return {
+            ...d,
+            documentType: documentTypes.find((dt) => dt.id == d.documentType),
+            isCurrentDocument: true,
+            company: company,
+          };
+        });
+
+        break;
+
+      case 'update':
+        const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
+          company,
+          data.map((d) => d.id),
+        );
+
+        if (documentExist.length == 0) {
+          throw new BadRequestException(
+            'Los documentos seleccionados no existen o estan en uso',
+          );
+        }
+
+        documentsNotExist = [];
+        documentsToUpdate = [];
+        for (const d of data) {
+          if (documentExist.map((de) => de.id).includes(d.id)) {
+            documentsToUpdate.push(d);
+          } else {
+            documentsNotExist.push(d);
+          }
+        }
+
+        document = documentsToUpdate.map((d) => {
+          return {
+            ...d,
+            documentType: documentTypes.find((dt) => dt.id == d.documentType),
+          };
+        });
+
+        break;
+    }
+
+    const documentCreated = await this.invoicesDocumentRepository.createUpdateDocument(
+      company,
+      document,
+      type,
+    );
+    let message = {};
+    switch (type) {
+      case 'create':
+        message = {
+          id: documentCreated.map((dr) => dr.id).join(','),
+          message: 'Los documentos se han creado correctamente.',
+        };
+        break;
+      case 'update':
+        message = {
+          message:
+            documentsNotExist.length == 0
+              ? 'Los documentos se han actualizado correctamente.'
+              : `Se actualizaron los documentos con id:${documentsToUpdate
+                  .map((dt) => dt.id)
+                  .join(
+                    ',',
+                    ' ',
+                  )}, y no se pudieron actualizar los documentos con id:${documentsNotExist
+                  .map((dne) => dne.id)
+                  .join(',', ' ')} porque no existe o esta en uso`,
+        };
+        break;
+    }
+
+    return message;
+  }
+
+  async getInvoices(
+    company: Company,
+    filter: InvoiceFilterDTO,
+  ): Promise<Invoice[]> {
+    return this.invoiceRepository.getInvoices(company, filter);
+  }
+
+  async getInvoice(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<Invoice>> {
+    const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
+
+    const details = invoiceAll.invoiceDetails.map((d) => {
+      const { id, name } = d.service;
+      delete d.service;
+      return {
+        ...d,
+        service: { id, name },
+      };
+    });
+
+    delete invoiceAll.invoiceDetails;
+    delete invoiceAll.invoicesPaymentsCondition.active;
+    delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+    delete invoiceAll.invoicesSeller.active;
+    delete invoiceAll.invoicesZone.active;
+
+    const invoice = {
+      ...invoiceAll,
+      details,
+      customer: {
+        id: invoiceAll.customer.id,
+        name: invoiceAll.customer.name,
+      },
+      customerBranch: {
+        id: invoiceAll.customerBranch.id,
+        name: invoiceAll.customerBranch.name,
+      },
+    };
+
+    delete invoiceAll.customerBranch;
+    delete invoiceAll.customer;
+    return new ResponseSingleDTO(plainToClass(Invoice, invoice));
+  }
+
   async createInvoice(
     company: Company,
     branch: Branch,
@@ -388,7 +544,7 @@ export class InvoicesService {
       company,
     );
     const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-      data.header.documentType,
+      [data.header.documentType],
     );
 
     const allInvoicesReserved = await this.invoiceRepository.getInvoices(
@@ -413,7 +569,7 @@ export class InvoicesService {
       customerBranch,
       invoiceSeller,
       invoicesPaymentCondition,
-      documentType,
+      documentType[0],
       document,
       invoiceStatus,
     );

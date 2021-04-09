@@ -11,7 +11,7 @@ const reponame = 'vendedor';
 export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
   async getAllSellers(
     company: Company,
-    filter: Partial<FilterDTO>,
+    filter: FilterDTO,
   ): Promise<InvoicesSeller[]> {
     const { limit, page, search, active } = filter;
 
@@ -106,14 +106,14 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     }
   }
 
-  // async deleteInvoicesZone(company: Company, id: string): Promise<boolean> {
-  //   try {
-  //     await this.delete({ id, company });
-  //   } catch (error) {
-  //     console.error(error);
+  async deleteSeller(company: Company, id: string): Promise<boolean> {
+    try {
+      await this.delete({ id, company });
+    } catch (error) {
+      console.error(error);
 
-  //     logDatabaseError(reponame, error);
-  //   }
-  //   return true;
-  // }
+      logDatabaseError(reponame, error);
+    }
+    return true;
+  }
 }

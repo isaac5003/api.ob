@@ -19,11 +19,11 @@ export class InvoicesDocumentTypeRepository extends Repository<InvoicesDocumentT
     return documentTypes;
   }
 
-  async getInvoiceDocumentType(id: number): Promise<InvoicesDocumentType> {
-    let invoicesDocumentType: InvoicesDocumentType;
+  async getInvoiceDocumentType(id: any): Promise<InvoicesDocumentType[]> {
+    let invoicesDocumentType: InvoicesDocumentType[];
 
     try {
-      invoicesDocumentType = await this.findOneOrFail({ id });
+      invoicesDocumentType = await this.findByIds(id);
     } catch (error) {
       logDatabaseError(reponame, error);
     }
