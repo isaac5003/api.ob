@@ -53,7 +53,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
 
   async createInvoiceZone(
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: InvoiceAuxiliarDataDTO,
   ): Promise<InvoicesZone> {
     let response: InvoicesZone;
     try {

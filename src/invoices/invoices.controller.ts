@@ -34,6 +34,11 @@ import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
+import { InvoicesSeller } from './entities/InvoicesSeller.entity';
+import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
+import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -70,7 +75,7 @@ export class InvoicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createInvoiceZone(
     @GetAuthData('company') company: Company,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: InvoiceAuxiliarDataDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.createInvoiceZone(company, data);
   }
@@ -80,7 +85,7 @@ export class InvoicesController {
   async updateInvoiceZone(
     @GetAuthData('company') company: Company,
     @Param('id') id: string,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.updateInvoiceZone(id, company, data);
   }
@@ -90,7 +95,7 @@ export class InvoicesController {
   async updateInvoiceZoneStatus(
     @GetAuthData('company') company: Company,
     @Param('id') id: string,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.updateInvoiceZone(id, company, data);
   }
@@ -122,7 +127,7 @@ export class InvoicesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createInvoicePaymentCondition(
     @GetAuthData('company') company: Company,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: PaymentConditionCreateDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.createInvoicePaymentCondition(company, data);
   }
@@ -132,7 +137,7 @@ export class InvoicesController {
   async updateInvoicePaymentCondition(
     @GetAuthData('company') company: Company,
     @Param('id') id: string,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.updateInvoicePaymentCondition(id, company, data);
   }
@@ -142,7 +147,7 @@ export class InvoicesController {
   async updateInvoicePaymentConditionStatus(
     @GetAuthData('company') company: Company,
     @Param('id') id: string,
-    @Body() data: Partial<InvoiceAuxiliarDataDTO>,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.updateInvoicePaymentCondition(id, company, data);
   }
@@ -153,6 +158,45 @@ export class InvoicesController {
     @Param('id') id: string,
   ): Promise<ResponseMinimalDTO> {
     return await this.invoice.deleteInvoicePaymentCondition(company, id);
+  }
+
+  @Get('sellers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getSellers(
+    @GetAuthData('company') company: Company,
+    @Body() filter: FilterDTO,
+  ): Promise<ResponseListDTO<InvoicesSeller>> {
+    const sellers = await this.invoice.getSellers(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesSeller, sellers));
+  }
+
+  @Post('/sellers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createSeller(
+    @GetAuthData('company') company: Company,
+    @Body() data: InvoiceSellerDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createSeller(company, data);
+  }
+
+  @Put('/sellers/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSeller(
+    @GetAuthData('company') company: Company,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateSeller(id, company, data, 'seller');
+  }
+
+  @Put('/sellers/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSellerStatus(
+    @GetAuthData('company') company: Company,
+    @Body() data: InvoiceAuxiliarUpdateDTO,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateSeller(id, company, data, 'status');
   }
 
   @Get()

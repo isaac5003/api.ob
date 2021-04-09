@@ -1,17 +1,17 @@
-const express = require("express");
-const { checkRequired, foundRelations, addLog } = require("../../tools");
+const express = require('express');
+const { checkRequired, foundRelations, addLog } = require('../../tools');
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   const check = checkRequired(
     req.query,
     [
-      { name: "limit", type: "integer", optional: true },
-      { name: "page", type: "integer", optional: true },
-      { name: "active", type: "boolean", optional: true },
-      { name: "search", type: "string", optional: true },
+      { name: 'limit', type: 'integer', optional: true },
+      { name: 'page', type: 'integer', optional: true },
+      { name: 'active', type: 'boolean', optional: true },
+      { name: 'search', type: 'string', optional: true },
     ],
-    true
+    true,
   );
   if (!check.success) {
     return res.status(400).json({ message: check.message });
@@ -22,38 +22,36 @@ router.get("/", async (req, res) => {
     const { limit, page, active, search } = req.query;
 
     let query = req.conn
-      .getRepository("InvoicesSeller")
-      .createQueryBuilder("is")
-      .where("is.company = :company", { company: cid })
-      .select("COUNT(is.id)", "count");
+      .getRepository('InvoicesSeller')
+      .createQueryBuilder('is')
+      .where('is.company = :company', { company: cid })
+      .select('COUNT(is.id)', 'count');
 
     if (active != null) {
-      query = query.andWhere("is.active = :active", {
-        active: active == "true",
+      query = query.andWhere('is.active = :active', {
+        active: active == 'true',
       });
     }
 
     let { count } = await query.getRawOne();
 
     let sellers = req.conn
-      .getRepository("InvoicesSeller")
-      .createQueryBuilder("is")
-      .leftJoin("is.invoicesZone", "iz")
-      .select(["is.id", "is.name", "is.active", "iz.id", "iz.name"])
-      .where("is.company = :company", { company: cid })
-      .orderBy("is.createdAt", "DESC");
+      .getRepository('InvoicesSeller')
+      .createQueryBuilder('is')
+      .leftJoin('is.invoicesZone', 'iz')
+      .select(['is.id', 'is.name', 'is.active', 'iz.id', 'iz.name'])
+      .where('is.company = :company', { company: cid })
+      .orderBy('is.createdAt', 'DESC');
 
     let index = 1;
     if (search == null) {
-      sellers = sellers
-        .limit(limit)
-        .offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
+      sellers = sellers.limit(limit).offset(limit ? parseInt(page ? page - 1 : 0) * parseInt(limit) : null);
       index = index * page ? (page - 1) * limit + 1 : 1;
     }
 
     if (active != null) {
-      sellers = sellers.andWhere("is.active = :active", {
-        active: active == "true",
+      sellers = sellers.andWhere('is.active = :active', {
+        active: active == 'true',
       });
     }
     sellers = await sellers.getMany();
@@ -71,15 +69,13 @@ router.get("/", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error al obtener el listado de vendedores." });
+    return res.status(500).json({ message: 'Error al obtener el listado de vendedores.' });
   }
 });
 
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, ["name", "invoicesZone"]);
+  const check = checkRequired(req.body, ['name', 'invoicesZone']);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -92,7 +88,7 @@ router.post("/", async (req, res) => {
     const zone = await req.conn
       .createQueryBuilder()
       .insert()
-      .into("InvoicesSeller")
+      .into('InvoicesSeller')
       .values({
         name,
         invoicesZone,
@@ -101,9 +97,9 @@ router.post("/", async (req, res) => {
       .execute();
 
     const user = await req.conn
-      .getRepository("User")
-      .createQueryBuilder("u")
-      .where("u.id = :id", { id: req.user.uid })
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
       .getOne();
 
     await addLog(
@@ -111,26 +107,25 @@ router.post("/", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha creado el vendedor: ${name}`
+      `Se ha creado el vendedor: ${name}`,
     );
 
     // On success
     return res.json({
-      message: "El vendedor se ha creado correctamente.",
+      message: 'El vendedor se ha creado correctamente.',
       id: zone.raw[0].id,
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
-      message:
-        "Error al guardar el nuevo vendedor, contacta con tu administrador.",
+      message: 'Error al guardar el nuevo vendedor, contacta con tu administrador.',
     });
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put('/:id', async (req, res) => {
   // Verifica los campos requeridos
-  const check = checkRequired(req.body, ["name", "invoicesZone"]);
+  const check = checkRequired(req.body, ['name', 'invoicesZone']);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -142,15 +137,15 @@ router.put("/:id", async (req, res) => {
   try {
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesSeller")
+      .update('InvoicesSeller')
       .set({ name, invoicesZone })
-      .where("id = :id", { id: req.params.id })
+      .where('id = :id', { id: req.params.id })
       .execute();
 
     const user = await req.conn
-      .getRepository("User")
-      .createQueryBuilder("u")
-      .where("u.id = :id", { id: req.user.uid })
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
       .getOne();
 
     await addLog(
@@ -158,25 +153,24 @@ router.put("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se ha editado El vendedor: ${name}`
+      `Se ha editado El vendedor: ${name}`,
     );
 
     // On success
     return res.json({
-      message: "El vendedor ha sido actualizado correctamente.",
+      message: 'El vendedor ha sido actualizado correctamente.',
     });
   } catch (error) {
     // On errror
     return res.status(400).json({
-      message:
-        "Error al actualizar el vendedor, contacta con tu administrador.",
+      message: 'Error al actualizar el vendedor, contacta con tu administrador.',
     });
   }
 });
 
-router.put("/status/:id", async (req, res) => {
+router.put('/status/:id', async (req, res) => {
   // Check required field
-  const check = checkRequired(req.body, ["status"]);
+  const check = checkRequired(req.body, ['status']);
   if (!check.success) {
     return res.status(400).json({ message: check.message });
   }
@@ -186,17 +180,15 @@ router.put("/status/:id", async (req, res) => {
 
   // Get zone
   const zone = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("is")
-    .where("is.company = :company", { company: req.user.cid })
-    .andWhere("is.id = :id", { id: req.params.id })
+    .getRepository('InvoicesSeller')
+    .createQueryBuilder('is')
+    .where('is.company = :company', { company: req.user.cid })
+    .andWhere('is.id = :id', { id: req.params.id })
     .getOne();
 
   // If no exist
   if (!zone) {
-    return res
-      .status(400)
-      .json({ message: "El vendedor seleccionado no existe." });
+    return res.status(400).json({ message: 'El vendedor seleccionado no existe.' });
   }
 
   // If zone exist updates it
@@ -204,16 +196,16 @@ router.put("/status/:id", async (req, res) => {
     // return success
     await req.conn
       .createQueryBuilder()
-      .update("InvoicesSeller")
+      .update('InvoicesSeller')
       .set({ active: status })
-      .where("company = :company", { company: req.user.cid })
-      .where("id = :id", { id: req.params.id })
+      .where('company = :company', { company: req.user.cid })
+      .where('id = :id', { id: req.params.id })
       .execute();
 
     const user = await req.conn
-      .getRepository("User")
-      .createQueryBuilder("u")
-      .where("u.id = :id", { id: req.user.uid })
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
       .getOne();
 
     await addLog(
@@ -221,52 +213,42 @@ router.put("/status/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se cambio el estado del vendedor: ${zone.name} a ${
-        status ? "ACTIVO" : "INACTIVO"
-      }.`
+      `Se cambio el estado del vendedor: ${zone.name} a ${status ? 'ACTIVO' : 'INACTIVO'}.`,
     );
 
     return res.json({
-      message: "El vendedor ha sido actualizado correctamente.",
+      message: 'El vendedor ha sido actualizado correctamente.',
     });
   } catch (error) {
     // return error
     return res.status(500).json({
-      message:
-        "Error al actualizar el vendedor. Contacta con tu administrador.",
+      message: 'Error al actualizar el vendedor. Contacta con tu administrador.',
     });
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete('/:id', async (req, res) => {
   // Get the zone
   const zone = await req.conn
-    .getRepository("InvoicesSeller")
-    .createQueryBuilder("s")
-    .where("s.company = :company", { company: req.user.cid })
-    .andWhere("s.id = :id", { id: req.params.id })
+    .getRepository('InvoicesSeller')
+    .createQueryBuilder('s')
+    .where('s.company = :company', { company: req.user.cid })
+    .andWhere('s.id = :id', { id: req.params.id })
     .getOne();
 
   // If no zone exist
   if (!zone) {
-    return res.status(400).json({ message: "El vendedor ingresado no existe" });
+    return res.status(400).json({ message: 'El vendedor ingresado no existe' });
   }
 
   // If zone exist
   // Check references in other tables
-  const references = await foundRelations(
-    req.conn,
-    "invoices_seller",
-    zone.id,
-    [],
-    "invoicesSeller"
-  );
+  const references = await foundRelations(req.conn, 'invoices_seller', zone.id, [], 'invoicesSeller');
 
   // if references rejects deletion
   if (references) {
     return res.status(400).json({
-      message:
-        "El vendedor no puede ser eliminado porque esta siendo utilizado en el sistema.",
+      message: 'El vendedor no puede ser eliminado porque esta siendo utilizado en el sistema.',
     });
   }
 
@@ -275,15 +257,15 @@ router.delete("/:id", async (req, res) => {
     await req.conn
       .createQueryBuilder()
       .delete()
-      .from("InvoicesSeller")
-      .where("id = :id", { id: req.params.id })
-      .andWhere("company = :company", { company: req.user.cid })
+      .from('InvoicesSeller')
+      .where('id = :id', { id: req.params.id })
+      .andWhere('company = :company', { company: req.user.cid })
       .execute();
 
     const user = await req.conn
-      .getRepository("User")
-      .createQueryBuilder("u")
-      .where("u.id = :id", { id: req.user.uid })
+      .getRepository('User')
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: req.user.uid })
       .getOne();
 
     await addLog(
@@ -291,15 +273,15 @@ router.delete("/:id", async (req, res) => {
       req.moduleName,
       `${user.names} ${user.lastnames}`,
       user.id,
-      `Se elimino el vendedor con nombre: ${zone.name}.`
+      `Se elimino el vendedor con nombre: ${zone.name}.`,
     );
 
     return res.json({
-      message: "El vendedor ha sido eliminado correctamente.",
+      message: 'El vendedor ha sido eliminado correctamente.',
     });
   } catch (error) {
     return res.status(500).json({
-      message: "Error al eliminar el vendedor. Conctacta a tu administrador.",
+      message: 'Error al eliminar el vendedor. Conctacta a tu administrador.',
     });
   }
 });

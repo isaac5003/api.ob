@@ -13,12 +13,17 @@ import {
 } from 'src/_dtos/responseList.dto';
 import { numeroALetras, validationMessage } from 'src/_tools';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
+import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
+import { SellerCreateDTO } from './dtos/invoice-seller-create.dto';
+import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSeller } from './entities/InvoicesSeller.entity';
 import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
@@ -187,7 +192,7 @@ export class InvoicesService {
 
   async createInvoiceZone(
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: InvoiceAuxiliarDataDTO,
   ): Promise<ResponseMinimalDTO> {
     const invoiceZone = await this.invoicesZoneRepository.createInvoiceZone(
       company,
@@ -202,7 +207,7 @@ export class InvoicesService {
   async updateInvoiceZone(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesZoneRepository.getInvoiceZone(company, id);
 
@@ -242,7 +247,7 @@ export class InvoicesService {
 
   async createInvoicePaymentCondition(
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: PaymentConditionCreateDTO,
   ): Promise<ResponseMinimalDTO> {
     const invoicePayment = await this.invoicesPaymentsConditionRepository.createInvoicePaymentCondition(
       company,
@@ -257,7 +262,7 @@ export class InvoicesService {
   async updateInvoicePaymentCondition(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: InvoiceAuxiliarUpdateDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
       id,
@@ -292,6 +297,70 @@ export class InvoicesService {
       message: result
         ? 'Se ha eliminado la condicion de pago correctamente correctamente'
         : 'No se ha podido eliminar condicion de pago correctamente',
+    };
+  }
+
+  async getSellers(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<InvoicesSeller[]> {
+    return await this.invoiceSellerRepository.getAllSellers(company, filter);
+  }
+
+  async createSeller(
+    company: Company,
+    data: InvoiceSellerDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
+      company,
+      data.invoicesZone,
+    );
+    const sellerToCreate = {
+      ...data,
+      invoicesZone,
+    };
+
+    const seller = await this.invoiceSellerRepository.createSeller(
+      company,
+      sellerToCreate,
+    );
+
+    return {
+      id: seller.id,
+      message: 'El vendedor se ha creado correctamente',
+    };
+  }
+
+  async updateSeller(
+    id: string,
+    company: Company,
+    data: InvoiceAuxiliarUpdateDTO,
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoiceSellerRepository.getSeller(company, id);
+    let seller;
+    switch (type) {
+      case 'seller':
+        const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
+          company,
+          data.invoicesZone,
+        );
+        seller = {
+          ...data,
+          invoicesZone,
+        };
+        break;
+      case 'status':
+        seller = {
+          active: data.active,
+        };
+        break;
+    }
+
+    await this.invoiceSellerRepository.updateSeller(id, company, seller);
+
+    return {
+      message: 'El vendedor se actualizo correctamente.',
     };
   }
 
