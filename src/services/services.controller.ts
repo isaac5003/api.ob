@@ -33,16 +33,40 @@ import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 export class ServicesController {
   constructor(private service: ServicesService) {}
 
-  @Get()
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getServices(
-    @Query() filter: ServiceFilterDTO,
+  // FOR REPORTS
+  @Get('/report/general')
+  async reportGeneral(
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Service>> {
-    const services = await this.service.getServices(company, filter);
-    return new ResponseListDTO(plainToClass(Service, services));
+  ): Promise<ServiceReportGeneralDTO> {
+    return this.service.reportGeneral(company);
   }
 
+  // FOR SETTINGS
+  @Get('/setting/integrations')
+  async settingIntegrations(
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.settingIntegrations(company);
+  }
+
+  @Put('/setting/integrations')
+  async updateSettingIntegrations(
+    @Body() data: ServiceIntegrationDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {}
+
+  // FOR STATUS
+  @Put('/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateServiceStatus(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+    @Body() data: serviceStatusDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateService(company, id, data);
+  }
+
+  // FOR SERVICES:/ID
   @Get('/:id')
   async getService(
     @Param('id') id: string,
@@ -58,15 +82,6 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.getServiceIntegrations(company, id);
-  }
-
-  @Post('/')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async createService(
-    @Body() data: serviceDataDTO,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    return this.service.createService(company, data);
   }
 
   @Put('/:id')
@@ -89,16 +104,6 @@ export class ServicesController {
     return this.service.updateService(company, id, data);
   }
 
-  @Put('/status/:id')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateServiceStatus(
-    @Param('id') id: string,
-    @GetAuthData('company') company: Company,
-    @Body() data: serviceStatusDTO,
-  ): Promise<ResponseMinimalDTO> {
-    return this.service.updateService(company, id, data);
-  }
-
   @Delete('/:id')
   async deleteService(
     @Param('id') id: string,
@@ -107,10 +112,23 @@ export class ServicesController {
     return this.service.deleteService(company, id);
   }
 
-  @Get('/report/general')
-  async reportGeneral(
+  // FOR SERVICES /
+  @Get('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getServices(
+    @Query() filter: ServiceFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ServiceReportGeneralDTO> {
-    return this.service.reportGeneral(company);
+  ): Promise<ResponseListDTO<Service>> {
+    const services = await this.service.getServices(company, filter);
+    return new ResponseListDTO(plainToClass(Service, services));
+  }
+
+  @Post('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createService(
+    @Body() data: serviceDataDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.createService(company, data);
   }
 }

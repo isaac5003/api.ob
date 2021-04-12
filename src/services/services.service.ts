@@ -9,12 +9,16 @@ import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { Service } from './entities/Service.entity';
 import { ServiceRepository } from './repositories/Service.repository';
+import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
 
 @Injectable()
 export class ServicesService {
   constructor(
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
+
+    @InjectRepository(ServiceSettingRepository)
+    private serviceSettingRepository: ServiceSettingRepository,
   ) {}
 
   async getServices(
@@ -89,6 +93,19 @@ export class ServicesService {
     return {
       company: { name, nit, nrc },
       services,
+    };
+  }
+
+  async settingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
+    const settings = await this.serviceSettingRepository.getSettings(company);
+
+    return {
+      integrations: {
+        catalog:
+          settings && settings.accountingCatalog
+            ? settings.accountingCatalog.id
+            : null,
+      },
     };
   }
 }
