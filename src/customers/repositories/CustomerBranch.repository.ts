@@ -31,4 +31,29 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
   async updateBranch(id: string, data: BranchDataDTO): Promise<any> {
     return this.update({ id }, data);
   }
+
+  async getCustomerCustomerBranch(id: string): Promise<CustomerBranch> {
+    let customerBranch: CustomerBranch;
+    const leftJoinAndSelect = {
+      c: 'cb.country',
+      s: 'cb.state',
+      ct: 'cb.city',
+    };
+
+    try {
+      customerBranch = await this.findOneOrFail(
+        { id },
+        {
+          join: {
+            alias: 'cb',
+            leftJoinAndSelect,
+          },
+        },
+      );
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(reponame, error);
+    }
+    return customerBranch;
+  }
 }

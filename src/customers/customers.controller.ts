@@ -30,7 +30,6 @@ import { CustomerBranch } from './entities/CustomerBranch.entity';
 import { CustomerType } from './entities/CustomerType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
-
 @Controller('customers')
 @UseGuards(AuthGuard())
 export class CustomersController {

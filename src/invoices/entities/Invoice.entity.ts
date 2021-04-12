@@ -32,7 +32,7 @@ export class Invoice extends BaseEntity {
   @Column()
   sequence: string;
 
-  @Column()
+  @Column({ nullable: true })
   customerName: string;
 
   @Column({ nullable: true })
@@ -62,25 +62,25 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true })
   customerGiro: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   sum: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   iva: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   subtotal: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   ivaRetenido: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   ventasExentas: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   ventasNoSujetas: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   ventaTotal: number;
 
   @Column({ nullable: true })

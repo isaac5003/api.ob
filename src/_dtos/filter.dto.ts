@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional } from 'class-validator';
+import { validationMessage } from 'src/_tools';
 
 export class FilterDTO {
   @IsOptional()
@@ -21,4 +22,15 @@ export class FilterDTO {
 
   @IsOptional()
   order: string;
+
+  @IsOptional()
+  @Transform(({ value }) =>
+    value.toLowerCase() === 'true'
+      ? true
+      : value.toLowerCase() == 'false'
+      ? false
+      : null,
+  )
+  @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
+  active: boolean;
 }
