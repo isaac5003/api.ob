@@ -6,6 +6,7 @@ import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
 import { AuthModule } from 'src/auth/auth.module';
+import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from 'src/auth/auth.module';
       ServiceRepository,
       SellingTypeRepository,
       ServiceSettingRepository,
+      AccountingCatalogRepository,
     ]),
   ],
   controllers: [ServicesController],

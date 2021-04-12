@@ -38,7 +38,7 @@ export class ServicesController {
   async reportGeneral(
     @GetAuthData('company') company: Company,
   ): Promise<ServiceReportGeneralDTO> {
-    return this.service.reportGeneral(company);
+    return this.service.getReportGeneral(company);
   }
 
   // FOR SETTINGS
@@ -46,14 +46,16 @@ export class ServicesController {
   async settingIntegrations(
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.settingIntegrations(company);
+    return this.service.getSettingsIntegrations(company);
   }
 
   @Put('/setting/integrations')
   async updateSettingIntegrations(
     @Body() data: ServiceIntegrationDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {}
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateSettingsIntegrations(company, data);
+  }
 
   // FOR STATUS
   @Put('/status/:id')

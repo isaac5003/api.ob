@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
+import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
@@ -19,6 +20,9 @@ export class ServicesService {
 
     @InjectRepository(ServiceSettingRepository)
     private serviceSettingRepository: ServiceSettingRepository,
+
+    @InjectRepository(AccountingCatalogRepository)
+    private accountingCatalogRepository: AccountingCatalogRepository,
   ) {}
 
   async getServices(
@@ -86,7 +90,7 @@ export class ServicesService {
     };
   }
 
-  async reportGeneral(company: Company): Promise<ServiceReportGeneralDTO> {
+  async getReportGeneral(company: Company): Promise<ServiceReportGeneralDTO> {
     const { name, nit, nrc } = company;
     const services = await this.serviceRepository.getServices(company);
 
@@ -96,7 +100,7 @@ export class ServicesService {
     };
   }
 
-  async settingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
+  async getSettingsIntegrations(company: Company): Promise<ResponseMinimalDTO> {
     const settings = await this.serviceSettingRepository.getSettings(company);
 
     return {
@@ -106,6 +110,30 @@ export class ServicesService {
             ? settings.accountingCatalog.id
             : null,
       },
+    };
+  }
+
+  async updateSettingsIntegrations(
+    company: Company,
+    data: ServiceIntegrationDTO,
+  ): Promise<ResponseMinimalDTO> {
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+      data,
+      company,
+    );
+
+    const settings = await this.serviceSettingRepository.getSettings(company);
+
+    if (settings) {
+      await this.serviceSettingRepository.updateSettings(company, data);
+      return {
+        message: 'La integración ha sido actualizada correctamente.',
+      };
+    }
+
+    await this.serviceSettingRepository.createSettings(company, data);
+    return {
+      message: 'La integración ha sido agregada correctamente.',
     };
   }
 }
