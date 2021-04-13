@@ -96,7 +96,6 @@ export class InvoiceRepository extends Repository<Invoice> {
         query.andWhere('i.invoiceDate <= :endDate', { endDate });
       }
 
-      // TODO Completar filtros
       // sort by prop}
       if (order && prop) {
         let field = `i.${prop}`;
@@ -107,6 +106,12 @@ export class InvoiceRepository extends Repository<Invoice> {
           case 'customer':
             field = `c.id`;
             break;
+          case 'seller':
+            field = `sl.id`;
+            break;
+          case 'zone':
+            field = `zo.id`;
+            break;
         }
         query.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
@@ -116,7 +121,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       // filter by search value
       if (search) {
         query.andWhere(
-          'LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search',
+          'LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search OR LOWER(zo.name) LIKE :search OR LOWER(cu.name) LIKE :search OR LOWER(sl.name) LIKE :search',
           {
             search: `%${search}%`,
           },

@@ -13,6 +13,7 @@ import {
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
 import { numeroALetras, validationMessage } from 'src/_tools';
+import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
@@ -23,6 +24,7 @@ import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
 import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
+import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { SellerCreateDTO } from './dtos/invoice-seller-create.dto';
 import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
@@ -168,7 +170,7 @@ export class InvoicesService {
   async updateInvoiceZone(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesZoneRepository.getInvoiceZone(company, id);
 
@@ -223,7 +225,7 @@ export class InvoicesService {
   async updateInvoicePaymentCondition(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
       id,
@@ -295,7 +297,7 @@ export class InvoicesService {
   async updateSeller(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
     type: string,
   ): Promise<ResponseMinimalDTO> {
     await this.invoiceSellerRepository.getSeller(company, id);
@@ -529,7 +531,7 @@ export class InvoicesService {
   async updateDocumentStatus(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesDocumentRepository.getDocumentsByIds(
       company,
@@ -547,6 +549,92 @@ export class InvoicesService {
     };
   }
 
+  async generateReport(
+    company: Company,
+    filter: ReportFilterDTO,
+  ): Promise<ResponseListDTO<Invoice>> {
+    let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+    const {
+      startDate,
+      endDate,
+      documentType,
+      customer,
+      seller,
+      zone,
+      status,
+      service,
+    } = filter;
+    if (documentType) {
+      documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds(
+        [documentType],
+      );
+    }
+
+    let params = {};
+    params = { startDate, endDate };
+
+    if (customer) {
+      params = { ...params, customer };
+    }
+    if (seller) {
+      params = { ...params, seller };
+    }
+    if (zone) {
+      params = { ...params, zone };
+    }
+    if (status) {
+      params = { ...params, status };
+    }
+    if (service) {
+      params = { ...params, service };
+    }
+    const sales = await this.invoiceRepository.getInvoices(company, params);
+
+    const report = documentTypes.map((dt) => {
+      const documents = sales
+        .filter((s) => s.documentType.id == dt.id)
+        .map((d) => {
+          return {
+            customer: d.customerName,
+            date: d.invoiceDate.split('-').reverse().join('/'),
+            documentNumber: `${d.authorization} - ${d.sequence}`,
+            status: { id: d.status.id, name: d.status.name },
+            vGravada: d.subtotal,
+            vNSujeta: d.ventasNoSujetas,
+            vExenta: d.ventasExentas,
+            iva: d.iva,
+            ivaRetenido: d.ivaRetenido,
+            total: d.ventaTotal,
+          };
+        });
+      return {
+        name: dt.name,
+        code: dt.code,
+        count: documents.length,
+        documents,
+        vGravadaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.total, 0),
+      };
+    });
+
+    return new ResponseListDTO(plainToClass(Invoice, report));
+  }
   async getInvoices(
     company: Company,
     filter: InvoiceFilterDTO,

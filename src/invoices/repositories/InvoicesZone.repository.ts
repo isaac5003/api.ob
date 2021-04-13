@@ -3,6 +3,7 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceAuxiliarDataDTO } from '../dtos/invoice-auxiliar-data.dto';
+import { InvoiceAuxiliarUpdateDTO } from '../dtos/invoice-auxiliar-update.dto';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
 
 const reponame = 'zonas';
@@ -70,7 +71,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
   async updateInvoiceZone(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
   ): Promise<any> {
     try {
       const invoiceZone = this.update({ id, company }, data);
