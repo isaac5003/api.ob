@@ -17,8 +17,10 @@ import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
+import { InvoiceDocumentDBDTO } from './dtos/invoice-document-db.dto';
 import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
 import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
+import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
@@ -349,7 +351,7 @@ export class InvoicesService {
     const doc = documentTypes.map((dt) => {
       const found = documents.find((d) => d.documentType.id == dt.id);
       return found
-        ? found
+        ? { ...found, documentLayout: JSON.parse(found.documentLayout) }
         : {
             id: null,
             authorization: null,
@@ -363,7 +365,19 @@ export class InvoicesService {
     return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
   }
 
-  async createDocument(
+  async getDocument(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const document = await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      [id],
+      'all',
+    );
+
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+  }
+  async createUpdateDocument(
     company: Company,
     data: any[],
     type: string,
@@ -413,6 +427,7 @@ export class InvoicesService {
         const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
           company,
           data.map((d) => d.id),
+          'unused',
         );
 
         if (documentExist.length == 0) {
@@ -472,6 +487,64 @@ export class InvoicesService {
     }
 
     return message;
+  }
+
+  async getDocumentLayout(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const {
+      documentLayout,
+    } = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      parseInt(id),
+    );
+
+    return new ResponseSingleDTO(
+      plainToClass(InvoicesDocument, JSON.parse(documentLayout)),
+    );
+  }
+
+  async createUpdateDocumentLayout(
+    company: Company,
+    id: number,
+    data: DocumentLayoutDTO,
+  ) {
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      id,
+    );
+
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { documentLayout: JSON.stringify(data) },
+      company,
+    );
+
+    return {
+      message: `La configuracion ha sido guardada correctamente.`,
+    };
+  }
+
+  async updateDocumentStatus(
+    id: string,
+    company: Company,
+    data: InvoiceAuxiliarUpdateDTO,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      [id],
+      'all',
+    );
+
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      id,
+      data,
+      company,
+    );
+    return {
+      message: 'El estado del documento se actualizo correctamente.',
+    };
   }
 
   async getInvoices(
