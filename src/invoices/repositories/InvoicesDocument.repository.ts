@@ -37,31 +37,35 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
       dt: 'i.documentType',
     };
     try {
-      document = await this.findOne({
+      document = await this.findOneOrFail({
         join: {
           alias: 'i',
           leftJoinAndSelect,
         },
         where: { company, isCurrentDocument: true, documentType },
       });
-      let sequence = document.current;
-      if (sequenceReserved) {
-        if (sequenceReserved.includes(sequence)) {
-          for (const is of sequenceReserved) {
-            for (let s = sequence; s <= document.final; s++) {
-              if (s != is) {
-                sequence = s;
-                s = document.final;
+      if (document) {
+        let sequence = document.current;
+        if (sequenceReserved) {
+          if (sequenceReserved.includes(sequence)) {
+            for (const is of sequenceReserved) {
+              for (let s = sequence; s <= document.final; s++) {
+                if (s != is) {
+                  sequence = s;
+                  s = document.final;
+                }
               }
             }
           }
         }
-      }
 
-      document = {
-        ...document,
-        current: sequence,
-      };
+        document = {
+          ...document,
+          current: sequence,
+        };
+      } else {
+        document = {};
+      }
     } catch (error) {
       console.error(error);
 
@@ -74,14 +78,27 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
   async getDocumentsByIds(
     company: Company,
     id: string[],
+    type: string,
   ): Promise<InvoicesDocument[]> {
-    let invoiceDocuments: InvoicesDocument[];
+    let invoiceDocuments;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
     };
+    let filter = {};
+    switch (type) {
+      case 'used':
+        filter = { company, used: true };
+        break;
+      case 'unused':
+        filter = { company, used: false };
+        break;
+      default:
+        filter = { company };
+        break;
+    }
     try {
       invoiceDocuments = await this.findByIds(id, {
-        where: { company, used: false },
+        where: filter,
         join: {
           alias: 'i',
           leftJoinAndSelect,
@@ -92,6 +109,12 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
 
       logDatabaseError(reponame, error);
     }
+    invoiceDocuments = invoiceDocuments.map((i) => {
+      return {
+        ...i,
+        documentLayout: JSON.parse(i.documentLayout),
+      };
+    });
     return invoiceDocuments;
   }
 

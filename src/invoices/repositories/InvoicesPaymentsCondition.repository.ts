@@ -3,6 +3,7 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceAuxiliarDataDTO } from '../dtos/invoice-auxiliar-data.dto';
+import { InvoiceAuxiliarUpdateDTO } from '../dtos/invoice-auxiliar-update.dto';
 import { PaymentConditionCreateDTO } from '../dtos/invoice-paymentcondition-data.dto';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 
@@ -13,7 +14,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
     company: Company,
     filter: Partial<FilterDTO>,
   ): Promise<InvoicesPaymentsCondition[]> {
-    const { limit, page, search, active } = filter;
+    const { search, active } = filter;
 
     try {
       const query = this.createQueryBuilder('pc')
@@ -21,7 +22,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
         .orderBy('pc.createdAt', 'DESC');
 
       // filter by status
-      if (active) {
+      if (active || active == false) {
         query.andWhere('pc.active = :active', { active });
       }
 
@@ -31,10 +32,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
           search: `%${search}%`,
         });
       }
-      // applies pagination
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
+
       return await query.getMany();
     } catch (error) {
       console.log(error);
@@ -75,7 +73,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
   async updateInvoicePaymentCondition(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarDataDTO>,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
   ): Promise<any> {
     try {
       const invoicesPaymantsCondition = this.update({ id, company }, data);
