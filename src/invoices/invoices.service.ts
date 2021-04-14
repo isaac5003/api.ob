@@ -13,14 +13,19 @@ import {
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
 import { numeroALetras, validationMessage } from 'src/_tools';
+import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
+import { InvoiceDocumentDBDTO } from './dtos/invoice-document-db.dto';
 import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
 import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
+import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { InvoiceUpdateHeaderDTO } from './dtos/invoice-header-update.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
+import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { SellerCreateDTO } from './dtos/invoice-seller-create.dto';
 import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
@@ -166,7 +171,7 @@ export class InvoicesService {
   async updateInvoiceZone(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesZoneRepository.getInvoiceZone(company, id);
 
@@ -221,7 +226,7 @@ export class InvoicesService {
   async updateInvoicePaymentCondition(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
   ): Promise<ResponseMinimalDTO> {
     await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
       id,
@@ -293,7 +298,7 @@ export class InvoicesService {
   async updateSeller(
     id: string,
     company: Company,
-    data: InvoiceAuxiliarUpdateDTO,
+    data: Partial<InvoiceAuxiliarUpdateDTO>,
     type: string,
   ): Promise<ResponseMinimalDTO> {
     await this.invoiceSellerRepository.getSeller(company, id);
@@ -349,7 +354,7 @@ export class InvoicesService {
     const doc = documentTypes.map((dt) => {
       const found = documents.find((d) => d.documentType.id == dt.id);
       return found
-        ? found
+        ? { ...found, documentLayout: JSON.parse(found.documentLayout) }
         : {
             id: null,
             authorization: null,
@@ -363,7 +368,19 @@ export class InvoicesService {
     return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
   }
 
-  async createDocument(
+  async getDocument(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const document = await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      [id],
+      'all',
+    );
+
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+  }
+  async createUpdateDocument(
     company: Company,
     data: any[],
     type: string,
@@ -413,6 +430,7 @@ export class InvoicesService {
         const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
           company,
           data.map((d) => d.id),
+          'unused',
         );
 
         if (documentExist.length == 0) {
@@ -474,11 +492,172 @@ export class InvoicesService {
     return message;
   }
 
+  async getDocumentLayout(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const {
+      documentLayout,
+    } = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      parseInt(id),
+    );
+
+    return new ResponseSingleDTO(
+      plainToClass(InvoicesDocument, JSON.parse(documentLayout)),
+    );
+  }
+
+  async createUpdateDocumentLayout(
+    company: Company,
+    id: number,
+    data: DocumentLayoutDTO,
+  ) {
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      id,
+    );
+
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { documentLayout: JSON.stringify(data) },
+      company,
+    );
+
+    return {
+      message: `La configuracion ha sido guardada correctamente.`,
+    };
+  }
+
+  async updateDocumentStatus(
+    id: string,
+    company: Company,
+    data: ActiveValidateDTO,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      [id],
+      'all',
+    );
+
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      id,
+      data,
+      company,
+    );
+    return {
+      message: 'El estado del documento se actualizo correctamente.',
+    };
+  }
+
+  async generateReport(
+    company: Company,
+    filter: ReportFilterDTO,
+  ): Promise<ResponseListDTO<Invoice>> {
+    let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+    const {
+      startDate,
+      endDate,
+      documentType,
+      customer,
+      seller,
+      zone,
+      status,
+      service,
+    } = filter;
+    if (documentType) {
+      documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds(
+        [documentType],
+      );
+    }
+
+    let params = {};
+    params = { startDate, endDate };
+
+    if (customer) {
+      params = { ...params, customer };
+    }
+    if (seller) {
+      params = { ...params, seller };
+    }
+    if (zone) {
+      params = { ...params, zone };
+    }
+    if (status) {
+      params = { ...params, status };
+    }
+    if (service) {
+      params = { ...params, service };
+    }
+    const sales = await this.invoiceRepository.getInvoices(company, params);
+
+    const report = documentTypes.map((dt) => {
+      const documents = sales
+        .filter((s) => s.documentType.id == dt.id)
+        .map((d) => {
+          return {
+            customer: d.customerName,
+            date: d.invoiceDate.split('-').reverse().join('/'),
+            documentNumber: `${d.authorization} - ${d.sequence}`,
+            status: { id: d.status.id, name: d.status.name },
+            vGravada: d.subtotal,
+            vNSujeta: d.ventasNoSujetas,
+            vExenta: d.ventasExentas,
+            iva: d.iva,
+            ivaRetenido: d.ivaRetenido,
+            total: d.ventaTotal,
+          };
+        });
+      return {
+        name: dt.name,
+        code: dt.code,
+        count: documents.length,
+        documents,
+        vGravadaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents
+          .filter((d) => d.status.id != 3)
+          .reduce((a, b) => a + b.total, 0),
+      };
+    });
+
+    return new ResponseListDTO(plainToClass(Invoice, report));
+  }
   async getInvoices(
     company: Company,
     filter: InvoiceFilterDTO,
-  ): Promise<Invoice[]> {
-    return this.invoiceRepository.getInvoices(company, filter);
+  ): Promise<ResponseListDTO<Invoice>> {
+    const invoices = await this.invoiceRepository.getInvoices(company, filter);
+    const sales = invoices.map((i) => {
+      return {
+        id: i.id,
+        authorization: i.authorization,
+        sequence: i.sequence,
+        invoiceDate: i.invoiceDate
+          ? i.invoiceDate.split('-').reverse().join('/')
+          : null,
+        customerName: i.customerName,
+        ventaTotal: i.ventaTotal,
+        documentType: i.documentType,
+        status: i.status,
+        invoiceRawDate: i.invoiceDate,
+      };
+    });
+
+    return new ResponseListDTO(plainToClass(Invoice, sales));
   }
 
   async getInvoice(

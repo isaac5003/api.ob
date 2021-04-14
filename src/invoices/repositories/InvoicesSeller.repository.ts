@@ -21,7 +21,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
         .orderBy('s.createdAt', 'DESC');
 
       // filter by status
-      if (active) {
+      if (active || active == false) {
         query.andWhere('s.active = :active', { active });
       }
 
