@@ -292,8 +292,7 @@ export class InvoicesController {
     @Query() filter: InvoiceFilterDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Invoice>> {
-    const invoices = await this.invoice.getInvoices(company, filter);
-    return new ResponseListDTO(plainToClass(Invoice, invoices));
+    return await this.invoice.getInvoices(company, filter);
   }
 
   @Get('/:id')

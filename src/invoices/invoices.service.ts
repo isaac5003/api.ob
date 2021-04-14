@@ -23,6 +23,7 @@ import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
 import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
 import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { InvoiceUpdateHeaderDTO } from './dtos/invoice-header-update.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
@@ -638,8 +639,25 @@ export class InvoicesService {
   async getInvoices(
     company: Company,
     filter: InvoiceFilterDTO,
-  ): Promise<Invoice[]> {
-    return this.invoiceRepository.getInvoices(company, filter);
+  ): Promise<ResponseListDTO<Invoice>> {
+    const invoices = await this.invoiceRepository.getInvoices(company, filter);
+    const sales = invoices.map((i) => {
+      return {
+        id: i.id,
+        authorization: i.authorization,
+        sequence: i.sequence,
+        invoiceDate: i.invoiceDate
+          ? i.invoiceDate.split('-').reverse().join('/')
+          : null,
+        customerName: i.customerName,
+        ventaTotal: i.ventaTotal,
+        documentType: i.documentType,
+        status: i.status,
+        invoiceRawDate: i.invoiceDate,
+      };
+    });
+
+    return new ResponseListDTO(plainToClass(Invoice, sales));
   }
 
   async getInvoice(
