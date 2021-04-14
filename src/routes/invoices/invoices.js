@@ -1,6 +1,7 @@
 const express = require('express');
 const { format } = require('date-fns');
 const { checkRequired, addLog, numeroALetras, foundRelations } = require('../../tools');
+const { raw } = require('body-parser');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -502,12 +503,11 @@ router.post('/', async (req, res) => {
   await req.conn
     .createQueryBuilder()
     .update('InvoicesDocument')
-    .set({ current: nextSequence })
+    .set({ current: nextSequence, used: true })
     .where('company = :company', { company: req.user.cid })
     .andWhere('isCurrentDocument = :current', { current: true })
     .andWhere('documentType = :type', { type: header.documentType })
     .execute();
-
   const user = await req.conn
     .getRepository('User')
     .createQueryBuilder('u')
@@ -899,13 +899,14 @@ router.delete('/:id', async (req, res) => {
 
     // updates secuence
     // Actualiza el documento
-    await req.conn
+    const documentUpdated = await req.conn
       .createQueryBuilder()
       .update('InvoicesDocument')
       .set({ current: document.current - 1 })
       .where('company = :company', { company: req.user.cid })
       .andWhere('isCurrentDocument = :current', { current: true })
       .andWhere('documentType = :type', { type: invoice.documentType.id })
+      .returning('*')
       .execute();
 
     const user = await req.conn
@@ -922,10 +923,22 @@ router.delete('/:id', async (req, res) => {
       `Se elimino la venta con referencia: ${invoice.authorization} - ${invoice.sequence}.`,
     );
 
+    if (documentUpdated.raw[0].current == documentUpdated.raw[0].initial) {
+      await req.conn
+        .createQueryBuilder()
+        .update('InvoicesDocument')
+        .set({ used: false })
+        .where('company = :company', { company: req.user.cid })
+        .andWhere('isCurrentDocument = :current', { current: true })
+        .andWhere('documentType = :type', { type: invoice.documentType.id })
+        .execute();
+    }
+
     return res.json({
       message: 'La venta ha sido eliminada correctamente.',
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: 'Error al eliminar la venta. Conctacta a tu administrador.',
     });
