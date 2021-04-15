@@ -22,7 +22,7 @@ import { CustomerDataDTO } from './dtos/customer-data.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerStatusDTO } from './dtos/customer-status.dto';
-import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
+import { AccountignCatalogIntegrationDTO } from './dtos/customer-integration.dto';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AuthGuard } from '@nestjs/passport';
@@ -63,7 +63,7 @@ export class CustomersController {
   @Put('/setting/integrations')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateSettingIntegrations(
-    @Body() data: CustomerIntegrationDTO,
+    @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.customersService.updateCustomerSettingsIntegrations(
@@ -133,7 +133,7 @@ export class CustomersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerIntegration(
     @Param('id') id: string,
-    @Body() data: CustomerIntegrationDTO,
+    @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return await this.customersService.UpdateCustomerIntegration(

@@ -26,4 +26,5 @@ export class ResponseMinimalDTO {
   id?: string;
   integrations?: any;
   message?: string;
+  nextSerie?: number;
 }
