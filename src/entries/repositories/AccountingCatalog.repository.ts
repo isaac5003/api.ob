@@ -86,9 +86,11 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
   }
 
   async getAccountingCatalogNotUsed(
-    { accountingCatalog }: AccountignCatalogIntegrationDTO,
+    { accountingCatalog }: any,
     company: Company,
   ): Promise<AccountingCatalog> {
+    console.log(accountingCatalog);
+
     const account = await this.getAccountingCatalog(
       accountingCatalog.id,
       company,

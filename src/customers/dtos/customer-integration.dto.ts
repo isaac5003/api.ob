@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
 import { validationMessage } from 'src/_tools';
 

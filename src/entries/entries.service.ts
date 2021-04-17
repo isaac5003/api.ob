@@ -12,6 +12,7 @@ import {
 import { AccountsDTO } from './dtos/entries-account.dto';
 import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
 import { SeriesDTO } from './dtos/entries-series.dto';
+import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
 import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
@@ -21,6 +22,9 @@ import { AccountingEntryRepository } from './repositories/AccountingEntry.reposi
 import { AccountingEntryTypeRepository } from './repositories/AccountingEntryType.repository';
 import { AccountingRegisterTypeRepository } from './repositories/AccountingRegisterType.repository';
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
+import { parseISO, differenceInMonths } from 'date-fns';
+import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
+import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
 
 @Injectable()
 export class EntriesService {
@@ -243,5 +247,81 @@ export class EntriesService {
         break;
     }
     return new ResponseSingleDTO(plainToClass(AccountingSetting, setting));
+  }
+
+  async updateSettingGeneral(
+    company: Company,
+    data: SettingGeneralDTO,
+    settingType: string,
+  ): Promise<ResponseMinimalDTO> {
+    const { peridoEnd, periodStart } = data;
+    if (parseISO(peridoEnd) < parseISO(periodStart)) {
+      throw new BadRequestException(
+        'La fecha final no puede ser menor que la fecha inicial',
+      );
+    }
+
+    if (
+      differenceInMonths(parseISO(peridoEnd), parseISO(periodStart)) + 1 !=
+      12
+    ) {
+      throw new BadRequestException(
+        'El periodo fiscal debe  contener 12 meses exactos',
+      );
+    }
+
+    const settingGeneral = await this.getSettings(company, settingType);
+    if (settingGeneral) {
+      await this.accountingSettingRepository.updateSetting(
+        company,
+        { periodStart, peridoEnd },
+        settingType,
+      );
+
+      return {
+        message:
+          'Configuracion general del modulo de contabilidad actualizada correctamente.',
+      };
+    }
+  }
+
+  async updateSettingSignatures(
+    company: Company,
+    data: SettingSignaturesDTO,
+    settingType: string,
+  ): Promise<ResponseMinimalDTO> {
+    const setting = await this.accountingSettingRepository.getSetting(
+      company,
+      settingType,
+    );
+
+    if (setting) {
+      await this.accountingSettingRepository.updateSetting(
+        company,
+        data,
+        settingType,
+      );
+
+      return {
+        message:
+          'Configuracion de los firmantes del modulo de contabilidad actualizada correctamente.',
+      };
+    }
+  }
+
+  async updateSettingIntegrations(
+    company: Company,
+    data: SettingIntegrationsDTO,
+    settingType: string,
+  ): Promise<ResponseMinimalDTO> {
+    const account = await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+      data.accountingCatalog,
+      company,
+    );
+    console.log(account);
+
+    return {
+      message: 'hola',
+    };
   }
 }

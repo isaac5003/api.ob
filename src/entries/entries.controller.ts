@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
+import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import {
   ResponseListDTO,
@@ -25,6 +26,9 @@ import { AccountsDTO } from './dtos/entries-account.dto';
 import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/entries-accountingcatalog-update.dto';
 import { SeriesDTO } from './dtos/entries-series.dto';
+import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
+import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
+import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
 import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
@@ -141,5 +145,40 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<AccountingSetting>> {
     return await this.entries.getSettings(company, 'estado-resultados');
+  }
+
+  @Put('/setting/general')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingGeneral(
+    @GetAuthData('company') company: Company,
+    @Body() data: SettingGeneralDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.updateSettingGeneral(company, data, 'general');
+  }
+
+  @Put('/setting/signatures')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingSignatures(
+    @GetAuthData('company') company: Company,
+    @Body() data: SettingSignaturesDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.updateSettingSignatures(
+      company,
+      data,
+      'firmantes',
+    );
+  }
+
+  @Put('/setting/integrations')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingIntegrations(
+    @GetAuthData() company: Company,
+    @Body() data: SettingIntegrationsDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.updateSettingIntegrations(
+      company,
+      data,
+      'integraciones',
+    );
   }
 }
