@@ -116,10 +116,7 @@ export class Invoice extends BaseEntity {
   @ManyToOne(() => Customer, (customer) => customer.invoices)
   customer: Customer;
 
-  @ManyToOne(
-    () => InvoicesPaymentsCondition,
-    (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices,
-  )
+  @ManyToOne(() => InvoicesPaymentsCondition, (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices)
   invoicesPaymentsCondition: InvoicesPaymentsCondition;
 
   @ManyToOne(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.invoices)
@@ -134,16 +131,10 @@ export class Invoice extends BaseEntity {
   @ManyToOne(() => CustomerType, (customerType) => customerType.invoices)
   customerType: CustomerType;
 
-  @ManyToOne(
-    () => CustomerTypeNatural,
-    (customerTypeNatural) => customerTypeNatural.invoices,
-  )
+  @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.invoices)
   customerTypeNatural: CustomerTypeNatural;
 
-  @ManyToOne(
-    () => InvoicesDocumentType,
-    (invoicesDocumentType) => invoicesDocumentType.invoices,
-  )
+  @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoices)
   documentType: InvoicesDocumentType;
 
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.invoice)

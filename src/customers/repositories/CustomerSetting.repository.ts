@@ -7,9 +7,7 @@ import { CustomerSetting } from '../entities/CustomerSetting.entity';
 const reponame = 'configuraciones de integracion';
 @EntityRepository(CustomerSetting)
 export class CustomerSettingRepository extends Repository<CustomerSetting> {
-  async getCustomerSettingIntegrations(
-    company: Company,
-  ): Promise<CustomerSetting> {
+  async getCustomerSettingIntegrations(company: Company): Promise<CustomerSetting> {
     let settingIntegrations: CustomerSetting;
     const leftJoinAndSelect = {
       csi: 'cs.accountingCatalog',
@@ -31,10 +29,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     }
     return settingIntegrations;
   }
-  async createSettingIntegration(
-    company: Company,
-    data: CustomerIntegrationDTO,
-  ): Promise<CustomerSetting> {
+  async createSettingIntegration(company: Company, data: CustomerIntegrationDTO): Promise<CustomerSetting> {
     // crea sucursal
     let response: CustomerSetting;
     try {
@@ -46,10 +41,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     return await response;
   }
 
-  async updateCustomerSetting(
-    company: Company,
-    data: CustomerIntegrationDTO,
-  ): Promise<void> {
+  async updateCustomerSetting(company: Company, data: CustomerIntegrationDTO): Promise<void> {
     try {
       this.update({ company }, data);
     } catch (error) {

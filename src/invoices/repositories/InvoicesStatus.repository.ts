@@ -15,14 +15,13 @@ export class InvoicesStatusRepository extends Repository<InvoicesStatus> {
     return statuses;
   }
 
-  async getInvoiceStatus(id: number): Promise<InvoicesStatus> {
-    let invoiceStatus: InvoicesStatus;
-
-    try {
-      invoiceStatus = await this.findOneOrFail({ id });
-    } catch (error) {
-      logDatabaseError(reponame, error);
-    }
-    return invoiceStatus;
-  }
+  // async getInvoiceStatus(id: number): Promise<InvoicesStatus> {
+  //   let invoiceStatus: InvoicesStatus;
+  //   try {
+  //     invoiceStatus = await this.findOneOrFail({ id });
+  //   } catch (error) {
+  //     logDatabaseError(reponame, error);
+  //   }
+  //   return invoiceStatus;
+  // }
 }

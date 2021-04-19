@@ -29,10 +29,7 @@ export class CustomerTypeNatural extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.customerTypeNatural)
   customers: Customer[];
 
-  @ManyToOne(
-    () => CustomerType,
-    (customerType) => customerType.customerTypeNaturals,
-  )
+  @ManyToOne(() => CustomerType, (customerType) => customerType.customerTypeNaturals)
   customerType: CustomerType;
 
   @OneToMany(() => Invoice, (invoice) => invoice.customerTypeNatural)

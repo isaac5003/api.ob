@@ -24,13 +24,7 @@ export class FilterDTO {
   order: string;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : null,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
   active: boolean;
 }

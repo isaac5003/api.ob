@@ -28,10 +28,7 @@ export class AccountingEntryType extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(
-    () => AccountingEntry,
-    (accountingEntry) => accountingEntry.accountingEntryType,
-  )
+  @OneToMany(() => AccountingEntry, (accountingEntry) => accountingEntry.accountingEntryType)
   accountingEntries: AccountingEntry[];
 
   @ManyToOne(() => Company, (company) => company.accountingEntryTypes)

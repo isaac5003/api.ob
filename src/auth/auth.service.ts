@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthDTO } from './dtos/auth.dto';
 import { UserRepository } from './repositories/User.repository';
@@ -22,9 +18,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async processLogin(
-    authDto: AuthDTO,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  async processLogin(authDto: AuthDTO): Promise<{ access_token: string; refresh_token: string }> {
     const { email, password } = authDto;
     const user = await this.userRepository.getUserByEmail(email);
 
@@ -35,27 +29,19 @@ export class AuthService {
 
     // If user is inactive
     if (!user.isActive) {
-      throw new ForbiddenException(
-        'Usuario inactivo, contacta con tu administrador.',
-      );
+      throw new ForbiddenException('Usuario inactivo, contacta con tu administrador.');
     }
 
     // If user has no profile
     if (!user.profile) {
-      throw new ForbiddenException(
-        'El usuario no tiene un perfil asignado, contacta con tu administrador.',
-      );
+      throw new ForbiddenException('El usuario no tiene un perfil asignado, contacta con tu administrador.');
     }
 
     // Get first access to get company adn branch id
-    const access = await this.accessRepository.getAccessByProfileId(
-      user.profile.id,
-    );
+    const access = await this.accessRepository.getAccessByProfileId(user.profile.id);
 
     if (!access) {
-      throw new ForbiddenException(
-        'El usuario no esta asignado a ninguna empresa, contacta con tu administrador.',
-      );
+      throw new ForbiddenException('El usuario no esta asignado a ninguna empresa, contacta con tu administrador.');
     }
 
     // Generates token

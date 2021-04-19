@@ -25,10 +25,7 @@ export class ServicesService {
     private accountingCatalogRepository: AccountingCatalogRepository,
   ) {}
 
-  async getServices(
-    company: Company,
-    filter: ServiceFilterDTO,
-  ): Promise<Service[]> {
+  async getServices(company: Company, filter: ServiceFilterDTO): Promise<Service[]> {
     return this.serviceRepository.getFilteredServices(company, filter);
   }
 
@@ -36,13 +33,8 @@ export class ServicesService {
     return this.serviceRepository.getService(company, id);
   }
 
-  async getServiceIntegrations(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
-    const {
-      accountingCatalog,
-    } = await this.serviceRepository.getService(company, id, ['ac']);
+  async getServiceIntegrations(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    const { accountingCatalog } = await this.serviceRepository.getService(company, id, ['ac']);
 
     return {
       integrations: {
@@ -51,10 +43,7 @@ export class ServicesService {
     };
   }
 
-  async createService(
-    company: Company,
-    data: serviceDataDTO,
-  ): Promise<ResponseMinimalDTO> {
+  async createService(company: Company, data: serviceDataDTO): Promise<ResponseMinimalDTO> {
     const service = await this.serviceRepository.createService(company, data);
     return {
       id: service.id,
@@ -67,26 +56,17 @@ export class ServicesService {
     id: string,
     data: serviceDataDTO | serviceStatusDTO | ServiceIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    const service = await this.serviceRepository.updateService(
-      company,
-      data,
-      id,
-    );
+    const service = await this.serviceRepository.updateService(company, data, id);
     return {
       id: service.id,
       message: 'El servicio se ha actualizado correctamente.',
     };
   }
 
-  async deleteService(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteService(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const result = await this.serviceRepository.deleteService(company, id);
     return {
-      message: result
-        ? 'Se ha eliminado el servicio correctamente'
-        : 'No se ha podido eliminar el servicio',
+      message: result ? 'Se ha eliminado el servicio correctamente' : 'No se ha podido eliminar el servicio',
     };
   }
 
@@ -105,22 +85,13 @@ export class ServicesService {
 
     return {
       integrations: {
-        catalog:
-          settings && settings.accountingCatalog
-            ? settings.accountingCatalog.id
-            : null,
+        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
       },
     };
   }
 
-  async updateSettingsIntegrations(
-    company: Company,
-    data: ServiceIntegrationDTO,
-  ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
-      data,
-      company,
-    );
+  async updateSettingsIntegrations(company: Company, data: ServiceIntegrationDTO): Promise<ResponseMinimalDTO> {
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
 
     const settings = await this.serviceSettingRepository.getSettings(company);
 

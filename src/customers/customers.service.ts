@@ -1,10 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import {
-  ResponseMinimalDTO,
-  ResponseSingleDTO,
-} from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
@@ -48,10 +45,7 @@ export class CustomersService {
     private customerSettingRepository: CustomerSettingRepository,
   ) {}
 
-  async getCustomers(
-    company: Company,
-    data: CustomerFilterDTO,
-  ): Promise<Customer[]> {
+  async getCustomers(company: Company, data: CustomerFilterDTO): Promise<Customer[]> {
     return this.customerRepository.getCustomers(company, data);
   }
 
@@ -59,15 +53,8 @@ export class CustomersService {
     return this.customerRepository.getCustomer(id, company);
   }
 
-  async getCustomerIntegration(
-    id: string,
-    company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    const { accountingCatalog } = await this.customerRepository.getCustomer(
-      id,
-      company,
-      ['ac'],
-    );
+  async getCustomerIntegration(id: string, company: Company): Promise<ResponseMinimalDTO> {
+    const { accountingCatalog } = await this.customerRepository.getCustomer(id, company, ['ac']);
 
     return {
       integrations: {
@@ -76,19 +63,12 @@ export class CustomersService {
     };
   }
 
-  async getCustomerSettingIntegrations(
-    company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
-      company,
-    );
+  async getCustomerSettingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
+    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
 
     return {
       integrations: {
-        catalog:
-          settings && settings.accountingCatalog
-            ? settings.accountingCatalog.id
-            : null,
+        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
       },
     };
   }
@@ -97,14 +77,9 @@ export class CustomersService {
     company: Company,
     data: CustomerIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
-      data,
-      company,
-    );
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
 
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(
-      company,
-    );
+    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
     if (settings) {
       await this.customerSettingRepository.updateCustomerSetting(company, data);
       return {
@@ -112,19 +87,13 @@ export class CustomersService {
       };
     }
 
-    await this.customerSettingRepository.createSettingIntegration(
-      company,
-      data,
-    );
+    await this.customerSettingRepository.createSettingIntegration(company, data);
     return {
       message: 'La integración ha sido agregada correctamente.',
     };
   }
 
-  async getCustomerTributary(
-    id: string,
-    company: Company,
-  ): Promise<ResponseSingleDTO<Customer>> {
+  async getCustomerTributary(id: string, company: Company): Promise<ResponseSingleDTO<Customer>> {
     const {
       dui,
       nit,
@@ -165,10 +134,7 @@ export class CustomersService {
   }
 
   async createCustomer(company: Company, data): Promise<ResponseMinimalDTO> {
-    const customer = await this.customerRepository.createCustomer(
-      company,
-      data,
-    );
+    const customer = await this.customerRepository.createCustomer(company, data);
     const { id } = customer;
     await this.customerBranchRepository.createBranch(id, data.branch);
     return {
@@ -177,11 +143,7 @@ export class CustomersService {
     };
   }
 
-  async updateCustomer(
-    id: string,
-    data: CustomerDataDTO,
-    company: Company,
-  ): Promise<ResponseMinimalDTO> {
+  async updateCustomer(id: string, data: CustomerDataDTO, company: Company): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.updateBranch(id, data.branch);
     delete data.branch;
 
@@ -191,11 +153,7 @@ export class CustomersService {
     };
   }
 
-  async UpdateStatusCustomer(
-    id: string,
-    data: CustomerStatusDTO,
-    company: Company,
-  ): Promise<ResponseMinimalDTO> {
+  async UpdateStatusCustomer(id: string, data: CustomerStatusDTO, company: Company): Promise<ResponseMinimalDTO> {
     await this.customerRepository.updateCustomer(id, data, company);
     return {
       message: 'El cliente se actualizo correctamente',
@@ -207,24 +165,16 @@ export class CustomersService {
     data: CustomerIntegrationDTO,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
-      data,
-      company,
-    );
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
     await this.customerRepository.updateCustomer(id, data, company);
     return {
       message: 'El cliente se actualizo correctamente',
     };
   }
-  async deleteCustomer(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteCustomer(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const result = await this.customerRepository.deleteCustomer(company, id);
     return {
-      message: result
-        ? 'Se ha eliminado el servicio correctamente'
-        : 'No se ha podido eliminar el servicio',
+      message: result ? 'Se ha eliminado el servicio correctamente' : 'No se ha podido eliminar el servicio',
     };
   }
 }

@@ -1,10 +1,8 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceDocumentDataDTO } from '../dtos/invoice-document-data.dto';
 import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 
 const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
@@ -27,6 +25,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     }
     return documents;
   }
+
   async getSequenceAvailable(
     company: Company,
     documentType: number,
@@ -75,11 +74,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     return document;
   }
 
-  async getDocumentsByIds(
-    company: Company,
-    id: string[],
-    type: string,
-  ): Promise<InvoicesDocument[]> {
+  async getDocumentsByIds(company: Company, id: string[], type: string): Promise<InvoicesDocument[]> {
     let invoiceDocuments;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
@@ -118,11 +113,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     return invoiceDocuments;
   }
 
-  async createUpdateDocument(
-    company: Company,
-    documents: any,
-    type: string,
-  ): Promise<InvoicesDocument[]> {
+  async createUpdateDocument(company: Company, documents: any, type: string): Promise<InvoicesDocument[]> {
     let response;
     try {
       let document;
@@ -142,11 +133,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     return response;
   }
 
-  async updateInvoiceDocument(
-    id: string,
-    data: Partial<InvoiceDocumentDBDTO>,
-    company: Company,
-  ): Promise<any> {
+  async updateInvoiceDocument(id: string, data: Partial<InvoiceDocumentDBDTO>, company: Company): Promise<any> {
     try {
       const document = this.update({ id, company }, data);
       return document;

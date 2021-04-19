@@ -9,9 +9,7 @@ export class BranchRepository extends Repository<Branch> {
       const branch = await this.createQueryBuilder('b').where({ id }).getOne();
       return branch;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener la empresa seleccionada.',
-      );
+      throw new InternalServerErrorException('Error al obtener la empresa seleccionada.');
     }
   }
 }

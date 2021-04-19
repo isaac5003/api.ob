@@ -22,35 +22,17 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async getFilteredServices(
-    company: Company,
-    filter?: ServiceFilterDTO,
-  ): Promise<Service[]> {
-    const {
-      limit,
-      page,
-      search,
-      active,
-      prop,
-      order,
-      type,
-      fromAmount,
-      toAmount,
-    } = filter;
+  async getFilteredServices(company: Company, filter?: ServiceFilterDTO): Promise<Service[]> {
+    const { limit, page, search, active, prop, order, type, fromAmount, toAmount } = filter;
 
     try {
-      const query = this.createQueryBuilder('s')
-        .where({ company })
-        .leftJoinAndSelect('s.sellingType', 'st');
+      const query = this.createQueryBuilder('s').where({ company }).leftJoinAndSelect('s.sellingType', 'st');
 
       // filter by search value
       if (search) {
-        query.andWhere(
-          'LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search',
-          {
-            search: `%${search}%`,
-          },
-        );
+        query.andWhere('LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search', {
+          search: `%${search}%`,
+        });
       }
 
       // filter by status
@@ -87,11 +69,7 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async getService(
-    company: Company,
-    id: string,
-    joins: string[] = [],
-  ): Promise<Service> {
+  async getService(company: Company, id: string, joins: string[] = []): Promise<Service> {
     let service: Service;
 
     const leftJoinAndSelect = {
@@ -124,10 +102,7 @@ export class ServiceRepository extends Repository<Service> {
     return service;
   }
 
-  async createService(
-    company: Company,
-    data: serviceDataDTO,
-  ): Promise<Service> {
+  async createService(company: Company, data: serviceDataDTO): Promise<Service> {
     let response: Service;
     try {
       const service = this.create({ company, ...data });

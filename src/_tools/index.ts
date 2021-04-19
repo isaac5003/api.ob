@@ -1,7 +1,4 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;
@@ -64,31 +61,14 @@ export function numeroALetras(num: number, currency?: any): string {
     data.letrasCentavos = '00/100';
     data.enteros++;
   } else if (data.centavos > 0) {
-    data.letrasCentavos = `${data.centavos.toString().length == 1 ? '0' : ''}${
-      data.centavos
-    }/100`;
+    data.letrasCentavos = `${data.centavos.toString().length == 1 ? '0' : ''}${data.centavos}/100`;
   } else {
     data.letrasCentavos = '00/100';
   }
 
-  if (data.enteros == 0)
-    return 'CERO ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
-  if (data.enteros == 1)
-    return (
-      Millones(data.enteros) +
-      ' ' +
-      data.letrasMonedaSingular +
-      ' ' +
-      data.letrasCentavos
-    );
-  else
-    return (
-      Millones(data.enteros) +
-      ' ' +
-      data.letrasMonedaPlural +
-      ' ' +
-      data.letrasCentavos
-    );
+  if (data.enteros == 0) return 'CERO ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
+  if (data.enteros == 1) return Millones(data.enteros) + ' ' + data.letrasMonedaSingular + ' ' + data.letrasCentavos;
+  else return Millones(data.enteros) + ' ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
 
   function Unidades(num) {
     switch (num) {

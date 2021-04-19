@@ -1,12 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  IsOptional,
-  IsString,
-  IsNotEmpty,
-  IsInt,
-  ValidateNested,
-  IsBoolean,
-} from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested, IsBoolean } from 'class-validator';
 import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
 import { validationMessage } from 'src/_tools';
 import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';
@@ -24,24 +17,12 @@ export class CustomerDataDTO {
   shortName: string;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : null,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
   isProvider: boolean;
 
   @IsNotEmpty({ message: validationMessage('isCustomer', 'IsNotEmpty') })
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : null,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('isCustomer', 'IsBoolean') })
   isCustomer: boolean;
 

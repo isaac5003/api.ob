@@ -17,10 +17,7 @@ import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 const reponame = 'documento';
 @EntityRepository(Invoice)
 export class InvoiceRepository extends Repository<Invoice> {
-  async getInvoices(
-    company: Company,
-    filter: Partial<InvoiceFilterDTO>,
-  ): Promise<Invoice[]> {
+  async getInvoices(company: Company, filter: Partial<InvoiceFilterDTO>): Promise<Invoice[]> {
     const {
       limit,
       page,
@@ -132,11 +129,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     }
   }
 
-  async getInvoice(
-    company: Company,
-    id: string,
-    joins: string[] = [],
-  ): Promise<Invoice> {
+  async getInvoice(company: Company, id: string, joins: string[] = []): Promise<Invoice> {
     let invoice: Invoice;
 
     const leftJoinAndSelect = {
@@ -240,11 +233,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async createReserveInvoice(
-    company: Company,
-    branch: Branch,
-    data: any,
-  ): Promise<Partial<Invoice[]>> {
+  async createReserveInvoice(company: Company, branch: Branch, data: any): Promise<Partial<Invoice[]>> {
     let response;
     try {
       const invoice = this.create([...data]);
@@ -257,11 +246,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async updateInvoice(
-    id: string,
-    company: Company,
-    data: Partial<InvoiceHeaderDataDTO>,
-  ): Promise<any> {
+  async updateInvoice(id: string, company: Company, data: Partial<InvoiceHeaderDataDTO>): Promise<any> {
     try {
       const invoice = this.update({ id, company }, data);
       return invoice;
@@ -270,11 +255,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     }
   }
 
-  async deleteInvoice(
-    company: Company,
-    id: string,
-    invoice: Invoice,
-  ): Promise<boolean> {
+  async deleteInvoice(company: Company, id: string, invoice: Invoice): Promise<boolean> {
     try {
       await this.delete(invoice.id);
     } catch (error) {

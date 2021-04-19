@@ -10,18 +10,12 @@ import { logDatabaseError } from 'src/_tools';
 const reponame = 'cliente';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(
-    company: Company,
-    filter: CustomerFilterDTO,
-  ): Promise<Customer[]> {
+  async getCustomers(company: Company, filter: CustomerFilterDTO): Promise<Customer[]> {
     try {
       const { active, limit, page, search, order, prop } = filter;
       const query = this.createQueryBuilder('customer')
         .leftJoinAndSelect('customer.customerType', 'customerType')
-        .leftJoinAndSelect(
-          'customer.customerTypeNatural',
-          'customerTypeNatural',
-        )
+        .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural')
         .where({ company });
 
       if (active) {
@@ -39,10 +33,7 @@ export class CustomerRepository extends Repository<Customer> {
       }
 
       if (order && prop) {
-        query.orderBy(
-          `customer.${prop}`,
-          order == 'ascending' ? 'ASC' : 'DESC',
-        );
+        query.orderBy(`customer.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
         query.orderBy('customer.createdAt', 'DESC');
       }
@@ -53,11 +44,7 @@ export class CustomerRepository extends Repository<Customer> {
     }
   }
 
-  async getCustomer(
-    id: string,
-    company: Company,
-    joins: string[] = [],
-  ): Promise<Customer> {
+  async getCustomer(id: string, company: Company, joins: string[] = []): Promise<Customer> {
     let customer: Customer;
     const leftJoinAndSelect = {
       ct: 'c.customerType',
@@ -90,10 +77,7 @@ export class CustomerRepository extends Repository<Customer> {
     return customer;
   }
 
-  async createCustomer(
-    company: Company,
-    data: CustomerDataDTO,
-  ): Promise<Customer> {
+  async createCustomer(company: Company, data: CustomerDataDTO): Promise<Customer> {
     let response: Customer;
     try {
       const customer = this.create({ company, ...data });

@@ -17,13 +17,7 @@ export class DocumentBasicsLayoutDTO {
   value: string;
 
   @IsNotEmpty({ message: validationMessage('show', 'IsNotEmpty') })
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 1,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('show', 'IsBoolean') })
   show: boolean;
 }

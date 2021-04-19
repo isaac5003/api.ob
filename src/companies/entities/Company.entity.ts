@@ -78,40 +78,22 @@ export class Company extends BaseEntity {
   @OneToMany(() => Access, (access) => access.company)
   accesses: Access[];
 
-  @OneToMany(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.company,
-  )
+  @OneToMany(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.company)
   accountingCatalogs: AccountingCatalog[];
 
-  @OneToMany(
-    () => AccountingEntry,
-    (accountingEntry) => accountingEntry.company,
-  )
+  @OneToMany(() => AccountingEntry, (accountingEntry) => accountingEntry.company)
   accountingEntries: AccountingEntry[];
 
-  @OneToMany(
-    () => AccountingEntryDetail,
-    (accountingEntryDetail) => accountingEntryDetail.company,
-  )
+  @OneToMany(() => AccountingEntryDetail, (accountingEntryDetail) => accountingEntryDetail.company)
   accountingEntryDetails: AccountingEntryDetail[];
 
-  @OneToMany(
-    () => AccountingEntryType,
-    (accountingEntryType) => accountingEntryType.company,
-  )
+  @OneToMany(() => AccountingEntryType, (accountingEntryType) => accountingEntryType.company)
   accountingEntryTypes: AccountingEntryType[];
 
-  @OneToMany(
-    () => AccountingRegisterType,
-    (accountingRegisterType) => accountingRegisterType.company,
-  )
+  @OneToMany(() => AccountingRegisterType, (accountingRegisterType) => accountingRegisterType.company)
   accountingRegisterTypes: AccountingRegisterType[];
 
-  @OneToMany(
-    () => AccountingSetting,
-    (accountingSetting) => accountingSetting.company,
-  )
+  @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.company)
   accountingSettings: AccountingSetting[];
 
   @OneToMany(() => Branch, (branch) => branch.company)
@@ -129,25 +111,16 @@ export class Company extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];
 
-  @OneToMany(
-    () => CustomerSetting,
-    (customerSetting) => customerSetting.company,
-  )
+  @OneToMany(() => CustomerSetting, (customerSetting) => customerSetting.company)
   customerSettings: CustomerSetting[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.company)
   invoices: Invoice[];
 
-  @OneToMany(
-    () => InvoicesDocument,
-    (invoicesDocument) => invoicesDocument.company,
-  )
+  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.company)
   invoicesDocuments: InvoicesDocument[];
 
-  @OneToMany(
-    () => InvoicesPaymentsCondition,
-    (invoicesPaymentsCondition) => invoicesPaymentsCondition.company,
-  )
+  @OneToMany(() => InvoicesPaymentsCondition, (invoicesPaymentsCondition) => invoicesPaymentsCondition.company)
   invoicesPaymentsConditions: InvoicesPaymentsCondition[];
 
   @OneToMany(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.company)

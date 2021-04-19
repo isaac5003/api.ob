@@ -7,13 +7,7 @@ export class InvoiceAuxiliarUpdateDTO {
   name: string;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 2,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 2))
   @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
   active: boolean;
 
@@ -21,13 +15,7 @@ export class InvoiceAuxiliarUpdateDTO {
   invoicesZone: string;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 2,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 2))
   @IsBoolean({ message: validationMessage('cashPayment', 'IsBoolean') })
   cashPayment: boolean;
 }

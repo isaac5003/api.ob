@@ -51,9 +51,6 @@ export class InvoicesDocument extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.invoicesDocuments)
   company: Company;
 
-  @ManyToOne(
-    () => InvoicesDocumentType,
-    (invoicesDocumentType) => invoicesDocumentType.invoicesDocuments,
-  )
+  @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoicesDocuments)
   documentType: InvoicesDocumentType;
 }

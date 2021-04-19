@@ -47,9 +47,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const branch = await this.branchRepository.getBranchById(bid);
     const profile = await this.profileRepository.getProfileById(pid);
     if (!user) {
-      throw new UnauthorizedException(
-        'Debes iniciar sesión para poder realizar esta acción.',
-      );
+      throw new UnauthorizedException('Debes iniciar sesión para poder realizar esta acción.');
     }
     return { user, company, branch, profile };
   }

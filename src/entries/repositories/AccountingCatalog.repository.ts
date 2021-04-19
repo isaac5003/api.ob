@@ -24,15 +24,10 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
     return account;
   }
 
-  async getAccountingCatalogNotUsed(
-    data: CustomerIntegrationDTO,
-    company: Company,
-  ): Promise<AccountingCatalog> {
+  async getAccountingCatalogNotUsed(data: CustomerIntegrationDTO, company: Company): Promise<AccountingCatalog> {
     const account = await this.getAccountingCatalog(data, company);
     if (account.isParent) {
-      throw new BadRequestException(
-        "La 'cuenta contable' selecciona no puede ser utilizada ya que no es asignable.",
-      );
+      throw new BadRequestException("La 'cuenta contable' selecciona no puede ser utilizada ya que no es asignable.");
     }
     return account;
   }

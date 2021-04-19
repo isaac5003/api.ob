@@ -2,23 +2,17 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceAuxiliarDataDTO } from '../dtos/invoice-auxiliar-data.dto';
 import { SellerCreateDTO } from '../dtos/invoice-seller-create.dto';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 
 const reponame = 'vendedor';
 @EntityRepository(InvoicesSeller)
 export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
-  async getAllSellers(
-    company: Company,
-    filter: FilterDTO,
-  ): Promise<InvoicesSeller[]> {
+  async getAllSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
     const { limit, page, search, active } = filter;
 
     try {
-      const query = this.createQueryBuilder('s')
-        .where({ company })
-        .orderBy('s.createdAt', 'DESC');
+      const query = this.createQueryBuilder('s').where({ company }).orderBy('s.createdAt', 'DESC');
 
       // filter by status
       if (active || active == false) {
@@ -42,11 +36,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     }
   }
 
-  async getSeller(
-    company: Company,
-    id: string,
-    joins: string[] = [],
-  ): Promise<InvoicesSeller> {
+  async getSeller(company: Company, id: string, joins: string[] = []): Promise<InvoicesSeller> {
     let invoiceSeller: InvoicesSeller;
 
     const leftJoinAndSelect = {
@@ -77,10 +67,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     return invoiceSeller;
   }
 
-  async createSeller(
-    company: Company,
-    data: SellerCreateDTO,
-  ): Promise<InvoicesSeller> {
+  async createSeller(company: Company, data: SellerCreateDTO): Promise<InvoicesSeller> {
     let response: InvoicesSeller;
     try {
       const invoiceSeller = this.create({ company, ...data });
@@ -93,11 +80,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     return await response;
   }
 
-  async updateSeller(
-    id: string,
-    company: Company,
-    data: SellerCreateDTO,
-  ): Promise<any> {
+  async updateSeller(id: string, company: Company, data: SellerCreateDTO): Promise<any> {
     try {
       const seller = this.update({ id, company }, data);
       return seller;

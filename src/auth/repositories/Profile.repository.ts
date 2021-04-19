@@ -9,9 +9,7 @@ export class ProfileRepository extends Repository<Profile> {
       const profile = await this.createQueryBuilder('p').where({ id }).getOne();
       return profile;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener el perfil seleccionado.',
-      );
+      throw new InternalServerErrorException('Error al obtener el perfil seleccionado.');
     }
   }
 }

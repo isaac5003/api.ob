@@ -32,10 +32,7 @@ export class InvoicesZone extends BaseEntity {
   @OneToMany(() => Invoice, (invoice) => invoice.invoicesZone)
   invoices: Invoice[];
 
-  @OneToMany(
-    () => InvoicesSeller,
-    (invoicesSeller) => invoicesSeller.invoicesZone,
-  )
+  @OneToMany(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.invoicesZone)
   invoicesSellers: InvoicesSeller[];
 
   @ManyToOne(() => Company, (company) => company.invoicesZones)

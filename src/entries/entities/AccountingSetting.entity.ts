@@ -49,18 +49,12 @@ export class AccountingSetting extends BaseEntity {
   @Column({ nullable: true })
   auditor: string;
 
-  @ManyToOne(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.accountingSettings,
-  )
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingSettings)
   accountingCatalog: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.accountingSettings)
   company: Company;
 
-  @ManyToOne(
-    () => AccountingRegisterType,
-    (accountingRegisterType) => accountingRegisterType.accountingSettings,
-  )
+  @ManyToOne(() => AccountingRegisterType, (accountingRegisterType) => accountingRegisterType.accountingSettings)
   registerType: AccountingRegisterType;
 }
