@@ -2,7 +2,7 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { ActiveValidateDTO } from '../dtos/invoice-active-auxiliar.dto';
+import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 

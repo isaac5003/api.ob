@@ -22,9 +22,11 @@ import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
-import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoicesSeller } from './entities/InvoicesSeller.entity';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -41,6 +43,30 @@ export class InvoicesController {
   async getInvoicesStatus(): Promise<ResponseListDTO<InvoicesStatus>> {
     const invoices = await this.invoice.getInvoicesStatuses();
     return new ResponseListDTO(plainToClass(InvoicesStatus, invoices));
+  }
+
+  @Put('/status/void/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async voidInvoice(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return this.invoice.updateInvoicesStatus(company, id, 'void');
+  }
+
+  @Put('/status/printed/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async printedInvoice(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return this.invoice.updateInvoicesStatus(company, id, 'printed');
+  }
+
+  @Put('/status/paid/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async paidInvoice(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return this.invoice.updateInvoicesStatus(company, id, 'paid');
+  }
+
+  @Put('/status/reverse/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async reverseInvoice(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return this.invoice.updateInvoicesStatus(company, id, 'reverse');
   }
 
   @Get('/zones')
@@ -137,52 +163,52 @@ export class InvoicesController {
     return await this.invoice.deleteInvoicesPaymentCondition(company, id);
   }
 
-  // @Get('/sellers')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async getSellers(
-  //   @GetAuthData('company') company: Company,
-  //   @Query() filter: FilterDTO,
-  // ): Promise<ResponseListDTO<InvoicesSeller>> {
-  //   const sellers = await this.invoice.getSellers(company, filter);
-  //   return new ResponseListDTO(plainToClass(InvoicesSeller, sellers));
-  // }
+  @Get('/sellers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getInvoicesSellers(
+    @GetAuthData('company') company: Company,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseListDTO<InvoicesSeller>> {
+    const sellers = await this.invoice.getInvoicesSellers(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesSeller, sellers));
+  }
 
-  // @Post('/sellers')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async createSeller(
-  //   @GetAuthData('company') company: Company,
-  //   @Body() data: InvoiceSellerDataDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return await this.invoice.createSeller(company, data);
-  // }
+  @Post('/sellers')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createInvoicesSeller(
+    @GetAuthData('company') company: Company,
+    @Body() data: InvoiceSellerDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createInvoicesSeller(company, data);
+  }
 
-  // @Put('/sellers/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async updateSeller(
-  //   @GetAuthData('company') company: Company,
-  //   @Body() data: InvoiceAuxiliarUpdateDTO,
-  //   @Param('id') id: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return await this.invoice.updateSeller(id, company, data, 'seller');
-  // }
+  @Put('/sellers/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateInvoicesSeller(
+    @GetAuthData('company') company: Company,
+    @Body() data: InvoiceSellerDataDTO,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateInvoicesSeller(id, company, data);
+  }
 
-  // @Put('/sellers/status/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async updateSellerStatus(
-  //   @GetAuthData('company') company: Company,
-  //   @Body() data: ActiveValidateDTO,
-  //   @Param('id') id: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return await this.invoice.updateSeller(id, company, data, 'status');
-  // }
+  @Put('/sellers/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSellerStatus(
+    @GetAuthData('company') company: Company,
+    @Body() data: ActiveValidateDTO,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.updateInvoicesSeller(id, company, data);
+  }
 
-  // @Delete('/sellers/:id')
-  // async deleteInvoiceSeller(
-  //   @Param('id') id: string,
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return this.invoice.deleteSeller(company, id);
-  // }
+  @Delete('/sellers/:id')
+  async deleteInvoicesSeller(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.invoice.deleteInvoicesSeller(company, id);
+  }
 
   // @Get('/documents')
   // @UsePipes(new ValidationPipe({ transform: true }))
@@ -303,42 +329,6 @@ export class InvoicesController {
   //   @GetAuthData('company') company: Company,
   // ): Promise<ResponseMinimalDTO> {
   //   return this.invoice.updateInvoice(company, id, { header, details });
-  // }
-
-  // @Put('/status/void/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async voidInvoice(
-  //   @Param('id') id: string,
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return this.invoice.updateInvoiceStatus(company, id, 'void');
-  // }
-
-  // @Put('/status/printed/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async printedInvoice(
-  //   @Param('id') id: string,
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return this.invoice.updateInvoiceStatus(company, id, 'printed');
-  // }
-
-  // @Put('/status/paid/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async paidInvoice(
-  //   @Param('id') id: string,
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return this.invoice.updateInvoiceStatus(company, id, 'paid');
-  // }
-
-  // @Put('/status/reverse/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async reverseInvoice(
-  //   @Param('id') id: string,
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return this.invoice.updateInvoiceStatus(company, id, 'reverse');
   // }
 
   // @Delete('/:id')

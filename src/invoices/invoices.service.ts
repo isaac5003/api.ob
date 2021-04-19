@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
@@ -6,11 +6,13 @@ import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBra
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
-import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSeller } from './entities/InvoicesSeller.entity';
 import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { InvoiceRepository } from './repositories/Invoice.repository';
@@ -37,6 +39,9 @@ export class InvoicesService {
     @InjectRepository(InvoicesPaymentsConditionRepository)
     private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionRepository,
 
+    @InjectRepository(InvoicesSellerRepository)
+    private invoiceSellerRepository: InvoicesSellerRepository,
+
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
 
@@ -45,9 +50,6 @@ export class InvoicesService {
 
     @InjectRepository(CustomerBranchRepository)
     private customerBranchRepository: CustomerBranchRepository,
-
-    @InjectRepository(InvoicesSellerRepository)
-    private invoiceSellerRepository: InvoicesSellerRepository,
 
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
@@ -64,7 +66,57 @@ export class InvoicesService {
   }
 
   async getInvoicesStatuses(): Promise<InvoicesStatus[]> {
-    return await this.invoiceStatusRepository.getInvoicesStatus();
+    return await this.invoiceStatusRepository.getInvoicesStatuses();
+  }
+
+  async updateInvoicesStatus(company: Company, id: string, type: string): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
+
+    let status: InvoicesStatus;
+    let statuses = [];
+
+    switch (type) {
+      case 'void':
+        status = await this.invoiceStatusRepository.getInvoicesStatus(3);
+        statuses = [1, 2];
+        break;
+      case 'printed':
+        status = await this.invoiceStatusRepository.getInvoicesStatus(2);
+        statuses = [1, 2];
+        break;
+      case 'paid':
+        status = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        statuses = [2];
+        break;
+      case 'reverse':
+        let newStatus = null;
+        switch (invoice.status.id) {
+          case 2:
+            newStatus = 1;
+            break;
+          case 3:
+            newStatus = 2;
+            break;
+          case 5:
+            newStatus = 2;
+            break;
+        }
+        status = await this.invoiceStatusRepository.getInvoicesStatus(newStatus);
+        statuses = [2, 3, 5];
+        break;
+    }
+
+    if (!statuses.includes(invoice.status.id)) {
+      throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
+    }
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+
+    return {
+      message:
+        type == 'reverse'
+          ? `La venta se revertio correctamente, ha sido marcada como ${status.name.toLowerCase()}.`
+          : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
+    };
   }
 
   async getInvoicesZones(company: Company, filter: Partial<FilterDTO>): Promise<InvoicesZone[]> {
@@ -137,142 +189,44 @@ export class InvoicesService {
     };
   }
 
-  // async updateInvoiceStatus(
-  //   company: Company,
-  //   id: string,
-  //   type: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const invoice = await this.invoiceRepository.getInvoice(company, id);
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
+    return await this.invoiceSellerRepository.getInvoicesSellers(company, filter);
+  }
 
-  //   let status: InvoicesStatus;
-  //   let statuses = [];
+  async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
+    const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
+      company,
+      (data.invoicesZone as unknown) as string,
+    );
+    const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
+    return {
+      id: seller.id,
+      message: 'El vendedor se ha creado correctamente',
+    };
+  }
 
-  //   switch (type) {
-  //     case 'void':
-  //       status = await this.invoiceStatusRepository.getInvoiceStatus(3);
-  //       // Verifica que tenga uno de los estados que pueden anularse
-  //       statuses = [1, 2];
-  //       break;
-  //     case 'printed':
-  //       status = await this.invoiceStatusRepository.getInvoiceStatus(2);
-  //       statuses = [1, 2];
-  //       break;
-  //     case 'paid':
-  //       status = await this.invoiceStatusRepository.getInvoiceStatus(5);
-  //       statuses = [2];
-  //       break;
-  //     case 'reverse':
-  //       let newStatus = null;
-  //       switch (invoice.status.id) {
-  //         case 2:
-  //           newStatus = 1;
-  //           break;
-  //         case 3:
-  //           newStatus = 2;
-  //           break;
-  //         case 5:
-  //           newStatus = 2;
-  //           break;
-  //       }
+  async updateInvoicesSeller(
+    id: string,
+    company: Company,
+    data: InvoiceSellerDataDTO | ActiveValidateDTO,
+  ): Promise<ResponseMinimalDTO> {
+    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
+    await this.invoiceSellerRepository.updateInvoicesSeller(id, company, data);
 
-  //       status = await this.invoiceStatusRepository.getInvoiceStatus(newStatus);
-  //       statuses = [2, 3, 5];
-  //       break;
-  //   }
+    return {
+      message: 'El vendedor se actualizo correctamente.',
+    };
+  }
 
-  //   if (!statuses.includes(invoice.status.id)) {
-  //     throw new BadRequestException(
-  //       validationMessage(status.name.toLowerCase(), 'status'),
-  //     );
-  //   }
-  //   await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+  async deleteInvoicesSeller(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
 
-  //   return {
-  //     message:
-  //       type == 'reverse'
-  //         ? `La venta ha sido marcada como ${status.name.toLowerCase()}, se revertio correctamente.`
-  //         : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
-  //   };
-  // }
+    const result = await this.invoiceSellerRepository.deleteInvoicesSeller(company, id);
 
-  // async getSellers(
-  //   company: Company,
-  //   filter: FilterDTO,
-  // ): Promise<InvoicesSeller[]> {
-  //   return await this.invoiceSellerRepository.getAllSellers(company, filter);
-  // }
-
-  // async createSeller(
-  //   company: Company,
-  //   data: InvoiceSellerDataDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
-  //     company,
-  //     data.invoicesZone,
-  //   );
-  //   const sellerToCreate = {
-  //     ...data,
-  //     invoicesZone,
-  //   };
-
-  //   const seller = await this.invoiceSellerRepository.createSeller(
-  //     company,
-  //     sellerToCreate,
-  //   );
-
-  //   return {
-  //     id: seller.id,
-  //     message: 'El vendedor se ha creado correctamente',
-  //   };
-  // }
-
-  // async updateSeller(
-  //   id: string,
-  //   company: Company,
-  //   data: Partial<InvoiceAuxiliarUpdateDTO>,
-  //   type: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   await this.invoiceSellerRepository.getSeller(company, id);
-  //   let seller;
-  //   switch (type) {
-  //     case 'seller':
-  //       const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
-  //         company,
-  //         data.invoicesZone,
-  //       );
-  //       seller = {
-  //         ...data,
-  //         invoicesZone,
-  //       };
-  //       break;
-  //     case 'status':
-  //       seller = {
-  //         active: data.active,
-  //       };
-  //       break;
-  //   }
-
-  //   await this.invoiceSellerRepository.updateSeller(id, company, seller);
-
-  //   return {
-  //     message: 'El vendedor se actualizo correctamente.',
-  //   };
-  // }
-
-  // async deleteSeller(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   await this.invoiceSellerRepository.getSeller(company, id);
-
-  //   const result = await this.invoiceSellerRepository.deleteSeller(company, id);
-
-  //   return {
-  //     message: result
-  //       ? 'Se ha eliminado el vendedor correctamente'
-  //       : 'No se ha podido eliminar el vendedor',
-  //   };
-  // }
+    return {
+      message: result ? 'Se ha eliminado el vendedor correctamente' : 'No se ha podido eliminar el vendedor',
+    };
+  }
 
   // async getDocuments(
   //   company: Company,

@@ -2,13 +2,14 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { SellerCreateDTO } from '../dtos/invoice-seller-create.dto';
+import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
+import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 
 const reponame = 'vendedor';
 @EntityRepository(InvoicesSeller)
 export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
-  async getAllSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
     const { limit, page, search, active } = filter;
 
     try {
@@ -36,7 +37,20 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     }
   }
 
-  async getSeller(company: Company, id: string, joins: string[] = []): Promise<InvoicesSeller> {
+  async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<InvoicesSeller> {
+    let response: InvoicesSeller;
+    try {
+      const invoiceSeller = this.create({ company, ...data });
+      response = await this.save(invoiceSeller);
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return await response;
+  }
+
+  async getInvoicesSeller(company: Company, id: string, joins: string[] = []): Promise<InvoicesSeller> {
     let invoiceSeller: InvoicesSeller;
 
     const leftJoinAndSelect = {
@@ -67,29 +81,20 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     return invoiceSeller;
   }
 
-  async createSeller(company: Company, data: SellerCreateDTO): Promise<InvoicesSeller> {
-    let response: InvoicesSeller;
+  async updateInvoicesSeller(
+    id: string,
+    company: Company,
+    data: InvoiceSellerDataDTO | ActiveValidateDTO,
+  ): Promise<InvoicesSeller> {
     try {
-      const invoiceSeller = this.create({ company, ...data });
-      response = await this.save(invoiceSeller);
-    } catch (error) {
-      console.error(error);
-
-      logDatabaseError(reponame, error);
-    }
-    return await response;
-  }
-
-  async updateSeller(id: string, company: Company, data: SellerCreateDTO): Promise<any> {
-    try {
-      const seller = this.update({ id, company }, data);
-      return seller;
+      await this.update({ id, company }, data);
+      return this.findOne({ id, company });
     } catch (error) {
       logDatabaseError(reponame, error);
     }
   }
 
-  async deleteSeller(company: Company, id: string): Promise<boolean> {
+  async deleteInvoicesSeller(company: Company, id: string): Promise<boolean> {
     try {
       await this.delete({ id, company });
     } catch (error) {

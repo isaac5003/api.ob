@@ -39,8 +39,6 @@ export function validationMessage(fieldname: string, type: string): string {
       return `El campo '${fieldname}' debe ser del tipo uuid".`;
     case 'IsNumber':
       return `El campo '${fieldname}' debe ser debe contener dos decimales".`;
-    case 'status':
-      return `La venta no puede ser ${fieldname} porque tiene un estado que no lo permite.`;
   }
 }
 
