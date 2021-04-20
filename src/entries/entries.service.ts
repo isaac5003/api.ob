@@ -6,6 +6,7 @@ import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-int
 import { serviceDataDTO } from 'src/services/dtos/service-data.dto';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import {
+  ResponseListDTO,
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
@@ -25,6 +26,15 @@ import { AccountingSettingRepository } from './repositories/AccountingSetting.re
 import { parseISO, differenceInMonths } from 'date-fns';
 import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
 import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
+import { AccountingEntry } from './entities/AccountingEntry.entity';
+import { EntriesFilterDTO } from './dtos/entries-filter.dto';
+import { AccountingEntryDetailRepository } from './repositories/AccountingEntryDetail.repository';
+import { format } from 'date-fns';
+import { allowedNodeEnvironmentFlags } from 'node:process';
+import { EntryDataDTO } from './dtos/entries-data.dto';
+import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
+import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
+import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
 
 @Injectable()
 export class EntriesService {
@@ -43,6 +53,9 @@ export class EntriesService {
 
     @InjectRepository(AccountingSettingRepository)
     private accountingSettingRepository: AccountingSettingRepository,
+
+    @InjectRepository(AccountingEntryDetailRepository)
+    private accountingEntryDetailRepository: AccountingEntryDetailRepository,
   ) {}
 
   async getAccountingCatalogs(
@@ -176,22 +189,7 @@ export class EntriesService {
     company: Company,
     data: SeriesDTO,
   ): Promise<ResponseMinimalDTO> {
-    const series = await this.accountingEntryRepository.getSeries(
-      company,
-      data,
-    );
-
-    const currentEntries = series
-      .map((e) => parseInt(e.serie))
-      .sort((a, b) => {
-        if (a < b) return 1;
-        if (a > b) return -1;
-        return 0;
-      });
-
-    return {
-      nextSerie: currentEntries.length > 0 ? currentEntries[0] + 1 : 1,
-    };
+    return await this.accountingEntryRepository.getSeries(company, data);
   }
 
   async getResgisterType(company: Company): Promise<AccountingRegisterType[]> {
@@ -322,6 +320,140 @@ export class EntriesService {
 
     return {
       message: 'hola',
+    };
+  }
+
+  async getEntries(
+    company: Company,
+    filter: EntriesFilterDTO,
+  ): Promise<ResponseListDTO<AccountingEntry>> {
+    const entries = await this.accountingEntryRepository.getEntries(
+      company,
+      filter,
+    );
+
+    // for (const entry of entries) {
+    //   const details = await this.accountingEntryDetailRepository.getDetails(
+    //     entry.id,
+    //   );
+
+    //   entry.cargo = details.reduce((a, b) => a + b.cargo, 0);
+    // }
+    return new ResponseListDTO(plainToClass(AccountingEntry, entries));
+  }
+
+  async getEntry(
+    company: Company,
+    id: string,
+  ): Promise<ResponseSingleDTO<AccountingEntry>> {
+    const entry = await this.accountingEntryRepository.getEntry(company, id);
+
+    const entrie = {
+      ...entry,
+      rawDate: entry.date,
+      date: format(new Date(entry.date), 'dd/MM/yyyy'),
+      accountingEntryDetails: entry.accountingEntryDetails
+        .sort((a, b) => {
+          if (a.order > b.order) return 1;
+          if (a.order < b.order) return -1;
+          return 0;
+        })
+        .map((aed) => {
+          delete aed.accountingCatalog.description,
+            delete aed.accountingCatalog.level;
+          delete aed.accountingCatalog.isParent;
+          delete aed.accountingCatalog.isAcreedora;
+          delete aed.accountingCatalog.isBalance;
+
+          return {
+            ...aed,
+          };
+        }),
+    };
+
+    return new ResponseSingleDTO(plainToClass(AccountingEntry, entrie));
+  }
+
+  async createUpdateEntry(
+    company: Company,
+    header: any,
+    details: EntryDetailsDTO[],
+    type: string,
+    id?: string,
+  ): Promise<ResponseMinimalDTO> {
+    let message = '';
+    const { nextSerie } = await this.accountingEntryRepository.getSeries(
+      company,
+      {
+        accountingEntryType: header.accountingEntryType,
+        date: header.date,
+      },
+    );
+
+    if (header.serie != nextSerie) {
+      message = `El numero de serie asignado fué: ${nextSerie}`;
+    }
+
+    const entryType = await this.accountingEntryTypeRepository.getEntryType(
+      company,
+      header.accountingEntryType,
+    );
+
+    let headerInsert = {};
+    headerInsert = {
+      serie: nextSerie,
+      title: header.title,
+      date: header.date,
+      squared: header.squared,
+      accounted: header.accounted,
+      accountingEntryType: entryType,
+      company: company,
+    };
+
+    if (id) {
+      const entry = await this.accountingEntryRepository.getEntry(company, id);
+
+      headerInsert = {
+        ...headerInsert,
+        id: entry.id,
+      };
+
+      const deleteEntry = await this.accountingEntryDetailRepository.deleteEntryDetail(
+        entry.accountingEntryDetails.map((e) => e.id),
+      );
+    }
+
+    const entryHeader = await this.accountingEntryRepository.createUpdateEntry(
+      headerInsert,
+      type,
+    );
+
+    const detailsInsert = [];
+    for (const detail of details) {
+      const catalog = await this.accountingCatalogRepository.getAccountingCatalog(
+        detail.accountingCatalog,
+        company,
+        false,
+      );
+
+      detailsInsert.push({
+        ...detail,
+        catalogName: catalog.name,
+        accountingCatalog: catalog,
+        accountingEntry: entryHeader.id,
+        company: company,
+      });
+    }
+
+    await this.accountingEntryDetailRepository.createEntryDetails(
+      detailsInsert,
+    );
+    return {
+      id: entryHeader.id,
+      message:
+        type == 'create'
+          ? `La partida contable ha sido registrada correctamente. ${message}`
+          : `La partida contable ha sido actualizada correctamente.`,
     };
   }
 }

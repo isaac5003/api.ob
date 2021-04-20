@@ -25,16 +25,20 @@ import {
 import { AccountsDTO } from './dtos/entries-account.dto';
 import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/entries-accountingcatalog-update.dto';
+import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
+import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
+import { EntriesFilterDTO } from './dtos/entries-filter.dto';
+import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
 import { SeriesDTO } from './dtos/entries-series.dto';
 import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
 import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
 import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
+import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
 import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
 import { AccountingSetting } from './entities/AccountingSetting.entity';
 import { EntriesService } from './entries.service';
-import { AccountingRegisterTypeRepository } from './repositories/AccountingRegisterType.repository';
 
 @Controller('entries')
 @UseGuards(AuthGuard())
@@ -179,6 +183,56 @@ export class EntriesController {
       company,
       data,
       'integraciones',
+    );
+  }
+
+  @Get('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getEntries(
+    @GetAuthData('company') company: Company,
+    @Query() filter: EntriesFilterDTO,
+  ): Promise<ResponseListDTO<AccountingEntry>> {
+    return await this.entries.getEntries(company, filter);
+  }
+
+  @Get('/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getEntry(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+  ): Promise<ResponseSingleDTO<AccountingEntry>> {
+    return await this.entries.getEntry(company, id);
+  }
+
+  @Post('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createEntry(
+    @GetAuthData('company') company: Company,
+    @Body('header') header: EntryHeaderCreateDTO,
+    @Body('details') details: EntryDetailsDTO[],
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.createUpdateEntry(
+      company,
+      header,
+      details,
+      'create',
+    );
+  }
+
+  @Put('/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateEntry(
+    @GetAuthData('company') company: Company,
+    @Body('header') header: EntryHeaderDataDTO,
+    @Body('details') details: EntryDetailsDTO[],
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.createUpdateEntry(
+      company,
+      header,
+      details,
+      'update',
+      id,
     );
   }
 }
