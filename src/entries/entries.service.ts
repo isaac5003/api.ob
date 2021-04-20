@@ -29,12 +29,14 @@ import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
 import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
 import { AccountingEntryDetailRepository } from './repositories/AccountingEntryDetail.repository';
-import { format } from 'date-fns';
+import { format, endOfMonth } from 'date-fns';
 import { allowedNodeEnvironmentFlags } from 'node:process';
 import { EntryDataDTO } from './dtos/entries-data.dto';
 import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
 import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
 import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
+import { DiarioMayorDTO } from './dtos/entries-libromayor-report.dto';
+import { es } from 'date-fns/locale';
 
 @Injectable()
 export class EntriesService {
@@ -323,6 +325,255 @@ export class EntriesService {
     };
   }
 
+  async getReport(
+    company: Company,
+    data: DiarioMayorDTO,
+    reportType: string,
+  ): Promise<any> {
+    const rangeDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
+      company,
+      data,
+      'rangeDetails',
+    );
+
+    const previousDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
+      company,
+      data,
+      'previousDetail',
+    );
+
+    const signatures = await this.getSettings(company, 'firmantes');
+    const catalog = await this.accountingCatalogRepository.getAccountingCatalogsReport(
+      company,
+    );
+
+    // define el listado de cuentas contables afectadas en el periodo seleccionado
+    let affectedCatalog = [];
+    affectedCatalog = [
+      ...new Set(rangeDetails.map((d) => d.accountingCatalog.code)),
+    ];
+    let accounts = [];
+    let name = '';
+    switch (reportType) {
+      case 'diarioMayor':
+        // obtiene el saldo inicial por cuenta
+        accounts = affectedCatalog
+          .map((c) => {
+            const account = catalog.find((ct) => ct.code == c);
+            const abono = previousDetails
+              .filter((d) => d.accountingCatalog.code == c)
+              .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+            const cargo = previousDetails
+              .filter((d) => d.accountingCatalog.code == c)
+              .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+            const applicable = rangeDetails.filter(
+              (d) => d.accountingCatalog.code == c,
+            );
+            const movements = [];
+            for (const item of applicable) {
+              const found = movements.find(
+                (m) => m.date == item.accountingEntry.date,
+              );
+              if (found) {
+                found.cargo = found.cargo + (item.cargo ? item.cargo : 0);
+                found.abono = found.abono + (item.abono ? item.abono : 0);
+              } else {
+                movements.push({
+                  date: item.accountingEntry.date,
+                  cargo: item.cargo ? item.cargo : 0,
+                  abono: item.abono ? item.abono : 0,
+                  balance: 0,
+                });
+              }
+            }
+            const initialBalance = account.isAcreedora
+              ? abono - cargo
+              : cargo - abono;
+            let currentBalance = initialBalance;
+            return {
+              code: c,
+              name: account.name,
+              initialBalance: parseFloat(initialBalance.toFixed(2)),
+              movements: movements
+                .sort((a, b) => {
+                  if (new Date(a.date) > new Date(b.date)) return 1;
+                  if (new Date(a.date) < new Date(b.date)) return -1;
+                  return 0;
+                })
+                .map((m) => {
+                  currentBalance = parseFloat(
+                    (
+                      currentBalance +
+                      (account.isAcreedora
+                        ? m.abono - m.cargo
+                        : m.cargo - m.abono)
+                    ).toFixed(2),
+                  );
+                  return {
+                    ...m,
+                    date: format(new Date(m.date), 'dd/MM/yyyy'),
+                    balance: currentBalance,
+                  };
+                }),
+              totalAbono: movements.reduce((a, b) => a + b.abono, 0),
+              totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
+              currentBalance,
+            };
+          })
+          .sort((a, b) => {
+            if (a.code < b.code) return -1;
+            if (a.code > b.code) return 1;
+            return 0;
+          });
+
+        name = `LIBRO DIARIO MAYOR PARA EL MES DE ${format(
+          new Date(data.date),
+          'MMMM yyyy',
+          { locale: es },
+        ).toUpperCase()}`;
+        break;
+
+      case 'auxiliares':
+        // // obtiene el saldo inicial por cuenta
+        // accounts = affectedCatalog
+        //   .map((c) => {
+        //     const account = catalog.find((ct) => ct.code == c);
+        //     const abono = previousDetails
+        //       .filter((d) => d.accountingCatalog.code == c)
+        //       .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+        //     const cargo = previousDetails
+        //       .filter((d) => d.accountingCatalog.code == c)
+        //       .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+        //     const applicable = rangeDetails.filter(
+        //       (d) => d.accountingCatalog.code == c,
+        //     );
+        //     const movements = applicable.map((a) => {
+        //       return {
+        //         entryNumber: `Partida #${a.accountingEntry.serie}`,
+        //         entryName: a.concept,
+        //         date: a.accountingEntry.date,
+        //         cargo: a.cargo ? a.cargo.toFixed(2) : 0,
+        //         abono: a.abono ? a.abono.toFixed(2) : 0,
+        //         balance: 0,
+        //       };
+        //     });
+        //     const initialBalance = account.isAcreedora
+        //       ? abono - cargo
+        //       : cargo - abono;
+        //     let currentBalance = initialBalance;
+        //     return {
+        //       code: c,
+        //       name: account.name,
+        //       initialBalance: parseFloat(initialBalance.toFixed(2)),
+        //       movements: movements
+        //         .sort((a, b) => {
+        //           if (new Date(a.date) > new Date(b.date)) return 1;
+        //           if (new Date(a.date) < new Date(b.date)) return -1;
+        //           return 0;
+        //         })
+        //         .map((m) => {
+        //           currentBalance = parseFloat(
+        //             (
+        //               currentBalance +
+        //               (account.isAcreedora
+        //                 ? m.abono - m.cargo
+        //                 : m.cargo - m.abono)
+        //             ).toFixed(2),
+        //           );
+        //           return {
+        //             ...m,
+        //             date: format(new Date(m.date), 'dd/MM/yyyy'),
+        //             balance: currentBalance,
+        //           };
+        //         }),
+        //       totalAbono: movements.reduce((a, b) => a + b.abono, 0),
+        //       totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
+        //       currentBalance,
+        //     };
+        //   })
+        //   .sort((a, b) => {
+        //     if (a.code < b.code) return -1;
+        //     if (a.code > b.code) return 1;
+        //     return 0;
+        //   });
+
+        // name = `LIBROS DE AUXILIARES PARA EL MES DE ${format(
+        //   new Date(date.date),
+        //   'MMMM yyyy',
+        //   { locale: es },
+        // ).toUpperCase()}`;
+        break;
+
+      case 'accountMovements':
+        break;
+
+      case 'balanceComprobacion':
+        affectedCatalog = [
+          ...rangeDetails.map((d) => d.accountingCatalog.code),
+        ].concat(...previousDetails.map((d) => d.accountingCatalog.code));
+
+        accounts = catalog
+          .filter((c) => {
+            return affectedCatalog.some((ac) => ac.startsWith(c.code));
+          })
+          .map((c) => {
+            let initialBalance = previousDetails
+              .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+              .reduce((a, b) => {
+                return (
+                  a +
+                  (b.accountingCatalog.isAcreedora
+                    ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
+                    : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0))
+                );
+              }, 0);
+            initialBalance = parseFloat(initialBalance.toFixed(2));
+            let cargo = rangeDetails
+              .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+              .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
+            cargo = parseFloat(cargo.toFixed(2));
+            let abono = rangeDetails
+              .filter((d) => d.accountingCatalog.code.startsWith(c.code))
+              .reduce((a, b) => a + (b.abono ? b.abono : 0), 0);
+            abono = parseFloat(abono.toFixed(2));
+            let currentBalance = c.isAcreedora ? abono - cargo : cargo - abono;
+            currentBalance = parseFloat(currentBalance.toFixed(2));
+            return {
+              code: c.code,
+              name: c.name,
+              initialBalance,
+              cargo,
+              abono,
+              currentBalance,
+              actualBalance: initialBalance + currentBalance,
+            };
+          })
+          .sort((a, b) => {
+            if (a.code < b.code) return -1;
+            if (a.code > b.code) return 1;
+            return 0;
+          })
+          .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
+
+        name = `BALANCE DE COMPROBACIÓN AL ${format(
+          endOfMonth(new Date(data.date)),
+          'dd - MMMM - yyyy',
+          { locale: es },
+        )
+          .split('-')
+          .join('de')
+          .toUpperCase()}`;
+        break;
+    }
+
+    return {
+      signatures: { ...signatures.data },
+      company: { name: company.name, nrc: company.nrc, nit: company.nit },
+      name,
+      accounts,
+    };
+  }
+
   async getEntries(
     company: Company,
     filter: EntriesFilterDTO,
@@ -410,7 +661,7 @@ export class EntriesService {
       company: company,
     };
 
-    if (id) {
+    if (id && type == 'update') {
       const entry = await this.accountingEntryRepository.getEntry(company, id);
 
       headerInsert = {
@@ -454,6 +705,27 @@ export class EntriesService {
         type == 'create'
           ? `La partida contable ha sido registrada correctamente. ${message}`
           : `La partida contable ha sido actualizada correctamente.`,
+    };
+  }
+
+  async deleteEntry(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    const entry = await this.accountingEntryRepository.getEntry(company, id);
+
+    const resultDetails = await this.accountingEntryDetailRepository.deleteEntryDetail(
+      entry.accountingEntryDetails.map((e) => {
+        return { id: e.id, company };
+      }),
+    );
+
+    const resultHeader = await this.accountingEntryRepository.deleteEntry(
+      company,
+      id,
+    );
+    return {
+      message:
+        resultDetails && resultHeader
+          ? 'Se ha eliminado la partida contable correctamente'
+          : 'No se ha podido eliminar la partida contable',
     };
   }
 }

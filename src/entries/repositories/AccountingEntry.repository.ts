@@ -12,7 +12,7 @@ import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { EntriesFilterDTO } from '../dtos/entries-filter.dto';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 
-const reponame = 'entry';
+const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)
 export class AccountingEntryRepository extends Repository<AccountingEntry> {
   async getSeries(
@@ -193,5 +193,18 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
       logDatabaseError(reponame, error);
     }
     return await response;
+  }
+
+  async deleteEntry(company: Company, id: string): Promise<boolean> {
+    const entryHeader = await this.getEntry(company, id);
+    delete entryHeader.accountingEntryDetails;
+    try {
+      await this.delete(entryHeader);
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return true;
   }
 }

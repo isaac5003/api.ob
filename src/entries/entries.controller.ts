@@ -29,6 +29,7 @@ import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
 import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
 import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
+import { DiarioMayorDTO } from './dtos/entries-libromayor-report.dto';
 import { SeriesDTO } from './dtos/entries-series.dto';
 import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
 import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
@@ -186,6 +187,24 @@ export class EntriesController {
     );
   }
 
+  @Get('/report/diario-mayor')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getDiarioMayor(
+    @GetAuthData('company') company: Company,
+    @Query() date: DiarioMayorDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'diarioMayor');
+  }
+
+  @Get('/report/balance-comprobacion')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getBalanceComprobacion(
+    @GetAuthData('company') company: Company,
+    @Query() date: DiarioMayorDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'balanceComprobacion');
+  }
+
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getEntries(
@@ -234,5 +253,13 @@ export class EntriesController {
       'update',
       id,
     );
+  }
+
+  @Delete('/:id')
+  async deleteEntry(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.deleteEntry(company, id);
   }
 }

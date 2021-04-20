@@ -57,6 +57,18 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
     }
   }
 
+  async getAccountingCatalogsReport(company): Promise<AccountingCatalog[]> {
+    let catalog: AccountingCatalog[];
+    try {
+      catalog = await this.find({ company });
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return catalog;
+  }
+
   async getAccountingCatalog(
     id: string,
     company: Company,
