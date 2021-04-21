@@ -98,13 +98,13 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
   }
 
   async getAccountingCatalogNotUsed(
-    { accountingCatalog }: any,
+    accountingCatalog: any,
     company: Company,
   ): Promise<AccountingCatalog> {
     console.log(accountingCatalog);
 
     const account = await this.getAccountingCatalog(
-      accountingCatalog.id,
+      accountingCatalog as string,
       company,
       true,
     );

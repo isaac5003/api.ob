@@ -28,10 +28,10 @@ export class AccountingSetting extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'json' })
   balanceGeneral: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'json' })
   estadoResultados: string;
 
   @Column({ nullable: true })

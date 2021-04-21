@@ -1,4 +1,5 @@
 import { startOfMonth, endOfMonth } from 'date-fns';
+import parseISO from 'date-fns/parseISO';
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
@@ -10,10 +11,14 @@ const reponame = 'detalles de partida contable';
 export class AccountingEntryDetailRepository extends Repository<AccountingEntryDetail> {
   async getDetailsForReport(
     company: Company,
-    { date }: DiarioMayorDTO,
+    data: any,
     type: string,
   ): Promise<AccountingEntryDetail[]> {
-    const newDate = new Date(date);
+    const startDate = data.startDate ? data.startDate : '';
+    const endDate = data.endDate ? data.endDate : '';
+    const selectedAccounts = data.selectedAccounts
+      ? JSON.parse(data.selectedAccounts)
+      : '';
     try {
       let entries = this.createQueryBuilder('entries')
         .leftJoinAndSelect('entries.accountingCatalog', 'ac')
@@ -22,19 +27,30 @@ export class AccountingEntryDetailRepository extends Repository<AccountingEntryD
 
       switch (type) {
         case 'rangeDetails':
-          if (newDate) {
+          if (startDate) {
             entries = entries.andWhere('aed.date >= :startDate', {
-              startDate: startOfMonth(newDate),
+              startDate,
             });
-            entries = entries.andWhere('aed.date <= :endDate', {
-              endDate: endOfMonth(newDate),
+          }
+          entries = entries.andWhere('aed.date <= :endDate', {
+            endDate,
+          });
+
+          if (selectedAccounts.length > 0) {
+            entries = entries.andWhere('ac.id IN (:...ids)', {
+              ids: selectedAccounts,
             });
           }
           break;
         case 'previousDetail':
-          if (newDate) {
+          if (startDate) {
             entries = entries.andWhere('aed.date < :startDate', {
-              startDate: startOfMonth(newDate),
+              startDate,
+            });
+          }
+          if (selectedAccounts.length > 0) {
+            entries = entries.andWhere('ac.id IN (:...ids)', {
+              ids: selectedAccounts,
             });
           }
           break;

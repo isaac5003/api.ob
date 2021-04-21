@@ -15,21 +15,22 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
-import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import {
   ResponseListDTO,
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
-import { AccountsDTO } from './dtos/entries-account.dto';
 import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/entries-accountingcatalog-update.dto';
+import { BalanceEstadoDTO } from './dtos/entries-balance-startdate.dto';
+import { EstadoBalanceDTO } from './dtos/entries-balanceestado-seting.dto';
 import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
 import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
 import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
 import { DiarioMayorDTO } from './dtos/entries-libromayor-report.dto';
+import { AccountsMovementsDTO } from './dtos/entries-movements.dto';
 import { SeriesDTO } from './dtos/entries-series.dto';
 import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
 import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
@@ -177,13 +178,41 @@ export class EntriesController {
   @Put('/setting/integrations')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateSettingIntegrations(
-    @GetAuthData() company: Company,
+    @GetAuthData('company') company: Company,
     @Body() data: SettingIntegrationsDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.entries.updateSettingIntegrations(
       company,
       data,
       'integraciones',
+    );
+  }
+
+  @Put('/setting/balance-general')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingBalance(
+    @GetAuthData('company') company: Company,
+    @Body() data: EstadoBalanceDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.updateBalanceSettings(
+      company,
+      data,
+      'integraciones',
+      'balance-general',
+    );
+  }
+
+  @Put('/setting/estado-resultados')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingEstadoResultados(
+    @GetAuthData('company') company: Company,
+    @Body() data: EstadoBalanceDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.entries.updateBalanceSettings(
+      company,
+      data,
+      'integraciones',
+      'estado-resultados',
     );
   }
 
@@ -196,6 +225,15 @@ export class EntriesController {
     return await this.entries.getReport(company, date, 'diarioMayor');
   }
 
+  @Get('/report/auxiliares')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAuxiliares(
+    @GetAuthData('company') company: Company,
+    @Query() date: DiarioMayorDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'auxiliares');
+  }
+
   @Get('/report/balance-comprobacion')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getBalanceComprobacion(
@@ -203,6 +241,33 @@ export class EntriesController {
     @Query() date: DiarioMayorDTO,
   ): Promise<any> {
     return await this.entries.getReport(company, date, 'balanceComprobacion');
+  }
+
+  @Get('/report/estado-resultados')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getEstadoResultados(
+    @GetAuthData('company') company: Company,
+    @Query() date: BalanceEstadoDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'estado-resultados');
+  }
+
+  @Get('/report/balance-general')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getBalanceGeneral(
+    @GetAuthData('company') company: Company,
+    @Query() date: BalanceEstadoDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'balance-general');
+  }
+
+  @Get('/report/account-movements')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAccounMovements(
+    @GetAuthData('company') company: Company,
+    @Query() date: AccountsMovementsDTO,
+  ): Promise<any> {
+    return await this.entries.getReport(company, date, 'accountMovements');
   }
 
   @Get('/')
