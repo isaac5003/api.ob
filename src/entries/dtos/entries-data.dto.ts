@@ -1,9 +1,9 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 import { validationMessage } from 'src/_tools';
-import { EntryDetailsDTO } from './entries-details-create.dto';
-import { EntryHeaderDataDTO } from './entries-entry-header-create.dto';
-import { EntryHeaderCreateDTO } from './entries-header-create.dto';
+import { EntryDetailsDTO } from './entry-details/entries-details-create.dto';
+import { EntryHeaderDataDTO } from './entry-header/entries-entry-header-create.dto';
+import { EntryHeaderCreateDTO } from './entry-header/entries-header-create.dto';
 
 export class EntryDataDTO {
   @IsNotEmpty({ message: validationMessage('header', 'IsNotEmpty') })

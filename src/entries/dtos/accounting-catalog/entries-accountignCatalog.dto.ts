@@ -1,6 +1,5 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
-import { Company } from 'src/companies/entities/Company.entity';
 import { validationMessage } from 'src/_tools';
 
 export class AccountingCatalogDTO {

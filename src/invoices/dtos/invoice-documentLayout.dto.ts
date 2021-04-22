@@ -1,13 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsNotEmpty,
-  IsNumber,
-  ValidateNested,
-} from 'class-validator';
-import { type } from 'node:os';
+import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 import { DocumentBasicsLayoutDTO } from './invoice-document-basics-layout.dto';
 import { DocumentLayoutHeaderDTO } from './invoice-document-layout-header.dto';

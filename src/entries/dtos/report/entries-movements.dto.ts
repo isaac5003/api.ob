@@ -1,4 +1,4 @@
-import { IsArray, IsISO8601, IsNotEmpty } from 'class-validator';
+import { IsISO8601, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 import { EndDateDTO } from './entries-enddate.dto';
 

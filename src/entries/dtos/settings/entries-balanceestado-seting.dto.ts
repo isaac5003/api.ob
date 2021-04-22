@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class EstadoBalanceDTO {

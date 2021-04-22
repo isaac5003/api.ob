@@ -2,7 +2,6 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceAuxiliarDataDTO } from '../dtos/invoice-auxiliar-data.dto';
 import { SellerCreateDTO } from '../dtos/invoice-seller-create.dto';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 

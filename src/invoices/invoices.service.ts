@@ -17,17 +17,11 @@ import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
 import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
 import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
-import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
-import { InvoiceDocumentDBDTO } from './dtos/invoice-document-db.dto';
-import { InvoiceDocumentFilterDTO } from './dtos/invoice-document-filter.dto';
-import { DocumentUpdateDTO } from './dtos/invoice-document-update.dto';
 import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
-import { InvoiceUpdateHeaderDTO } from './dtos/invoice-header-update.dto';
 import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
-import { SellerCreateDTO } from './dtos/invoice-seller-create.dto';
 import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoicesDocument } from './entities/InvoicesDocument.entity';
@@ -409,7 +403,7 @@ export class InvoicesService {
           };
         });
 
-        const documentUpdated = await this.invoicesDocumentRepository.createUpdateDocument(
+        await this.invoicesDocumentRepository.createUpdateDocument(
           company,
           documentToUpdate,
           'update',

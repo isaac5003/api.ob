@@ -1,10 +1,8 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceDocumentDataDTO } from '../dtos/invoice-document-data.dto';
 import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 
 const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)

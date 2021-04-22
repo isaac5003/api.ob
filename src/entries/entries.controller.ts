@@ -21,20 +21,20 @@ import {
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
-import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
-import { AccountingUpdateDTO } from './dtos/entries-accountingcatalog-update.dto';
-import { BalanceEstadoDTO } from './dtos/entries-balance-startdate.dto';
-import { EstadoBalanceDTO } from './dtos/entries-balanceestado-seting.dto';
-import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
-import { EntryHeaderDataDTO } from './dtos/entries-entry-header-create.dto';
+import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
+import { AccountingUpdateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-update.dto';
+import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
+import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.dto';
+import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
+import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.dto';
+import { BalanceEstadoDTO } from './dtos/report/entries-balance-startdate.dto';
+import { EntryDetailsDTO } from './dtos/entry-details/entries-details-create.dto';
+import { EntryHeaderDataDTO } from './dtos/entry-header/entries-entry-header-create.dto';
+import { EntryHeaderCreateDTO } from './dtos/entry-header/entries-header-create.dto';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
-import { EntryHeaderCreateDTO } from './dtos/entries-header-create.dto';
-import { DiarioMayorDTO } from './dtos/entries-libromayor-report.dto';
-import { AccountsMovementsDTO } from './dtos/entries-movements.dto';
-import { SeriesDTO } from './dtos/entries-series.dto';
-import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
-import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
-import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
+import { DiarioMayorDTO } from './dtos/report/entries-libromayor-report.dto';
+import { AccountsMovementsDTO } from './dtos/report/entries-movements.dto';
+import { SeriesDTO } from './dtos/serie/entries-series.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';

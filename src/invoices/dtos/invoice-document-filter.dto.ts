@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsIn, IsInt, IsOptional } from 'class-validator';
+import { IsInt, IsOptional } from 'class-validator';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { validationMessage } from 'src/_tools';
 

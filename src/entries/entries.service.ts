@@ -9,10 +9,11 @@ import {
   ResponseMinimalDTO,
   ResponseSingleDTO,
 } from 'src/_dtos/responseList.dto';
-import { AccountsDTO } from './dtos/entries-account.dto';
-import { AccountingCreateDTO } from './dtos/entries-accountingcatalog-create.dto';
-import { SeriesDTO } from './dtos/entries-series.dto';
-import { SettingGeneralDTO } from './dtos/entries-setting-general.dto';
+import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
+import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
+import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
+import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.dto';
+import { SeriesDTO } from './dtos/serie/entries-series.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
 import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
@@ -23,20 +24,13 @@ import { AccountingEntryTypeRepository } from './repositories/AccountingEntryTyp
 import { AccountingRegisterTypeRepository } from './repositories/AccountingRegisterType.repository';
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
 import { parseISO, differenceInMonths } from 'date-fns';
-import { SettingSignaturesDTO } from './dtos/entries-setting-signatures.dto';
-import { SettingIntegrationsDTO } from './dtos/entries-setting-integration.dto';
+import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.dto';
 import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
 import { AccountingEntryDetailRepository } from './repositories/AccountingEntryDetail.repository';
 import { format, endOfMonth, startOfMonth } from 'date-fns';
-import { EntryDetailsDTO } from './dtos/entries-details-create.dto';
-import { DiarioMayorDTO } from './dtos/entries-libromayor-report.dto';
+import { EntryDetailsDTO } from './dtos/entry-details/entries-details-create.dto';
 import { es } from 'date-fns/locale';
-import { BalanceEstadoDTO } from './dtos/entries-balance-startdate.dto';
-import { AccountsMovementsDTO } from './dtos/entries-movements.dto';
-import { EstadoBalanceDTO } from './dtos/entries-balanceestado-seting.dto';
-import { type } from 'node:os';
-import { parse } from 'node:path';
 
 @Injectable()
 export class EntriesService {
@@ -136,8 +130,6 @@ export class EntriesService {
     );
     let { code } = data;
     const { name, description, isAcreedora, isBalance } = data;
-
-    const updateData = { name, description, isAcreedora, isBalance };
 
     if (!account.isParent) {
       data['code'] = code;
@@ -357,12 +349,12 @@ export class EntriesService {
       company,
       settingType,
     );
-    const account = await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
       data.accountingCatalog,
       company,
     );
 
-    const register = await this.accountingRegisterTypeRepository.getRegisterType(
+    await this.accountingRegisterTypeRepository.getRegisterType(
       company,
       data.resgisterType,
     );
@@ -1135,7 +1127,7 @@ export class EntriesService {
         id: entry.id,
       };
 
-      const deleteEntry = await this.accountingEntryDetailRepository.deleteEntryDetail(
+      await this.accountingEntryDetailRepository.deleteEntryDetail(
         entry.accountingEntryDetails.map((e) => e.id),
       );
     }

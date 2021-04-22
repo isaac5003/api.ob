@@ -1,9 +1,10 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class EntryDetailsDTO {
   @IsNotEmpty({ message: validationMessage('accountingCatalog', 'IsNotEmpty') })
+  @IsUUID('4', { message: validationMessage('accountingCatalog', 'IsUUID') })
   accountingCatalog: string;
 
   @IsNotEmpty({ message: validationMessage('concept', 'IsNotEmpty') })

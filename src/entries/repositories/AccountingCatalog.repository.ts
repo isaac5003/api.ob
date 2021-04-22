@@ -1,12 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
-import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { AccountsDTO } from '../dtos/entries-account.dto';
-import { AccountingCatalogDTO } from '../dtos/entries-accountignCatalog.dto';
 import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
 
 const reponame = 'catalogo de cuentas';
@@ -141,7 +137,6 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
 
   async updateAccount(id: string, data: any, company: Company): Promise<any> {
     try {
-      const accountingCatalog = id;
       const account = this.update({ id, company }, data);
       return account;
     } catch (error) {

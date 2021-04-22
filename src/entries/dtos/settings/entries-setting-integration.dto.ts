@@ -1,8 +1,8 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
 import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
 import { validationMessage } from 'src/_tools';
-import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
+import { AccountingCatalog } from '../../entities/AccountingCatalog.entity';
 
 export class SettingIntegrationsDTO extends AccountignCatalogIntegrationDTO {
   @IsNotEmpty({ message: validationMessage('accountingCatalog', 'IsNotEmpty') })

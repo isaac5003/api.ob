@@ -6,9 +6,9 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
-import { SeriesDTO } from '../dtos/entries-series.dto';
+import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth } from 'date-fns';
 import { EntriesFilterDTO } from '../dtos/entries-filter.dto';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 

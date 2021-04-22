@@ -1,9 +1,6 @@
-import { startOfMonth, endOfMonth } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { DiarioMayorDTO } from '../dtos/entries-libromayor-report.dto';
 import { AccountingEntryDetail } from '../entities/AccountingEntryDetail.entity';
 
 const reponame = 'detalles de partida contable';

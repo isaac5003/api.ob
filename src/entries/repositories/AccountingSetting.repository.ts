@@ -1,10 +1,9 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { EstadoBalanceDTO } from '../dtos/entries-balanceestado-seting.dto';
-import { SettingGeneralDTO } from '../dtos/entries-setting-general.dto';
-import { SettingIntegrationsDTO } from '../dtos/entries-setting-integration.dto';
-import { SettingSignaturesDTO } from '../dtos/entries-setting-signatures.dto';
+import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.dto';
+import { SettingIntegrationsDTO } from '../dtos/settings/entries-setting-integration.dto';
+import { SettingSignaturesDTO } from '../dtos/settings/entries-setting-signatures.dto';
 import { AccountingSetting } from '../entities/AccountingSetting.entity';
 
 @EntityRepository(AccountingSetting)
