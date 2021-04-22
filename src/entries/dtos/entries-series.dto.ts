@@ -9,6 +9,6 @@ export class SeriesDTO {
   accountingEntryType: string;
 
   @IsNotEmpty({ message: validationMessage('date', 'IsNotEmpty') })
-  @IsISO8601({}, { message: validationMessage('date', 'IsISO6801') })
+  @IsISO8601({}, { message: validationMessage('date', 'IsISO8601') })
   date: string;
 }

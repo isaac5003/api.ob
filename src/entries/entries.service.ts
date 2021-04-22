@@ -1041,15 +1041,22 @@ export class EntriesService {
       company,
       filter,
     );
+    const entry = entries.map((e) => {
+      const entri = {
+        ...e,
+        cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
+      };
+      delete entri.accountingEntryDetails;
 
+      return entri;
+    });
     // for (const entry of entries) {
-    //   const details = await this.accountingEntryDetailRepository.getDetails(
-    //     entry.id,
-    //   );
-
-    //   entry.cargo = details.reduce((a, b) => a + b.cargo, 0);
+    //   entri = {
+    //     ...entry,
+    //     cargo: entry.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
+    //   };
     // }
-    return new ResponseListDTO(plainToClass(AccountingEntry, entries));
+    return new ResponseListDTO(plainToClass(AccountingEntry, entry));
   }
 
   async getEntry(

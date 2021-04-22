@@ -66,34 +66,40 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
 
       let entries = this.createQueryBuilder('entries')
         .select([
-          '(entries.id) id ',
-          '(entries.serie) serie',
-          '(entries.title) tittle',
-          '(entries.date) date',
-          '(entries.squared) squared',
-          '(entries.accounted) accounted',
+          'entries.id ',
+          'entries.serie',
+          'entries.title',
+          'entries.date',
+          'entries.squared',
+          'entries.accounted',
           'aet.id',
           'aet.name',
           'aet.code',
           'SUM(aed.cargo) cargo',
+          'aed.id',
+          'aed.cargo',
         ])
         .leftJoin('entries.accountingEntryType', 'aet')
         .leftJoin('entries.accountingEntryDetails', 'aed')
         .where({ company })
         .groupBy('entries.id')
-        .addGroupBy('aet.id');
+        .addGroupBy('aet.id')
+        .addGroupBy('aed.id');
 
       if (search) {
-        entries.andWhere(
-          '(LOWER(entries.tittle) LIKE :search) OR (LOWER(entries.data) LIKE :search)',
-          {
-            search: `%${search}%`,
-          },
-        );
+        entries = entries.andWhere('(LOWER(entries.title) LIKE :search) ', {
+          search: `%${search}%`,
+        });
       }
 
       if (limit && page) {
-        entries.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
+        entries = entries
+          .limit(limit)
+          .offset(limit ? (page ? page - 1 : 0 * limit) : null);
+
+        // entries = entries
+        //   .take(limit)
+        //   .skip(limit ? (page ? page - 1 : 0) * limit : null);
       }
 
       if (squared == true) {
@@ -137,8 +143,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
       } else {
         entries = entries.orderBy('entries.createdAt', 'DESC');
       }
-
-      return await entries.getRawMany();
+      return await entries.getMany();
     } catch (error) {
       console.error(error);
 
