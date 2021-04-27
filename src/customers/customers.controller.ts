@@ -139,8 +139,7 @@ export class CustomersController {
     @Query() filter: CustomerFilterDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Customer>> {
-    const customers = await this.customersService.getCustomers(company, filter);
-    return new ResponseListDTO(plainToClass(Customer, customers));
+    return await this.customersService.getCustomers(company, filter);
   }
 
   @Post('/')

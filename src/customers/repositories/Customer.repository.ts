@@ -16,6 +16,7 @@ export class CustomerRepository extends Repository<Customer> {
       const query = this.createQueryBuilder('customer')
         .leftJoinAndSelect('customer.customerType', 'customerType')
         .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural')
+        .leftJoinAndSelect('customer.customerBranches', 'branch')
         .where({ company });
 
       if (active) {
@@ -40,6 +41,8 @@ export class CustomerRepository extends Repository<Customer> {
 
       return await query.getMany();
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
   }

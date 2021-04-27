@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
@@ -19,6 +19,7 @@ import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
 import { Injectable } from '@nestjs/common';
+import { json } from 'express';
 
 @Injectable()
 export class CustomersService {
@@ -45,8 +46,29 @@ export class CustomersService {
     private customerSettingRepository: CustomerSettingRepository,
   ) {}
 
-  async getCustomers(company: Company, data: CustomerFilterDTO): Promise<Customer[]> {
-    return this.customerRepository.getCustomers(company, data);
+  async getCustomers(company: Company, data: CustomerFilterDTO): Promise<ResponseListDTO<Customer>> {
+    const customers = await this.customerRepository.getCustomers(company, data);
+    let customer = customers.map((c) => {
+      const branch = c.customerBranches.find((b) => b.default == true);
+      const phone = JSON.parse(JSON.stringify(branch.contactInfo)).phones;
+
+      const cus = {
+        ...c,
+        contacName: branch.contactName,
+        contactPhone: phone ? Object.values(phone)[0] : '',
+      };
+
+      return cus;
+    });
+    customer = customer.map((cu) => {
+      const c = {
+        ...cu,
+      };
+      delete c.customerBranches;
+      return c;
+    });
+
+    return new ResponseListDTO(plainToClass(Customer, customer));
   }
 
   async getCustomer(company: Company, id: string): Promise<Customer> {
