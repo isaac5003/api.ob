@@ -133,13 +133,24 @@ export class CustomersController {
     return this.customersService.deleteCustomer(company, id);
   }
 
+  @Get('/report/general')
+  async getReportGeneral(@GetAuthData('company') company: Company): Promise<ResponseListDTO<Customer>> {
+    return await this.customersService.generateReportGeneral(company);
+  }
+
+  @Get('/report/:id')
+  async getReportIndividual(@GetAuthData('company') company: Company, @Param('id') id: string): Promise<Customer> {
+    return await this.customersService.generateReportIndividual(company, id);
+  }
+
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomers(
     @Query() filter: CustomerFilterDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Customer>> {
-    return await this.customersService.getCustomers(company, filter);
+    const customers = await this.customersService.getCustomers(company, filter);
+    return new ResponseListDTO(plainToClass(Customer, customers));
   }
 
   @Post('/')

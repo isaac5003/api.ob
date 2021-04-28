@@ -9,18 +9,18 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
   async getCustomerBranches(id: string): Promise<CustomerBranch[]> {
     let branches: CustomerBranch[];
     try {
-      branches = await this.find({ id });
+      branches = await this.find({ where: { customer: id } });
     } catch (error) {
       logDatabaseError(reponame, error);
     }
     return branches;
   }
 
-  async createBranch(id: string, data: BranchDataDTO): Promise<CustomerBranch> {
+  async createBranch(data: BranchDataDTO): Promise<CustomerBranch> {
     // crea sucursal
     let response: CustomerBranch;
     try {
-      const branch = this.create({ id, ...data });
+      const branch = this.create({ ...data });
       response = await this.save(branch);
     } catch (error) {
       logDatabaseError(reponame, error);
