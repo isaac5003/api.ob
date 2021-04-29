@@ -15,7 +15,7 @@ export class BranchDataDTO {
 
   @IsOptional()
   @IsString({ message: validationMessage('contactInfo', 'IsBooleanString') })
-  contactInfo: string;
+  contactInfo: { phone: string[]; emails: string[] };
 
   @IsNotEmpty({ message: validationMessage('address1', 'IsNotEmpty') })
   @IsString({ message: validationMessage('address1', 'IsString') })

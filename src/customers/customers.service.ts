@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
@@ -19,6 +19,7 @@ import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
 import { Injectable } from '@nestjs/common';
+import { json } from 'express';
 
 @Injectable()
 export class CustomersService {
@@ -45,8 +46,66 @@ export class CustomersService {
     private customerSettingRepository: CustomerSettingRepository,
   ) {}
 
+  async generateReportGeneral(company: Company): Promise<any> {
+    const customers = await this.customerRepository.getCustomers(company, { branch: true });
+
+    const report = {
+      company: {
+        name: company.name,
+        nrc: company.nrc,
+        nit: company.nit,
+      },
+      name: 'REPORTE GENERAL DE CLIENTES',
+      customers: customers
+        .map((c) => {
+          const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
+          return {
+            ...c,
+            contactName: c.customerBranches.find((cb) => cb.default).contactName,
+            contactPhone: phones ? (phones.length > 0 ? phones[0] : '') : '',
+          };
+        })
+        .map((cu) => {
+          delete cu.customerBranches,
+            delete cu.shortName,
+            delete cu.customerTaxerType,
+            delete cu.customerTypeNatural,
+            delete cu.isActiveProvider;
+          delete cu.isCustomer, delete cu.isProvider, delete cu.isActiveCustomer;
+          return {
+            ...cu,
+          };
+        }),
+    };
+
+    return report;
+  }
+
+  async generateReportIndividual(company: Company, id: string): Promise<any> {
+    const customer = await this.customerRepository.getCustomer(id, company);
+    const phone = customer.customerBranches.find((cb) => cb.default).contactInfo;
+    delete customer.isActiveCustomer, delete customer.isActiveProvider, delete customer.isProvider;
+    const report = {
+      company: {
+        name: company.name,
+        nrc: company.nrc,
+        nit: company.nit,
+      },
+      name: 'PERFIL DEL CLIENTE',
+
+      customer: {
+        ...customer,
+        constactName: customer.customerBranches.find((cb) => cb.default).contactName,
+        contactPhone: phone ? (phone.phones.length > 0 ? phone.phones[0] : '') : '',
+        contactEmail: phone ? (phone.emails.length > 0 ? phone.emails[0] : '') : '',
+      },
+    };
+
+    return report;
+  }
+
   async getCustomers(company: Company, data: CustomerFilterDTO): Promise<Customer[]> {
-    return this.customerRepository.getCustomers(company, data);
+    return await this.customerRepository.getCustomers(company, data);
   }
 
   async getCustomer(company: Company, id: string): Promise<Customer> {
@@ -136,7 +195,11 @@ export class CustomersService {
   async createCustomer(company: Company, data): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.createCustomer(company, data);
     const { id } = customer;
-    await this.customerBranchRepository.createBranch(id, data.branch);
+    const branch = {
+      ...data.branch,
+      customer: id,
+    };
+    await this.customerBranchRepository.createBranch(branch);
     return {
       id: customer.id,
       message: 'Se ha creado el cliente correctamente',

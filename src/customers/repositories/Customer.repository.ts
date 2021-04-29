@@ -10,13 +10,18 @@ import { logDatabaseError } from 'src/_tools';
 const reponame = 'cliente';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(company: Company, filter: CustomerFilterDTO): Promise<Customer[]> {
+  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>): Promise<Customer[]> {
     try {
-      const { active, limit, page, search, order, prop } = filter;
+      const { active, limit, page, search, order, prop, branch } = filter;
       const query = this.createQueryBuilder('customer')
         .leftJoinAndSelect('customer.customerType', 'customerType')
         .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural')
+
         .where({ company });
+
+      if (branch) {
+        query.leftJoinAndSelect('customer.customerBranches', 'customerBranches');
+      }
 
       if (active) {
         query.andWhere('customer.isActiveCustomer = :active', { active });
@@ -40,6 +45,8 @@ export class CustomerRepository extends Repository<Customer> {
 
       return await query.getMany();
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
   }
@@ -50,6 +57,7 @@ export class CustomerRepository extends Repository<Customer> {
       ct: 'c.customerType',
       ctt: 'c.customerTaxerType',
       ctn: 'c.customerTypeNatural',
+      cb: 'c.customerBranches',
     };
 
     for (const table of joins) {
