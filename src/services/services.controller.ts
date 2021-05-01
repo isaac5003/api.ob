@@ -23,6 +23,8 @@ import { serviceDataDTO } from './dtos/service-data.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
+import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
+import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 
 @Controller('services')
 @UseGuards(AuthGuard())
@@ -98,9 +100,21 @@ export class ServicesController {
     return this.service.updateService(company, id, data);
   }
 
-  @Delete('/:id')
-  async deleteService(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
-    return this.service.deleteService(company, id);
+  @Delete('/')
+  async deleteService(
+    @Body('ids') ids: ServicesIdsDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.deleteService(company, ids);
+  }
+
+  @Put('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateServicesStatus(
+    @Body() data: UpdateStatusDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateServicesStatus(company, data);
   }
 
   // FOR SERVICES /
