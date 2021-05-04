@@ -140,7 +140,7 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async deleteService(company: Company, id: ServicesIdsDTO): Promise<any> {
+  async deleteServices(company: Company, id: ServicesIdsDTO): Promise<any> {
     const services = await this.getServicesByIds(company, (id as unknown) as string[]);
     let deletedServices;
     try {
@@ -157,5 +157,15 @@ export class ServiceRepository extends Repository<Service> {
       }),
       deletedServices,
     };
+  }
+
+  async deleteService(company: Company, id: string): Promise<boolean> {
+    const service = await this.getService(company, id);
+    try {
+      await this.delete(service);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+    return true;
   }
 }

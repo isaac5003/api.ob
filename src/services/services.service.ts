@@ -102,8 +102,8 @@ export class ServicesService {
     };
   }
 
-  async deleteService(company: Company, ids: ServicesIdsDTO): Promise<ResponseMinimalDTO> {
-    const result = await this.serviceRepository.deleteService(company, ids);
+  async deleteServices(company: Company, ids: ServicesIdsDTO): Promise<ResponseMinimalDTO> {
+    const result = await this.serviceRepository.deleteServices(company, ids);
     let message = '';
     const deletedServices = [];
     const notDeletedServices = [];
@@ -130,6 +130,12 @@ export class ServicesService {
 
     return {
       message: message,
+    };
+  }
+  async deleteService(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    const result = await this.serviceRepository.deleteService(company, id);
+    return {
+      message: result ? 'Se ha eliminado el servicio correctamente' : 'No se ha podido eliminar el servicio',
     };
   }
 

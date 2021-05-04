@@ -51,17 +51,6 @@ export class ServicesController {
     return this.service.updateSettingsIntegrations(company, data);
   }
 
-  // FOR STATUS
-  @Put('/status/:id')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateServiceStatus(
-    @Param('id') id: string,
-    @GetAuthData('company') company: Company,
-    @Body() data: serviceStatusDTO,
-  ): Promise<ResponseMinimalDTO> {
-    return this.service.updateService(company, id, data);
-  }
-
   // FOR SERVICES:/ID
   @Get('/:id')
   async getService(
@@ -100,14 +89,22 @@ export class ServicesController {
     return this.service.updateService(company, id, data);
   }
 
+  //DELETE INDIVIDUAL
+  @Delete('/:id')
+  async deleteService(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return this.service.deleteService(company, id);
+  }
+
+  //DELETE MANY SERVISES
   @Delete('/')
-  async deleteService(
+  async deleteServices(
     @Body('ids') ids: ServicesIdsDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.deleteService(company, ids);
+    return this.service.deleteServices(company, ids);
   }
 
+  //FOR STATUS FOR MANY SERVICES
   @Put('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateServicesStatus(
@@ -115,6 +112,17 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateServicesStatus(company, data);
+  }
+
+  // FOR STATUS INDIVIDUAL SERVICE
+  @Put('/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateServiceStatus(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+    @Body() data: serviceStatusDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateService(company, id, data);
   }
 
   // FOR SERVICES /
