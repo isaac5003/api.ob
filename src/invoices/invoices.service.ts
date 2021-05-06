@@ -1,15 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
@@ -105,6 +108,9 @@ export class InvoicesService {
         statuses = [2, 3, 5];
         break;
     }
+
+    console.log(status);
+    console.log(statuses);
 
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
@@ -228,154 +234,129 @@ export class InvoicesService {
     };
   }
 
-  // async getDocuments(
-  //   company: Company,
-  // ): Promise<ResponseListDTO<InvoicesDocument>> {
-  //   const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-  //     company,
-  //   );
-  //   const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+  async getDocuments(company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
+    const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
-  //   const doc = documentTypes.map((dt) => {
-  //     const found = documents.find((d) => d.documentType.id == dt.id);
-  //     return found
-  //       ? { ...found, documentLayout: JSON.parse(found.documentLayout) }
-  //       : {
-  //           id: null,
-  //           authorization: null,
-  //           initial: null,
-  //           final: null,
-  //           current: null,
-  //           active: false,
-  //           documentType: dt,
-  //         };
-  //   });
-  //   return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
-  // }
+    const documents = documentTypes.map((dt) => {
+      const found = existingDocuments.find((d) => d.documentType.id == dt.id);
+      return found
+        ? { ...found }
+        : {
+            id: null,
+            authorization: null,
+            initial: null,
+            final: null,
+            current: null,
+            active: false,
+            documentType: dt,
+          };
+    });
+    return new ResponseListDTO(plainToClass(InvoicesDocument, documents));
+  }
 
-  // async getDocument(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-  //   const document = await this.invoicesDocumentRepository.getDocumentsByIds(
-  //     company,
-  //     [id],
-  //     'all',
-  //   );
+  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const document = await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+  }
 
-  //   return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
-  // }
-  // async createUpdateDocument(
-  //   company: Company,
-  //   data: any[],
-  //   type: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-  //     data.map((d) => d.documentType),
-  //   );
+  async createUpdateDocument(
+    company: Company,
+    data: InvoiceDocumentDataDTO[],
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
+      data.map((d) => d.documentType),
+    );
 
-  //   let documentsToUpdate;
-  //   let documentsNotExist;
-  //   let document = [];
-  //   switch (type) {
-  //     case 'create':
-  //       let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-  //         company,
-  //       );
-  //       documents = documents.filter((d) =>
-  //         documentTypes.map((dt) => dt.id).includes(d.documentType.id),
-  //       );
+    let documentsToUpdate;
+    let documentsNotExist;
+    let document = [];
+    switch (type) {
+      case 'create':
+        let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+        documents = documents.filter((d) => documentTypes.map((dt) => dt.id).includes(d.documentType.id));
 
-  //       const documentToUpdate = documents.map((d) => {
-  //         return {
-  //           ...d,
-  //           isCurrentDocument: false,
-  //           active: false,
-  //         };
-  //       });
+        const documentToUpdate = documents.map((d) => {
+          return {
+            ...d,
+            isCurrentDocument: false,
+            active: false,
+          };
+        });
 
-  //       const documentUpdated = await this.invoicesDocumentRepository.createUpdateDocument(
-  //         company,
-  //         documentToUpdate,
-  //         'update',
-  //       );
+        const documentUpdated = await this.invoicesDocumentRepository.createUpdateDocument(
+          company,
+          documentToUpdate,
+          'update',
+        );
 
-  //       document = data.map((d) => {
-  //         return {
-  //           ...d,
-  //           documentType: documentTypes.find((dt) => dt.id == d.documentType),
-  //           isCurrentDocument: true,
-  //           company: company,
-  //         };
-  //       });
+        document = data.map((d) => {
+          return {
+            ...d,
+            documentType: documentTypes.find((dt) => dt.id == d.documentType),
+            isCurrentDocument: true,
+            company: company,
+          };
+        });
 
-  //       break;
+        break;
+      case 'update':
+        const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
+          company,
+          data.map((d) => d.id),
+          'unused',
+        );
 
-  //     case 'update':
-  //       const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
-  //         company,
-  //         data.map((d) => d.id),
-  //         'unused',
-  //       );
+        if (documentExist.length == 0) {
+          throw new BadRequestException('Los documentos seleccionados no existen o estan en uso');
+        }
 
-  //       if (documentExist.length == 0) {
-  //         throw new BadRequestException(
-  //           'Los documentos seleccionados no existen o estan en uso',
-  //         );
-  //       }
+        documentsNotExist = [];
+        documentsToUpdate = [];
+        for (const d of data) {
+          if (documentExist.map((de) => de.id).includes(d.id)) {
+            documentsToUpdate.push(d);
+          } else {
+            documentsNotExist.push(d);
+          }
+        }
 
-  //       documentsNotExist = [];
-  //       documentsToUpdate = [];
-  //       for (const d of data) {
-  //         if (documentExist.map((de) => de.id).includes(d.id)) {
-  //           documentsToUpdate.push(d);
-  //         } else {
-  //           documentsNotExist.push(d);
-  //         }
-  //       }
+        document = documentsToUpdate.map((d) => {
+          return {
+            ...d,
+            documentType: documentTypes.find((dt) => dt.id == d.documentType),
+          };
+        });
 
-  //       document = documentsToUpdate.map((d) => {
-  //         return {
-  //           ...d,
-  //           documentType: documentTypes.find((dt) => dt.id == d.documentType),
-  //         };
-  //       });
+        break;
+    }
 
-  //       break;
-  //   }
+    const documentCreated = await this.invoicesDocumentRepository.createUpdateDocument(company, document, type);
+    let message = {};
+    switch (type) {
+      case 'create':
+        message = {
+          id: documentCreated.map((dr) => dr.id).join(','),
+          message: 'Los documentos se han creado correctamente.',
+        };
+        break;
+      case 'update':
+        message = {
+          message:
+            documentsNotExist.length == 0
+              ? 'Los documentos se han actualizado correctamente.'
+              : `Se actualizaron los documentos con id:${documentsToUpdate
+                  .map((dt) => dt.id)
+                  .join(',', ' ')}, y no se pudieron actualizar los documentos con id:${documentsNotExist
+                  .map((dne) => dne.id)
+                  .join(',', ' ')} porque no existe o esta en uso`,
+        };
+        break;
+    }
 
-  //   const documentCreated = await this.invoicesDocumentRepository.createUpdateDocument(
-  //     company,
-  //     document,
-  //     type,
-  //   );
-  //   let message = {};
-  //   switch (type) {
-  //     case 'create':
-  //       message = {
-  //         id: documentCreated.map((dr) => dr.id).join(','),
-  //         message: 'Los documentos se han creado correctamente.',
-  //       };
-  //       break;
-  //     case 'update':
-  //       message = {
-  //         message:
-  //           documentsNotExist.length == 0
-  //             ? 'Los documentos se han actualizado correctamente.'
-  //             : `Se actualizaron los documentos con id:${documentsToUpdate
-  //                 .map((dt) => dt.id)
-  //                 .join(
-  //                   ',',
-  //                   ' ',
-  //                 )}, y no se pudieron actualizar los documentos con id:${documentsNotExist
-  //                 .map((dne) => dne.id)
-  //                 .join(',', ' ')} porque no existe o esta en uso`,
-  //       };
-  //       break;
-  //   }
-
-  //   return message;
-  // }
+    return message;
+  }
 
   // async getDocumentLayout(
   //   company: Company,

@@ -16,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
-import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
@@ -27,6 +27,8 @@ import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoicesDocument } from './entities/InvoicesDocument.entity';
+import { InvoiceDocumentDataDTO } from './dtos/invoice-document-data.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -210,31 +212,29 @@ export class InvoicesController {
     return this.invoice.deleteInvoicesSeller(company, id);
   }
 
-  // @Get('/documents')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async getInvoiceDocuments(
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseListDTO<InvoicesDocument>> {
-  //   return await this.invoice.getDocuments(company);
-  // }
+  @Get('/documents')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getInvoiceDocuments(@GetAuthData('company') company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
+    return await this.invoice.getDocuments(company);
+  }
 
-  // @Get('/documents/:id')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async getInvoiceDocument(
-  //   @GetAuthData('company') company: Company,
-  //   @Param('id') id: string,
-  // ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-  //   return await this.invoice.getDocument(company, id);
-  // }
+  @Get('/documents/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getInvoiceDocument(
+    @GetAuthData('company') company: Company,
+    @Param('id') id: string,
+  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    return await this.invoice.getDocument(company, id);
+  }
 
-  // @Post('/documents')
-  // @UsePipes(new ValidationPipe({ transform: true }))
-  // async createDocument(
-  //   @Body('documents') data: InvoiceDocumentDataDTO[],
-  //   @GetAuthData('company') company: Company,
-  // ): Promise<ResponseMinimalDTO> {
-  //   return await this.invoice.createUpdateDocument(company, data, 'create');
-  // }
+  @Post('/documents')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createDocument(
+    @Body('documents') data: InvoiceDocumentDataDTO[],
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.invoice.createUpdateDocument(company, data, 'create');
+  }
 
   // @Put('/documents')
   // @UsePipes(new ValidationPipe({ transform: true }))

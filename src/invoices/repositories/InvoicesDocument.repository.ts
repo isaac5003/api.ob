@@ -74,7 +74,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     return document;
   }
 
-  async getDocumentsByIds(company: Company, id: string[], type: string): Promise<InvoicesDocument[]> {
+  async getDocumentsByIds(company: Company, id: string[], type?: string): Promise<InvoicesDocument[]> {
     let invoiceDocuments;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
