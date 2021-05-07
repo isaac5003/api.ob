@@ -1,4 +1,5 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import * as nodemailer from 'nodemailer';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;
@@ -216,4 +217,29 @@ export function numeroALetras(num: number, currency?: any): string {
 
     return strMillones + ' ' + strMiles;
   } //Millones()
+}
+
+export async function emailSender(to, subject, html) {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'email-smtp.us-east-2.amazonaws.com',
+      port: 465,
+      secure: true, // true for 465, false for other ports
+      auth: {
+        user: 'AKIA3I3CIZQD345EAMRP', // generated ethereal user
+        pass: 'BF2PNGhDuuu6p3FicN2j35SQzaHhCeRcBy7uZGQPbEi8', // generated ethereal password
+      },
+    });
+    const mailOptions = { from: '"OpenboxCloud" <no-reply@tatascoffee.com>', to, subject, html };
+
+    await transporter.sendMail(mailOptions);
+    return { success: true, message: 'Se ha enviado el correo de verificación.' };
+  } catch (error) {
+    console.log(error.response);
+    return {
+      success: false,
+      message:
+        'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
+    };
+  }
 }
