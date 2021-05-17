@@ -1,10 +1,10 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 import { validationMessage } from 'src/_tools';
-import { DocumentLayoutDescriptionOptionDTO } from './invocie-documentlayout-descriptiodetail.dto';
-import { DocumentDetailsOptionDTO } from './invoice-documentlayout-detailsoption.dto';
+import { InvoiceDocumentLayoutPositionSmallExtended } from './invocie-document-layout-position-small-extended.dto';
+import { InvoiceDocumentLayoutPositionSmallDTO } from './invoice-document-layout-position-small.dto';
 
-export class DocumentDetailLayoutDTO {
+export class InvoiceDocumentDetailLayoutDTO {
   @IsNotEmpty({ message: validationMessage('position_y', 'IsNotEmpty') })
   position_y: string;
 
@@ -16,31 +16,31 @@ export class DocumentDetailLayoutDTO {
 
   @IsNotEmpty({ message: validationMessage('quantity', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  quantity: DocumentDetailsOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallDTO)
+  quantity: InvoiceDocumentLayoutPositionSmallDTO;
 
   @IsNotEmpty({ message: validationMessage('description', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  description: DocumentLayoutDescriptionOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallExtended)
+  description: InvoiceDocumentLayoutPositionSmallExtended;
 
   @IsNotEmpty({ message: validationMessage('price', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  price: DocumentDetailsOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallDTO)
+  price: InvoiceDocumentLayoutPositionSmallDTO;
 
   @IsNotEmpty({ message: validationMessage('sujeto', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  sujeto: DocumentDetailsOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallDTO)
+  sujeto: InvoiceDocumentLayoutPositionSmallDTO;
 
   @IsNotEmpty({ message: validationMessage('exento', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  exento: DocumentDetailsOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallDTO)
+  exento: InvoiceDocumentLayoutPositionSmallDTO;
 
   @IsNotEmpty({ message: validationMessage('afecto', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailsOptionDTO)
-  afecto: DocumentDetailsOptionDTO;
+  @Type(() => InvoiceDocumentLayoutPositionSmallDTO)
+  afecto: InvoiceDocumentLayoutPositionSmallDTO;
 }
