@@ -12,11 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import {
-  ResponseListDTO,
-  ResponseMinimalDTO,
-  ResponseSingleDTO,
-} from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
@@ -35,17 +31,13 @@ export class ServicesController {
 
   // FOR REPORTS
   @Get('/report/general')
-  async reportGeneral(
-    @GetAuthData('company') company: Company,
-  ): Promise<ServiceReportGeneralDTO> {
+  async reportGeneral(@GetAuthData('company') company: Company): Promise<ServiceReportGeneralDTO> {
     return this.service.getReportGeneral(company);
   }
 
   // FOR SETTINGS
   @Get('/setting/integrations')
-  async settingIntegrations(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
+  async settingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
     return this.service.getSettingsIntegrations(company);
   }
 
@@ -107,10 +99,7 @@ export class ServicesController {
   }
 
   @Delete('/:id')
-  async deleteService(
-    @Param('id') id: string,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteService(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
     return this.service.deleteService(company, id);
   }
 

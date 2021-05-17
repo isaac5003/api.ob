@@ -36,16 +36,10 @@ export class AccountingEntryDetail extends BaseEntity {
   @Column({ nullable: true })
   order: number;
 
-  @ManyToOne(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.accountingEntryDetails,
-  )
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingEntryDetails)
   accountingCatalog: AccountingCatalog;
 
-  @ManyToOne(
-    () => AccountingEntry,
-    (accountingEntry) => accountingEntry.accountingEntryDetails,
-  )
+  @ManyToOne(() => AccountingEntry, (accountingEntry) => accountingEntry.accountingEntryDetails)
   accountingEntry: AccountingEntry;
 
   @ManyToOne(() => Company, (company) => company.accountingEntryDetails)

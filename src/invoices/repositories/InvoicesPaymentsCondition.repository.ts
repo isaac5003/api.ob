@@ -2,23 +2,18 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceAuxiliarUpdateDTO } from '../dtos/invoice-auxiliar-update.dto';
-import { PaymentConditionCreateDTO } from '../dtos/invoice-paymentcondition-data.dto';
+import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
+import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 
 const reponame = 'condiciones de pago';
 @EntityRepository(InvoicesPaymentsCondition)
 export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaymentsCondition> {
-  async getInvoicePaymentConditions(
-    company: Company,
-    filter: Partial<FilterDTO>,
-  ): Promise<InvoicesPaymentsCondition[]> {
+  async getInvoicesPaymentConditions(company: Company, filter: FilterDTO): Promise<InvoicesPaymentsCondition[]> {
     const { search, active } = filter;
 
     try {
-      const query = this.createQueryBuilder('pc')
-        .where({ company })
-        .orderBy('pc.createdAt', 'DESC');
+      const query = this.createQueryBuilder('pc').where({ company }).orderBy('pc.createdAt', 'DESC');
 
       // filter by status
       if (active || active == false) {
@@ -39,10 +34,22 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
     }
   }
 
-  async getInvoicePaymentCondition(
-    id: string,
+  async createInvoicesPaymentCondition(
     company: Company,
+    data: InvoicePaymentConditionDataDTO,
   ): Promise<InvoicesPaymentsCondition> {
+    let response: InvoicesPaymentsCondition;
+    try {
+      const invoicesPaymantsCondition = this.create({ company, ...data });
+      response = await this.save(invoicesPaymantsCondition);
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(reponame, error);
+    }
+    return await response;
+  }
+
+  async getInvoicesPaymentCondition(id: string, company: Company): Promise<InvoicesPaymentsCondition> {
     let invoicesPaymantsCondition: InvoicesPaymentsCondition;
 
     try {
@@ -53,44 +60,24 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
     return invoicesPaymantsCondition;
   }
 
-  async createInvoicePaymentCondition(
+  async updateInvoicesPaymentCondition(
+    id: string,
     company: Company,
-    data: PaymentConditionCreateDTO,
+    data: InvoicePaymentConditionDataDTO | ActiveValidateDTO,
   ): Promise<InvoicesPaymentsCondition> {
-    let response: InvoicesPaymentsCondition;
     try {
-      const invoicesPaymantsCondition = this.create({ company, ...data });
-      response = await this.save(invoicesPaymantsCondition);
-    } catch (error) {
-      console.error(error);
-
-      logDatabaseError(reponame, error);
-    }
-    return await response;
-  }
-
-  async updateInvoicePaymentCondition(
-    id: string,
-    company: Company,
-    data: Partial<InvoiceAuxiliarUpdateDTO>,
-  ): Promise<any> {
-    try {
-      const invoicesPaymantsCondition = this.update({ id, company }, data);
-      return invoicesPaymantsCondition;
+      this.update({ id, company }, data);
+      return this.findOne({ id, company });
     } catch (error) {
       logDatabaseError(reponame, error);
     }
   }
 
-  async deleteInvoicePaymentCondition(
-    company: Company,
-    id: string,
-  ): Promise<boolean> {
+  async deleteInvoicesPaymentCondition(company: Company, id: string): Promise<boolean> {
     try {
       await this.delete({ id, company });
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
     return true;

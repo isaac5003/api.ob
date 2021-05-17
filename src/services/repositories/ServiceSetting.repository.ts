@@ -22,10 +22,7 @@ export class ServiceSettingRepository extends Repository<ServiceSetting> {
     }
   }
 
-  async updateSettings(
-    company: Company,
-    data: ServiceIntegrationDTO,
-  ): Promise<void> {
+  async updateSettings(company: Company, data: ServiceIntegrationDTO): Promise<void> {
     try {
       this.update({ company }, data);
     } catch (error) {
@@ -33,10 +30,7 @@ export class ServiceSettingRepository extends Repository<ServiceSetting> {
     }
   }
 
-  async createSettings(
-    company: Company,
-    data: ServiceIntegrationDTO,
-  ): Promise<ServiceSetting> {
+  async createSettings(company: Company, data: ServiceIntegrationDTO): Promise<ServiceSetting> {
     let response: ServiceSetting;
     try {
       const settings = this.create({ company, ...data });

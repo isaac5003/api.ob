@@ -1,11 +1,5 @@
 import { Transform } from 'class-transformer';
-import {
-  IsInt,
-  IsISO8601,
-  IsNotEmpty,
-  IsOptional,
-  IsUUID,
-} from 'class-validator';
+import { IsInt, IsISO8601, IsNotEmpty, IsOptional, IsUUID } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class ReportFilterDTO {

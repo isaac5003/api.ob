@@ -8,10 +8,7 @@ import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
 const reponame = 'catalogo de cuentas';
 @EntityRepository(AccountingCatalog)
 export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
-  async getAccountingCatalogs(
-    company: Company,
-    filter: FilterDTO,
-  ): Promise<AccountingCatalog[]> {
+  async getAccountingCatalogs(company: Company, filter: FilterDTO): Promise<AccountingCatalog[]> {
     try {
       const { search, limit, page } = filter;
 
@@ -34,12 +31,9 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
         .orderBy('ac.code', 'ASC');
 
       if (search) {
-        query.andWhere(
-          '(LOWER(ac.name) LIKE :search) OR (LOWER(ac.code) LIKE :search) ',
-          {
-            search: `%${search}%`,
-          },
-        );
+        query.andWhere('(LOWER(ac.name) LIKE :search) OR (LOWER(ac.code) LIKE :search) ', {
+          search: `%${search}%`,
+        });
       }
 
       if (limit && page) {
@@ -65,11 +59,7 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
     return catalog;
   }
 
-  async getAccountingCatalog(
-    id: string,
-    company: Company,
-    join: boolean,
-  ): Promise<AccountingCatalog> {
+  async getAccountingCatalog(id: string, company: Company, join: boolean): Promise<AccountingCatalog> {
     let account: AccountingCatalog;
     const leftJoinAndSelect = {};
 
@@ -93,29 +83,17 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
     return account;
   }
 
-  async getAccountingCatalogNotUsed(
-    accountingCatalog: any,
-    company: Company,
-  ): Promise<AccountingCatalog> {
+  async getAccountingCatalogNotUsed(accountingCatalog: any, company: Company): Promise<AccountingCatalog> {
     console.log(accountingCatalog);
 
-    const account = await this.getAccountingCatalog(
-      accountingCatalog as string,
-      company,
-      true,
-    );
+    const account = await this.getAccountingCatalog(accountingCatalog as string, company, true);
     if (account.isParent) {
-      throw new BadRequestException(
-        "La 'cuenta contable' selecciona no puede ser utilizada ya que no es asignable.",
-      );
+      throw new BadRequestException("La 'cuenta contable' selecciona no puede ser utilizada ya que no es asignable.");
     }
     return account;
   }
 
-  async createAccounts(
-    data: any,
-    company: Company,
-  ): Promise<AccountingCatalog[]> {
+  async createAccounts(data: any, company: Company): Promise<AccountingCatalog[]> {
     let response;
     try {
       const insert = data.accounts.map((d) => {

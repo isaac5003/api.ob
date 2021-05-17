@@ -50,10 +50,7 @@ export class Service extends BaseEntity {
   @JoinColumn({ name: 'company_id' })
   company: Company;
 
-  @ManyToOne(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.services,
-  )
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.services)
   accountingCatalog: AccountingCatalog;
 
   @ManyToOne(() => SellingType, (sellingType) => sellingType.services)

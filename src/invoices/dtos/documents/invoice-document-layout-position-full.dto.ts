@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsBoolean, IsInt, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
-export class DocumentBasicsLayoutDTO {
+export class InvoiceDocumentLayoutPositionFullDTO {
   @IsNotEmpty({ message: validationMessage('x', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('x', 'IsInt') })
@@ -17,13 +17,7 @@ export class DocumentBasicsLayoutDTO {
   value: string;
 
   @IsNotEmpty({ message: validationMessage('show', 'IsNotEmpty') })
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 1,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('show', 'IsBoolean') })
   show: boolean;
 }

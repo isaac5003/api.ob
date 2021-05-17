@@ -28,9 +28,6 @@ export class AccountingRegisterType extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.accountingRegisterTypes)
   company: Company;
 
-  @OneToMany(
-    () => AccountingSetting,
-    (accountingSetting) => accountingSetting.registerType,
-  )
+  @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.registerType)
   accountingSettings: AccountingSetting[];
 }

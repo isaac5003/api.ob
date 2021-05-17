@@ -9,9 +9,7 @@ export class CompanyRepository extends Repository<Company> {
       const company = await this.createQueryBuilder('c').where({ id }).getOne();
       return company;
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener la empresa seleccionada.',
-      );
+      throw new InternalServerErrorException('Error al obtener la empresa seleccionada.');
     }
   }
 }

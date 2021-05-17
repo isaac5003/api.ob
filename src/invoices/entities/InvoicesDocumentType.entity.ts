@@ -30,9 +30,6 @@ export class InvoicesDocumentType extends BaseEntity {
   @OneToMany(() => Invoice, (invoice) => invoice.documentType)
   invoices: Invoice[];
 
-  @OneToMany(
-    () => InvoicesDocument,
-    (invoicesDocument) => invoicesDocument.documentType,
-  )
+  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.documentType)
   invoicesDocuments: InvoicesDocument[];
 }

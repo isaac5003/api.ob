@@ -2,29 +2,21 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoiceAuxiliarDataDTO } from '../dtos/invoice-auxiliar-data.dto';
-import { InvoiceAuxiliarUpdateDTO } from '../dtos/invoice-auxiliar-update.dto';
+import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
+import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
 
 const reponame = 'zonas';
 @EntityRepository(InvoicesZone)
 export class InvoicesZoneRepository extends Repository<InvoicesZone> {
-  async getInvoicesZones(
-    company: Company,
-    filter: Partial<FilterDTO>,
-  ): Promise<InvoicesZone[]> {
+  async getInvoicesZones(company: Company, filter: Partial<FilterDTO>): Promise<InvoicesZone[]> {
     const { limit, page, search, active } = filter;
-
     try {
-      const query = this.createQueryBuilder('iz')
-        .where({ company })
-        .orderBy('iz.createdAt', 'DESC');
-
+      const query = this.createQueryBuilder('iz').where({ company }).orderBy('iz.createdAt', 'DESC');
       // filter by status
       if (active) {
         query.andWhere('iz.active = :active', { active });
       }
-
       // filter by search value
       if (search) {
         query.andWhere('LOWER(iz.name) LIKE :search', {
@@ -42,7 +34,19 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
     }
   }
 
-  async getInvoiceZone(company: Company, id: string): Promise<InvoicesZone> {
+  async createInvoicesZone(company: Company, data: InvoiceZonesDataDTO): Promise<InvoicesZone> {
+    let response: InvoicesZone;
+    try {
+      const invoiceZone = this.create({ company, ...data });
+      response = await this.save(invoiceZone);
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(reponame, error);
+    }
+    return await response;
+  }
+
+  async getInvoicesZone(company: Company, id: string): Promise<InvoicesZone> {
     let invoicesZone: InvoicesZone;
     try {
       invoicesZone = await this.findOneOrFail({ id, company });
@@ -52,30 +56,14 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
     return invoicesZone;
   }
 
-  async createInvoiceZone(
-    company: Company,
-    data: InvoiceAuxiliarDataDTO,
-  ): Promise<InvoicesZone> {
-    let response: InvoicesZone;
-    try {
-      const invoiceZone = this.create({ company, ...data });
-      response = await this.save(invoiceZone);
-    } catch (error) {
-      console.error(error);
-
-      logDatabaseError(reponame, error);
-    }
-    return await response;
-  }
-
-  async updateInvoiceZone(
+  async updateInvoicesZone(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarUpdateDTO>,
-  ): Promise<any> {
+    data: InvoiceZonesDataDTO | ActiveValidateDTO,
+  ): Promise<InvoicesZone> {
     try {
-      const invoiceZone = this.update({ id, company }, data);
-      return invoiceZone;
+      this.update({ id, company }, data);
+      return this.findOne({ id, company });
     } catch (error) {
       logDatabaseError(reponame, error);
     }
@@ -86,7 +74,6 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
       await this.delete({ id, company });
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
     return true;

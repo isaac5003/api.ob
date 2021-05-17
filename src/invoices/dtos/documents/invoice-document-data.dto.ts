@@ -24,5 +24,5 @@ export class InvoiceDocumentDataDTO {
   @IsNotEmpty({ message: validationMessage('', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('documentType', 'IsInt') })
-  documentType: number;
+  documentType: DocumentType;
 }

@@ -26,7 +26,7 @@ export class CustomerBranch extends BaseEntity {
   contactName: string;
 
   @Column({ type: 'json' })
-  contactInfo: string;
+  contactInfo: { phones: string[]; emails: string[] };
 
   @Column({ nullable: true })
   address1: string;

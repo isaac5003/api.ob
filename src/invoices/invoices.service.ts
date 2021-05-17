@@ -1,28 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
-import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import {
-  ResponseListDTO,
-  ResponseMinimalDTO,
-  ResponseSingleDTO,
-} from 'src/_dtos/responseList.dto';
-import { numeroALetras, validationMessage } from 'src/_tools';
-import { ActiveValidateDTO } from './dtos/invoice-active-auxiliar.dto';
-import { InvoiceAuxiliarDataDTO } from './dtos/invoice-auxiliar-data.dto';
-import { InvoiceAuxiliarUpdateDTO } from './dtos/invoice-auxiliar-update.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
-import { DocumentLayoutDTO } from './dtos/invoice-documentLayout.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
-import { PaymentConditionCreateDTO } from './dtos/invoice-paymentcondition-data.dto';
 import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
-import { InvoiceSellerDataDTO } from './dtos/invoice-seller-data.dto';
 import { Invoice } from './entities/Invoice.entity';
 import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
@@ -38,10 +26,34 @@ import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaym
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
+import { InvoiceDocumentUpdateDTO } from './dtos/documents/invoice-document-update.dto';
+import { InvoiceDocumentLayoutDTO } from './dtos/documents/invoice-document-layout.dto';
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { numeroALetras } from 'src/_tools';
+import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
+import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 
 @Injectable()
 export class InvoicesService {
   constructor(
+    @InjectRepository(InvoicesDocumentTypeRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+
+    @InjectRepository(InvoicesStatusRepository)
+    private invoiceStatusRepository: InvoicesStatusRepository,
+
+    @InjectRepository(InvoicesZoneRepository)
+    private invoicesZoneRepository: InvoicesZoneRepository,
+
+    @InjectRepository(InvoicesPaymentsConditionRepository)
+    private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionRepository,
+
+    @InjectRepository(InvoicesSellerRepository)
+    private invoiceSellerRepository: InvoicesSellerRepository,
+
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
 
@@ -51,43 +63,25 @@ export class InvoicesService {
     @InjectRepository(CustomerBranchRepository)
     private customerBranchRepository: CustomerBranchRepository,
 
-    @InjectRepository(InvoicesSellerRepository)
-    private invoiceSellerRepository: InvoicesSellerRepository,
-
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
-
-    @InjectRepository(InvoicesStatusRepository)
-    private invoiceStatusRepository: InvoicesStatusRepository,
-
-    @InjectRepository(InvoicesPaymentsConditionRepository)
-    private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionRepository,
-
-    @InjectRepository(InvoicesDocumentTypeRepository)
-    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
 
     @InjectRepository(InvoiceDetailRepository)
     private invoiceDetailRepository: InvoiceDetailRepository,
 
     @InjectRepository(InvoicesDocumentRepository)
     private invoicesDocumentRepository: InvoicesDocumentRepository,
-
-    @InjectRepository(InvoicesZoneRepository)
-    private invoicesZoneRepository: InvoicesZoneRepository,
   ) {}
 
-  async getInvoiceDocumentsType(): Promise<InvoicesDocumentType[]> {
-    return await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+  async getInvoicesDocumentTypes(): Promise<InvoicesDocumentType[]> {
+    return await this.invoicesDocumentTypeRepository.getInvoiceDocumentsType();
   }
 
-  async getInvoiceStatuses(): Promise<InvoicesStatus[]> {
-    return await this.invoiceStatusRepository.getInvoicesStatus();
+  async getInvoicesStatuses(): Promise<InvoicesStatus[]> {
+    return await this.invoiceStatusRepository.getInvoicesStatuses();
   }
-  async updateInvoiceStatus(
-    company: Company,
-    id: string,
-    type: string,
-  ): Promise<ResponseMinimalDTO> {
+
+  async updateInvoicesStatus(company: Company, id: string, type: string): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
     let status: InvoicesStatus;
@@ -95,16 +89,15 @@ export class InvoicesService {
 
     switch (type) {
       case 'void':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(3);
-        // Verifica que tenga uno de los estados que pueden anularse
+        status = await this.invoiceStatusRepository.getInvoicesStatus(3);
         statuses = [1, 2];
         break;
       case 'printed':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(2);
+        status = await this.invoiceStatusRepository.getInvoicesStatus(2);
         statuses = [1, 2];
         break;
       case 'paid':
-        status = await this.invoiceStatusRepository.getInvoiceStatus(5);
+        status = await this.invoiceStatusRepository.getInvoicesStatus(5);
         statuses = [2];
         break;
       case 'reverse':
@@ -120,137 +113,90 @@ export class InvoicesService {
             newStatus = 2;
             break;
         }
-
-        status = await this.invoiceStatusRepository.getInvoiceStatus(newStatus);
+        status = await this.invoiceStatusRepository.getInvoicesStatus(newStatus);
         statuses = [2, 3, 5];
         break;
     }
 
+    console.log(status);
+    console.log(statuses);
+
     if (!statuses.includes(invoice.status.id)) {
-      throw new BadRequestException(
-        validationMessage(status.name.toLowerCase(), 'status'),
-      );
+      throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
     await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
 
     return {
       message:
         type == 'reverse'
-          ? `La venta ha sido marcada como ${status.name.toLowerCase()}, se revertio correctamente.`
+          ? `La venta se revertio correctamente, ha sido marcada como ${status.name.toLowerCase()}.`
           : `La venta ha sido marcada como ${status.name.toLowerCase()} correctamente.`,
     };
   }
 
-  async getInvoiceZones(
-    company: Company,
-    filter: Partial<FilterDTO>,
-  ): Promise<InvoicesZone[]> {
+  async getInvoicesZones(company: Company, filter: Partial<FilterDTO>): Promise<InvoicesZone[]> {
     return await this.invoicesZoneRepository.getInvoicesZones(company, filter);
   }
 
-  async createInvoiceZone(
-    company: Company,
-    data: InvoiceAuxiliarDataDTO,
-  ): Promise<ResponseMinimalDTO> {
-    const invoiceZone = await this.invoicesZoneRepository.createInvoiceZone(
-      company,
-      data,
-    );
+  async createInvoicesZone(company: Company, data: InvoiceZonesDataDTO): Promise<ResponseMinimalDTO> {
+    const invoiceZone = await this.invoicesZoneRepository.createInvoicesZone(company, data);
     return {
       id: invoiceZone.id,
       message: 'La zona se creo correctamente.',
     };
   }
 
-  async updateInvoiceZone(
+  async updateInvoicesZone(
     id: string,
     company: Company,
-    data: ActiveValidateDTO,
+    data: InvoiceZonesDataDTO | ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.invoicesZoneRepository.getInvoiceZone(company, id);
-
-    await this.invoicesZoneRepository.updateInvoiceZone(id, company, data);
+    await this.invoicesZoneRepository.getInvoicesZone(company, id);
+    await this.invoicesZoneRepository.updateInvoicesZone(id, company, data);
     return {
       message: 'La zona se actualizo correctamente',
     };
   }
 
-  async deleteInvoiceZone(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
-    await this.invoicesZoneRepository.getInvoiceZone(company, id);
-
-    const result = await this.invoicesZoneRepository.deleteInvoicesZone(
-      company,
-      id,
-    );
-
+  async deleteInvoicesZone(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    await this.invoicesZoneRepository.getInvoicesZone(company, id);
+    const result = await this.invoicesZoneRepository.deleteInvoicesZone(company, id);
     return {
-      message: result
-        ? 'Se ha eliminado la zona correctamente'
-        : 'No se ha podido eliminar zona',
+      message: result ? 'Se ha eliminado la zona correctamente' : 'No se ha podido eliminar zona',
     };
   }
 
-  async getInvoicePaymentConditions(
-    company: Company,
-    filter: Partial<FilterDTO>,
-  ): Promise<InvoicesPaymentsCondition[]> {
-    return await this.invoicesPaymentsConditionRepository.getInvoicePaymentConditions(
-      company,
-      filter,
-    );
+  async getInvoicesPaymentConditions(company: Company, filter: FilterDTO): Promise<InvoicesPaymentsCondition[]> {
+    return await this.invoicesPaymentsConditionRepository.getInvoicesPaymentConditions(company, filter);
   }
 
-  async createInvoicePaymentCondition(
+  async createInvoicesPaymentCondition(
     company: Company,
-    data: PaymentConditionCreateDTO,
+    data: InvoicePaymentConditionDataDTO,
   ): Promise<ResponseMinimalDTO> {
-    const invoicePayment = await this.invoicesPaymentsConditionRepository.createInvoicePaymentCondition(
-      company,
-      data,
-    );
+    const invoicePayment = await this.invoicesPaymentsConditionRepository.createInvoicesPaymentCondition(company, data);
     return {
       id: invoicePayment.id,
       message: 'La condicion de pago se creo correctamente.',
     };
   }
 
-  async updateInvoicePaymentCondition(
+  async updateInvoicesPaymentCondition(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarUpdateDTO>,
+    data: InvoicePaymentConditionDataDTO | ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
-      id,
-      company,
-    );
+    await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(id, company);
 
-    await this.invoicesPaymentsConditionRepository.updateInvoicePaymentCondition(
-      id,
-      company,
-      data,
-    );
+    await this.invoicesPaymentsConditionRepository.updateInvoicesPaymentCondition(id, company, data);
     return {
       message: 'La condicion de pago se actualizo correctamente',
     };
   }
 
-  async deleteInvoicePaymentCondition(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
-    await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
-      id,
-      company,
-    );
-
-    const result = await this.invoicesPaymentsConditionRepository.deleteInvoicePaymentCondition(
-      company,
-      id,
-    );
-
+  async deleteInvoicesPaymentCondition(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(id, company);
+    const result = await this.invoicesPaymentsConditionRepository.deleteInvoicesPaymentCondition(company, id);
     return {
       message: result
         ? 'Se ha eliminado la condicion de pago correctamente correctamente'
@@ -258,97 +204,53 @@ export class InvoicesService {
     };
   }
 
-  async getSellers(
-    company: Company,
-    filter: FilterDTO,
-  ): Promise<InvoicesSeller[]> {
-    return await this.invoiceSellerRepository.getAllSellers(company, filter);
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
+    return await this.invoiceSellerRepository.getInvoicesSellers(company, filter);
   }
 
-  async createSeller(
-    company: Company,
-    data: InvoiceSellerDataDTO,
-  ): Promise<ResponseMinimalDTO> {
-    const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
+  async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
+    const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      data.invoicesZone,
+      (data.invoicesZone as unknown) as string,
     );
-    const sellerToCreate = {
-      ...data,
-      invoicesZone,
-    };
-
-    const seller = await this.invoiceSellerRepository.createSeller(
-      company,
-      sellerToCreate,
-    );
-
+    const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
       id: seller.id,
       message: 'El vendedor se ha creado correctamente',
     };
   }
 
-  async updateSeller(
+  async updateInvoicesSeller(
     id: string,
     company: Company,
-    data: Partial<InvoiceAuxiliarUpdateDTO>,
-    type: string,
+    data: InvoiceSellerDataDTO | ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.invoiceSellerRepository.getSeller(company, id);
-    let seller;
-    switch (type) {
-      case 'seller':
-        const invoicesZone = await this.invoicesZoneRepository.getInvoiceZone(
-          company,
-          data.invoicesZone,
-        );
-        seller = {
-          ...data,
-          invoicesZone,
-        };
-        break;
-      case 'status':
-        seller = {
-          active: data.active,
-        };
-        break;
-    }
-
-    await this.invoiceSellerRepository.updateSeller(id, company, seller);
+    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
+    await this.invoiceSellerRepository.updateInvoicesSeller(id, company, data);
 
     return {
       message: 'El vendedor se actualizo correctamente.',
     };
   }
 
-  async deleteSeller(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
-    await this.invoiceSellerRepository.getSeller(company, id);
+  async deleteInvoicesSeller(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
 
-    const result = await this.invoiceSellerRepository.deleteSeller(company, id);
+    const result = await this.invoiceSellerRepository.deleteInvoicesSeller(company, id);
 
     return {
-      message: result
-        ? 'Se ha eliminado el vendedor correctamente'
-        : 'No se ha podido eliminar el vendedor',
+      message: result ? 'Se ha eliminado el vendedor correctamente' : 'No se ha podido eliminar el vendedor',
     };
   }
 
-  async getDocuments(
-    company: Company,
-  ): Promise<ResponseListDTO<InvoicesDocument>> {
-    const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-      company,
-    );
+  async getDocuments(company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
+    const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
-    const doc = documentTypes.map((dt) => {
-      const found = documents.find((d) => d.documentType.id == dt.id);
+    const documents = documentTypes.map((dt) => {
+      const found = existingDocuments.find((d) => d.documentType.id == dt.id);
       return found
-        ? { ...found, documentLayout: JSON.parse(found.documentLayout) }
+        ? { ...found }
         : {
             id: null,
             authorization: null,
@@ -359,43 +261,32 @@ export class InvoicesService {
             documentType: dt,
           };
     });
-    return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
+    return new ResponseListDTO(plainToClass(InvoicesDocument, documents));
   }
 
-  async getDocument(
-    company: Company,
-    id: string,
-  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-    const document = await this.invoicesDocumentRepository.getDocumentsByIds(
-      company,
-      [id],
-      'all',
-    );
-
+  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const document = await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
     return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
   }
+
   async createUpdateDocument(
     company: Company,
-    data: any[],
+    data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
     type: string,
   ): Promise<ResponseMinimalDTO> {
-    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-      data.map((d) => d.documentType),
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
+      data.map((d) => (d.documentType as unknown) as number),
     );
 
-    let documentsToUpdate;
-    let documentsNotExist;
-    let document = [];
+    let documentsToProcess = [];
     switch (type) {
       case 'create':
-        let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-          company,
-        );
-        documents = documents.filter((d) =>
+        // Obtiene los documentos ya existentes de los tipos que se van a crear
+        const documents = (await this.invoicesDocumentRepository.getInvoicesDocuments(company)).filter((d) =>
           documentTypes.map((dt) => dt.id).includes(d.documentType.id),
         );
 
-        const documentToUpdate = documents.map((d) => {
+        const documentsToDisable = documents.map((d) => {
           return {
             ...d,
             isCurrentDocument: false,
@@ -403,23 +294,18 @@ export class InvoicesService {
           };
         });
 
-        await this.invoicesDocumentRepository.createUpdateDocument(
-          company,
-          documentToUpdate,
-          'update',
-        );
+        // Deshabilita los documentos
+        await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
 
-        document = data.map((d) => {
+        documentsToProcess = data.map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == d.documentType),
+            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
             isCurrentDocument: true,
             company: company,
           };
         });
-
         break;
-
       case 'update':
         const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
           company,
@@ -429,140 +315,69 @@ export class InvoicesService {
 
         if (documentExist.length == 0) {
           throw new BadRequestException(
-            'Los documentos seleccionados no existen o estan en uso',
+            'Los documentos seleccionados no pueden ser actualizados ya que no existen o estan en uso',
           );
         }
 
-        documentsNotExist = [];
-        documentsToUpdate = [];
-        for (const d of data) {
-          if (documentExist.map((de) => de.id).includes(d.id)) {
-            documentsToUpdate.push(d);
-          } else {
-            documentsNotExist.push(d);
-          }
-        }
-
-        document = documentsToUpdate.map((d) => {
-          return {
-            ...d,
-            documentType: documentTypes.find((dt) => dt.id == d.documentType),
-          };
-        });
+        documentsToProcess = data
+          .filter((d) => documentExist.map((de) => de.id).includes(d.id))
+          .map((d) => {
+            return {
+              ...d,
+              documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            };
+          });
 
         break;
     }
 
-    const documentCreated = await this.invoicesDocumentRepository.createUpdateDocument(
-      company,
-      document,
-      type,
-    );
-    let message = {};
+    const completed = await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToProcess, type);
+    let message = '';
     switch (type) {
       case 'create':
-        message = {
-          id: documentCreated.map((dr) => dr.id).join(','),
-          message: 'Los documentos se han creado correctamente.',
-        };
+        message = 'Los documentos se han creado correctamente.';
         break;
       case 'update':
-        message = {
-          message:
-            documentsNotExist.length == 0
-              ? 'Los documentos se han actualizado correctamente.'
-              : `Se actualizaron los documentos con id:${documentsToUpdate
-                  .map((dt) => dt.id)
-                  .join(
-                    ',',
-                    ' ',
-                  )}, y no se pudieron actualizar los documentos con id:${documentsNotExist
-                  .map((dne) => dne.id)
-                  .join(',', ' ')} porque no existe o esta en uso`,
-        };
+        message = 'Los documentos se han actualizado correctamente.';
         break;
     }
 
-    return message;
-  }
-
-  async getDocumentLayout(
-    company: Company,
-    id: string,
-  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-    const {
-      documentLayout,
-    } = await this.invoicesDocumentRepository.getSequenceAvailable(
-      company,
-      parseInt(id),
-    );
-
-    return new ResponseSingleDTO(
-      plainToClass(InvoicesDocument, JSON.parse(documentLayout)),
-    );
-  }
-
-  async createUpdateDocumentLayout(
-    company: Company,
-    id: number,
-    data: DocumentLayoutDTO,
-  ) {
-    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-      company,
-      id,
-    );
-
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      document.id,
-      { documentLayout: JSON.stringify(data) },
-      company,
-    );
-
     return {
-      message: `La configuracion ha sido guardada correctamente.`,
+      ids: completed.map((c) => c.id),
+      message,
     };
   }
 
-  async updateDocumentStatus(
-    id: string,
-    company: Company,
-    data: ActiveValidateDTO,
-  ): Promise<ResponseMinimalDTO> {
-    await this.invoicesDocumentRepository.getDocumentsByIds(
-      company,
-      [id],
-      'all',
-    );
+  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
+  }
 
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      id,
-      data,
-      company,
-    );
+  async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
+    await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(id, data, company);
     return {
       message: 'El estado del documento se actualizo correctamente.',
     };
   }
 
-  async generateReport(
-    company: Company,
-    filter: ReportFilterDTO,
-  ): Promise<ResponseListDTO<Invoice>> {
+  async createUpdateDocumentLayout(company: Company, id: number, data: InvoiceDocumentLayoutDTO) {
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { documentLayout: JSON.stringify(data) },
+      company,
+    );
+    return {
+      message: `La configuracion ha sido guardada correctamente.`,
+    };
+  }
+
+  async generateReport(company: Company, filter: ReportFilterDTO): Promise<ResponseListDTO<Invoice>> {
     let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
-    const {
-      startDate,
-      endDate,
-      documentType,
-      customer,
-      seller,
-      zone,
-      status,
-      service,
-    } = filter;
+    const { startDate, endDate, documentType, customer, seller, zone, status, service } = filter;
     if (documentType) {
-      documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds(
-        [documentType],
-      );
+      documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds([documentType]);
     }
 
     let params = {};
@@ -607,42 +422,25 @@ export class InvoicesService {
         code: dt.code,
         count: documents.length,
         documents,
-        vGravadaTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.vGravada, 0),
-        vNSujetaTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.vNSujeta, 0),
-        vExentaTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.vExenta, 0),
-        ivaTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.iva, 0),
-        ivaRetenidoTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.ivaRetenido, 0),
-        totalTotal: documents
-          .filter((d) => d.status.id != 3)
-          .reduce((a, b) => a + b.total, 0),
+        vGravadaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.total, 0),
       };
     });
 
     return new ResponseListDTO(plainToClass(Invoice, report));
   }
-  async getInvoices(
-    company: Company,
-    filter: InvoiceFilterDTO,
-  ): Promise<ResponseListDTO<Invoice>> {
+  async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
     const invoices = await this.invoiceRepository.getInvoices(company, filter);
     const sales = invoices.map((i) => {
       return {
         id: i.id,
         authorization: i.authorization,
         sequence: i.sequence,
-        invoiceDate: i.invoiceDate
-          ? i.invoiceDate.split('-').reverse().join('/')
-          : null,
+        invoiceDate: i.invoiceDate ? i.invoiceDate.split('-').reverse().join('/') : null,
         customerName: i.customerName,
         ventaTotal: i.ventaTotal,
         documentType: i.documentType,
@@ -654,10 +452,7 @@ export class InvoicesService {
     return new ResponseListDTO(plainToClass(Invoice, sales));
   }
 
-  async getInvoice(
-    company: Company,
-    id: string,
-  ): Promise<ResponseSingleDTO<Invoice>> {
+  async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoice>> {
     const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
 
     const details = invoiceAll.invoiceDetails.map((d) => {
@@ -693,40 +488,21 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
 
-  async createInvoice(
-    company: Company,
-    branch: Branch,
-    data: InvoiceDataDTO,
-  ): Promise<ResponseMinimalDTO> {
-    const customer = await this.customerRepository.getCustomer(
-      data.header.customer,
-      company,
-    );
-    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
-      data.header.customerBranch,
-    );
-    const invoiceSeller = await this.invoiceSellerRepository.getSeller(
-      company,
-      data.header.invoicesSeller,
-    );
-    const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-      1,
-    );
-    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
       company,
     );
-    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-      [data.header.documentType],
-    );
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.header.documentType]);
 
-    const allInvoicesReserved = await this.invoiceRepository.getInvoices(
-      company,
-      {
-        status: 4,
-        documentType: data.header.documentType,
-      },
-    );
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(company, {
+      status: 4,
+      documentType: data.header.documentType,
+    });
 
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(
       company,
@@ -755,10 +531,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(
-        company,
-        detail.selectedService,
-      );
+      const service = await this.serviceRepository.getService(company, detail.selectedService);
       details.push({
         ...detail,
         service,
@@ -769,11 +542,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.createInvoiceDetail(details);
 
     let nextSequence = parseInt(invoiceHeader.sequence) + 1;
-    if (
-      allInvoicesReserved
-        .map((ir) => parseInt(ir.sequence))
-        .includes(nextSequence)
-    ) {
+    if (allInvoicesReserved.map((ir) => parseInt(ir.sequence)).includes(nextSequence)) {
       for (const is of allInvoicesReserved.map((ir) => parseInt(ir.sequence))) {
         for (let s = nextSequence; s <= document.final; s++) {
           if (s != is) {
@@ -783,11 +552,7 @@ export class InvoicesService {
         }
       }
     }
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      document.id,
-      { current: nextSequence },
-      company,
-    );
+    await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { current: nextSequence }, company);
 
     return {
       id: invoiceHeader.id,
@@ -800,47 +565,28 @@ export class InvoicesService {
     branch: Branch,
     data: InvoiceReserveDataDTO,
   ): Promise<ResponseMinimalDTO> {
-    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-      data.documentType,
-    );
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.documentType]);
 
-    const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-      4,
-    );
-    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-      company,
-      data.documentType,
-    );
-    if (
-      data.sequenceForm < document.current ||
-      data.sequenceTo > document.final
-    ) {
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(4);
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, data.documentType);
+    if (data.sequenceForm < document.current || data.sequenceTo > document.final) {
       throw new BadRequestException(
         `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
       );
     }
-    const allInvoicesReserved = await this.invoiceRepository.getInvoices(
-      company,
-      {
-        status: 4,
-        documentType: data.documentType,
-      },
-    );
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(company, {
+      status: 4,
+      documentType: data.documentType,
+    });
 
     const sequence = [];
     for (let s = data.sequenceForm; s <= data.sequenceTo; s++) {
       sequence.push(s);
     }
 
-    const invoicesSequence = allInvoicesReserved.map((is) =>
-      parseInt(is.sequence),
-    );
-    const alreadyReserved = invoicesSequence.filter((is) =>
-      sequence.includes(is),
-    );
-    const sequenceToReserve = sequence.filter(
-      (s) => !alreadyReserved.includes(s),
-    );
+    const invoicesSequence = allInvoicesReserved.map((is) => parseInt(is.sequence));
+    const alreadyReserved = invoicesSequence.filter((is) => sequence.includes(is));
+    const sequenceToReserve = sequence.filter((s) => !alreadyReserved.includes(s));
 
     const invoiceValues = sequenceToReserve.map((sr) => {
       return {
@@ -852,11 +598,7 @@ export class InvoicesService {
       };
     });
 
-    await this.invoiceRepository.createReserveInvoice(
-      company,
-      branch,
-      invoiceValues,
-    );
+    await this.invoiceRepository.createReserveInvoice(company, branch, invoiceValues);
 
     if (data.sequenceForm == document.current) {
       await this.invoicesDocumentRepository.updateInvoiceDocument(
@@ -875,34 +617,18 @@ export class InvoicesService {
               ', ',
             )} correctamente.`
           : sequenceToReserve.length > 0
-          ? `Los documentos con sequencia ${sequenceToReserve.join(
-              ', ',
-            )} han sido reservados correctamente.`
-          : `Los documentos con secuencia ${alreadyReserved.join(
-              ', ',
-            )} ya estan reservados`,
+          ? `Los documentos con sequencia ${sequenceToReserve.join(', ')} han sido reservados correctamente.`
+          : `Los documentos con secuencia ${alreadyReserved.join(', ')} ya estan reservados`,
     };
   }
 
-  async updateInvoice(
-    company: Company,
-    id: string,
-    data: InvoiceDataDTO,
-  ): Promise<ResponseMinimalDTO> {
+  async updateInvoice(company: Company, id: string, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-    const customer = await this.customerRepository.getCustomer(
-      data.header.customer,
-      company,
-    );
-    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
-      data.header.customerBranch,
-    );
-    const invoiceSeller = await this.invoiceSellerRepository.getSeller(
-      company,
-      data.header.invoicesSeller,
-    );
-    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
       company,
     );
@@ -944,10 +670,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(
-        company,
-        detail.selectedService,
-      );
+      const service = await this.serviceRepository.getService(company, detail.selectedService);
       details.push({
         ...detail,
         service,
@@ -962,10 +685,7 @@ export class InvoicesService {
     };
   }
 
-  async deleteInvoice(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteInvoice(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
     const allowedStatuses = [1];
@@ -975,10 +695,7 @@ export class InvoicesService {
       );
     }
 
-    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-      company,
-      invoice.documentType.id,
-    );
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, invoice.documentType.id);
     if (document.current - 1 != parseInt(invoice.sequence)) {
       throw new BadRequestException(
         'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
@@ -988,11 +705,7 @@ export class InvoicesService {
 
     await this.invoiceDetailRepository.deleteInvoiceDetail(detailsIds);
 
-    const result = await this.invoiceRepository.deleteInvoice(
-      company,
-      id,
-      invoice,
-    );
+    const result = await this.invoiceRepository.deleteInvoice(company, id, invoice);
 
     await this.invoicesDocumentRepository.updateInvoiceDocument(
       document.id,
@@ -1001,9 +714,7 @@ export class InvoicesService {
     );
 
     return {
-      message: result
-        ? 'Se ha eliminado la venta correctamente'
-        : 'No se ha podido eliminar venta',
+      message: result ? 'Se ha eliminado la venta correctamente' : 'No se ha podido eliminar venta',
     };
   }
 }

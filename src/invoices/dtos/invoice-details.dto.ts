@@ -4,18 +4,12 @@ import { validationMessage } from 'src/_tools';
 
 export class InvoiceDetailDTO {
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: validationMessage('quantity', 'IsNumber') },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('quantity', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('quantity', 'IsNotEmpty') })
   quantity: number;
 
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: validationMessage('unitPrice', 'IsNumber') },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('unitPrice', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('unitPrice', 'IsNotEmpty') })
   unitPrice: number;
 
@@ -24,21 +18,12 @@ export class InvoiceDetailDTO {
   chargeDescription: string;
 
   @IsNotEmpty({ message: validationMessage('incTax', 'IsNotEmpty') })
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : null,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('incTax', 'IsBoolean') })
   incTax: boolean;
 
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: validationMessage('ventaPrice', 'IsNumber') },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('ventaPrice', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('ventaPrice', 'IsNotEmpty') })
   ventaPrice: number;
 

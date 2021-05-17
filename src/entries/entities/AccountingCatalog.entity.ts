@@ -51,45 +51,27 @@ export class AccountingCatalog extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.accountingCatalogs)
   company: Company;
 
-  @ManyToOne(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.accountingCatalogs,
-  )
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingCatalogs)
   parentCatalog: AccountingCatalog;
 
-  @OneToMany(
-    () => AccountingCatalog,
-    (accountingCatalog) => accountingCatalog.parentCatalog,
-  )
+  @OneToMany(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.parentCatalog)
   accountingCatalogs: AccountingCatalog[];
 
-  @OneToMany(
-    () => AccountingEntryDetail,
-    (accountingEntryDetail) => accountingEntryDetail.accountingCatalog,
-  )
+  @OneToMany(() => AccountingEntryDetail, (accountingEntryDetail) => accountingEntryDetail.accountingCatalog)
   accountingEntryDetails: AccountingEntryDetail[];
 
-  @OneToMany(
-    () => AccountingSetting,
-    (accountingSetting) => accountingSetting.accountingCatalog,
-  )
+  @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.accountingCatalog)
   accountingSettings: AccountingSetting[];
 
   @OneToMany(() => Customer, (customer) => customer.accountingCatalog)
   customers: Customer[];
 
-  @OneToMany(
-    () => CustomerSetting,
-    (customerSetting) => customerSetting.accountingCatalog,
-  )
+  @OneToMany(() => CustomerSetting, (customerSetting) => customerSetting.accountingCatalog)
   customerSettings: CustomerSetting[];
 
   @OneToMany(() => Service, (service) => service.accountingCatalog)
   services: Service[];
 
-  @OneToMany(
-    () => ServiceSetting,
-    (serviceSetting) => serviceSetting.accountingCatalog,
-  )
+  @OneToMany(() => ServiceSetting, (serviceSetting) => serviceSetting.accountingCatalog)
   serviceSettings: ServiceSetting[];
 }
