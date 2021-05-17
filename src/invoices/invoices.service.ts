@@ -7,11 +7,11 @@ import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBra
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
-import { ActiveValidateDTO } from './dtos/invoice-active.dto';
-import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
-import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
-import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { InvoiceDataDTO } from './dtos/invoice-data.dto';
+import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
+import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
+import { Invoice } from './entities/Invoice.entity';
 import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
@@ -28,13 +28,13 @@ import { InvoicesStatusRepository } from './repositories/InvoicesStatus.reposito
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
 import { InvoiceDocumentUpdateDTO } from './dtos/documents/invoice-document-update.dto';
 import { InvoiceDocumentLayoutDTO } from './dtos/documents/invoice-document-layout.dto';
-import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
-import { Invoice } from './entities/Invoice.entity';
 import { Branch } from 'src/companies/entities/Branch.entity';
-import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
-import { InvoiceDataDTO } from './dtos/invoice-data.dto';
-import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { numeroALetras } from 'src/_tools';
+import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
+import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 
 @Injectable()
 export class InvoicesService {

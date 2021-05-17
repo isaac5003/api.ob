@@ -32,7 +32,7 @@ router.put('/void/:id', async (req, res) => {
   }
 
   // Verifica que tenga uno de los estados que pueden anularse
-  const statuses = [1, 2];
+  const statuses = [1, 2, 5];
   if (!statuses.includes(invoice.status.id)) {
     return res.status(500).json({
       message: 'El documento no puede ser anulado porque tiene un estado que no lo permite.',

@@ -6,9 +6,13 @@ import { AccountingEntryDetailRepository } from './repositories/AccountingEntryD
 import { AccountingEntryTypeRepository } from './repositories/AccountingEntryType.repository';
 import { AccountingRegisterTypeRepository } from './repositories/AccountingRegisterType.repository';
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
+import { EntriesService } from './entries.service';
+import { EntriesController } from './entries.controller';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       AccountingCatalogRepository,
       AccountingEntryRepository,
@@ -18,5 +22,7 @@ import { AccountingSettingRepository } from './repositories/AccountingSetting.re
       AccountingSettingRepository,
     ]),
   ],
+  providers: [EntriesService],
+  controllers: [EntriesController],
 })
 export class EntriesModule {}

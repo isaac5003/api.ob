@@ -1,8 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { Company } from 'src/companies/entities/Company.entity';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
-import { CustomerIntegrationDTO } from './dtos/customer-integration.dto';
+import { AccountignCatalogIntegrationDTO } from './dtos/customer-integration.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerRepository } from './repositories/Customer.repository';
@@ -19,7 +16,9 @@ import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
 import { Injectable } from '@nestjs/common';
-import { json } from 'express';
+import { Company } from 'src/companies/entities/Company.entity';
+import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 
 @Injectable()
 export class CustomersService {
@@ -134,7 +133,7 @@ export class CustomersService {
 
   async updateCustomerSettingsIntegrations(
     company: Company,
-    data: CustomerIntegrationDTO,
+    data: AccountignCatalogIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
 
@@ -225,7 +224,7 @@ export class CustomersService {
 
   async UpdateCustomerIntegration(
     id: string,
-    data: CustomerIntegrationDTO,
+    data: AccountignCatalogIntegrationDTO,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);

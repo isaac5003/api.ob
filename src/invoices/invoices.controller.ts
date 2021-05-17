@@ -23,10 +23,7 @@ import { InvoicesZone } from './entities/InvoicesZone.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
-import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
-import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { InvoiceDocumentUpdateDTO } from './dtos/documents/invoice-document-update.dto';
@@ -39,6 +36,9 @@ import { InvoiceDetailDTO } from './dtos/invoice-details.dto';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
 import { InvoiceUpdateHeaderDTO } from './dtos/invoice-header-update.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
