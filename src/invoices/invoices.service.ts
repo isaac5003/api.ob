@@ -1,15 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from 'src/services/repositories/Service.repository';
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
-import { ActiveValidateDTO } from './dtos/invoice-active.dto';
-import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
-import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { InvoiceDataDTO } from './dtos/invoice-data.dto';
+import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
+import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
+import { InvoiceReserveDataDTO } from './dtos/invoice-reserve-data.dto';
+import { Invoice } from './entities/Invoice.entity';
+import { InvoicesDocument } from './entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
@@ -23,6 +26,15 @@ import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaym
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
+import { InvoiceDocumentUpdateDTO } from './dtos/documents/invoice-document-update.dto';
+import { InvoiceDocumentLayoutDTO } from './dtos/documents/invoice-document-layout.dto';
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { numeroALetras } from 'src/_tools';
+import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
+import { ActiveValidateDTO } from './dtos/invoice-active.dto';
+import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
+import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
+import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -105,6 +117,9 @@ export class InvoicesService {
         statuses = [2, 3, 5];
         break;
     }
+
+    console.log(status);
+    console.log(statuses);
 
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
@@ -228,673 +243,478 @@ export class InvoicesService {
     };
   }
 
-  // async getDocuments(
-  //   company: Company,
-  // ): Promise<ResponseListDTO<InvoicesDocument>> {
-  //   const documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-  //     company,
-  //   );
-  //   const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+  async getDocuments(company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
+    const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
-  //   const doc = documentTypes.map((dt) => {
-  //     const found = documents.find((d) => d.documentType.id == dt.id);
-  //     return found
-  //       ? { ...found, documentLayout: JSON.parse(found.documentLayout) }
-  //       : {
-  //           id: null,
-  //           authorization: null,
-  //           initial: null,
-  //           final: null,
-  //           current: null,
-  //           active: false,
-  //           documentType: dt,
-  //         };
-  //   });
-  //   return new ResponseListDTO(plainToClass(InvoicesDocument, doc));
-  // }
+    const documents = documentTypes.map((dt) => {
+      const found = existingDocuments.find((d) => d.documentType.id == dt.id);
+      return found
+        ? { ...found }
+        : {
+            id: null,
+            authorization: null,
+            initial: null,
+            final: null,
+            current: null,
+            active: false,
+            documentType: dt,
+          };
+    });
+    return new ResponseListDTO(plainToClass(InvoicesDocument, documents));
+  }
 
-  // async getDocument(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-  //   const document = await this.invoicesDocumentRepository.getDocumentsByIds(
-  //     company,
-  //     [id],
-  //     'all',
-  //   );
+  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const document = await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+  }
 
-  //   return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
-  // }
-  // async createUpdateDocument(
-  //   company: Company,
-  //   data: any[],
-  //   type: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-  //     data.map((d) => d.documentType),
-  //   );
+  async createUpdateDocument(
+    company: Company,
+    data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
+    type: string,
+  ): Promise<ResponseMinimalDTO> {
+    const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
+      data.map((d) => (d.documentType as unknown) as number),
+    );
 
-  //   let documentsToUpdate;
-  //   let documentsNotExist;
-  //   let document = [];
-  //   switch (type) {
-  //     case 'create':
-  //       let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(
-  //         company,
-  //       );
-  //       documents = documents.filter((d) =>
-  //         documentTypes.map((dt) => dt.id).includes(d.documentType.id),
-  //       );
+    let documentsToProcess = [];
+    switch (type) {
+      case 'create':
+        // Obtiene los documentos ya existentes de los tipos que se van a crear
+        const documents = (await this.invoicesDocumentRepository.getInvoicesDocuments(company)).filter((d) =>
+          documentTypes.map((dt) => dt.id).includes(d.documentType.id),
+        );
 
-  //       const documentToUpdate = documents.map((d) => {
-  //         return {
-  //           ...d,
-  //           isCurrentDocument: false,
-  //           active: false,
-  //         };
-  //       });
+        const documentsToDisable = documents.map((d) => {
+          return {
+            ...d,
+            isCurrentDocument: false,
+            active: false,
+          };
+        });
 
-  //       const documentUpdated = await this.invoicesDocumentRepository.createUpdateDocument(
-  //         company,
-  //         documentToUpdate,
-  //         'update',
-  //       );
+        // Deshabilita los documentos
+        await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
 
-  //       document = data.map((d) => {
-  //         return {
-  //           ...d,
-  //           documentType: documentTypes.find((dt) => dt.id == d.documentType),
-  //           isCurrentDocument: true,
-  //           company: company,
-  //         };
-  //       });
+        documentsToProcess = data.map((d) => {
+          return {
+            ...d,
+            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            isCurrentDocument: true,
+            company: company,
+          };
+        });
+        break;
+      case 'update':
+        const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
+          company,
+          data.map((d) => d.id),
+          'unused',
+        );
 
-  //       break;
+        if (documentExist.length == 0) {
+          throw new BadRequestException(
+            'Los documentos seleccionados no pueden ser actualizados ya que no existen o estan en uso',
+          );
+        }
 
-  //     case 'update':
-  //       const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
-  //         company,
-  //         data.map((d) => d.id),
-  //         'unused',
-  //       );
+        documentsToProcess = data
+          .filter((d) => documentExist.map((de) => de.id).includes(d.id))
+          .map((d) => {
+            return {
+              ...d,
+              documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            };
+          });
 
-  //       if (documentExist.length == 0) {
-  //         throw new BadRequestException(
-  //           'Los documentos seleccionados no existen o estan en uso',
-  //         );
-  //       }
+        break;
+    }
 
-  //       documentsNotExist = [];
-  //       documentsToUpdate = [];
-  //       for (const d of data) {
-  //         if (documentExist.map((de) => de.id).includes(d.id)) {
-  //           documentsToUpdate.push(d);
-  //         } else {
-  //           documentsNotExist.push(d);
-  //         }
-  //       }
+    const completed = await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToProcess, type);
+    let message = '';
+    switch (type) {
+      case 'create':
+        message = 'Los documentos se han creado correctamente.';
+        break;
+      case 'update':
+        message = 'Los documentos se han actualizado correctamente.';
+        break;
+    }
 
-  //       document = documentsToUpdate.map((d) => {
-  //         return {
-  //           ...d,
-  //           documentType: documentTypes.find((dt) => dt.id == d.documentType),
-  //         };
-  //       });
+    return {
+      ids: completed.map((c) => c.id),
+      message,
+    };
+  }
 
-  //       break;
-  //   }
+  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
+    const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
+  }
 
-  //   const documentCreated = await this.invoicesDocumentRepository.createUpdateDocument(
-  //     company,
-  //     document,
-  //     type,
-  //   );
-  //   let message = {};
-  //   switch (type) {
-  //     case 'create':
-  //       message = {
-  //         id: documentCreated.map((dr) => dr.id).join(','),
-  //         message: 'Los documentos se han creado correctamente.',
-  //       };
-  //       break;
-  //     case 'update':
-  //       message = {
-  //         message:
-  //           documentsNotExist.length == 0
-  //             ? 'Los documentos se han actualizado correctamente.'
-  //             : `Se actualizaron los documentos con id:${documentsToUpdate
-  //                 .map((dt) => dt.id)
-  //                 .join(
-  //                   ',',
-  //                   ' ',
-  //                 )}, y no se pudieron actualizar los documentos con id:${documentsNotExist
-  //                 .map((dne) => dne.id)
-  //                 .join(',', ' ')} porque no existe o esta en uso`,
-  //       };
-  //       break;
-  //   }
+  async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
+    await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(id, data, company);
+    return {
+      message: 'El estado del documento se actualizo correctamente.',
+    };
+  }
 
-  //   return message;
-  // }
+  async createUpdateDocumentLayout(company: Company, id: number, data: InvoiceDocumentLayoutDTO) {
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { documentLayout: JSON.stringify(data) },
+      company,
+    );
+    return {
+      message: `La configuracion ha sido guardada correctamente.`,
+    };
+  }
 
-  // async getDocumentLayout(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseSingleDTO<InvoicesDocument>> {
-  //   const {
-  //     documentLayout,
-  //   } = await this.invoicesDocumentRepository.getSequenceAvailable(
-  //     company,
-  //     parseInt(id),
-  //   );
+  async generateReport(company: Company, filter: ReportFilterDTO): Promise<ResponseListDTO<Invoice>> {
+    let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
+    const { startDate, endDate, documentType, customer, seller, zone, status, service } = filter;
+    if (documentType) {
+      documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds([documentType]);
+    }
 
-  //   return new ResponseSingleDTO(
-  //     plainToClass(InvoicesDocument, JSON.parse(documentLayout)),
-  //   );
-  // }
+    let params = {};
+    params = { startDate, endDate };
 
-  // async createUpdateDocumentLayout(
-  //   company: Company,
-  //   id: number,
-  //   data: DocumentLayoutDTO,
-  // ) {
-  //   const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-  //     company,
-  //     id,
-  //   );
+    if (customer) {
+      params = { ...params, customer };
+    }
+    if (seller) {
+      params = { ...params, seller };
+    }
+    if (zone) {
+      params = { ...params, zone };
+    }
+    if (status) {
+      params = { ...params, status };
+    }
+    if (service) {
+      params = { ...params, service };
+    }
+    const sales = await this.invoiceRepository.getInvoices(company, params);
 
-  //   await this.invoicesDocumentRepository.updateInvoiceDocument(
-  //     document.id,
-  //     { documentLayout: JSON.stringify(data) },
-  //     company,
-  //   );
+    const report = documentTypes.map((dt) => {
+      const documents = sales
+        .filter((s) => s.documentType.id == dt.id)
+        .map((d) => {
+          return {
+            customer: d.customerName,
+            date: d.invoiceDate.split('-').reverse().join('/'),
+            documentNumber: `${d.authorization} - ${d.sequence}`,
+            status: { id: d.status.id, name: d.status.name },
+            vGravada: d.subtotal,
+            vNSujeta: d.ventasNoSujetas,
+            vExenta: d.ventasExentas,
+            iva: d.iva,
+            ivaRetenido: d.ivaRetenido,
+            total: d.ventaTotal,
+          };
+        });
+      return {
+        name: dt.name,
+        code: dt.code,
+        count: documents.length,
+        documents,
+        vGravadaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vGravada, 0),
+        vNSujetaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vNSujeta, 0),
+        vExentaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.vExenta, 0),
+        ivaTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.iva, 0),
+        ivaRetenidoTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.ivaRetenido, 0),
+        totalTotal: documents.filter((d) => d.status.id != 3).reduce((a, b) => a + b.total, 0),
+      };
+    });
 
-  //   return {
-  //     message: `La configuracion ha sido guardada correctamente.`,
-  //   };
-  // }
+    return new ResponseListDTO(plainToClass(Invoice, report));
+  }
+  async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
+    const invoices = await this.invoiceRepository.getInvoices(company, filter);
+    const sales = invoices.map((i) => {
+      return {
+        id: i.id,
+        authorization: i.authorization,
+        sequence: i.sequence,
+        invoiceDate: i.invoiceDate ? i.invoiceDate.split('-').reverse().join('/') : null,
+        customerName: i.customerName,
+        ventaTotal: i.ventaTotal,
+        documentType: i.documentType,
+        status: i.status,
+        invoiceRawDate: i.invoiceDate,
+      };
+    });
 
-  // async updateDocumentStatus(
-  //   id: string,
-  //   company: Company,
-  //   data: ActiveValidateDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   await this.invoicesDocumentRepository.getDocumentsByIds(
-  //     company,
-  //     [id],
-  //     'all',
-  //   );
+    return new ResponseListDTO(plainToClass(Invoice, sales));
+  }
 
-  //   await this.invoicesDocumentRepository.updateInvoiceDocument(
-  //     id,
-  //     data,
-  //     company,
-  //   );
-  //   return {
-  //     message: 'El estado del documento se actualizo correctamente.',
-  //   };
-  // }
+  async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoice>> {
+    const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
 
-  // async generateReport(
-  //   company: Company,
-  //   filter: ReportFilterDTO,
-  // ): Promise<ResponseListDTO<Invoice>> {
-  //   let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
-  //   const {
-  //     startDate,
-  //     endDate,
-  //     documentType,
-  //     customer,
-  //     seller,
-  //     zone,
-  //     status,
-  //     service,
-  //   } = filter;
-  //   if (documentType) {
-  //     documentTypes = await this.invoicesDocumentTypeRepository.documentTypesByIds(
-  //       [documentType],
-  //     );
-  //   }
+    const details = invoiceAll.invoiceDetails.map((d) => {
+      const { id, name } = d.service;
+      delete d.service;
+      return {
+        ...d,
+        service: { id, name },
+      };
+    });
 
-  //   let params = {};
-  //   params = { startDate, endDate };
+    delete invoiceAll.invoiceDetails;
+    delete invoiceAll.invoicesPaymentsCondition.active;
+    delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+    delete invoiceAll.invoicesSeller.active;
+    delete invoiceAll.invoicesZone.active;
 
-  //   if (customer) {
-  //     params = { ...params, customer };
-  //   }
-  //   if (seller) {
-  //     params = { ...params, seller };
-  //   }
-  //   if (zone) {
-  //     params = { ...params, zone };
-  //   }
-  //   if (status) {
-  //     params = { ...params, status };
-  //   }
-  //   if (service) {
-  //     params = { ...params, service };
-  //   }
-  //   const sales = await this.invoiceRepository.getInvoices(company, params);
+    const invoice = {
+      ...invoiceAll,
+      details,
+      customer: {
+        id: invoiceAll.customer.id,
+        name: invoiceAll.customer.name,
+      },
+      customerBranch: {
+        id: invoiceAll.customerBranch.id,
+        name: invoiceAll.customerBranch.name,
+      },
+    };
 
-  //   const report = documentTypes.map((dt) => {
-  //     const documents = sales
-  //       .filter((s) => s.documentType.id == dt.id)
-  //       .map((d) => {
-  //         return {
-  //           customer: d.customerName,
-  //           date: d.invoiceDate.split('-').reverse().join('/'),
-  //           documentNumber: `${d.authorization} - ${d.sequence}`,
-  //           status: { id: d.status.id, name: d.status.name },
-  //           vGravada: d.subtotal,
-  //           vNSujeta: d.ventasNoSujetas,
-  //           vExenta: d.ventasExentas,
-  //           iva: d.iva,
-  //           ivaRetenido: d.ivaRetenido,
-  //           total: d.ventaTotal,
-  //         };
-  //       });
-  //     return {
-  //       name: dt.name,
-  //       code: dt.code,
-  //       count: documents.length,
-  //       documents,
-  //       vGravadaTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.vGravada, 0),
-  //       vNSujetaTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.vNSujeta, 0),
-  //       vExentaTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.vExenta, 0),
-  //       ivaTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.iva, 0),
-  //       ivaRetenidoTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.ivaRetenido, 0),
-  //       totalTotal: documents
-  //         .filter((d) => d.status.id != 3)
-  //         .reduce((a, b) => a + b.total, 0),
-  //     };
-  //   });
+    delete invoiceAll.customerBranch;
+    delete invoiceAll.customer;
+    return new ResponseSingleDTO(plainToClass(Invoice, invoice));
+  }
 
-  //   return new ResponseListDTO(plainToClass(Invoice, report));
-  // }
-  // async getInvoices(
-  //   company: Company,
-  //   filter: InvoiceFilterDTO,
-  // ): Promise<ResponseListDTO<Invoice>> {
-  //   const invoices = await this.invoiceRepository.getInvoices(company, filter);
-  //   const sales = invoices.map((i) => {
-  //     return {
-  //       id: i.id,
-  //       authorization: i.authorization,
-  //       sequence: i.sequence,
-  //       invoiceDate: i.invoiceDate
-  //         ? i.invoiceDate.split('-').reverse().join('/')
-  //         : null,
-  //       customerName: i.customerName,
-  //       ventaTotal: i.ventaTotal,
-  //       documentType: i.documentType,
-  //       status: i.status,
-  //       invoiceRawDate: i.invoiceDate,
-  //     };
-  //   });
+  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
+      data.header.invoicesPaymentsCondition,
+      company,
+    );
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.header.documentType]);
 
-  //   return new ResponseListDTO(plainToClass(Invoice, sales));
-  // }
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(company, {
+      status: 4,
+      documentType: data.header.documentType,
+    });
 
-  // async getInvoice(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseSingleDTO<Invoice>> {
-  //   const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(
+      company,
+      data.header.documentType,
+      allInvoicesReserved.map((ir) => parseInt(ir.sequence)),
+    );
 
-  //   const details = invoiceAll.invoiceDetails.map((d) => {
-  //     const { id, name } = d.service;
-  //     delete d.service;
-  //     return {
-  //       ...d,
-  //       service: { id, name },
-  //     };
-  //   });
+    const invoiceHeader = await this.invoiceRepository.createInvoice(
+      company,
+      branch,
+      data.header,
+      customer,
+      customerBranch,
+      invoiceSeller,
+      invoicesPaymentCondition,
+      documentType[0],
+      document,
+      invoiceStatus,
+    );
 
-  //   delete invoiceAll.invoiceDetails;
-  //   delete invoiceAll.invoicesPaymentsCondition.active;
-  //   delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-  //   delete invoiceAll.invoicesSeller.active;
-  //   delete invoiceAll.invoicesZone.active;
+    let message = '';
 
-  //   const invoice = {
-  //     ...invoiceAll,
-  //     details,
-  //     customer: {
-  //       id: invoiceAll.customer.id,
-  //       name: invoiceAll.customer.name,
-  //     },
-  //     customerBranch: {
-  //       id: invoiceAll.customerBranch.id,
-  //       name: invoiceAll.customerBranch.name,
-  //     },
-  //   };
+    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+      message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
+    }
 
-  //   delete invoiceAll.customerBranch;
-  //   delete invoiceAll.customer;
-  //   return new ResponseSingleDTO(plainToClass(Invoice, invoice));
-  // }
+    const details = [];
+    for (const detail of data.details) {
+      const service = await this.serviceRepository.getService(company, detail.selectedService);
+      details.push({
+        ...detail,
+        service,
+        sellingType: service.sellingType,
+        invoice: invoiceHeader,
+      });
+    }
+    await this.invoiceDetailRepository.createInvoiceDetail(details);
 
-  // async createInvoice(
-  //   company: Company,
-  //   branch: Branch,
-  //   data: InvoiceDataDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const customer = await this.customerRepository.getCustomer(
-  //     data.header.customer,
-  //     company,
-  //   );
-  //   const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
-  //     data.header.customerBranch,
-  //   );
-  //   const invoiceSeller = await this.invoiceSellerRepository.getSeller(
-  //     company,
-  //     data.header.invoicesSeller,
-  //   );
-  //   const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-  //     1,
-  //   );
-  //   const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
-  //     data.header.invoicesPaymentsCondition,
-  //     company,
-  //   );
-  //   const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-  //     [data.header.documentType],
-  //   );
+    let nextSequence = parseInt(invoiceHeader.sequence) + 1;
+    if (allInvoicesReserved.map((ir) => parseInt(ir.sequence)).includes(nextSequence)) {
+      for (const is of allInvoicesReserved.map((ir) => parseInt(ir.sequence))) {
+        for (let s = nextSequence; s <= document.final; s++) {
+          if (s != is) {
+            nextSequence = s;
+            s = document.final;
+          }
+        }
+      }
+    }
+    await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { current: nextSequence }, company);
 
-  //   const allInvoicesReserved = await this.invoiceRepository.getInvoices(
-  //     company,
-  //     {
-  //       status: 4,
-  //       documentType: data.header.documentType,
-  //     },
-  //   );
+    return {
+      id: invoiceHeader.id,
+      message: `La venta ha sido registrada correctamente. ${message}`,
+    };
+  }
 
-  //   const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-  //     company,
-  //     data.header.documentType,
-  //     allInvoicesReserved.map((ir) => parseInt(ir.sequence)),
-  //   );
+  async createInvoiceReserve(
+    company: Company,
+    branch: Branch,
+    data: InvoiceReserveDataDTO,
+  ): Promise<ResponseMinimalDTO> {
+    const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.documentType]);
 
-  //   const invoiceHeader = await this.invoiceRepository.createInvoice(
-  //     company,
-  //     branch,
-  //     data.header,
-  //     customer,
-  //     customerBranch,
-  //     invoiceSeller,
-  //     invoicesPaymentCondition,
-  //     documentType[0],
-  //     document,
-  //     invoiceStatus,
-  //   );
+    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(4);
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, data.documentType);
+    if (data.sequenceForm < document.current || data.sequenceTo > document.final) {
+      throw new BadRequestException(
+        `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
+      );
+    }
+    const allInvoicesReserved = await this.invoiceRepository.getInvoices(company, {
+      status: 4,
+      documentType: data.documentType,
+    });
 
-  //   let message = '';
+    const sequence = [];
+    for (let s = data.sequenceForm; s <= data.sequenceTo; s++) {
+      sequence.push(s);
+    }
 
-  //   if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
-  //     message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
-  //   }
+    const invoicesSequence = allInvoicesReserved.map((is) => parseInt(is.sequence));
+    const alreadyReserved = invoicesSequence.filter((is) => sequence.includes(is));
+    const sequenceToReserve = sequence.filter((s) => !alreadyReserved.includes(s));
 
-  //   const details = [];
-  //   for (const detail of data.details) {
-  //     const service = await this.serviceRepository.getService(
-  //       company,
-  //       detail.selectedService,
-  //     );
-  //     details.push({
-  //       ...detail,
-  //       service,
-  //       sellingType: service.sellingType,
-  //       invoice: invoiceHeader,
-  //     });
-  //   }
-  //   await this.invoiceDetailRepository.createInvoiceDetail(details);
+    const invoiceValues = sequenceToReserve.map((sr) => {
+      return {
+        authorization: document.authorization,
+        sequence: sr,
+        company: company,
+        documentType: documentType,
+        status: invoiceStatus,
+      };
+    });
 
-  //   let nextSequence = parseInt(invoiceHeader.sequence) + 1;
-  //   if (
-  //     allInvoicesReserved
-  //       .map((ir) => parseInt(ir.sequence))
-  //       .includes(nextSequence)
-  //   ) {
-  //     for (const is of allInvoicesReserved.map((ir) => parseInt(ir.sequence))) {
-  //       for (let s = nextSequence; s <= document.final; s++) {
-  //         if (s != is) {
-  //           nextSequence = s;
-  //           s = document.final;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   await this.invoicesDocumentRepository.updateInvoiceDocument(
-  //     document.id,
-  //     { current: nextSequence },
-  //     company,
-  //   );
+    await this.invoiceRepository.createReserveInvoice(company, branch, invoiceValues);
 
-  //   return {
-  //     id: invoiceHeader.id,
-  //     message: `La venta ha sido registrada correctamente. ${message}`,
-  //   };
-  // }
+    if (data.sequenceForm == document.current) {
+      await this.invoicesDocumentRepository.updateInvoiceDocument(
+        document.id,
+        { current: data.sequenceTo + 1 },
+        company,
+      );
+    }
 
-  // async createInvoiceReserve(
-  //   company: Company,
-  //   branch: Branch,
-  //   data: InvoiceReserveDataDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentType(
-  //     data.documentType,
-  //   );
+    return {
+      message:
+        alreadyReserved.length > 0 && sequenceToReserve.length > 0
+          ? `Los documentos ${alreadyReserved.join(
+              ', ',
+            )} ya estan reservados, unicamente se reservaron los documentos con sequencia ${sequenceToReserve.join(
+              ', ',
+            )} correctamente.`
+          : sequenceToReserve.length > 0
+          ? `Los documentos con sequencia ${sequenceToReserve.join(', ')} han sido reservados correctamente.`
+          : `Los documentos con secuencia ${alreadyReserved.join(', ')} ya estan reservados`,
+    };
+  }
 
-  //   const invoiceStatus = await this.invoiceStatusRepository.getInvoiceStatus(
-  //     4,
-  //   );
-  //   const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-  //     company,
-  //     data.documentType,
-  //   );
-  //   if (
-  //     data.sequenceForm < document.current ||
-  //     data.sequenceTo > document.final
-  //   ) {
-  //     throw new BadRequestException(
-  //       `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
-  //     );
-  //   }
-  //   const allInvoicesReserved = await this.invoiceRepository.getInvoices(
-  //     company,
-  //     {
-  //       status: 4,
-  //       documentType: data.documentType,
-  //     },
-  //   );
+  async updateInvoice(company: Company, id: string, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-  //   const sequence = [];
-  //   for (let s = data.sequenceForm; s <= data.sequenceTo; s++) {
-  //     sequence.push(s);
-  //   }
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
+      data.header.invoicesPaymentsCondition,
+      company,
+    );
 
-  //   const invoicesSequence = allInvoicesReserved.map((is) =>
-  //     parseInt(is.sequence),
-  //   );
-  //   const alreadyReserved = invoicesSequence.filter((is) =>
-  //     sequence.includes(is),
-  //   );
-  //   const sequenceToReserve = sequence.filter(
-  //     (s) => !alreadyReserved.includes(s),
-  //   );
+    const header = {
+      customerName: customer.name,
+      customerAddress1: customerBranch.address1,
+      customerAddress2: customerBranch.address2,
+      customerCountry: customerBranch.country.name,
+      customerState: customerBranch.state.name,
+      customerCity: customerBranch.city.name,
+      customerDui: customer.dui,
+      customerNit: customer.nit,
+      customerNrc: customer.nrc,
+      customerGiro: customer.giro,
+      sum: data.header.sum,
+      iva: data.header.iva,
+      subtotal: data.header.subTotal,
+      ivaRetenido: data.header.ivaRetenido,
+      ventasExentas: data.header.ventasExentas,
+      ventasNoSujetas: data.header.ventasNoSujetas,
+      ventaTotal: data.header.ventaTotal,
+      ventaTotalText: numeroALetras(data.header.ventaTotal),
+      invoiceDate: data.header.invoiceDate,
+      paymentConditionName: invoicesPaymentCondition.name,
+      sellerName: invoiceSeller.name,
+      zoneName: invoiceSeller.invoicesZone.name,
+      customerBranch: customerBranch,
+      customer: customer,
+      invoicesPaymentsCondition: invoicesPaymentCondition,
+      invoicesSeller: invoiceSeller,
+      invoicesZone: invoiceSeller.invoicesZone,
+      customerType: customer.customerType,
+      customerTypeNatural: customer.customerTypeNatural,
+    };
 
-  //   const invoiceValues = sequenceToReserve.map((sr) => {
-  //     return {
-  //       authorization: document.authorization,
-  //       sequence: sr,
-  //       company: company,
-  //       documentType: documentType,
-  //       status: invoiceStatus,
-  //     };
-  //   });
+    await this.invoiceRepository.updateInvoice(id, company, header);
+    const ids = invoice.invoiceDetails.map((id) => id.id);
+    await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
+    const details = [];
+    for (const detail of data.details) {
+      const service = await this.serviceRepository.getService(company, detail.selectedService);
+      details.push({
+        ...detail,
+        service,
+        sellingType: service.sellingType,
+        invoice: invoice,
+      });
+    }
+    await this.invoiceDetailRepository.createInvoiceDetail(details);
 
-  //   await this.invoiceRepository.createReserveInvoice(
-  //     company,
-  //     branch,
-  //     invoiceValues,
-  //   );
+    return {
+      message: 'La venta se actualizo correctamente.',
+    };
+  }
 
-  //   if (data.sequenceForm == document.current) {
-  //     await this.invoicesDocumentRepository.updateInvoiceDocument(
-  //       document.id,
-  //       { current: data.sequenceTo + 1 },
-  //       company,
-  //     );
-  //   }
+  async deleteInvoice(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-  //   return {
-  //     message:
-  //       alreadyReserved.length > 0 && sequenceToReserve.length > 0
-  //         ? `Los documentos ${alreadyReserved.join(
-  //             ', ',
-  //           )} ya estan reservados, unicamente se reservaron los documentos con sequencia ${sequenceToReserve.join(
-  //             ', ',
-  //           )} correctamente.`
-  //         : sequenceToReserve.length > 0
-  //         ? `Los documentos con sequencia ${sequenceToReserve.join(
-  //             ', ',
-  //           )} han sido reservados correctamente.`
-  //         : `Los documentos con secuencia ${alreadyReserved.join(
-  //             ', ',
-  //           )} ya estan reservados`,
-  //   };
-  // }
+    const allowedStatuses = [1];
+    if (!allowedStatuses.includes(invoice.status.id)) {
+      throw new BadRequestException(
+        `La venta seleccionada no puede ser eliminada mientras tenga estado "${invoice.status.name.toUpperCase()}"`,
+      );
+    }
 
-  // async updateInvoice(
-  //   company: Company,
-  //   id: string,
-  //   data: InvoiceDataDTO,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const invoice = await this.invoiceRepository.getInvoice(company, id);
+    const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, invoice.documentType.id);
+    if (document.current - 1 != parseInt(invoice.sequence)) {
+      throw new BadRequestException(
+        'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
+      );
+    }
+    const detailsIds = invoice.invoiceDetails.map((id) => id.id);
 
-  //   const customer = await this.customerRepository.getCustomer(
-  //     data.header.customer,
-  //     company,
-  //   );
-  //   const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
-  //     data.header.customerBranch,
-  //   );
-  //   const invoiceSeller = await this.invoiceSellerRepository.getSeller(
-  //     company,
-  //     data.header.invoicesSeller,
-  //   );
-  //   const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicePaymentCondition(
-  //     data.header.invoicesPaymentsCondition,
-  //     company,
-  //   );
+    await this.invoiceDetailRepository.deleteInvoiceDetail(detailsIds);
 
-  //   const header = {
-  //     customerName: customer.name,
-  //     customerAddress1: customerBranch.address1,
-  //     customerAddress2: customerBranch.address2,
-  //     customerCountry: customerBranch.country.name,
-  //     customerState: customerBranch.state.name,
-  //     customerCity: customerBranch.city.name,
-  //     customerDui: customer.dui,
-  //     customerNit: customer.nit,
-  //     customerNrc: customer.nrc,
-  //     customerGiro: customer.giro,
-  //     sum: data.header.sum,
-  //     iva: data.header.iva,
-  //     subtotal: data.header.subTotal,
-  //     ivaRetenido: data.header.ivaRetenido,
-  //     ventasExentas: data.header.ventasExentas,
-  //     ventasNoSujetas: data.header.ventasNoSujetas,
-  //     ventaTotal: data.header.ventaTotal,
-  //     ventaTotalText: numeroALetras(data.header.ventaTotal),
-  //     invoiceDate: data.header.invoiceDate,
-  //     paymentConditionName: invoicesPaymentCondition.name,
-  //     sellerName: invoiceSeller.name,
-  //     zoneName: invoiceSeller.invoicesZone.name,
-  //     customerBranch: customerBranch,
-  //     customer: customer,
-  //     invoicesPaymentsCondition: invoicesPaymentCondition,
-  //     invoicesSeller: invoiceSeller,
-  //     invoicesZone: invoiceSeller.invoicesZone,
-  //     customerType: customer.customerType,
-  //     customerTypeNatural: customer.customerTypeNatural,
-  //   };
+    const result = await this.invoiceRepository.deleteInvoice(company, id, invoice);
 
-  //   await this.invoiceRepository.updateInvoice(id, company, header);
-  //   const ids = invoice.invoiceDetails.map((id) => id.id);
-  //   await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
-  //   const details = [];
-  //   for (const detail of data.details) {
-  //     const service = await this.serviceRepository.getService(
-  //       company,
-  //       detail.selectedService,
-  //     );
-  //     details.push({
-  //       ...detail,
-  //       service,
-  //       sellingType: service.sellingType,
-  //       invoice: invoice,
-  //     });
-  //   }
-  //   await this.invoiceDetailRepository.createInvoiceDetail(details);
+    await this.invoicesDocumentRepository.updateInvoiceDocument(
+      document.id,
+      { current: document.current - 1 },
+      company,
+    );
 
-  //   return {
-  //     message: 'La venta se actualizo correctamente.',
-  //   };
-  // }
-
-  // async deleteInvoice(
-  //   company: Company,
-  //   id: string,
-  // ): Promise<ResponseMinimalDTO> {
-  //   const invoice = await this.invoiceRepository.getInvoice(company, id);
-
-  //   const allowedStatuses = [1];
-  //   if (!allowedStatuses.includes(invoice.status.id)) {
-  //     throw new BadRequestException(
-  //       `La venta seleccionada no puede ser eliminada mientras tenga estado "${invoice.status.name.toUpperCase()}"`,
-  //     );
-  //   }
-
-  //   const document = await this.invoicesDocumentRepository.getSequenceAvailable(
-  //     company,
-  //     invoice.documentType.id,
-  //   );
-  //   if (document.current - 1 != parseInt(invoice.sequence)) {
-  //     throw new BadRequestException(
-  //       'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
-  //     );
-  //   }
-  //   const detailsIds = invoice.invoiceDetails.map((id) => id.id);
-
-  //   await this.invoiceDetailRepository.deleteInvoiceDetail(detailsIds);
-
-  //   const result = await this.invoiceRepository.deleteInvoice(
-  //     company,
-  //     id,
-  //     invoice,
-  //   );
-
-  //   await this.invoicesDocumentRepository.updateInvoiceDocument(
-  //     document.id,
-  //     { current: document.current - 1 },
-  //     company,
-  //   );
-
-  //   return {
-  //     message: result
-  //       ? 'Se ha eliminado la venta correctamente'
-  //       : 'No se ha podido eliminar venta',
-  //   };
-  // }
+    return {
+      message: result ? 'Se ha eliminado la venta correctamente' : 'No se ha podido eliminar venta',
+    };
+  }
 }

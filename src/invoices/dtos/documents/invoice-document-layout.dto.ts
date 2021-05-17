@@ -1,11 +1,11 @@
 import { Transform, Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
 import { validationMessage } from 'src/_tools';
-import { DocumentBasicsLayoutDTO } from './invoice-document-basics-layout.dto';
-import { DocumentLayoutHeaderDTO } from './invoice-document-layout-header.dto';
-import { DocumentDetailLayoutDTO } from './invoice-documentlayout-details.dto';
+import { InvoiceDocumentLayoutPositionFullDTO } from './invoice-document-layout-position-full.dto';
+import { InvoiceDocumentLayoutHeaderDTO } from './invoice-document-layout-header.dto';
+import { InvoiceDocumentDetailLayoutDTO } from './invoice-document-layout-details.dto';
 
-export class DocumentLayoutDTO {
+export class InvoiceDocumentLayoutDTO {
   @IsNotEmpty({ message: validationMessage('configuration', 'IsNotEmpty') })
   configuration: string;
 
@@ -17,17 +17,17 @@ export class DocumentLayoutDTO {
   @IsNotEmpty({ message: validationMessage('header', 'IsNotEmpty') })
   @IsArray()
   @ValidateNested()
-  @Type(() => DocumentLayoutHeaderDTO)
-  header: DocumentLayoutHeaderDTO[];
+  @Type(() => InvoiceDocumentLayoutHeaderDTO)
+  header: InvoiceDocumentLayoutHeaderDTO[];
 
   @IsNotEmpty({ message: validationMessage('details', 'IsNotEmpty') })
   @ValidateNested()
-  @Type(() => DocumentDetailLayoutDTO)
-  details: DocumentDetailLayoutDTO;
+  @Type(() => InvoiceDocumentDetailLayoutDTO)
+  details: InvoiceDocumentDetailLayoutDTO;
 
   @IsNotEmpty({ message: validationMessage('resolution', 'IsNotEmpty') })
   @IsArray()
   @ValidateNested()
-  @Type(() => DocumentBasicsLayoutDTO)
-  totals: DocumentBasicsLayoutDTO[];
+  @Type(() => InvoiceDocumentLayoutPositionFullDTO)
+  totals: InvoiceDocumentLayoutPositionFullDTO[];
 }

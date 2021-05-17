@@ -7,6 +7,8 @@ import { LoggerRepository } from './repositories/Logger.repository';
 import { ModuleRepository } from './repositories/Module.repository';
 import { StateRepository } from './repositories/State.repository';
 import { TokenRepository } from './repositories/Token.repository';
+import { SystemController } from './system.controller';
+import { SystemService } from './system.service';
 
 @Module({
   imports: [
@@ -20,5 +22,7 @@ import { TokenRepository } from './repositories/Token.repository';
       TokenRepository,
     ]),
   ],
+  controllers: [SystemController],
+  providers: [SystemService],
 })
 export class SystemModule {}

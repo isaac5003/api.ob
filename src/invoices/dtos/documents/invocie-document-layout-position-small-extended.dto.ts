@@ -1,9 +1,9 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
-import { DocumentBasicsLayoutDTO } from './invoice-document-basics-layout.dto';
+import { InvoiceDocumentLayoutPositionSmallDTO } from './invoice-document-layout-position-small.dto';
 
-export class DocumentLayoutHeaderDTO extends DocumentBasicsLayoutDTO {
+export class InvoiceDocumentLayoutPositionSmallExtended extends InvoiceDocumentLayoutPositionSmallDTO {
   @IsNotEmpty({ message: validationMessage('length', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('length', 'IsInt') })

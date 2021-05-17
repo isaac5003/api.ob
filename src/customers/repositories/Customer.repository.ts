@@ -3,7 +3,7 @@ import { CustomerDataDTO } from '../dtos/customer-data.dto';
 import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
 import { CustomerStatusDTO } from '../dtos/customer-status.dto';
-import { CustomerIntegrationDTO } from '../dtos/customer-integration.dto';
+import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dto';
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 
@@ -97,7 +97,7 @@ export class CustomerRepository extends Repository<Customer> {
   }
   async updateCustomer(
     id: string,
-    data: CustomerDataDTO | CustomerStatusDTO | CustomerIntegrationDTO,
+    data: CustomerDataDTO | CustomerStatusDTO | AccountignCatalogIntegrationDTO,
     company: Company,
   ): Promise<any> {
     try {

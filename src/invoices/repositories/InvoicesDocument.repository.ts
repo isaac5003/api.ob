@@ -43,6 +43,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
         },
         where: { company, isCurrentDocument: true, documentType },
       });
+
       if (document) {
         let sequence = document.current;
         if (sequenceReserved) {
@@ -57,7 +58,6 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
             }
           }
         }
-
         document = {
           ...document,
           current: sequence,
@@ -67,14 +67,12 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
       }
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
-
     return document;
   }
 
-  async getDocumentsByIds(company: Company, id: string[], type: string): Promise<InvoicesDocument[]> {
+  async getDocumentsByIds(company: Company, id: string[], type?: string): Promise<InvoicesDocument[]> {
     let invoiceDocuments;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
@@ -91,6 +89,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
         filter = { company };
         break;
     }
+
     try {
       invoiceDocuments = await this.findByIds(id, {
         where: filter,
@@ -101,9 +100,9 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
       });
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
+
     invoiceDocuments = invoiceDocuments.map((i) => {
       return {
         ...i,
@@ -114,7 +113,6 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
   }
 
   async createUpdateDocument(company: Company, documents: any, type: string): Promise<InvoicesDocument[]> {
-    let response;
     try {
       let document;
       switch (type) {
@@ -125,18 +123,15 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
           document = documents;
           break;
       }
-      response = await this.save(document);
+      return await this.save(document);
     } catch (error) {
       logDatabaseError(reponame, error);
     }
-
-    return response;
   }
 
   async updateInvoiceDocument(id: string, data: Partial<InvoiceDocumentDBDTO>, company: Company): Promise<any> {
     try {
-      const document = this.update({ id, company }, data);
-      return document;
+      return await this.update({ id, company }, data);
     } catch (error) {
       logDatabaseError(reponame, error);
     }
