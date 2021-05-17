@@ -222,20 +222,19 @@ export function numeroALetras(num: number, currency?: any): string {
 export async function emailSender(to, subject, html) {
   try {
     const transporter = nodemailer.createTransport({
-      host: 'email-smtp.us-east-2.amazonaws.com',
+      host: 'email-smtp.sa-east-1.amazonaws.com',
       port: 465,
       secure: true, // true for 465, false for other ports
       auth: {
-        user: 'AKIA3I3CIZQD345EAMRP', // generated ethereal user
-        pass: 'BF2PNGhDuuu6p3FicN2j35SQzaHhCeRcBy7uZGQPbEi8', // generated ethereal password
+        user: 'AKIAUF5XA5XBS47Z5FWT', // generated ethereal user
+        pass: 'BHMYz/JBm1Ir2xqURjCjEbIsCMXbGma+rG21xRirD53P', // generated ethereal password
       },
     });
-    const mailOptions = { from: '"OpenboxCloud" <no-reply@tatascoffee.com>', to, subject, html };
+    const mailOptions = { from: '"Openbox Cloud" <no-reply@openbox.cloud>', to, subject, html };
 
     await transporter.sendMail(mailOptions);
     return { success: true, message: 'Se ha enviado el correo de verificación.' };
   } catch (error) {
-    console.log(error.response);
     return {
       success: false,
       message:
