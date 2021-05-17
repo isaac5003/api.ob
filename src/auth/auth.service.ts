@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthDTO } from './dtos/auth.dto';
 import { UserRepository } from './repositories/User.repository';
@@ -6,6 +6,13 @@ import * as bcrypt from 'bcrypt';
 import { AccessRepository } from './repositories/Access.repository';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayloadDTO } from './dtos/jwtPayload.dto';
+import { emailSender } from '../_tools';
+import { v1 as uuidv1 } from 'uuid';
+import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
+import { RecoveryRepository } from './repositories/Recovery.repository';
+import { resetPassword } from '../emailsTemplate/resetPassword';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -14,6 +21,9 @@ export class AuthService {
 
     @InjectRepository(AccessRepository)
     private accessRepository: AccessRepository,
+
+    @InjectRepository(RecoveryRepository)
+    private recoveryRepository: RecoveryRepository,
 
     private jwtService: JwtService,
   ) {}
@@ -55,5 +65,49 @@ export class AuthService {
     const refresh_token = await this.jwtService.sign(payload);
 
     return { access_token, refresh_token };
+  }
+
+  async recoveryPassword(userAuth: UserRecoveryDTO): Promise<ResponseMinimalDTO> {
+    const { email } = userAuth;
+
+    const user = await this.userRepository.getUserByEmail(email);
+
+    if (!user) {
+      throw new BadRequestException(
+        'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
+      );
+    }
+
+    const v1options = {
+      node: [0x01, 0x23, 0x45, 0x67, 0x89, 0xab],
+      clockseq: 0x1234,
+      msecs: new Date().getTime(),
+      nsecs: 5678,
+    };
+
+    let message = '';
+    const token = uuidv1(v1options);
+    const data = {
+      user,
+      token,
+    };
+
+    const recovery = await this.recoveryRepository.createToken(data);
+
+    const url = `https://app.openbox.cloud/auth/login?reset-token=${recovery.token}`;
+
+    try {
+      const content = resetPassword(url);
+      const email = await emailSender(user.email, 'OPENBOXCLOUD | Reinicio de contraseña.', content);
+      message = email.message;
+    } catch (error) {
+      console.error(error);
+      message =
+        'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.';
+    }
+
+    return {
+      message,
+    };
   }
 }
