@@ -23,6 +23,8 @@ import { serviceDataDTO } from './dtos/service-data.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
+import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
+import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 
 @Controller('services')
 @UseGuards(AuthGuard())
@@ -47,17 +49,6 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateSettingsIntegrations(company, data);
-  }
-
-  // FOR STATUS
-  @Put('/status/:id')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateServiceStatus(
-    @Param('id') id: string,
-    @GetAuthData('company') company: Company,
-    @Body() data: serviceStatusDTO,
-  ): Promise<ResponseMinimalDTO> {
-    return this.service.updateService(company, id, data);
   }
 
   // FOR SERVICES:/ID
@@ -98,9 +89,40 @@ export class ServicesController {
     return this.service.updateService(company, id, data);
   }
 
+  //DELETE INDIVIDUAL
   @Delete('/:id')
   async deleteService(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
     return this.service.deleteService(company, id);
+  }
+
+  //DELETE MANY SERVISES
+  @Delete('/')
+  async deleteServices(
+    @Body('ids') ids: ServicesIdsDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.deleteServices(company, ids);
+  }
+
+  //FOR STATUS FOR MANY SERVICES
+  @Put('/')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateServicesStatus(
+    @Body() data: UpdateStatusDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateServicesStatus(company, data);
+  }
+
+  // FOR STATUS INDIVIDUAL SERVICE
+  @Put('/status/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateServiceStatus(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+    @Body() data: serviceStatusDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.updateService(company, id, data);
   }
 
   // FOR SERVICES /

@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
+import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
@@ -62,7 +64,74 @@ export class ServicesService {
       message: 'El servicio se ha actualizado correctamente.',
     };
   }
+  async updateServicesStatus(company: Company, data: UpdateStatusDTO): Promise<ResponseMinimalDTO> {
+    let message = '';
 
+    const servicesToUpdate = await this.serviceRepository.getServicesByIds(
+      company,
+      (data.ids as unknown) as ServicesIdsDTO['ids'],
+    );
+
+    const servicesUpdated = await this.serviceRepository.updateServicesStatus(company, {
+      ids: servicesToUpdate.map((s) => s.id),
+      status: data.status,
+    });
+    const updatedServices = [];
+    const notUpdatedServices = [];
+    if (data.ids.length != servicesUpdated.affected) {
+      for (const id of data.ids) {
+        if (servicesToUpdate.map((su) => su.id).includes(id)) {
+          updatedServices.push(id);
+        } else {
+          notUpdatedServices.push(id);
+        }
+
+        message =
+          notUpdatedServices.length == data.ids.length
+            ? 'No se pudieron actulizar los servicios.'
+            : updatedServices.length == data.ids.length
+            ? `Se actualizaron ${updatedServices.length}/${data.ids.length} servicios correctamente.`
+            : `Se actualizron ${updatedServices.length}/${data.ids.length} servicios, no se pudieron actualizar ${notUpdatedServices.length} servicios.`;
+      }
+    } else {
+      message = `Se actualizaron ${servicesUpdated.affected} servicios correctamente.`;
+    }
+
+    return {
+      message: message,
+    };
+  }
+
+  async deleteServices(company: Company, ids: ServicesIdsDTO): Promise<ResponseMinimalDTO> {
+    const result = await this.serviceRepository.deleteServices(company, ids);
+    let message = '';
+    const deletedServices = [];
+    const notDeletedServices = [];
+    const idToCompare = (ids as unknown) as any[];
+
+    if (idToCompare.length != result.deletedServices.affected) {
+      for (const ids of idToCompare) {
+        if (result.services.includes(ids)) {
+          deletedServices.push(ids);
+        } else {
+          notDeletedServices.push(ids);
+        }
+
+        message =
+          deletedServices.length == notDeletedServices.length
+            ? `Se eliminaron ${deletedServices.length}/${idToCompare.length} servicios.`
+            : notDeletedServices.length == idToCompare.length
+            ? `No se pudieron eliminar los servicios seleccionados.`
+            : `Se eliminaron ${deletedServices.length}/${idToCompare.length} servicios, no se pudieron eliminar ${notDeletedServices.length} servicios.`;
+      }
+    } else {
+      message = `Se eliminaron ${result.deletedServices.affected} servicios correctamente.`;
+    }
+
+    return {
+      message: message,
+    };
+  }
   async deleteService(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const result = await this.serviceRepository.deleteService(company, id);
     return {
@@ -72,7 +141,7 @@ export class ServicesService {
 
   async getReportGeneral(company: Company): Promise<ServiceReportGeneralDTO> {
     const { name, nit, nrc } = company;
-    const services = await this.serviceRepository.getServices(company);
+    const services = await this.serviceRepository.getFilteredServices(company);
 
     return {
       company: { name, nit, nrc },

@@ -6,18 +6,20 @@ import { Service } from '../entities/Service.entity';
 import { logDatabaseError } from '../../_tools/index';
 import { serviceStatusDTO } from '../dtos/service-status.dto';
 import { ServiceIntegrationDTO } from '../dtos/service-integration.dto';
+import { ServicesIdsDTO } from '../dtos/delete-updateServices/service-deleteupdate.dto';
+import { UpdateStatusDTO } from '../dtos/delete-updateServices/service-update-status.dto';
 
 const reponame = 'servicio';
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
-  async getServices(company: Company): Promise<Service[]> {
+  async getServicesByIds(company: Company, ids: string[]): Promise<Service[]> {
     try {
-      const services = await this.find({
-        where: { company },
-        join: { alias: 's', leftJoinAndSelect: { st: 's.sellingType' } },
-      });
+      const services = await this.findByIds((ids as unknown) as any[]);
+
       return services;
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
   }
@@ -26,7 +28,10 @@ export class ServiceRepository extends Repository<Service> {
     const { limit, page, search, active, prop, order, type, fromAmount, toAmount } = filter;
 
     try {
-      const query = this.createQueryBuilder('s').where({ company }).leftJoinAndSelect('s.sellingType', 'st');
+      const query = this.createQueryBuilder('s')
+        .select(['s.id', 's.name', 's.description', 's.cost', 's.active', 's.incIva', 's.incRenta', 'st.id', 'st.name'])
+        .where({ company })
+        .leftJoinAndSelect('s.sellingType', 'st');
 
       // filter by search value
       if (search) {
@@ -124,6 +129,34 @@ export class ServiceRepository extends Repository<Service> {
     } catch (error) {
       logDatabaseError(reponame, error);
     }
+  }
+
+  async updateServicesStatus(company: Company, data: UpdateStatusDTO): Promise<any> {
+    try {
+      const service = await this.update(data.ids, { active: data.status });
+      return service;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+  }
+
+  async deleteServices(company: Company, id: ServicesIdsDTO): Promise<any> {
+    const services = await this.getServicesByIds(company, (id as unknown) as string[]);
+    let deletedServices;
+    try {
+      deletedServices = await this.delete((id as unknown) as any[]);
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+
+    return {
+      services: services.map((s) => {
+        return { id: s.id };
+      }),
+      deletedServices,
+    };
   }
 
   async deleteService(company: Company, id: string): Promise<boolean> {
