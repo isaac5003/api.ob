@@ -19,25 +19,22 @@ export class InvoicesDocumentTypeRepository extends Repository<InvoicesDocumentT
     return documentTypes;
   }
 
-  // async documentTypesByIds(id: number[]): Promise<InvoicesDocumentType[]> {
-  //   let documentTypes;
-  //   try {
-  //     documentTypes = await this.findByIds(id);
-  //   } catch (error) {
-  //     logDatabaseError(reponame, error);
-  //   }
+  async documentTypesByIds(id: number[]): Promise<InvoicesDocumentType[]> {
+    let documentTypes;
+    try {
+      documentTypes = await this.findByIds(id);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
 
-  //   return documentTypes;
-  // }
+    return documentTypes;
+  }
 
-  // async getInvoiceDocumentType(id: any): Promise<InvoicesDocumentType[]> {
-  //   let invoicesDocumentType: InvoicesDocumentType[];
-
-  //   try {
-  //     invoicesDocumentType = await this.findByIds(id);
-  //   } catch (error) {
-  //     logDatabaseError(reponame, error);
-  //   }
-  //   return invoicesDocumentType;
-  // }
+  async getInvoiceDocumentTypes(ids?: number[]): Promise<InvoicesDocumentType[]> {
+    try {
+      return ids ? await this.findByIds(ids) : await this.find();
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+  }
 }

@@ -42,7 +42,7 @@ export class InvoicesDocument extends BaseEntity {
   @Column({ default: false })
   isCurrentDocument: boolean;
 
-  @Column({ nullable: true })
+  @Column({ type: 'json', nullable: true })
   documentLayout: string;
 
   @Column({ nullable: true })

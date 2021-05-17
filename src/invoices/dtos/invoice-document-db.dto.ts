@@ -41,9 +41,6 @@ export class InvoiceDocumentDBDTO {
   documentLayout: string;
 
   @IsOptional()
-  layout: string;
-
-  @IsOptional()
   company: Company;
 
   @IsOptional()

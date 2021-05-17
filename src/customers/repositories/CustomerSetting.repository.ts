@@ -1,7 +1,7 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { CustomerIntegrationDTO } from '../dtos/customer-integration.dto';
+import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dto';
 import { CustomerSetting } from '../entities/CustomerSetting.entity';
 
 const reponame = 'configuraciones de integracion';
@@ -29,7 +29,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     }
     return settingIntegrations;
   }
-  async createSettingIntegration(company: Company, data: CustomerIntegrationDTO): Promise<CustomerSetting> {
+  async createSettingIntegration(company: Company, data: AccountignCatalogIntegrationDTO): Promise<CustomerSetting> {
     // crea sucursal
     let response: CustomerSetting;
     try {
@@ -41,7 +41,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     return await response;
   }
 
-  async updateCustomerSetting(company: Company, data: CustomerIntegrationDTO): Promise<void> {
+  async updateCustomerSetting(company: Company, data: AccountignCatalogIntegrationDTO): Promise<void> {
     try {
       this.update({ company }, data);
     } catch (error) {

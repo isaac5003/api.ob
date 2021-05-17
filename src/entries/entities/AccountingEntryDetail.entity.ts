@@ -21,10 +21,10 @@ export class AccountingEntryDetail extends BaseEntity {
 
   @Column()
   concept: string;
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'float' })
   cargo: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'float' })
   abono: number;
 
   @CreateDateColumn({ select: false })

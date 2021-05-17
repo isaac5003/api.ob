@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
-export class DocumentDetailsOptionDTO {
+export class InvoiceDocumentLayoutPositionSmallDTO {
   @IsNotEmpty({ message: validationMessage('x', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('x', 'IsInt') })

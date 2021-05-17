@@ -44,6 +44,8 @@ export function validationMessage(fieldname: string, type: string): string {
       return `El campo '${fieldname}' debe ser de tipo arreglo".`;
     case 'ArrayNotEmpty':
       return `El arreglo '${fieldname}' debe contener al menos un elemento".`;
+    case 'status':
+      return `La venta no puede ser ${fieldname} porque tiene un estado que no lo permite.`;
   }
 }
 
