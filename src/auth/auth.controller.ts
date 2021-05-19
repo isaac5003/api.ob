@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UsePipes, ValidationPipe } from '@nestjs/common';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO } from '../_dtos/responseList.dto';
 import { AuthService } from './auth.service';
 import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
 import { AuthDTO } from './dtos/auth.dto';

@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { ServicesIdsDTO } from './service-deleteupdate.dto';
 
 export class UpdateStatusDTO extends ServicesIdsDTO {

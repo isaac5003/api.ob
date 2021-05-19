@@ -10,10 +10,10 @@ import { InvoicesStatusRepository } from './repositories/InvoicesStatus.reposito
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
 import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
-import { AuthModule } from 'src/auth/auth.module';
-import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
-import { ServiceRepository } from 'src/services/repositories/Service.repository';
+import { AuthModule } from '../auth/auth.module';
+import { CustomerRepository } from '../customers/repositories/Customer.repository';
+import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
+import { ServiceRepository } from '../services/repositories/Service.repository';
 
 @Module({
   imports: [

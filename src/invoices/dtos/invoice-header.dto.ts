@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 
 export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })

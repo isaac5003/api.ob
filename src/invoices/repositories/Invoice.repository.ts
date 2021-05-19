@@ -1,8 +1,8 @@
-import { Branch } from 'src/companies/entities/Branch.entity';
-import { Company } from 'src/companies/entities/Company.entity';
-import { Customer } from 'src/customers/entities/Customer.entity';
-import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
-import { logDatabaseError, numeroALetras } from 'src/_tools';
+import { Branch } from '../../companies/entities/Branch.entity';
+import { Company } from '../../companies/entities/Company.entity';
+import { Customer } from '../../customers/entities/Customer.entity';
+import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
+import { logDatabaseError, numeroALetras } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { InvoiceHeaderCreateDTO } from '../dtos/invoice-header-create.dto';

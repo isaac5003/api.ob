@@ -14,7 +14,7 @@ import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
 export class AccountingCatalog extends BaseEntity {

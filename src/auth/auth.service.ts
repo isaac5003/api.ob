@@ -8,7 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayloadDTO } from './dtos/jwtPayload.dto';
 import { emailSender } from '../_tools';
 import { v1 as uuidv1 } from 'uuid';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO } from '../_dtos/responseList.dto';
 import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
 import { RecoveryRepository } from './repositories/Recovery.repository';
 import { resetPassword } from '../emailsTemplate/resetPassword';

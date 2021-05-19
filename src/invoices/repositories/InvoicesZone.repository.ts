@@ -1,6 +1,6 @@
-import { Company } from 'src/companies/entities/Company.entity';
-import { FilterDTO } from 'src/_dtos/filter.dto';
-import { logDatabaseError } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { FilterDTO } from '../../_dtos/filter.dto';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';

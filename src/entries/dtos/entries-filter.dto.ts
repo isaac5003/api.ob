@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsISO8601, IsOptional } from 'class-validator';
-import { FilterDTO } from 'src/_dtos/filter.dto';
-import { validationMessage } from 'src/_tools';
+import { FilterDTO } from '../../_dtos/filter.dto';
+import { validationMessage } from '../../_tools';
 
 export class EntriesFilterDTO extends FilterDTO {
   @IsOptional()

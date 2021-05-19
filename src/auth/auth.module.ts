@@ -8,8 +8,8 @@ import { UserRepository } from './repositories/User.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { CompanyRepository } from 'src/companies/repositories/Company.repository';
-import { BranchRepository } from 'src/companies/repositories/Branch.repository';
+import { CompanyRepository } from '../companies/repositories/Company.repository';
+import { BranchRepository } from '../companies/repositories/Branch.repository';
 import { RecoveryRepository } from './repositories/Recovery.repository';
 
 @Module({

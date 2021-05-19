@@ -5,8 +5,8 @@ import { SellingTypeRepository } from './repositories/SellingType.repository';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
-import { AuthModule } from 'src/auth/auth.module';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { AuthModule } from '../auth/auth.module';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 
 @Module({
   imports: [

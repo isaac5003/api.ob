@@ -13,10 +13,10 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
-import { GetAuthData } from 'src/auth/get-auth-data.decorator';
-import { Company } from 'src/companies/entities/Company.entity';
-import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { GetAuthData } from '../auth/get-auth-data.decorator';
+import { Company } from '../companies/entities/Company.entity';
+import { FilterDTO } from '../_dtos/filter.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-update.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';

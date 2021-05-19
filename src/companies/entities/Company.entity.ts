@@ -1,20 +1,20 @@
-import { Access } from 'src/auth/entities/Access.entity';
-import { Profile } from 'src/auth/entities/Profile.entity';
-import { Customer } from 'src/customers/entities/Customer.entity';
-import { CustomerSetting } from 'src/customers/entities/CustomerSetting.entity';
-import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
-import { AccountingEntry } from 'src/entries/entities/AccountingEntry.entity';
-import { AccountingEntryDetail } from 'src/entries/entities/AccountingEntryDetail.entity';
-import { AccountingEntryType } from 'src/entries/entities/AccountingEntryType.entity';
-import { AccountingRegisterType } from 'src/entries/entities/AccountingRegisterType.entity';
-import { AccountingSetting } from 'src/entries/entities/AccountingSetting.entity';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
-import { InvoicesDocument } from 'src/invoices/entities/InvoicesDocument.entity';
-import { InvoicesPaymentsCondition } from 'src/invoices/entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from 'src/invoices/entities/InvoicesSeller.entity';
-import { InvoicesZone } from 'src/invoices/entities/InvoicesZone.entity';
-import { Service } from 'src/services/entities/Service.entity';
-import { ServiceSetting } from 'src/services/entities/ServiceSetting.entity';
+import { Access } from '../../auth/entities/Access.entity';
+import { Profile } from '../../auth/entities/Profile.entity';
+import { Customer } from '../../customers/entities/Customer.entity';
+import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
+import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
+import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
+import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
+import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
+import { AccountingRegisterType } from '../../entries/entities/AccountingRegisterType.entity';
+import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
+import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
+import { InvoicesPaymentsCondition } from '../../invoices/entities/InvoicesPaymentsCondition.entity';
+import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
+import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
+import { Service } from '../../services/entities/Service.entity';
+import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
 import {
   BaseEntity,
   Column,

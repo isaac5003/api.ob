@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentLayoutPositionSmallExtended } from './invocie-document-layout-position-small-extended.dto';
 import { InvoiceDocumentLayoutPositionSmallDTO } from './invoice-document-layout-position-small.dto';
 

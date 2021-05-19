@@ -16,9 +16,9 @@ import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
 import { Injectable } from '@nestjs/common';
-import { Company } from 'src/companies/entities/Company.entity';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { Company } from '../companies/entities/Company.entity';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 
 @Injectable()
 export class CustomersService {

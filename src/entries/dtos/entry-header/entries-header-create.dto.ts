@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { EntryHeaderDataDTO } from './entries-entry-header-create.dto';
 
 export class EntryHeaderCreateDTO extends EntryHeaderDataDTO {

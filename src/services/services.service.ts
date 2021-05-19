@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Company } from 'src/companies/entities/Company.entity';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { Company } from '../companies/entities/Company.entity';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { ResponseMinimalDTO } from '../_dtos/responseList.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';

@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, IsNumber, IsBoolean } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 
 export class InvoiceDetailDTO {
   @Transform(({ value }) => parseFloat(value))

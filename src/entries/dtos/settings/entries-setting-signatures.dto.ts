@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 
 export class SettingSignaturesDTO {
   @IsNotEmpty({ message: validationMessage('legal', 'IsNotEmpty') })

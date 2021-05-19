@@ -8,7 +8,7 @@ import { AccountingRegisterTypeRepository } from './repositories/AccountingRegis
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
 import { EntriesService } from './entries.service';
 import { EntriesController } from './entries.controller';
-import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [

@@ -1,11 +1,11 @@
-import { Company } from 'src/companies/entities/Company.entity';
-import { logDatabaseError } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
 import { startOfMonth, endOfMonth } from 'date-fns';
 import { EntriesFilterDTO } from '../dtos/entries-filter.dto';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
 
 const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)

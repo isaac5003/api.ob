@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 import { InvoiceHeaderDTO } from './invoice-header.dto';
 
 export class InvoiceHeaderCreateDTO extends InvoiceHeaderDTO {

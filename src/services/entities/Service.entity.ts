@@ -12,7 +12,7 @@ import {
 import { InvoiceDetail } from '../../invoices/entities/InvoiceDetail.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { SellingType } from './SellingType.entity';
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
 export class Service extends BaseEntity {

@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentLayoutPositionFullDTO } from './invoice-document-layout-position-full.dto';
 
 export class InvoiceDocumentLayoutHeaderDTO extends InvoiceDocumentLayoutPositionFullDTO {
