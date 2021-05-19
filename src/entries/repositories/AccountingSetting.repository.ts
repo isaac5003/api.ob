@@ -20,11 +20,7 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
 
   async updateSetting(
     company: Company,
-    data:
-      | SettingGeneralDTO
-      | SettingSignaturesDTO
-      | SettingIntegrationsDTO
-      | any,
+    data: SettingGeneralDTO | SettingSignaturesDTO | SettingIntegrationsDTO | any,
     settingType: string,
     type: string,
     id?: string,

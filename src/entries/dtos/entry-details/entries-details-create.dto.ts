@@ -12,18 +12,12 @@ export class EntryDetailsDTO {
 
   @IsOptional()
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: validationMessage('cargo', 'IsNumber') },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('cargo', 'IsNumber') })
   cargo: number;
 
   @IsOptional()
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber(
-    { maxDecimalPlaces: 2 },
-    { message: validationMessage('abono', 'IsNumber') },
-  )
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('abono', 'IsNumber') })
   abono: number;
 
   @IsNotEmpty({ message: validationMessage('order', 'IsNotEmpty') })

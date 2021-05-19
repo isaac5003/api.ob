@@ -19,10 +19,7 @@ export class AccountingRegisterTypeRepository extends Repository<AccountingRegis
     return registerType;
   }
 
-  async getRegisterType(
-    company: Company,
-    id: number,
-  ): Promise<AccountingRegisterType> {
+  async getRegisterType(company: Company, id: number): Promise<AccountingRegisterType> {
     let registerType: AccountingRegisterType;
     try {
       registerType = await this.findOneOrFail({ id, company });
