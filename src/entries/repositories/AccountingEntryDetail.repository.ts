@@ -6,16 +6,10 @@ import { AccountingEntryDetail } from '../entities/AccountingEntryDetail.entity'
 const reponame = 'detalles de partida contable';
 @EntityRepository(AccountingEntryDetail)
 export class AccountingEntryDetailRepository extends Repository<AccountingEntryDetail> {
-  async getDetailsForReport(
-    company: Company,
-    data: any,
-    type: string,
-  ): Promise<AccountingEntryDetail[]> {
+  async getDetailsForReport(company: Company, data: any, type: string): Promise<AccountingEntryDetail[]> {
     const startDate = data.startDate ? data.startDate : '';
     const endDate = data.endDate ? data.endDate : '';
-    const selectedAccounts = data.selectedAccounts
-      ? JSON.parse(data.selectedAccounts)
-      : '';
+    const selectedAccounts = data.selectedAccounts ? JSON.parse(data.selectedAccounts) : '';
     try {
       let entries = this.createQueryBuilder('entries')
         .leftJoinAndSelect('entries.accountingCatalog', 'ac')

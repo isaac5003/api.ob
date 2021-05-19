@@ -5,24 +5,12 @@ import { validationMessage } from 'src/_tools';
 
 export class EntriesFilterDTO extends FilterDTO {
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 1,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
   squared: boolean;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value.toLowerCase() === 'true'
-      ? true
-      : value.toLowerCase() == 'false'
-      ? false
-      : 1,
-  )
+  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
   accounted: boolean;
 

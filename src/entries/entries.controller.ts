@@ -16,11 +16,7 @@ import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import {
-  ResponseListDTO,
-  ResponseMinimalDTO,
-  ResponseSingleDTO,
-} from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-update.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
@@ -53,13 +49,8 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
   ): Promise<ResponseListDTO<AccountingCatalog>> {
-    const accountingCatalogs = await this.entries.getAccountingCatalogs(
-      company,
-      filter,
-    );
-    return new ResponseListDTO(
-      plainToClass(AccountingCatalog, accountingCatalogs),
-    );
+    const accountingCatalogs = await this.entries.getAccountingCatalogs(company, filter);
+    return new ResponseListDTO(plainToClass(AccountingCatalog, accountingCatalogs));
   }
 
   @Post('/catalog')
@@ -83,52 +74,36 @@ export class EntriesController {
   }
 
   @Delete('/catalog/:id')
-  async deleteCustomer(
-    @Param('id') id: string,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteCustomer(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
     return await this.entries.deleteAccount(company, id);
   }
 
   @Get('/types')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getEntryTypes(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<AccountingEntryType>> {
+  async getEntryTypes(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingEntryType>> {
     const entryTypes = await this.entries.getEntryTypes(company);
     return new ResponseListDTO(plainToClass(AccountingEntryType, entryTypes));
   }
 
   @Get('/serie')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getSeries(
-    @GetAuthData('company') company: Company,
-    @Query() data: SeriesDTO,
-  ): Promise<ResponseMinimalDTO> {
+  async getSeries(@GetAuthData('company') company: Company, @Query() data: SeriesDTO): Promise<ResponseMinimalDTO> {
     return await this.entries.getSeries(company, data);
   }
 
   @Get('/register-type')
-  async getRegisterType(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<AccountingRegisterType>> {
+  async getRegisterType(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingRegisterType>> {
     const registerType = await this.entries.getResgisterType(company);
-    return new ResponseListDTO(
-      plainToClass(AccountingRegisterType, registerType),
-    );
+    return new ResponseListDTO(plainToClass(AccountingRegisterType, registerType));
   }
 
   @Get('/setting/general')
-  async getSettingGeneral(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<AccountingSetting>> {
+  async getSettingGeneral(@GetAuthData('company') company: Company): Promise<ResponseSingleDTO<AccountingSetting>> {
     return await this.entries.getSettings(company, 'general');
   }
 
   @Get('/setting/signatures')
-  async getSettingSignatures(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<AccountingSetting>> {
+  async getSettingSignatures(@GetAuthData('company') company: Company): Promise<ResponseSingleDTO<AccountingSetting>> {
     return await this.entries.getSettings(company, 'firmantes');
   }
 
@@ -168,11 +143,7 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
     @Body() data: SettingSignaturesDTO,
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.updateSettingSignatures(
-      company,
-      data,
-      'firmantes',
-    );
+    return await this.entries.updateSettingSignatures(company, data, 'firmantes');
   }
 
   @Put('/setting/integrations')
@@ -181,11 +152,7 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
     @Body() data: SettingIntegrationsDTO,
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.updateSettingIntegrations(
-      company,
-      data,
-      'integraciones',
-    );
+    return await this.entries.updateSettingIntegrations(company, data, 'integraciones');
   }
 
   @Put('/setting/balance-general')
@@ -194,12 +161,7 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
     @Body() data: EstadoBalanceDTO,
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.updateBalanceSettings(
-      company,
-      data,
-      'integraciones',
-      'balance-general',
-    );
+    return await this.entries.updateBalanceSettings(company, data, 'integraciones', 'balance-general');
   }
 
   @Put('/setting/estado-resultados')
@@ -208,56 +170,36 @@ export class EntriesController {
     @GetAuthData('company') company: Company,
     @Body() data: EstadoBalanceDTO,
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.updateBalanceSettings(
-      company,
-      data,
-      'integraciones',
-      'estado-resultados',
-    );
+    return await this.entries.updateBalanceSettings(company, data, 'integraciones', 'estado-resultados');
   }
 
   @Get('/report/diario-mayor')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getDiarioMayor(
-    @GetAuthData('company') company: Company,
-    @Query() date: DiarioMayorDTO,
-  ): Promise<any> {
+  async getDiarioMayor(@GetAuthData('company') company: Company, @Query() date: DiarioMayorDTO): Promise<any> {
     return await this.entries.getReport(company, date, 'diarioMayor');
   }
 
   @Get('/report/auxiliares')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getAuxiliares(
-    @GetAuthData('company') company: Company,
-    @Query() date: DiarioMayorDTO,
-  ): Promise<any> {
+  async getAuxiliares(@GetAuthData('company') company: Company, @Query() date: DiarioMayorDTO): Promise<any> {
     return await this.entries.getReport(company, date, 'auxiliares');
   }
 
   @Get('/report/balance-comprobacion')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getBalanceComprobacion(
-    @GetAuthData('company') company: Company,
-    @Query() date: DiarioMayorDTO,
-  ): Promise<any> {
+  async getBalanceComprobacion(@GetAuthData('company') company: Company, @Query() date: DiarioMayorDTO): Promise<any> {
     return await this.entries.getReport(company, date, 'balanceComprobacion');
   }
 
   @Get('/report/estado-resultados')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getEstadoResultados(
-    @GetAuthData('company') company: Company,
-    @Query() date: BalanceEstadoDTO,
-  ): Promise<any> {
+  async getEstadoResultados(@GetAuthData('company') company: Company, @Query() date: BalanceEstadoDTO): Promise<any> {
     return await this.entries.getReport(company, date, 'estado-resultados');
   }
 
   @Get('/report/balance-general')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getBalanceGeneral(
-    @GetAuthData('company') company: Company,
-    @Query() date: BalanceEstadoDTO,
-  ): Promise<any> {
+  async getBalanceGeneral(@GetAuthData('company') company: Company, @Query() date: BalanceEstadoDTO): Promise<any> {
     return await this.entries.getReport(company, date, 'balance-general');
   }
 
@@ -295,12 +237,7 @@ export class EntriesController {
     @Body('header') header: EntryHeaderCreateDTO,
     @Body('details') details: EntryDetailsDTO[],
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.createUpdateEntry(
-      company,
-      header,
-      details,
-      'create',
-    );
+    return await this.entries.createUpdateEntry(company, header, details, 'create');
   }
 
   @Put('/:id')
@@ -311,20 +248,11 @@ export class EntriesController {
     @Body('details') details: EntryDetailsDTO[],
     @Param('id') id: string,
   ): Promise<ResponseMinimalDTO> {
-    return await this.entries.createUpdateEntry(
-      company,
-      header,
-      details,
-      'update',
-      id,
-    );
+    return await this.entries.createUpdateEntry(company, header, details, 'update', id);
   }
 
   @Delete('/:id')
-  async deleteEntry(
-    @GetAuthData('company') company: Company,
-    @Param('id') id: string,
-  ): Promise<ResponseMinimalDTO> {
+  async deleteEntry(@GetAuthData('company') company: Company, @Param('id') id: string): Promise<ResponseMinimalDTO> {
     return await this.entries.deleteEntry(company, id);
   }
 }

@@ -4,11 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { Company } from 'src/companies/entities/Company.entity';
 
 import { FilterDTO } from 'src/_dtos/filter.dto';
-import {
-  ResponseListDTO,
-  ResponseMinimalDTO,
-  ResponseSingleDTO,
-} from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
@@ -54,14 +50,8 @@ export class EntriesService {
     private accountingEntryDetailRepository: AccountingEntryDetailRepository,
   ) {}
 
-  async getAccountingCatalogs(
-    company: Company,
-    filter: FilterDTO,
-  ): Promise<AccountingCatalog[]> {
-    const catalog = await this.accountingCatalogRepository.getAccountingCatalogs(
-      company,
-      filter,
-    );
+  async getAccountingCatalogs(company: Company, filter: FilterDTO): Promise<AccountingCatalog[]> {
+    const catalog = await this.accountingCatalogRepository.getAccountingCatalogs(company, filter);
     let accounts = [];
     accounts = catalog
       .map((c) => {
@@ -87,28 +77,17 @@ export class EntriesService {
   ): Promise<ResponseMinimalDTO> {
     let parent;
 
-    const account = await this.accountingCatalogRepository.createAccounts(
-      { accounts, parentsCatalog },
-      company,
-    );
+    const account = await this.accountingCatalogRepository.createAccounts({ accounts, parentsCatalog }, company);
 
     if (parentsCatalog) {
-      parent = await this.accountingCatalogRepository.getAccountingCatalog(
-        parentsCatalog,
-        company,
-        false,
-      );
+      parent = await this.accountingCatalogRepository.getAccountingCatalog(parentsCatalog, company, false);
 
       const data = {
         ...parent,
         isParent: true,
       };
 
-      await this.accountingCatalogRepository.updateAccount(
-        parentsCatalog,
-        data,
-        company,
-      );
+      await this.accountingCatalogRepository.updateAccount(parentsCatalog, data, company);
     }
 
     return {
@@ -117,57 +96,32 @@ export class EntriesService {
     };
   }
 
-  async updateAccountingCatalog(
-    id: string,
-    company: Company,
-    data: any,
-  ): Promise<ResponseMinimalDTO> {
+  async updateAccountingCatalog(id: string, company: Company, data: any): Promise<ResponseMinimalDTO> {
     let message = '';
-    const account = await this.accountingCatalogRepository.getAccountingCatalog(
-      id,
-      company,
-      true,
-    );
+    const account = await this.accountingCatalogRepository.getAccountingCatalog(id, company, true);
     let { code } = data;
     const { name, description, isAcreedora, isBalance } = data;
 
     if (!account.isParent) {
       data['code'] = code;
     } else {
-      (message = 'El codigo no se cambio ya que otras cuentas dependen de él.'),
-        (code = account.code);
+      (message = 'El codigo no se cambio ya que otras cuentas dependen de él.'), (code = account.code);
     }
 
-    await this.accountingCatalogRepository.updateAccount(
-      id,
-      { name, description, isAcreedora, isBalance },
-      company,
-    );
+    await this.accountingCatalogRepository.updateAccount(id, { name, description, isAcreedora, isBalance }, company);
 
     return {
       message: `La cuenta contable ha sido actualizada correctamente. ${message}`,
     };
   }
 
-  async deleteAccount(
-    company: Company,
-    id: string,
-  ): Promise<ResponseMinimalDTO> {
-    const account = await this.accountingCatalogRepository.getAccountingCatalog(
-      id,
-      company,
-      false,
-    );
+  async deleteAccount(company: Company, id: string): Promise<ResponseMinimalDTO> {
+    const account = await this.accountingCatalogRepository.getAccountingCatalog(id, company, false);
 
     if (account.isParent) {
-      throw new BadRequestException(
-        'No se puede eliminar la cuenta contable ya que tiene subcuentas asignadas a ella',
-      );
+      throw new BadRequestException('No se puede eliminar la cuenta contable ya que tiene subcuentas asignadas a ella');
     }
-    const result = await this.accountingCatalogRepository.deleteAccount(
-      company,
-      account,
-    );
+    const result = await this.accountingCatalogRepository.deleteAccount(company, account);
     return {
       message: result
         ? 'Se ha eliminado la cuenta contable correctamente'
@@ -179,27 +133,16 @@ export class EntriesService {
     return await this.accountingEntryTypeRepository.getEntryTypes(company);
   }
 
-  async getSeries(
-    company: Company,
-    data: SeriesDTO,
-  ): Promise<ResponseMinimalDTO> {
+  async getSeries(company: Company, data: SeriesDTO): Promise<ResponseMinimalDTO> {
     return await this.accountingEntryRepository.getSeries(company, data);
   }
 
   async getResgisterType(company: Company): Promise<AccountingRegisterType[]> {
-    return await this.accountingRegisterTypeRepository.getResgisterTypes(
-      company,
-    );
+    return await this.accountingRegisterTypeRepository.getResgisterTypes(company);
   }
 
-  async getSettings(
-    company: Company,
-    settingType: string,
-  ): Promise<ResponseSingleDTO<AccountingSetting>> {
-    const settings = await this.accountingSettingRepository.getSetting(
-      company,
-      settingType,
-    );
+  async getSettings(company: Company, settingType: string): Promise<ResponseSingleDTO<AccountingSetting>> {
+    const settings = await this.accountingSettingRepository.getSetting(company, settingType);
     let setting = {};
     switch (settingType) {
       case 'general':
@@ -217,34 +160,18 @@ export class EntriesService {
         break;
       case 'balance-general':
         setting = {
-          balanceGeneral: settings
-            ? settings.balanceGeneral
-              ? settings.balanceGeneral
-              : null
-            : null,
+          balanceGeneral: settings ? (settings.balanceGeneral ? settings.balanceGeneral : null) : null,
         };
         break;
       case 'estado-resultados':
         setting = {
-          estadoResultados: settings
-            ? settings.estadoResultados
-              ? settings.estadoResultados
-              : null
-            : null,
+          estadoResultados: settings ? (settings.estadoResultados ? settings.estadoResultados : null) : null,
         };
         break;
       case 'integraciones':
         setting = {
-          catalog: settings
-            ? settings.accountingCatalog
-              ? settings.accountingCatalog.id
-              : null
-            : null,
-          registerType: settings
-            ? settings.registerType
-              ? settings.registerType.id
-              : null
-            : null,
+          catalog: settings ? (settings.accountingCatalog ? settings.accountingCatalog.id : null) : null,
+          registerType: settings ? (settings.registerType ? settings.registerType.id : null) : null,
         };
         break;
     }
@@ -258,24 +185,14 @@ export class EntriesService {
   ): Promise<ResponseMinimalDTO> {
     const { peridoEnd, periodStart } = data;
     if (parseISO(peridoEnd) < parseISO(periodStart)) {
-      throw new BadRequestException(
-        'La fecha final no puede ser menor que la fecha inicial',
-      );
+      throw new BadRequestException('La fecha final no puede ser menor que la fecha inicial');
     }
 
-    if (
-      differenceInMonths(parseISO(peridoEnd), parseISO(periodStart)) + 1 !=
-      12
-    ) {
-      throw new BadRequestException(
-        'El periodo fiscal debe  contener 12 meses exactos',
-      );
+    if (differenceInMonths(parseISO(peridoEnd), parseISO(periodStart)) + 1 != 12) {
+      throw new BadRequestException('El periodo fiscal debe  contener 12 meses exactos');
     }
 
-    const settingGeneral = await this.accountingSettingRepository.getSetting(
-      company,
-      settingType,
-    );
+    const settingGeneral = await this.accountingSettingRepository.getSetting(company, settingType);
 
     if (settingGeneral) {
       await this.accountingSettingRepository.updateSetting(
@@ -287,19 +204,12 @@ export class EntriesService {
       );
 
       return {
-        message:
-          'Configuracion general del modulo de contabilidad actualizada correctamente.',
+        message: 'Configuracion general del modulo de contabilidad actualizada correctamente.',
       };
     }
-    await this.accountingSettingRepository.updateSetting(
-      company,
-      { periodStart, peridoEnd },
-      settingType,
-      'create',
-    );
+    await this.accountingSettingRepository.updateSetting(company, { periodStart, peridoEnd }, settingType, 'create');
     return {
-      message:
-        'Configuracion general del modulo de contabilidad creada correctamente.',
+      message: 'Configuracion general del modulo de contabilidad creada correctamente.',
     };
   }
 
@@ -308,35 +218,19 @@ export class EntriesService {
     data: SettingSignaturesDTO,
     settingType: string,
   ): Promise<ResponseMinimalDTO> {
-    const setting = await this.accountingSettingRepository.getSetting(
-      company,
-      settingType,
-    );
+    const setting = await this.accountingSettingRepository.getSetting(company, settingType);
 
     if (setting) {
-      await this.accountingSettingRepository.updateSetting(
-        company,
-        data,
-        settingType,
-        'update',
-        setting.id,
-      );
+      await this.accountingSettingRepository.updateSetting(company, data, settingType, 'update', setting.id);
 
       return {
-        message:
-          'Configuracion de los firmantes del modulo de contabilidad actualizada correctamente.',
+        message: 'Configuracion de los firmantes del modulo de contabilidad actualizada correctamente.',
       };
     }
-    await this.accountingSettingRepository.updateSetting(
-      company,
-      data,
-      settingType,
-      'create',
-    );
+    await this.accountingSettingRepository.updateSetting(company, data, settingType, 'create');
 
     return {
-      message:
-        'Configuracion de los firmantes del modulo de contabilidad creada correctamente.',
+      message: 'Configuracion de los firmantes del modulo de contabilidad creada correctamente.',
     };
   }
 
@@ -345,40 +239,19 @@ export class EntriesService {
     data: SettingIntegrationsDTO,
     settingType: string,
   ): Promise<ResponseMinimalDTO> {
-    const settings = await this.accountingSettingRepository.getSetting(
-      company,
-      settingType,
-    );
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
-      data.accountingCatalog,
-      company,
-    );
+    const settings = await this.accountingSettingRepository.getSetting(company, settingType);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
-    await this.accountingRegisterTypeRepository.getRegisterType(
-      company,
-      data.resgisterType,
-    );
+    await this.accountingRegisterTypeRepository.getRegisterType(company, data.resgisterType);
 
     if (settings) {
-      await this.accountingSettingRepository.updateSetting(
-        company,
-        data,
-        settingType,
-        'update',
-        settings.id,
-      );
+      await this.accountingSettingRepository.updateSetting(company, data, settingType, 'update', settings.id);
 
       return {
-        message:
-          'Los datos de integración han sido actualizados correctamente.',
+        message: 'Los datos de integración han sido actualizados correctamente.',
       };
     }
-    await this.accountingSettingRepository.updateSetting(
-      company,
-      data,
-      settingType,
-      'create',
-    );
+    await this.accountingSettingRepository.updateSetting(company, data, settingType, 'create');
 
     return {
       message: 'Los datos de integración han sido creados correctamente.',
@@ -391,10 +264,7 @@ export class EntriesService {
     settingType: string,
     type: string,
   ): Promise<ResponseMinimalDTO> {
-    const setting = await this.accountingSettingRepository.getSetting(
-      company,
-      settingType,
-    );
+    const setting = await this.accountingSettingRepository.getSetting(company, settingType);
     let settings;
     switch (type) {
       case 'balance-general':
@@ -406,36 +276,20 @@ export class EntriesService {
     }
 
     if (setting) {
-      await this.accountingSettingRepository.updateSetting(
-        company,
-        settings,
-        settingType,
-        'update',
-        setting.id,
-      );
+      await this.accountingSettingRepository.updateSetting(company, settings, settingType, 'update', setting.id);
 
       return {
-        message:
-          'Los datos de integración han sido actualizados correctamente.',
+        message: 'Los datos de integración han sido actualizados correctamente.',
       };
     }
-    await this.accountingSettingRepository.updateSetting(
-      company,
-      settings,
-      settingType,
-      'create',
-    );
+    await this.accountingSettingRepository.updateSetting(company, settings, settingType, 'create');
 
     return {
       message: 'Los datos de integración han sido creados correctamente.',
     };
   }
 
-  async getReport(
-    company: Company,
-    data: any,
-    reportType: string,
-  ): Promise<any> {
+  async getReport(company: Company, data: any, reportType: string): Promise<any> {
     let rangeDetails = [];
     let previousDetails = [];
 
@@ -497,9 +351,7 @@ export class EntriesService {
 
     const signatures = await this.getSettings(company, 'firmantes');
 
-    const catalog = await this.accountingCatalogRepository.getAccountingCatalogsReport(
-      company,
-    );
+    const catalog = await this.accountingCatalogRepository.getAccountingCatalogsReport(company);
 
     // define el listado de cuentas contables afectadas en el periodo seleccionado
     let affectedCatalog = [];
@@ -509,9 +361,7 @@ export class EntriesService {
 
     switch (reportType) {
       case 'diarioMayor':
-        affectedCatalog = [
-          ...new Set(rangeDetails.map((d) => d.accountingCatalog.code)),
-        ];
+        affectedCatalog = [...new Set(rangeDetails.map((d) => d.accountingCatalog.code))];
         // obtiene el saldo inicial por cuenta
         accounts = affectedCatalog
           .map((c) => {
@@ -522,14 +372,10 @@ export class EntriesService {
             const cargo = previousDetails
               .filter((d) => d.accountingCatalog.code == c)
               .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
-            const applicable = rangeDetails.filter(
-              (d) => d.accountingCatalog.code == c,
-            );
+            const applicable = rangeDetails.filter((d) => d.accountingCatalog.code == c);
             const movements = [];
             for (const item of applicable) {
-              const found = movements.find(
-                (m) => m.date == item.accountingEntry.date,
-              );
+              const found = movements.find((m) => m.date == item.accountingEntry.date);
               if (found) {
                 found.cargo = found.cargo + (item.cargo ? item.cargo : 0);
                 found.abono = found.abono + (item.abono ? item.abono : 0);
@@ -542,9 +388,7 @@ export class EntriesService {
                 });
               }
             }
-            const initialBalance = account.isAcreedora
-              ? abono - cargo
-              : cargo - abono;
+            const initialBalance = account.isAcreedora ? abono - cargo : cargo - abono;
             let currentBalance = initialBalance;
             return {
               code: c,
@@ -558,12 +402,7 @@ export class EntriesService {
                 })
                 .map((m) => {
                   currentBalance = parseFloat(
-                    (
-                      currentBalance +
-                      (account.isAcreedora
-                        ? m.abono - m.cargo
-                        : m.cargo - m.abono)
-                    ).toFixed(2),
+                    (currentBalance + (account.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)).toFixed(2),
                   );
                   return {
                     ...m,
@@ -582,17 +421,13 @@ export class EntriesService {
             return 0;
           });
 
-        name = `LIBRO DIARIO MAYOR PARA EL MES DE ${format(
-          parseISO(data.date),
-          'MMMM yyyy',
-          { locale: es },
-        ).toUpperCase()}`;
+        name = `LIBRO DIARIO MAYOR PARA EL MES DE ${format(parseISO(data.date), 'MMMM yyyy', {
+          locale: es,
+        }).toUpperCase()}`;
         break;
 
       case 'auxiliares':
-        affectedCatalog = [
-          ...new Set(rangeDetails.map((d) => d.accountingCatalog.code)),
-        ];
+        affectedCatalog = [...new Set(rangeDetails.map((d) => d.accountingCatalog.code))];
         // obtiene el saldo inicial por cuenta
         accounts = affectedCatalog
           .map((c) => {
@@ -603,9 +438,7 @@ export class EntriesService {
             const cargo = previousDetails
               .filter((d) => d.accountingCatalog.code == c)
               .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
-            const applicable = rangeDetails.filter(
-              (d) => d.accountingCatalog.code == c,
-            );
+            const applicable = rangeDetails.filter((d) => d.accountingCatalog.code == c);
             const movements = applicable.map((a) => {
               return {
                 entryNumber: `Partida #${a.accountingEntry.serie}`,
@@ -616,9 +449,7 @@ export class EntriesService {
                 balance: 0,
               };
             });
-            const initialBalance = account.isAcreedora
-              ? abono - cargo
-              : cargo - abono;
+            const initialBalance = account.isAcreedora ? abono - cargo : cargo - abono;
             let currentBalance = initialBalance;
             return {
               code: c,
@@ -632,12 +463,7 @@ export class EntriesService {
                 })
                 .map((m) => {
                   currentBalance = parseFloat(
-                    (
-                      currentBalance +
-                      (account.isAcreedora
-                        ? m.abono - m.cargo
-                        : m.cargo - m.abono)
-                    ).toFixed(2),
+                    (currentBalance + (account.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)).toFixed(2),
                   );
                   return {
                     ...m,
@@ -656,18 +482,14 @@ export class EntriesService {
             return 0;
           });
 
-        name = `LIBROS DE AUXILIARES PARA EL MES DE ${format(
-          parseISO(data.date),
-          'MMMM yyyy',
-          { locale: es },
-        ).toUpperCase()}`;
+        name = `LIBROS DE AUXILIARES PARA EL MES DE ${format(parseISO(data.date), 'MMMM yyyy', {
+          locale: es,
+        }).toUpperCase()}`;
         break;
 
       case 'accountMovements':
         // define el listado de cuentas contables afectadas en el periodo seleccionado
-        affectedCatalog = [
-          ...new Set(rangeDetails.map((d) => d.accountingCatalog.code)),
-        ];
+        affectedCatalog = [...new Set(rangeDetails.map((d) => d.accountingCatalog.code))];
         // obtiene el saldo inicial por cuenta
         accounts = affectedCatalog
           .map((c) => {
@@ -678,9 +500,7 @@ export class EntriesService {
             const cargo = previousDetails
               .filter((d) => d.accountingCatalog.code == c)
               .reduce((a, b) => a + (b.cargo ? b.cargo : 0), 0);
-            const applicable = rangeDetails.filter(
-              (d) => d.accountingCatalog.code == c,
-            );
+            const applicable = rangeDetails.filter((d) => d.accountingCatalog.code == c);
             const movements = applicable.map((a) => {
               return {
                 entryNumber: `Partida #${a.accountingEntry.serie}`,
@@ -691,9 +511,7 @@ export class EntriesService {
                 balance: 0,
               };
             });
-            const initialBalance = account.isAcreedora
-              ? abono - cargo
-              : cargo - abono;
+            const initialBalance = account.isAcreedora ? abono - cargo : cargo - abono;
             let currentBalance = initialBalance;
             return {
               code: c,
@@ -707,12 +525,7 @@ export class EntriesService {
                 })
                 .map((m) => {
                   currentBalance = parseFloat(
-                    (
-                      currentBalance +
-                      (account.isAcreedora
-                        ? m.abono - m.cargo
-                        : m.cargo - m.abono)
-                    ).toFixed(2),
+                    (currentBalance + (account.isAcreedora ? m.abono - m.cargo : m.cargo - m.abono)).toFixed(2),
                   );
                   return {
                     ...m,
@@ -720,12 +533,8 @@ export class EntriesService {
                     balance: currentBalance,
                   };
                 }),
-              totalAbono: parseFloat(
-                movements.reduce((a, b) => a + b.abono, 0).toFixed(2),
-              ),
-              totalCargo: parseFloat(
-                movements.reduce((a, b) => a + b.cargo, 0).toFixed(2),
-              ),
+              totalAbono: parseFloat(movements.reduce((a, b) => a + b.abono, 0).toFixed(2)),
+              totalCargo: parseFloat(movements.reduce((a, b) => a + b.cargo, 0).toFixed(2)),
               currentBalance,
             };
           })
@@ -743,9 +552,9 @@ export class EntriesService {
         break;
 
       case 'balanceComprobacion':
-        affectedCatalog = [
-          ...rangeDetails.map((d) => d.accountingCatalog.code),
-        ].concat(...previousDetails.map((d) => d.accountingCatalog.code));
+        affectedCatalog = [...rangeDetails.map((d) => d.accountingCatalog.code)].concat(
+          ...previousDetails.map((d) => d.accountingCatalog.code),
+        );
 
         accounts = catalog
           .filter((c) => {
@@ -790,33 +599,19 @@ export class EntriesService {
           })
           .filter((c) => c.initialBalance > 0 || c.cargo > 0 || c.abono > 0);
 
-        name = `BALANCE DE COMPROBACIÓN AL ${format(
-          endOfMonth(parseISO(data.date)),
-          'dd - MMMM - yyyy',
-          { locale: es },
-        )
+        name = `BALANCE DE COMPROBACIÓN AL ${format(endOfMonth(parseISO(data.date)), 'dd - MMMM - yyyy', { locale: es })
           .split('-')
           .join('de')
           .toUpperCase()}`;
         break;
 
       case 'balance-general':
-        const {
-          balanceGeneral,
-        } = await this.accountingSettingRepository.getSetting(
-          company,
-          'balance general',
-        );
+        const { balanceGeneral } = await this.accountingSettingRepository.getSetting(company, 'balance general');
         if (!balanceGeneral) {
-          throw new BadRequestException(
-            'No hay configuracion valida guardada para el Balance general.',
-          );
+          throw new BadRequestException('No hay configuracion valida guardada para el Balance general.');
         }
 
-        if (
-          Object.values(balanceGeneral.special).filter((v) => v == '').length >
-          0
-        ) {
+        if (Object.values(balanceGeneral.special).filter((v) => v == '').length > 0) {
           throw new BadRequestException(
             'Se deben definir las cuentas de utiliadades y perdidas para el periodo anterior y el actual.',
           );
@@ -828,8 +623,7 @@ export class EntriesService {
             const resacreedora = rangeDetails
               .filter(
                 (d) =>
-                  (d.accountingCatalog.code.startsWith('4') ||
-                    d.accountingCatalog.code.startsWith('5')) &&
+                  (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) &&
                   d.accountingCatalog.isAcreedora,
               )
               .reduce(
@@ -844,8 +638,7 @@ export class EntriesService {
             const resdeudora = rangeDetails
               .filter(
                 (d) =>
-                  (d.accountingCatalog.code.startsWith('4') ||
-                    d.accountingCatalog.code.startsWith('5')) &&
+                  (d.accountingCatalog.code.startsWith('4') || d.accountingCatalog.code.startsWith('5')) &&
                   !d.accountingCatalog.isAcreedora,
               )
               .reduce(
@@ -857,16 +650,9 @@ export class EntriesService {
                 },
                 { cargo: 0, abono: 0 },
               );
-            add =
-              resacreedora.abono +
-              resdeudora.abono -
-              (resacreedora.cargo + resdeudora.cargo);
+            add = resacreedora.abono + resdeudora.abono - (resacreedora.cargo + resdeudora.cargo);
             const current = catalog.find(
-              (c) =>
-                c.id ==
-                (add >= 0
-                  ? balanceGeneral.special.curre_gain
-                  : balanceGeneral.special.curre_lost),
+              (c) => c.id == (add >= 0 ? balanceGeneral.special.curre_gain : balanceGeneral.special.curre_lost),
             );
             objaccount = {
               code: current.code,
@@ -884,17 +670,13 @@ export class EntriesService {
                     const totalniveldos = c.children
                       .map((ch) => {
                         const totalniveltres = rangeDetails
-                          .filter((d) =>
-                            d.accountingCatalog.code.startsWith(ch.id),
-                          )
+                          .filter((d) => d.accountingCatalog.code.startsWith(ch.id))
                           .reduce(
                             (a, b) =>
                               a +
                               (b.accountingCatalog.isAcreedora
-                                ? (b.abono ? b.abono : 0) -
-                                  (b.cargo ? b.cargo : 0)
-                                : (b.cargo ? b.cargo : 0) -
-                                  (b.abono ? b.abono : 0)),
+                                ? (b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)
+                                : (b.cargo ? b.cargo : 0) - (b.abono ? b.abono : 0)),
                             0,
                           );
                         ch.total = totalniveltres;
@@ -930,29 +712,19 @@ export class EntriesService {
           };
         });
 
-        name = `BALANCE GENERAL AL ${format(
-          parseISO(data.endDate),
-          'dd/MM/yyyy',
-        )}`;
+        name = `BALANCE GENERAL AL ${format(parseISO(data.endDate), 'dd/MM/yyyy')}`;
 
         break;
 
       case 'estado-resultados':
-        const estadoResultados = await this.accountingSettingRepository.getSetting(
-          company,
-          'estado de resultado',
-        );
+        const estadoResultados = await this.accountingSettingRepository.getSetting(company, 'estado de resultado');
 
         if (!estadoResultados.estadoResultados) {
-          throw new BadRequestException(
-            'El estado de resultados no se puede generar ya que no ha sido configurado',
-          );
+          throw new BadRequestException('El estado de resultados no se puede generar ya que no ha sido configurado');
         }
         estadoResultados.estadoResultados as any[];
         if (
-          !estadoResultados.estadoResultados
-            .map((er) => er.children)
-            .filter((erc) => erc != null && erc.length > 0)
+          !estadoResultados.estadoResultados.map((er) => er.children).filter((erc) => erc != null && erc.length > 0)
         ) {
           throw new BadRequestException(
             'El estado de resultados no se puede generar ya que no tiene cuentas contables asignadas',
@@ -969,14 +741,8 @@ export class EntriesService {
                 .map((children) => children.id)
                 .map((catalogo) =>
                   rangeDetails
-                    .filter((d) =>
-                      d.accountingCatalog.code.startsWith(catalogo),
-                    )
-                    .reduce(
-                      (a, b) =>
-                        a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)),
-                      0,
-                    ),
+                    .filter((d) => d.accountingCatalog.code.startsWith(catalogo))
+                    .reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0),
                 )
                 .reduce((a, b) => a + b, 0);
               saldoacumulado = saldoacumulado + total;
@@ -990,14 +756,8 @@ export class EntriesService {
                 return {
                   name: ch.display,
                   total: rangeDetails
-                    .filter((detail) =>
-                      detail.accountingCatalog.code.startsWith(ch.id),
-                    )
-                    .reduce(
-                      (a, b) =>
-                        a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)),
-                      0,
-                    ),
+                    .filter((detail) => detail.accountingCatalog.code.startsWith(ch.id))
+                    .reduce((a, b) => a + ((b.abono ? b.abono : 0) - (b.cargo ? b.cargo : 0)), 0),
                 };
               });
             }
@@ -1010,10 +770,7 @@ export class EntriesService {
             };
           });
 
-        name = `ESTADO DE RESULTADOS AL ${format(
-          parseISO(data.endDate),
-          'dd/MM/yyyy',
-        )}`;
+        name = `ESTADO DE RESULTADOS AL ${format(parseISO(data.endDate), 'dd/MM/yyyy')}`;
         break;
     }
 
@@ -1025,14 +782,8 @@ export class EntriesService {
     };
   }
 
-  async getEntries(
-    company: Company,
-    filter: EntriesFilterDTO,
-  ): Promise<ResponseListDTO<AccountingEntry>> {
-    const entries = await this.accountingEntryRepository.getEntries(
-      company,
-      filter,
-    );
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<ResponseListDTO<AccountingEntry>> {
+    const entries = await this.accountingEntryRepository.getEntries(company, filter);
     const entry = entries.map((e) => {
       const entri = {
         ...e,
@@ -1051,10 +802,7 @@ export class EntriesService {
     return new ResponseListDTO(plainToClass(AccountingEntry, entry));
   }
 
-  async getEntry(
-    company: Company,
-    id: string,
-  ): Promise<ResponseSingleDTO<AccountingEntry>> {
+  async getEntry(company: Company, id: string): Promise<ResponseSingleDTO<AccountingEntry>> {
     const entry = await this.accountingEntryRepository.getEntry(company, id);
 
     const entrie = {
@@ -1068,8 +816,7 @@ export class EntriesService {
           return 0;
         })
         .map((aed) => {
-          delete aed.accountingCatalog.description,
-            delete aed.accountingCatalog.level;
+          delete aed.accountingCatalog.description, delete aed.accountingCatalog.level;
           delete aed.accountingCatalog.isParent;
           delete aed.accountingCatalog.isAcreedora;
           delete aed.accountingCatalog.isBalance;
@@ -1091,22 +838,16 @@ export class EntriesService {
     id?: string,
   ): Promise<ResponseMinimalDTO> {
     let message = '';
-    const { nextSerie } = await this.accountingEntryRepository.getSeries(
-      company,
-      {
-        accountingEntryType: header.accountingEntryType,
-        date: header.date,
-      },
-    );
+    const { nextSerie } = await this.accountingEntryRepository.getSeries(company, {
+      accountingEntryType: header.accountingEntryType,
+      date: header.date,
+    });
 
     if (header.serie != nextSerie) {
       message = `El numero de serie asignado fué: ${nextSerie}`;
     }
 
-    const entryType = await this.accountingEntryTypeRepository.getEntryType(
-      company,
-      header.accountingEntryType,
-    );
+    const entryType = await this.accountingEntryTypeRepository.getEntryType(company, header.accountingEntryType);
 
     let headerInsert = {};
     headerInsert = {
@@ -1127,15 +868,10 @@ export class EntriesService {
         id: entry.id,
       };
 
-      await this.accountingEntryDetailRepository.deleteEntryDetail(
-        entry.accountingEntryDetails.map((e) => e.id),
-      );
+      await this.accountingEntryDetailRepository.deleteEntryDetail(entry.accountingEntryDetails.map((e) => e.id));
     }
 
-    const entryHeader = await this.accountingEntryRepository.createUpdateEntry(
-      headerInsert,
-      type,
-    );
+    const entryHeader = await this.accountingEntryRepository.createUpdateEntry(headerInsert, type);
 
     const detailsInsert = [];
     for (const detail of details) {
@@ -1154,9 +890,7 @@ export class EntriesService {
       });
     }
 
-    await this.accountingEntryDetailRepository.createEntryDetails(
-      detailsInsert,
-    );
+    await this.accountingEntryDetailRepository.createEntryDetails(detailsInsert);
     return {
       id: entryHeader.id,
       message:
@@ -1175,10 +909,7 @@ export class EntriesService {
       }),
     );
 
-    const resultHeader = await this.accountingEntryRepository.deleteEntry(
-      company,
-      id,
-    );
+    const resultHeader = await this.accountingEntryRepository.deleteEntry(company, id);
     return {
       message:
         resultDetails && resultHeader

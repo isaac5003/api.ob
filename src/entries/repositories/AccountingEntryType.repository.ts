@@ -19,10 +19,7 @@ export class AccountingEntryTypeRepository extends Repository<AccountingEntryTyp
     return entryTypes;
   }
 
-  async getEntryType(
-    company: Company,
-    id: string,
-  ): Promise<AccountingEntryType> {
+  async getEntryType(company: Company, id: string): Promise<AccountingEntryType> {
     let entryType: AccountingEntryType;
     try {
       entryType = await this.findOneOrFail({ id, company });

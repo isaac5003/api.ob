@@ -1,11 +1,6 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { logDatabaseError } from 'src/_tools';
-import {
-  EntityRepository,
-  LessThanOrEqual,
-  MoreThanOrEqual,
-  Repository,
-} from 'typeorm';
+import { EntityRepository, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
 import { startOfMonth, endOfMonth } from 'date-fns';
@@ -15,19 +10,14 @@ import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)
 export class AccountingEntryRepository extends Repository<AccountingEntry> {
-  async getSeries(
-    company: Company,
-    data: SeriesDTO,
-  ): Promise<ResponseMinimalDTO> {
+  async getSeries(company: Company, data: SeriesDTO): Promise<ResponseMinimalDTO> {
     let entries: AccountingEntry[];
     try {
       entries = await this.find({
         select: ['serie', 'date'],
         where: {
           company,
-          date:
-            MoreThanOrEqual(startOfMonth(new Date(data.date))) ||
-            LessThanOrEqual(endOfMonth(new Date(data.date))),
+          date: MoreThanOrEqual(startOfMonth(new Date(data.date))) || LessThanOrEqual(endOfMonth(new Date(data.date))),
         },
       });
     } catch (error) {
@@ -46,23 +36,9 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
     };
   }
 
-  async getEntries(
-    company: Company,
-    filter: EntriesFilterDTO,
-  ): Promise<AccountingEntry[]> {
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<AccountingEntry[]> {
     try {
-      const {
-        limit,
-        page,
-        search,
-        squared,
-        accounted,
-        startDate,
-        endDate,
-        entryType,
-        prop,
-        order,
-      } = filter;
+      const { limit, page, search, squared, accounted, startDate, endDate, entryType, prop, order } = filter;
 
       let entries = this.createQueryBuilder('entries')
         .select([
@@ -93,9 +69,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
       }
 
       if (limit && page) {
-        entries = entries
-          .limit(limit)
-          .offset(limit ? (page ? page - 1 : 0 * limit) : null);
+        entries = entries.limit(limit).offset(limit ? (page ? page - 1 : 0 * limit) : null);
 
         // entries = entries
         //   .take(limit)
@@ -119,26 +93,17 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
         entries = entries.andWhere('entries.date <= :endDate', { endDate });
       }
       if (entryType) {
-        entries = entries.andWhere(
-          'entries.accountingEntryTypeId = :entryType',
-          {
-            entryType,
-          },
-        );
+        entries = entries.andWhere('entries.accountingEntryTypeId = :entryType', {
+          entryType,
+        });
       }
       if (order && prop) {
         switch (prop) {
           case 'accountingEntryType':
-            entries = entries.orderBy(
-              'entries.accountingEntryType',
-              order == 'ascending' ? 'ASC' : 'DESC',
-            );
+            entries = entries.orderBy('entries.accountingEntryType', order == 'ascending' ? 'ASC' : 'DESC');
             break;
           default:
-            entries = entries.orderBy(
-              `${prop}`,
-              order == 'ascending' ? 'ASC' : 'DESC',
-            );
+            entries = entries.orderBy(`${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
         }
       } else {
         entries = entries.orderBy('entries.createdAt', 'DESC');
