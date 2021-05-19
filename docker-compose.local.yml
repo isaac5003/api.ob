@@ -14,7 +14,7 @@ services:
 
   local_openbox_api:
     container_name: local_openbox_api
-    image: 'node:lts-slim'
+    image: 'node:lts'
     working_dir: /usr/api
     ports:
       - '5001:3000'
