@@ -121,10 +121,10 @@ export class InvoiceRepository extends Repository<Invoice> {
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
+
       return await query.getMany();
     } catch (error) {
-      console.log(error);
-
+      console.error(error);
       logDatabaseError(reponame, error);
     }
   }
@@ -260,7 +260,6 @@ export class InvoiceRepository extends Repository<Invoice> {
       await this.delete(invoice.id);
     } catch (error) {
       console.error(error);
-
       logDatabaseError(reponame, error);
     }
     return true;

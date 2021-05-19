@@ -593,7 +593,7 @@ export class InvoicesService {
         authorization: document.authorization,
         sequence: sr,
         company: company,
-        documentType: documentType,
+        documentType: documentType[0].id,
         status: invoiceStatus,
       };
     });
