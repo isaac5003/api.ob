@@ -84,8 +84,6 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
   }
 
   async getAccountingCatalogNotUsed(accountingCatalog: any, company: Company): Promise<AccountingCatalog> {
-    console.log(accountingCatalog);
-
     const account = await this.getAccountingCatalog(accountingCatalog as string, company, true);
     if (account.isParent) {
       throw new BadRequestException("La 'cuenta contable' selecciona no puede ser utilizada ya que no es asignable.");

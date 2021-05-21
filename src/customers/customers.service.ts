@@ -227,7 +227,7 @@ export class CustomersService {
     data: AccountignCatalogIntegrationDTO,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
     await this.customerRepository.updateCustomer(id, data, company);
     return {
       message: 'El cliente se actualizo correctamente',
@@ -236,7 +236,7 @@ export class CustomersService {
   async deleteCustomer(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const result = await this.customerRepository.deleteCustomer(company, id);
     return {
-      message: result ? 'Se ha eliminado el servicio correctamente' : 'No se ha podido eliminar el servicio',
+      message: result ? 'Se ha eliminado el cliente correctamente' : 'No se ha podido eliminar el cliente',
     };
   }
 }
