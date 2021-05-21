@@ -135,7 +135,7 @@ export class CustomersService {
     company: Company,
     data: AccountignCatalogIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
     const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
     if (settings) {
