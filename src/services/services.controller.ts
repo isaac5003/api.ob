@@ -33,8 +33,11 @@ export class ServicesController {
 
   // FOR REPORTS
   @Get('/report/general')
-  async reportGeneral(@GetAuthData('company') company: Company): Promise<ServiceReportGeneralDTO> {
-    return this.service.getReportGeneral(company);
+  async reportGeneral(
+    @GetAuthData('company') company: Company,
+    @Query() filter: ServiceFilterDTO,
+  ): Promise<ServiceReportGeneralDTO> {
+    return this.service.getReportGeneral(company, filter);
   }
 
   // FOR SETTINGS
