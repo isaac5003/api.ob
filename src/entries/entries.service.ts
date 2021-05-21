@@ -91,7 +91,7 @@ export class EntriesService {
     }
 
     return {
-      id: `'${account.map((a) => a.id).join("','")}'`,
+      ids: account.map((a) => a.id),
       message: 'La(s) cuenta(s) contable(s) se ha creado correctamente.',
     };
   }

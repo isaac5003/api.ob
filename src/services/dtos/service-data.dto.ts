@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { SellingType } from '../entities/SellingType.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
@@ -9,8 +9,8 @@ export class serviceDataDTO {
   name: string;
 
   @IsNotEmpty({ message: validationMessage('cost', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('cost', 'IsInt') })
+  @Transform(({ value }) => parseFloat(value).toFixed(2))
+  @IsDecimal({ decimal_digits: '2' }, { message: validationMessage('cost', 'IsDecimal') })
   cost: number;
 
   @IsNotEmpty({ message: validationMessage('sellingType', 'IsNotEmpty') })

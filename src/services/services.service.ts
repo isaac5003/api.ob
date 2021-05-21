@@ -139,9 +139,10 @@ export class ServicesService {
     };
   }
 
-  async getReportGeneral(company: Company): Promise<ServiceReportGeneralDTO> {
+  async getReportGeneral(company: Company, filter): Promise<ServiceReportGeneralDTO> {
     const { name, nit, nrc } = company;
-    const services = await this.serviceRepository.getFilteredServices(company);
+
+    const services = await this.serviceRepository.getFilteredServices(company, filter);
 
     return {
       company: { name, nit, nrc },
@@ -160,7 +161,7 @@ export class ServicesService {
   }
 
   async updateSettingsIntegrations(company: Company, data: ServiceIntegrationDTO): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
     const settings = await this.serviceSettingRepository.getSettings(company);
 
