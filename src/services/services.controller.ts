@@ -142,6 +142,9 @@ export class ServicesController {
     @Body() data: serviceDataDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
+    console.log(company);
+    console.log(data);
+
     return this.service.createService(company, data);
   }
 }
