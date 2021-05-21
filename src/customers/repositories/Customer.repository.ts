@@ -110,9 +110,11 @@ export class CustomerRepository extends Repository<Customer> {
 
   async deleteCustomer(company: Company, id: string): Promise<boolean> {
     const customer = await this.getCustomer(id, company);
+
     try {
-      await this.delete(customer);
+      await this.delete(customer.id);
     } catch (error) {
+      console.error(error);
       logDatabaseError(reponame, error);
     }
     return true;
