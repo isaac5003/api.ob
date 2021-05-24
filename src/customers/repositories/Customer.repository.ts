@@ -10,7 +10,7 @@ import { logDatabaseError } from 'src/_tools';
 const reponame = 'cliente';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>): Promise<Customer[]> {
+  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>, type): Promise<Customer[]> {
     try {
       const { active, limit, page, search, order, prop, branch } = filter;
       const query = this.createQueryBuilder('customer')
@@ -19,12 +19,23 @@ export class CustomerRepository extends Repository<Customer> {
 
         .where({ company });
 
-      if (branch) {
-        query.leftJoinAndSelect('customer.customerBranches', 'customerBranches');
+      switch (type) {
+        case 'customers':
+          query.andWhere('customer.isCustomer =:customer', { customer: true });
+          if (active) {
+            query.andWhere('customer.isActiveCustomer = :active', { active });
+          }
+          break;
+        case 'providers':
+          query.andWhere('customer.isProvider =:customer', { customer: true });
+          if (active) {
+            query.andWhere('customer.isActiveProvider = :active', { active });
+          }
+          break;
       }
 
-      if (active) {
-        query.andWhere('customer.isActiveCustomer = :active', { active });
+      if (branch) {
+        query.leftJoinAndSelect('customer.customerBranches', 'customerBranches');
       }
 
       if (search) {

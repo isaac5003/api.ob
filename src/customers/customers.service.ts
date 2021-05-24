@@ -15,7 +15,7 @@ import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.re
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
@@ -45,8 +45,8 @@ export class CustomersService {
     private customerSettingRepository: CustomerSettingRepository,
   ) {}
 
-  async generateReportGeneral(company: Company): Promise<any> {
-    const customers = await this.customerRepository.getCustomers(company, { branch: true });
+  async generateReportGeneral(company: Company, type = 'customers'): Promise<any> {
+    const customers = await this.customerRepository.getCustomers(company, { branch: true }, type);
 
     const report = {
       company: {
@@ -75,12 +75,36 @@ export class CustomersService {
             ...cu,
           };
         }),
+      providers: customers
+        .map((c) => {
+          const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
+          return {
+            ...c,
+            contactName: c.customerBranches.find((cb) => cb.default).contactName,
+            contactPhone: phones ? (phones.length > 0 ? phones[0] : '') : '',
+          };
+        })
+        .map((cu) => {
+          delete cu.customerBranches,
+            delete cu.shortName,
+            delete cu.customerTaxerType,
+            delete cu.customerTypeNatural,
+            delete cu.isActiveProvider;
+          delete cu.isCustomer, delete cu.isProvider, delete cu.isActiveCustomer;
+          return {
+            ...cu,
+          };
+        }),
     };
-
+    if (type == 'providers') {
+      delete report.customers;
+    } else {
+      delete report.providers;
+    }
     return report;
   }
 
-  async generateReportIndividual(company: Company, id: string): Promise<any> {
+  async generateReportIndividual(company: Company, id: string, type = 'customer'): Promise<any> {
     const customer = await this.customerRepository.getCustomer(id, company);
     const phone = customer.customerBranches.find((cb) => cb.default).contactInfo;
     delete customer.isActiveCustomer, delete customer.isActiveProvider, delete customer.isProvider;
@@ -98,17 +122,36 @@ export class CustomersService {
         contactPhone: phone ? (phone.phones.length > 0 ? phone.phones[0] : '') : '',
         contactEmail: phone ? (phone.emails.length > 0 ? phone.emails[0] : '') : '',
       },
+      provider: {
+        ...customer,
+        constactName: customer.customerBranches.find((cb) => cb.default).contactName,
+        contactPhone: phone ? (phone.phones.length > 0 ? phone.phones[0] : '') : '',
+        contactEmail: phone ? (phone.emails.length > 0 ? phone.emails[0] : '') : '',
+      },
     };
 
+    if (type == 'provider') {
+      delete report.customer;
+    } else {
+      delete report.provider;
+    }
     return report;
   }
 
-  async getCustomers(company: Company, data: CustomerFilterDTO): Promise<Customer[]> {
-    return await this.customerRepository.getCustomers(company, data);
+  async getCustomers(company: Company, data: CustomerFilterDTO, type = 'customers'): Promise<Customer[]> {
+    return await this.customerRepository.getCustomers(company, data, type);
   }
 
-  async getCustomer(company: Company, id: string): Promise<Customer> {
-    return this.customerRepository.getCustomer(id, company);
+  async getCustomer(company: Company, id: string, type = 'customer'): Promise<Customer> {
+    const customer = await this.customerRepository.getCustomer(id, company);
+
+    if (type == 'provider') {
+      if (!customer.isProvider) {
+        throw new BadRequestException('El proveedor seleccionado no existe.');
+      }
+
+      return customer;
+    }
   }
 
   async getCustomerIntegration(id: string, company: Company): Promise<ResponseMinimalDTO> {
@@ -178,8 +221,6 @@ export class CustomersService {
   }
 
   async getCustomerTypes(): Promise<CustomerType[]> {
-    console.log(this.customerTypeRepository.getCustomerTypes());
-
     return this.customerTypeRepository.getCustomerTypes();
   }
 
@@ -191,7 +232,19 @@ export class CustomersService {
     return this.customerTypeNaturalRepository.getCustomerTypeNaturals();
   }
 
-  async createCustomer(company: Company, data): Promise<ResponseMinimalDTO> {
+  async createCustomer(company: Company, data, type = 'customer'): Promise<ResponseMinimalDTO> {
+    let message = 'Se ha creado el cliente correctamente';
+    if (type == 'provider') {
+      data = {
+        ...data,
+        isProvider: true,
+        isActiverProvider: true,
+        isCustomer: false,
+        isActiveCustomer: false,
+      };
+
+      message = 'Se ha creado el proveedor correctamente';
+    }
     const customer = await this.customerRepository.createCustomer(company, data);
     const { id } = customer;
     const branch = {
@@ -201,24 +254,35 @@ export class CustomersService {
     await this.customerBranchRepository.createBranch(branch);
     return {
       id: customer.id,
-      message: 'Se ha creado el cliente correctamente',
+      message,
     };
   }
 
-  async updateCustomer(id: string, data: CustomerDataDTO, company: Company): Promise<ResponseMinimalDTO> {
+  async updateCustomer(
+    id: string,
+    data: CustomerDataDTO,
+    company: Company,
+    type = 'customer',
+  ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.updateBranch(id, data.branch);
     delete data.branch;
 
     await this.customerRepository.updateCustomer(id, data, company);
+
     return {
-      message: 'El cliente se actualizo correctamente',
+      message: type == 'customer' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
     };
   }
 
-  async UpdateStatusCustomer(id: string, data: CustomerStatusDTO, company: Company): Promise<ResponseMinimalDTO> {
+  async UpdateStatusCustomer(
+    id: string,
+    data: CustomerStatusDTO,
+    company: Company,
+    type = 'customer',
+  ): Promise<ResponseMinimalDTO> {
     await this.customerRepository.updateCustomer(id, data, company);
     return {
-      message: 'El cliente se actualizo correctamente',
+      message: type == 'customer' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
     };
   }
 
@@ -226,17 +290,25 @@ export class CustomersService {
     id: string,
     data: AccountignCatalogIntegrationDTO,
     company: Company,
+    type = 'customer',
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
     await this.customerRepository.updateCustomer(id, data, company);
     return {
-      message: 'El cliente se actualizo correctamente',
+      message: type == 'customer' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
     };
   }
-  async deleteCustomer(company: Company, id: string): Promise<ResponseMinimalDTO> {
+  async deleteCustomer(company: Company, id: string, type = 'customer'): Promise<ResponseMinimalDTO> {
     const result = await this.customerRepository.deleteCustomer(company, id);
     return {
-      message: result ? 'Se ha eliminado el cliente correctamente' : 'No se ha podido eliminar el cliente',
+      message:
+        type == 'customer'
+          ? result
+            ? 'Se ha eliminado el cliente correctamente'
+            : 'No se ha podido eliminar el cliente'
+          : result
+          ? 'Se ha eliminado el proveedor correctamente'
+          : 'No se ha podido eliminar el proveedor',
     };
   }
 }
