@@ -11,6 +11,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { BranchRepository } from 'src/companies/repositories/Branch.repository';
 import { RecoveryRepository } from './repositories/Recovery.repository';
+import { TokenRepository } from 'src/system/repositories/Token.repository';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { RecoveryRepository } from './repositories/Recovery.repository';
       BranchRepository,
       ProfileRepository,
       RecoveryRepository,
+      TokenRepository,
     ]),
   ],
   exports: [JwtStrategy, PassportModule],
