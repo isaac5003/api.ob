@@ -26,6 +26,7 @@ import { CustomerTaxerType } from 'src/customers/entities/CustomerTaxerType.enti
 import { CustomerType } from 'src/customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ProviderStatusDTO } from './dtos/provider-updateStatus.dto';
 
 @Controller('providers')
 @UseGuards(AuthGuard())
@@ -61,17 +62,17 @@ export class ProvidersController {
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data);
+    return this.customersService.updateCustomerSettingsIntegrations(company, data, 'proveedor');
   }
 
   @Put('/status/:id')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerStatus(
     @Param('id') id: string,
-    @Body() data: CustomerStatusDTO,
+    @Body() data: ProviderStatusDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.UpdateStatusCustomer(id, data, company, 'provider');
+    return this.customersService.UpdateStatusCustomer(id, data, company, 'proveedor');
   }
 
   @Get('/:id/integrations')
@@ -80,7 +81,7 @@ export class ProvidersController {
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerIntegration(id, company);
+    return await this.customersService.getCustomerIntegration(id, company, 'proveedor');
   }
 
   @Get('/:id/tributary')
@@ -89,13 +90,13 @@ export class ProvidersController {
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Customer>> {
-    return await this.customersService.getCustomerTributary(id, company);
+    return await this.customersService.getCustomerTributary(id, company, 'proveedor');
   }
 
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id);
+    const branches = await this.customersService.getCustomerBranches(id, 'proveedor');
     return new ResponseListDTO(plainToClass(CustomerBranch, branches));
   }
 
@@ -106,17 +107,17 @@ export class ProvidersController {
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.UpdateCustomerIntegration(id, data, company, 'provider');
+    return await this.customersService.UpdateCustomerIntegration(id, data, company, 'proveedor');
   }
 
   @Get('/report/general')
   async getReportGeneral(@GetAuthData('company') company: Company): Promise<ResponseListDTO<Customer>> {
-    return await this.customersService.generateReportGeneral(company, 'providers');
+    return await this.customersService.generateReportGeneral(company, 'proveedores');
   }
 
   @Get('/report/:id')
   async getReportIndividual(@GetAuthData('company') company: Company, @Param('id') id: string): Promise<Customer> {
-    return await this.customersService.generateReportIndividual(company, id, 'provider');
+    return await this.customersService.generateReportIndividual(company, id, 'proveedor');
   }
 
   @Get('/')
@@ -125,7 +126,7 @@ export class ProvidersController {
     @Query() filter: CustomerFilterDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseListDTO<Customer>> {
-    const customers = await this.customersService.getCustomers(company, filter, 'providers');
+    const customers = await this.customersService.getCustomers(company, filter, 'proveedores');
     return new ResponseListDTO(plainToClass(Customer, customers));
   }
 
@@ -135,7 +136,7 @@ export class ProvidersController {
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Customer>> {
-    const customer = await this.customersService.getCustomer(company, id, 'provider');
+    const customer = await this.customersService.getCustomer(company, id, 'proveedor');
     return new ResponseSingleDTO(plainToClass(Customer, customer));
   }
 
@@ -146,12 +147,12 @@ export class ProvidersController {
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.createCustomer(company, data, 'provider');
+    return this.customersService.createCustomer(company, data, 'proveedor');
   }
 
   @Delete('/:id')
   async deleteCustomer(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
-    return this.customersService.deleteCustomer(company, id, 'provider');
+    return this.customersService.deleteCustomer(company, id, 'proveedor');
   }
 
   @Put('/:id')
@@ -161,6 +162,6 @@ export class ProvidersController {
     @Body() data: CustomerDataDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomer(id, data, company, 'provider');
+    return this.customersService.updateCustomer(id, data, company, 'proveedor');
   }
 }

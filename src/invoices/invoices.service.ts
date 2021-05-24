@@ -489,8 +489,11 @@ export class InvoicesService {
   }
 
   async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
-    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
-    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company, 'cliente');
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
+      data.header.customerBranch,
+      'cliente',
+    );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
@@ -625,8 +628,11 @@ export class InvoicesService {
   async updateInvoice(company: Company, id: string, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-    const customer = await this.customerRepository.getCustomer(data.header.customer, company);
-    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(data.header.customerBranch);
+    const customer = await this.customerRepository.getCustomer(data.header.customer, company, 'cliente');
+    const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
+      data.header.customerBranch,
+      'cliente',
+    );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
