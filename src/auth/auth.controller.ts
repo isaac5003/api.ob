@@ -3,7 +3,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
-import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO, ResponseSingleDTO, ResponseUserDTO } from 'src/_dtos/responseList.dto';
 import { AuthService } from './auth.service';
 import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
 import { updatePassWordDTO } from './dtos/auth-update-password.dto';
@@ -36,7 +36,7 @@ export class AuthController {
     @GetAuthData('user') user: User,
     @GetAuthData('branch') branch: Branch,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<User>> {
+  ): Promise<ResponseUserDTO> {
     return await this.authService.getUser(user, branch, company);
   }
 

@@ -14,7 +14,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtPayloadDTO } from './dtos/jwtPayload.dto';
 import { emailSender } from '../_tools';
 import { v1 as uuidv1 } from 'uuid';
-import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO, ResponseSingleDTO, ResponseUserDTO } from 'src/_dtos/responseList.dto';
 import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
 import { RecoveryRepository } from './repositories/Recovery.repository';
 import { resetPassword } from '../emailsTemplate/resetPassword';
@@ -116,7 +116,7 @@ export class AuthService {
     };
   }
 
-  async getUser(user: User, branch: Branch, company: Company): Promise<ResponseSingleDTO<User>> {
+  async getUser(user: User, branch: Branch, company: Company): Promise<ResponseUserDTO> {
     const userLogged = await this.userRepository.getUserById(user.id);
 
     const access = [];
@@ -170,13 +170,13 @@ export class AuthService {
             };
           }),
         },
+        workspace: (userLogged['workspace'] = {
+          company: { id: company.id, unique: company.unique, name: company.name },
+          branch: { id: branch.id, name: branch.name },
+        }),
       },
-      workspace: (userLogged['workspace'] = {
-        company: { id: company.id, unique: company.unique, name: company.name },
-        branch: { id: branch.id, name: branch.name },
-      }),
     };
-    return new ResponseSingleDTO(plainToClass(User, userToShow));
+    return { ...userToShow };
   }
 
   async updateWorkSpace(data: WorkSpaceDTO, user: User, profile: Profile): Promise<{ access_token: string }> {
