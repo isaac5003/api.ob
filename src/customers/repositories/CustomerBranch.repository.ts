@@ -6,33 +6,33 @@ import { CustomerBranch } from '../entities/CustomerBranch.entity';
 const reponame = 'sucursal';
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
-  async getCustomerBranches(id: string): Promise<CustomerBranch[]> {
+  async getCustomerBranches(id: string, type: string): Promise<CustomerBranch[]> {
     let branches: CustomerBranch[];
     try {
       branches = await this.find({ where: { customer: id } });
     } catch (error) {
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return branches;
   }
 
-  async createBranch(data: BranchDataDTO): Promise<CustomerBranch> {
+  async createBranch(data: BranchDataDTO, type: string): Promise<CustomerBranch> {
     // crea sucursal
     let response: CustomerBranch;
     try {
       const branch = this.create({ ...data });
       response = await this.save(branch);
     } catch (error) {
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return await response;
   }
 
-  async updateBranch(id: string, data: BranchDataDTO): Promise<any> {
+  async updateBranch(id: string, data: BranchDataDTO, type: string): Promise<any> {
     return this.update({ id }, data);
   }
 
-  async getCustomerCustomerBranch(id: string): Promise<CustomerBranch> {
+  async getCustomerCustomerBranch(id: string, type: string): Promise<CustomerBranch> {
     let customerBranch: CustomerBranch;
     const leftJoinAndSelect = {
       c: 'cb.country',
@@ -52,7 +52,7 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
       );
     } catch (error) {
       console.error(error);
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return customerBranch;
   }

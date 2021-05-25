@@ -6,11 +6,11 @@ import { CustomerStatusDTO } from '../dtos/customer-status.dto';
 import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dto';
 import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
+import { ProviderStatusDTO } from 'src/providers/dtos/provider-updateStatus.dto';
 
-const reponame = 'cliente';
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>): Promise<Customer[]> {
+  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>, type: string): Promise<Customer[]> {
     try {
       const { active, limit, page, search, order, prop, branch } = filter;
       const query = this.createQueryBuilder('customer')
@@ -19,12 +19,23 @@ export class CustomerRepository extends Repository<Customer> {
 
         .where({ company });
 
-      if (branch) {
-        query.leftJoinAndSelect('customer.customerBranches', 'customerBranches');
+      switch (type) {
+        case 'clientes':
+          query.andWhere('customer.isCustomer =:customer', { customer: true });
+          if (active) {
+            query.andWhere('customer.isActiveCustomer = :active', { active });
+          }
+          break;
+        case 'proveedores':
+          query.andWhere('customer.isProvider =:customer', { customer: true });
+          if (active) {
+            query.andWhere('customer.isActiveProvider = :active', { active });
+          }
+          break;
       }
 
-      if (active) {
-        query.andWhere('customer.isActiveCustomer = :active', { active });
+      if (branch) {
+        query.leftJoinAndSelect('customer.customerBranches', 'customerBranches');
       }
 
       if (search) {
@@ -47,11 +58,11 @@ export class CustomerRepository extends Repository<Customer> {
     } catch (error) {
       console.error(error);
 
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
   }
 
-  async getCustomer(id: string, company: Company, joins: string[] = []): Promise<Customer> {
+  async getCustomer(id: string, company: Company, type: string, joins: string[] = []): Promise<Customer> {
     let customer: Customer;
     const leftJoinAndSelect = {
       ct: 'c.customerType',
@@ -80,42 +91,47 @@ export class CustomerRepository extends Repository<Customer> {
       );
     } catch (error) {
       console.error(error);
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return customer;
   }
 
-  async createCustomer(company: Company, data: CustomerDataDTO): Promise<Customer> {
+  async createCustomer(company: Company, data: CustomerDataDTO, type: string): Promise<Customer> {
     let response: Customer;
     try {
       const customer = this.create({ company, ...data });
       response = await this.save(customer);
     } catch (error) {
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return await response;
   }
   async updateCustomer(
     id: string,
-    data: CustomerDataDTO | CustomerStatusDTO | AccountignCatalogIntegrationDTO,
+    data:
+      | Partial<CustomerDataDTO>
+      | Partial<CustomerStatusDTO>
+      | Partial<ProviderStatusDTO>
+      | Partial<AccountignCatalogIntegrationDTO>,
     company: Company,
+    type: string,
   ): Promise<any> {
     try {
       const customer = this.update({ id, company }, data);
       return customer;
     } catch (error) {
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
   }
 
-  async deleteCustomer(company: Company, id: string): Promise<boolean> {
-    const customer = await this.getCustomer(id, company);
+  async deleteCustomer(company: Company, id: string, type: string): Promise<boolean> {
+    const customer = await this.getCustomer(id, company, type);
 
     try {
       await this.delete(customer.id);
     } catch (error) {
       console.error(error);
-      logDatabaseError(reponame, error);
+      logDatabaseError(type, error);
     }
     return true;
   }
