@@ -85,7 +85,7 @@ describe('SERVICES MODULE', () => {
 
   describe('POST / rejects when any required value is not being sent', () => {
     const { name, cost, sellingType, description, incIva, incRenta } = newServicePayload;
-    it('omiting name', () => {
+    it('omitting name', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -98,7 +98,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting cost', () => {
+    it('omitting cost', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -111,7 +111,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting sellingType', () => {
+    it('omitting sellingType', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -124,7 +124,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting description', () => {
+    it('omitting description', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -137,7 +137,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting incIva', () => {
+    it('omitting incIva', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -150,7 +150,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting incRenta', () => {
+    it('omitting incRenta', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -212,7 +212,7 @@ describe('SERVICES MODULE', () => {
       });
   });
 
-  it('PUT /id rejects when no token is sent', () => {
+  it('PUT /:id rejects when no token is sent', () => {
     return request(app)
       .put(`${path}/${id}`)
       .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -293,7 +293,7 @@ describe('SERVICES MODULE', () => {
 
   describe('PUT /:id rejects when any required value is not being sent', () => {
     const { name, cost, sellingType, description, incIva, incRenta } = editServicePayload;
-    it('omiting name', () => {
+    it('omitting name', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -306,7 +306,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting cost', () => {
+    it('omitting cost', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -319,7 +319,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting sellingType', () => {
+    it('omitting sellingType', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -332,7 +332,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting description', () => {
+    it('omitting description', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -345,7 +345,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting incIva', () => {
+    it('omitting incIva', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -358,7 +358,7 @@ describe('SERVICES MODULE', () => {
         });
     });
 
-    it('omiting incRenta', () => {
+    it('omitting incRenta', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
