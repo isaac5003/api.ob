@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentLayoutPositionSmallDTO } from './invoice-document-layout-position-small.dto';
 
 export class InvoiceDocumentLayoutPositionSmallExtended extends InvoiceDocumentLayoutPositionSmallDTO {

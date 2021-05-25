@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../companies/entities/Company.entity';
 
-import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { FilterDTO } from '../_dtos/filter.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';

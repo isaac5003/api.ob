@@ -1,8 +1,8 @@
 import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { SellingType } from '../entities/SellingType.entity';
-import { AccountingCatalog } from 'src/entries/entities/AccountingCatalog.entity';
-import { validationMessage } from 'src/_tools';
+import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
+import { validationMessage } from '../../_tools';
 
 export class serviceDataDTO {
   @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })

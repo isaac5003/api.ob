@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
-import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
-import { validationMessage } from 'src/_tools';
+import { AccountignCatalogIntegrationDTO } from '../../../customers/dtos/customer-integration.dto';
+import { validationMessage } from '../../../_tools';
 import { AccountingCatalog } from '../../entities/AccountingCatalog.entity';
 
 export class SettingIntegrationsDTO extends AccountignCatalogIntegrationDTO {

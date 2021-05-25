@@ -1,6 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentLayoutPositionFullDTO } from './invoice-document-layout-position-full.dto';
 import { InvoiceDocumentLayoutHeaderDTO } from './invoice-document-layout-header.dto';
 import { InvoiceDocumentDetailLayoutDTO } from './invoice-document-layout-details.dto';

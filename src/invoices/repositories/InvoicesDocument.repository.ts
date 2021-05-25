@@ -1,5 +1,5 @@
-import { Company } from 'src/companies/entities/Company.entity';
-import { logDatabaseError } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';

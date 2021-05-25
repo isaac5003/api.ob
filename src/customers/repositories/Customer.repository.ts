@@ -4,8 +4,8 @@ import { CustomerFilterDTO } from '../dtos/customer-filter.dto';
 import { Customer } from '../entities/Customer.entity';
 import { CustomerStatusDTO } from '../dtos/customer-status.dto';
 import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dto';
-import { Company } from 'src/companies/entities/Company.entity';
-import { logDatabaseError } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { logDatabaseError } from '../../_tools';
 import { ProviderStatusDTO } from 'src/providers/dtos/provider-updateStatus.dto';
 
 @EntityRepository(Customer)

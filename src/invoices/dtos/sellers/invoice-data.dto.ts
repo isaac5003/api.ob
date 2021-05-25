@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { InvoicesZone } from 'src/invoices/entities/InvoicesZone.entity';
-import { validationMessage } from 'src/_tools';
+import { InvoicesZone } from '../../../invoices/entities/InvoicesZone.entity';
+import { validationMessage } from '../../../_tools';
 
 export class InvoiceSellerDataDTO {
   @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })

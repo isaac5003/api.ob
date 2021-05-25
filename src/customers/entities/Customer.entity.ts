@@ -14,7 +14,7 @@ import { CustomerType } from './CustomerType.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
 export class Customer extends BaseEntity {

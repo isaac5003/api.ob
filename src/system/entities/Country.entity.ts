@@ -10,7 +10,7 @@ import {
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { State } from './State.entity';
 import { User } from '../../auth/entities/User.entity';
-import { Branch } from 'src/companies/entities/Branch.entity';
+import { Branch } from '../../companies/entities/Branch.entity';
 
 @Entity()
 export class Country extends BaseEntity {

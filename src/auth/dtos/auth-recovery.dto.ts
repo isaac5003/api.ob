@@ -1,5 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 
 export class UserRecoveryDTO {
   @IsNotEmpty({ message: validationMessage('email', 'IsNotEmpty') })

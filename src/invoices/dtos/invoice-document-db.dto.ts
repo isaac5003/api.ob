@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional } from 'class-validator';
-import { Company } from 'src/companies/entities/Company.entity';
-import { validationMessage } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { validationMessage } from '../../_tools';
 
 export class InvoiceDocumentDBDTO {
   @IsOptional()

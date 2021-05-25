@@ -1,8 +1,8 @@
 import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { City } from 'src/system/entities/City.entity';
-import { Country } from 'src/system/entities/Country.entity';
-import { State } from 'src/system/entities/State.entity';
-import { validationMessage } from 'src/_tools';
+import { City } from '../../system/entities/City.entity';
+import { Country } from '../../system/entities/Country.entity';
+import { State } from '../../system/entities/State.entity';
+import { validationMessage } from '../../_tools';
 
 export class BranchDataDTO {
   @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })

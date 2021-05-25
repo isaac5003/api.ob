@@ -1,4 +1,4 @@
-import { logDatabaseError } from 'src/_tools';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDetailDataDTO } from '../dtos/invoice-details-dat.dto';
 import { InvoiceDetail } from '../entities/InvoiceDetail.entity';

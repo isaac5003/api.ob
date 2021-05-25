@@ -1,5 +1,5 @@
 import { IsISO8601, IsNotEmpty, IsUUID } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 
 export class SeriesDTO {
   @IsNotEmpty({

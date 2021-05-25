@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { ResponseListDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO } from '../_dtos/responseList.dto';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
 import { State } from './entities/State.entity';

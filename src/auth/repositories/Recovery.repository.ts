@@ -1,4 +1,4 @@
-import { logDatabaseError } from 'src/_tools';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { Recovery } from '../entities/Recovery.entity';
 

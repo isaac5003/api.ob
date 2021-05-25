@@ -8,8 +8,8 @@ import { CustomerTypeRepository } from './repositories/CustomerType.repository';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
 import { CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
-import { AuthModule } from 'src/auth/auth.module';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [

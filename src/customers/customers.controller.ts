@@ -12,15 +12,15 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { CustomersService } from './customers.service';
 import { CustomerDataDTO } from './dtos/customer-data.dto';
 import { CustomerFilterDTO } from './dtos/customer-filter.dto';
 import { Customer } from './entities/Customer.entity';
 import { CustomerStatusDTO } from './dtos/customer-status.dto';
 import { AccountignCatalogIntegrationDTO } from './dtos/customer-integration.dto';
-import { GetAuthData } from 'src/auth/get-auth-data.decorator';
-import { Company } from 'src/companies/entities/Company.entity';
+import { GetAuthData } from '../auth/get-auth-data.decorator';
+import { Company } from '../companies/entities/Company.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { CustomerBranch } from './entities/CustomerBranch.entity';
 import { CustomerType } from './entities/CustomerType.entity';

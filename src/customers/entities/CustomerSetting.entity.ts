@@ -1,4 +1,4 @@
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 import { BaseEntity, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 

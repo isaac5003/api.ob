@@ -1,9 +1,9 @@
-import { Access } from 'src/auth/entities/Access.entity';
-import { Profile } from 'src/auth/entities/Profile.entity';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
-import { City } from 'src/system/entities/City.entity';
-import { Country } from 'src/system/entities/Country.entity';
-import { State } from 'src/system/entities/State.entity';
+import { Access } from '../../auth/entities/Access.entity';
+import { Profile } from '../../auth/entities/Profile.entity';
+import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { City } from '../../system/entities/City.entity';
+import { Country } from '../../system/entities/Country.entity';
+import { State } from '../../system/entities/State.entity';
 import {
   BaseEntity,
   Column,

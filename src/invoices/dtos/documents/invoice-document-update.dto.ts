@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsUUID } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentDataDTO } from './invoice-document-data.dto';
 
 export class InvoiceDocumentUpdateDTO extends InvoiceDocumentDataDTO {

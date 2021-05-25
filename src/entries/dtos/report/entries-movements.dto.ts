@@ -1,5 +1,5 @@
 import { IsISO8601, IsNotEmpty } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 import { EndDateDTO } from './entries-enddate.dto';
 
 export class AccountsMovementsDTO extends EndDateDTO {

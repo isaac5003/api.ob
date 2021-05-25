@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { AccountingEntryType } from './AccountingEntryType.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
 export class AccountingEntry extends BaseEntity {

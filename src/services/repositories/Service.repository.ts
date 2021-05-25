@@ -1,4 +1,4 @@
-import { Company } from 'src/companies/entities/Company.entity';
+import { Company } from '../../companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { serviceDataDTO } from '../dtos/service-data.dto';
 import { ServiceFilterDTO } from '../dtos/service-filter.dto';

@@ -1,5 +1,5 @@
-import { Company } from 'src/companies/entities/Company.entity';
-import { logDatabaseError } from 'src/_tools';
+import { Company } from '../../companies/entities/Company.entity';
+import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.dto';
 import { SettingIntegrationsDTO } from '../dtos/settings/entries-setting-integration.dto';

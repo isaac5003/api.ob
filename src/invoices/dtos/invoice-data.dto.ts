@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 import { InvoiceDetailDTO } from './invoice-details.dto';
 import { InvoiceHeaderCreateDTO } from './invoice-header-create.dto';
 import { InvoiceUpdateHeaderDTO } from './invoice-header-update.dto';

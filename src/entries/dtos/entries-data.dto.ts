@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../_tools';
 import { EntryDetailsDTO } from './entry-details/entries-details-create.dto';
 import { EntryHeaderDataDTO } from './entry-header/entries-entry-header-create.dto';
 import { EntryHeaderCreateDTO } from './entry-header/entries-header-create.dto';

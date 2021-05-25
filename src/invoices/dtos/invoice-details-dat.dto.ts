@@ -1,7 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
-import { SellingType } from 'src/services/entities/SellingType.entity';
-import { Service } from 'src/services/entities/Service.entity';
-import { validationMessage } from 'src/_tools';
+import { SellingType } from '../../services/entities/SellingType.entity';
+import { Service } from '../../services/entities/Service.entity';
+import { validationMessage } from '../../_tools';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoiceDetailDTO } from './invoice-details.dto';
 

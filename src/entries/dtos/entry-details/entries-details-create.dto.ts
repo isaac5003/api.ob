@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsUUID } from 'class-validator';
-import { validationMessage } from 'src/_tools';
+import { validationMessage } from '../../../_tools';
 
 export class EntryDetailsDTO {
   @IsNotEmpty({ message: validationMessage('accountingCatalog', 'IsNotEmpty') })
