@@ -1,8 +1,6 @@
 import { ResponseMinimalDTO, ResponseUserDTO } from '../_dtos/responseList.dto';
 import { Body, Controller, Delete, Get, Post, Put, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Branch } from '../../src/companies/entities/Branch.entity';
-import { Company } from '../../src/companies/entities/Company.entity';
 import { AuthService } from './auth.service';
 import { UserRecoveryDTO } from './dtos/auth-recovery.dto';
 import { updatePassWordDTO } from './dtos/auth-update-password.dto';
@@ -12,6 +10,8 @@ import { WorkSpaceDTO } from './dtos/workspace-data.dto';
 import { Profile } from './entities/Profile.entity';
 import { User } from './entities/User.entity';
 import { GetAuthData } from './get-auth-data.decorator';
+import { Branch } from 'src/companies/entities/Branch.entity';
+import { Company } from 'src/companies/entities/Company.entity';
 
 @Controller('auth')
 export class AuthController {
