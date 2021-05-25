@@ -29,3 +29,7 @@ export class ResponseMinimalDTO {
   message?: string;
   nextSerie?: number;
 }
+
+export class ResponseUserDTO {
+  user: any;
+}
