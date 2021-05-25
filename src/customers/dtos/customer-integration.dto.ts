@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsUUID } from 'class-validator';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../_tools';
 

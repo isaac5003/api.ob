@@ -7,4 +7,13 @@ const newServicePayload = {
   incRenta: false,
 };
 
-export { newServicePayload };
+const editServicePayload = {
+  name: 'prueba modificada',
+  cost: 20.81,
+  sellingType: 2,
+  description: 'description modificada',
+  incIva: false,
+  incRenta: true,
+};
+
+export { newServicePayload, editServicePayload };
