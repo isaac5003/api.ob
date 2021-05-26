@@ -11,7 +11,9 @@ import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
+import { SellingType } from './entities/SellingType.entity';
 import { Service } from './entities/Service.entity';
+import { SellingTypeRepository } from './repositories/SellingType.repository';
 import { ServiceRepository } from './repositories/Service.repository';
 import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
 
@@ -24,10 +26,16 @@ export class ServicesService {
     @InjectRepository(ServiceSettingRepository)
     private serviceSettingRepository: ServiceSettingRepository,
 
+    @InjectRepository(SellingTypeRepository)
+    private sellingTypeRepository: SellingTypeRepository,
+
     @InjectRepository(AccountingCatalogRepository)
     private accountingCatalogRepository: AccountingCatalogRepository,
   ) {}
 
+  async getSellyingTypes(): Promise<SellingType[]> {
+    return this.sellingTypeRepository.getSellyingTypes();
+  }
   async getServices(company: Company, filter: ServiceFilterDTO): Promise<ResponseListDTO<Service>> {
     const service = await this.serviceRepository.getFilteredServices(company, filter);
     const services = service.map((s) => {
