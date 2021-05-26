@@ -66,12 +66,7 @@ export class CustomersService {
           };
         })
         .map((cu) => {
-          delete cu.customerBranches,
-            delete cu.shortName,
-            delete cu.customerTaxerType,
-            delete cu.customerTypeNatural,
-            delete cu.isActiveProvider;
-          delete cu.isCustomer, delete cu.isProvider, delete cu.isActiveCustomer;
+          delete cu.customerBranches, delete cu.shortName, delete cu.isCustomer, delete cu.isProvider;
           return {
             ...cu,
           };
@@ -86,12 +81,8 @@ export class CustomersService {
           };
         })
         .map((cu) => {
-          delete cu.customerBranches,
-            delete cu.shortName,
-            delete cu.customerTaxerType,
-            delete cu.customerTypeNatural,
-            delete cu.isActiveProvider;
-          delete cu.isCustomer, delete cu.isProvider, delete cu.isActiveCustomer;
+          delete cu.customerBranches, delete cu.shortName;
+
           return {
             ...cu,
           };
@@ -150,9 +141,8 @@ export class CustomersService {
       if (!customer.isProvider) {
         throw new BadRequestException('El proveedor seleccionado no existe.');
       }
-
-      return customer;
     }
+    return customer;
   }
 
   async getCustomerIntegration(id: string, company: Company, type = 'cliente'): Promise<ResponseMinimalDTO> {

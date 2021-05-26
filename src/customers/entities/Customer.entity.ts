@@ -51,7 +51,7 @@ export class Customer extends BaseEntity {
   @Column({ default: true })
   isActiveProvider: boolean;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
