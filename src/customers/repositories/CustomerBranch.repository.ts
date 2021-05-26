@@ -3,13 +3,22 @@ import { EntityRepository, Repository } from 'typeorm';
 import { BranchDataDTO } from '../dtos/customer-branch.dto';
 import { CustomerBranch } from '../entities/CustomerBranch.entity';
 
-const reponame = 'sucursal';
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
   async getCustomerBranches(id: string, type: string): Promise<CustomerBranch[]> {
     let branches: CustomerBranch[];
     try {
-      branches = await this.find({ where: { customer: id } });
+      branches = await this.find({
+        where: { customer: id },
+        join: {
+          alias: 'branch',
+          leftJoinAndSelect: {
+            counttry: 'branch.country',
+            state: 'branch.state',
+            city: 'branch.city',
+          },
+        },
+      });
     } catch (error) {
       logDatabaseError(type, error);
     }
@@ -28,7 +37,7 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
     return await response;
   }
 
-  async updateBranch(id: string, data: BranchDataDTO, type: string): Promise<any> {
+  async updateBranch(id: string, data: BranchDataDTO, type): Promise<any> {
     return this.update({ id }, data);
   }
 

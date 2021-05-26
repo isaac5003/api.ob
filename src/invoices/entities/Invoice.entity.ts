@@ -86,7 +86,7 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true })
   ventaTotalText: string;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })

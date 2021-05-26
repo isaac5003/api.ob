@@ -36,7 +36,6 @@ export class InvoiceRepository extends Repository<Invoice> {
 
     try {
       const query = this.createQueryBuilder('i')
-
         .leftJoinAndSelect('i.documentType', 'dt')
         .leftJoinAndSelect('i.status', 'st')
         .leftJoin('i.customer', 'cu')

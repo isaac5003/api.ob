@@ -28,10 +28,7 @@ export class ServiceRepository extends Repository<Service> {
     const { limit, page, search, active, prop, order, type, fromAmount, toAmount } = filter;
 
     try {
-      const query = this.createQueryBuilder('s')
-        .select(['s.id', 's.name', 's.description', 's.cost', 's.active', 's.incIva', 's.incRenta', 'st.id', 'st.name'])
-        .where({ company })
-        .leftJoinAndSelect('s.sellingType', 'st');
+      const query = this.createQueryBuilder('s').where({ company }).leftJoinAndSelect('s.sellingType', 'st');
 
       // filter by search value
       if (search) {
