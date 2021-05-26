@@ -12,7 +12,12 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
+import {
+  ResponseListDTO,
+  ResponseMinimalDTO,
+  ResponseSingleDTO,
+  ServiceReportGeneralDTO,
+} from '../_dtos/responseList.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { Service } from './entities/Service.entity';
 import { ServicesService } from './services.service';
@@ -22,7 +27,6 @@ import { Company } from '../companies/entities/Company.entity';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
-import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 import { SellingType } from './entities/SellingType.entity';
@@ -45,7 +49,7 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
     @Query() filter: ServiceFilterDTO,
   ): Promise<ServiceReportGeneralDTO> {
-    return this.service.getReportGeneral(company, filter);
+    return await this.service.getReportGeneral(company, filter);
   }
 
   // FOR SETTINGS

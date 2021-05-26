@@ -1,3 +1,5 @@
+import { Company } from 'src/companies/entities/Company.entity';
+
 export class ResponseListDTO<T> {
   count: number;
   data: T[];
@@ -32,4 +34,9 @@ export class ResponseMinimalDTO {
 
 export class ResponseUserDTO {
   user: any;
+}
+
+export class ServiceReportGeneralDTO {
+  company: Partial<Company>;
+  services: any[];
 }

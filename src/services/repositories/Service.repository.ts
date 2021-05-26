@@ -45,7 +45,7 @@ export class ServiceRepository extends Repository<Service> {
       // filter by range of amounts
       if (fromAmount && toAmount) {
         query.andWhere('s.cost >= :fromAmount', { fromAmount });
-        query.andWhere('s.cost >= :toAmount', { toAmount });
+        query.andWhere('s.cost <= :toAmount', { toAmount });
       }
 
       // applies pagination
