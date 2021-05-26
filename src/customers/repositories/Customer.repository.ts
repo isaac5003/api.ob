@@ -16,7 +16,6 @@ export class CustomerRepository extends Repository<Customer> {
       const query = this.createQueryBuilder('customer')
         .leftJoinAndSelect('customer.customerType', 'customerType')
         .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural')
-
         .where({ company });
 
       switch (type) {
@@ -69,6 +68,9 @@ export class CustomerRepository extends Repository<Customer> {
       ctt: 'c.customerTaxerType',
       ctn: 'c.customerTypeNatural',
       cb: 'c.customerBranches',
+      bc: 'cb.country',
+      bs: 'cb.state',
+      bct: 'cb.city',
     };
 
     for (const table of joins) {
