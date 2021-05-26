@@ -25,11 +25,19 @@ import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
+import { SellingType } from './entities/SellingType.entity';
 
 @Controller('services')
 @UseGuards(AuthGuard())
 export class ServicesController {
   constructor(private service: ServicesService) {}
+  // FOR SERVICES /
+  @Get('/selling-types')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getSellingTypes(): Promise<ResponseListDTO<SellingType>> {
+    const sellingType = await this.service.getSellyingTypes();
+    return new ResponseListDTO(plainToClass(SellingType, sellingType));
+  }
 
   // FOR REPORTS
   @Get('/report/general')
