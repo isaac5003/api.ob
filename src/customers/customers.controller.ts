@@ -26,6 +26,7 @@ import { CustomerBranch } from './entities/CustomerBranch.entity';
 import { CustomerType } from './entities/CustomerType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
+import { IsProviderDTO } from './dtos/customers-isprovider.dto';
 @Controller('customers')
 @UseGuards(AuthGuard())
 export class CustomersController {
@@ -156,10 +157,11 @@ export class CustomersController {
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
+    @Body() isProvider: IsProviderDTO,
     @Body()
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.createCustomer(company, data);
+    return this.customersService.createCustomer(company, { ...data, isProvider });
   }
 }
