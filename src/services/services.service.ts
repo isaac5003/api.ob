@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
-import { ResponseMinimalDTO } from '../_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO } from '../_dtos/responseList.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
@@ -27,8 +28,15 @@ export class ServicesService {
     private accountingCatalogRepository: AccountingCatalogRepository,
   ) {}
 
-  async getServices(company: Company, filter: ServiceFilterDTO): Promise<Service[]> {
-    return this.serviceRepository.getFilteredServices(company, filter);
+  async getServices(company: Company, filter: ServiceFilterDTO): Promise<ResponseListDTO<Service>> {
+    const service = await this.serviceRepository.getFilteredServices(company, filter);
+    const services = service.map((s) => {
+      delete s.createdAt;
+      return {
+        ...s,
+      };
+    });
+    return new ResponseListDTO(plainToClass(Service, services));
   }
 
   async getService(company: Company, id: string): Promise<Service> {

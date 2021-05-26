@@ -31,7 +31,7 @@ export class Service extends BaseEntity {
   @Column({ default: true })
   active: boolean;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
