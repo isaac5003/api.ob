@@ -13,7 +13,10 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     const { limit, page, search, active } = filter;
 
     try {
-      const query = this.createQueryBuilder('s').where({ company }).orderBy('s.createdAt', 'DESC');
+      const query = this.createQueryBuilder('s')
+        .leftJoinAndSelect('s.invoicesZone', 'sz')
+        .where({ company })
+        .orderBy('s.createdAt', 'DESC');
 
       // filter by status
       if (active || active == false) {
