@@ -1,4 +1,5 @@
 FROM node:lts-slim
+RUN apk --no-cache add --virtual builds-deps build-base python
 WORKDIR /usr/app
 COPY ./package.json ./package.json
 COPY ./nest-cli.json ./nest-cli.json
