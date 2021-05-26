@@ -3,13 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
-import { ResponseListDTO, ResponseMinimalDTO } from '../_dtos/responseList.dto';
+import { ResponseListDTO, ResponseMinimalDTO, ServiceReportGeneralDTO } from '../_dtos/responseList.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
 import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
-import { ServiceReportGeneralDTO } from './dtos/service-report-general.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
 import { SellingType } from './entities/SellingType.entity';
 import { Service } from './entities/Service.entity';
@@ -169,11 +168,16 @@ export class ServicesService {
   async getReportGeneral(company: Company, filter): Promise<ServiceReportGeneralDTO> {
     const { name, nit, nrc } = company;
 
+    let index = 1;
     const services = await this.serviceRepository.getFilteredServices(company, filter);
-
     return {
       company: { name, nit, nrc },
-      services,
+      services: services.map((s) => {
+        return {
+          index: index++,
+          ...s,
+        };
+      }),
     };
   }
 
