@@ -16,4 +16,17 @@ export class SellingTypeRepository extends Repository<SellingType> {
       logDatabaseError(reponame, error);
     }
   }
+
+  async getSellingType(id: number): Promise<SellingType> {
+    let sellingType: SellingType;
+
+    try {
+      sellingType = await this.findOneOrFail({ id });
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return sellingType;
+  }
 }
