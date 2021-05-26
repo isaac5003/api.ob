@@ -19,13 +19,13 @@ import { CustomersService } from 'src/customers/customers.service';
 import { CustomerDataDTO } from 'src/customers/dtos/customer-data.dto';
 import { CustomerFilterDTO } from 'src/customers/dtos/customer-filter.dto';
 import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
-import { CustomerStatusDTO } from 'src/customers/dtos/customer-status.dto';
 import { Customer } from 'src/customers/entities/Customer.entity';
 import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { CustomerTaxerType } from 'src/customers/entities/CustomerTaxerType.entity';
 import { CustomerType } from 'src/customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
+import { IsCustomerDTO } from './dtos/provider-isCustomer.dto';
 import { ProviderStatusDTO } from './dtos/provider-updateStatus.dto';
 
 @Controller('providers')
@@ -144,10 +144,12 @@ export class ProvidersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
     @Body()
+    isCustomer: IsCustomerDTO,
+    @Body()
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.createCustomer(company, data, 'proveedor');
+    return this.customersService.createCustomer(company, { ...data, isCustomer }, 'proveedor');
   }
 
   @Delete('/:id')

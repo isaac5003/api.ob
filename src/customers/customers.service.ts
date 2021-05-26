@@ -226,6 +226,7 @@ export class CustomersService {
 
   async createCustomer(company: Company, data, type = 'cliente'): Promise<ResponseMinimalDTO> {
     let message = 'Se ha creado el cliente correctamente';
+
     if (type == 'proveedor') {
       data = {
         ...data,
@@ -236,7 +237,13 @@ export class CustomersService {
       };
 
       message = 'Se ha creado el proveedor correctamente';
+    } else {
+      data = {
+        ...data,
+        isCustomer: true,
+      };
     }
+
     const customer = await this.customerRepository.createCustomer(company, data, type);
     const { id } = customer;
     const branch = {

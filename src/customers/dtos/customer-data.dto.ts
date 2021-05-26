@@ -17,16 +17,6 @@ export class CustomerDataDTO {
   shortName: string;
 
   @IsOptional()
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
-  @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
-  isProvider: boolean;
-
-  @IsNotEmpty({ message: validationMessage('isCustomer', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
-  @IsBoolean({ message: validationMessage('isCustomer', 'IsBoolean') })
-  isCustomer: boolean;
-
-  @IsOptional()
   @IsString({ message: validationMessage('dui', 'IsString') })
   dui: string;
 
