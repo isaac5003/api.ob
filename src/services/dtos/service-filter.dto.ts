@@ -16,9 +16,4 @@ export class ServiceFilterDTO extends FilterDTO {
   @IsOptional()
   @Transform(({ value }) => parseFloat(value))
   toAmount: number;
-
-  @IsOptional()
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
-  @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
-  active: boolean;
 }
