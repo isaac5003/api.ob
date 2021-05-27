@@ -38,7 +38,7 @@ export class ServiceRepository extends Repository<Service> {
       }
 
       // filter by status
-      if (active) {
+      if (active == true || active == false) {
         query.andWhere('s.active = :active', { active });
       }
 
@@ -159,7 +159,7 @@ export class ServiceRepository extends Repository<Service> {
   async deleteService(company: Company, id: string): Promise<boolean> {
     const service = await this.getService(company, id);
     try {
-      await this.delete(service);
+      await this.delete(service.id);
     } catch (error) {
       logDatabaseError(reponame, error);
     }

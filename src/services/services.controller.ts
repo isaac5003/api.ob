@@ -43,15 +43,6 @@ export class ServicesController {
     return new ResponseListDTO(plainToClass(SellingType, sellingType));
   }
 
-  // FOR REPORTS
-  @Get('/report/general')
-  async reportGeneral(
-    @GetAuthData('company') company: Company,
-    @Query() filter: ServiceFilterDTO,
-  ): Promise<ServiceReportGeneralDTO> {
-    return await this.service.getReportGeneral(company, filter);
-  }
-
   // FOR SETTINGS
   @Get('/setting/integrations')
   async settingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
@@ -138,6 +129,16 @@ export class ServicesController {
     @Body() data: serviceStatusDTO,
   ): Promise<ResponseMinimalDTO> {
     return this.service.updateServiceStatusIntegration(company, id, data);
+  }
+
+  // FOR REPORTS
+  @Get('/report/general')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async reportGeneral(
+    @Query() filter: ServiceFilterDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ServiceReportGeneralDTO> {
+    return await this.service.getReportGeneral(company, filter);
   }
 
   // FOR SERVICES /
