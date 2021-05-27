@@ -10,6 +10,4 @@ export class InvoiceDetailDataDTO extends InvoiceDetailDTO {
   invoice: Invoice;
   @IsNotEmpty({ message: validationMessage('sellingType', 'IsNotEmpty') })
   sellingType: SellingType;
-  @IsNotEmpty({ message: validationMessage('service', 'IsNotEmpty') })
-  service: Service;
 }
