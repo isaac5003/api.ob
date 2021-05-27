@@ -35,8 +35,26 @@ export class ServicesService {
   async getSellyingTypes(): Promise<SellingType[]> {
     return this.sellingTypeRepository.getSellyingTypes();
   }
+
+  async getReportGeneral(company: Company, filter: ServiceFilterDTO): Promise<ServiceReportGeneralDTO> {
+    const { name, nit, nrc } = company;
+
+    let index = 1;
+    const services = await this.serviceRepository.getFilteredServices(company, filter);
+    return {
+      company: { name, nit, nrc },
+      services: services.map((s) => {
+        return {
+          index: index++,
+          ...s,
+        };
+      }),
+    };
+  }
+
   async getServices(company: Company, filter: ServiceFilterDTO): Promise<ResponseListDTO<Service>> {
     const service = await this.serviceRepository.getFilteredServices(company, filter);
+
     const services = service.map((s) => {
       delete s.createdAt;
       return {
@@ -162,22 +180,6 @@ export class ServicesService {
     const result = await this.serviceRepository.deleteService(company, id);
     return {
       message: result ? 'Se ha eliminado el servicio correctamente' : 'No se ha podido eliminar el servicio',
-    };
-  }
-
-  async getReportGeneral(company: Company, filter): Promise<ServiceReportGeneralDTO> {
-    const { name, nit, nrc } = company;
-
-    let index = 1;
-    const services = await this.serviceRepository.getFilteredServices(company, filter);
-    return {
-      company: { name, nit, nrc },
-      services: services.map((s) => {
-        return {
-          index: index++,
-          ...s,
-        };
-      }),
     };
   }
 
