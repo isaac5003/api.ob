@@ -13,7 +13,7 @@ export class InvoiceDataDTO {
   header: InvoiceHeaderCreateDTO | InvoiceUpdateHeaderDTO;
 
   @IsNotEmpty({ message: validationMessage('details', 'IsNotEmpty') })
-  @ValidateNested()
+  @ValidateNested({ each: true })
   @Type(() => InvoiceDetailDTO)
   details: InvoiceDetailDTO[];
 }

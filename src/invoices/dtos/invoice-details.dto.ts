@@ -1,11 +1,12 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, IsNumber, IsBoolean } from 'class-validator';
+import { Service } from 'src/services/entities/Service.entity';
 import { validationMessage } from '../../_tools';
 
 export class InvoiceDetailDTO {
+  @IsNotEmpty({ message: validationMessage('quantity', 'IsNotEmpty') })
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('quantity', 'IsNumber') })
-  @IsNotEmpty({ message: validationMessage('quantity', 'IsNotEmpty') })
   quantity: number;
 
   @Transform(({ value }) => parseFloat(value))
@@ -29,5 +30,5 @@ export class InvoiceDetailDTO {
 
   @IsNotEmpty({ message: validationMessage('service', 'IsNotEmpty') })
   @IsString({ message: validationMessage('service', 'IsString') })
-  selectedService: string;
+  service: Service;
 }

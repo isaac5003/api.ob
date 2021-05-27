@@ -32,9 +32,9 @@ export class InvoiceHeaderDTO {
   iva: number;
 
   @Transform(({ value }) => parseFloat(value))
-  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('subTotal', 'IsNumber') })
-  @IsNotEmpty({ message: validationMessage('subTotal', 'IsNotEmpty') })
-  subTotal: number;
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('subtotal', 'IsNumber') })
+  @IsNotEmpty({ message: validationMessage('subtotal', 'IsNotEmpty') })
+  subtotal: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('ivaRetenido', 'IsNumber') })

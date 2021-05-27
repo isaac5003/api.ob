@@ -456,36 +456,43 @@ export class InvoicesService {
   async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoice>> {
     const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
 
-    const details = invoiceAll.invoiceDetails.map((d) => {
-      const { id, name } = d.service;
-      delete d.service;
-      return {
-        ...d,
-        service: { id, name },
-      };
-    });
-
-    delete invoiceAll.invoiceDetails;
-    delete invoiceAll.invoicesPaymentsCondition.active;
-    delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-    delete invoiceAll.invoicesSeller.active;
-    delete invoiceAll.invoicesZone.active;
+    let details = [];
+    if (invoiceAll.status.id != 4) {
+      details = invoiceAll.invoiceDetails.map((d) => {
+        const { id, name } = d.service;
+        delete d.service;
+        return {
+          ...d,
+          service: { id, name },
+        };
+      });
+      delete invoiceAll.invoiceDetails;
+      delete invoiceAll.invoicesPaymentsCondition.active;
+      delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+      delete invoiceAll.invoicesSeller.active;
+      delete invoiceAll.invoicesZone.active;
+    }
 
     const invoice = {
       ...invoiceAll,
       details,
-      customer: {
-        id: invoiceAll.customer.id,
-        name: invoiceAll.customer.name,
-      },
-      customerBranch: {
-        id: invoiceAll.customerBranch.id,
-        name: invoiceAll.customerBranch.name,
-      },
+      customer: invoiceAll.customer
+        ? {
+            id: invoiceAll.customer.id,
+            name: invoiceAll.customer.name,
+          }
+        : null,
+      customerBranch: invoiceAll.customerBranch
+        ? {
+            id: invoiceAll.customerBranch.id,
+            name: invoiceAll.customerBranch.name,
+          }
+        : null,
     };
 
     delete invoiceAll.customerBranch;
     delete invoiceAll.customer;
+
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
 
@@ -535,7 +542,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.selectedService);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -653,7 +660,7 @@ export class InvoicesService {
       customerGiro: customer.giro,
       sum: data.header.sum,
       iva: data.header.iva,
-      subtotal: data.header.subTotal,
+      subtotal: data.header.subtotal,
       ivaRetenido: data.header.ivaRetenido,
       ventasExentas: data.header.ventasExentas,
       ventasNoSujetas: data.header.ventasNoSujetas,
@@ -677,7 +684,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.selectedService);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,

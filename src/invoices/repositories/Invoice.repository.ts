@@ -199,7 +199,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       customerGiro: customer.giro,
       sum: data.sum,
       iva: data.iva,
-      subtotal: data.subTotal,
+      subtotal: data.subtotal,
       ivaRetenido: data.ivaRetenido,
       ventasExentas: data.ventasExentas,
       ventasNoSujetas: data.ventasNoSujetas,
