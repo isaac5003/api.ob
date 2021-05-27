@@ -130,9 +130,11 @@ export class ServiceRepository extends Repository<Service> {
 
   async updateServicesStatus(company: Company, data: UpdateStatusDTO): Promise<any> {
     try {
-      const service = await this.update(data.ids, { active: data.status });
+      const service = await this.update(data.ids, data);
       return service;
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(reponame, error);
     }
   }

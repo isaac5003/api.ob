@@ -1,4 +1,4 @@
-import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsDecimal, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { SellingType } from '../entities/SellingType.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
@@ -14,7 +14,8 @@ export class serviceDataDTO {
   cost: number;
 
   @IsNotEmpty({ message: validationMessage('sellingType', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('sellingType', 'IsString') })
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('sellingType', 'IsNumber') })
   sellingType: SellingType;
 
   @IsNotEmpty({ message: validationMessage('description', 'IsNotEmpty') })
@@ -22,19 +23,16 @@ export class serviceDataDTO {
   description: string;
 
   @IsNotEmpty({ message: validationMessage('incIva', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('incIva', 'IsBoolean') })
   incIva: boolean;
 
   @IsNotEmpty({ message: validationMessage('incRenta', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({
     message: validationMessage('incRenta', 'IsBoolean'),
   })
   incRenta: boolean;
 
   @IsOptional()
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : null))
   @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
   active: boolean;
 
