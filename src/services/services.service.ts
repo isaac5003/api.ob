@@ -118,7 +118,7 @@ export class ServicesService {
 
     const servicesUpdated = await this.serviceRepository.updateServicesStatus(company, {
       ids: servicesToUpdate.map((s) => s.id),
-      status: data.status,
+      active: data.active,
     });
     const updatedServices = [];
     const notUpdatedServices = [];
