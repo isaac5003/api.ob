@@ -16,12 +16,10 @@ export class EntryHeaderDataDTO {
   date: string;
 
   @IsNotEmpty({ message: validationMessage('squared', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('squared', 'IsBoolean') })
   squared: boolean;
 
   @IsNotEmpty({ message: validationMessage('accounted', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('accounted', 'IsBoolean') })
   accounted: boolean;
 }

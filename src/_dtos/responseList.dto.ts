@@ -1,4 +1,5 @@
 import { Company } from 'src/companies/entities/Company.entity';
+import { AccountingEntry } from 'src/entries/entities/AccountingEntry.entity';
 
 export class ResponseListDTO<T> {
   count: number;
@@ -44,4 +45,9 @@ export class ServiceReportGeneralDTO {
 export class ReportsDTO {
   company: Partial<Company>;
   invoices: any[];
+}
+
+export class ReportsEntriesDTO {
+  company: Partial<Company>;
+  entry: AccountingEntry;
 }

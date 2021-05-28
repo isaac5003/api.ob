@@ -1,6 +1,7 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsNumber, IsISO8601 } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsISO8601, IsOptional, IsInt } from 'class-validator';
 import { validationMessage } from '../../_tools';
+import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 
 export class InvoiceHeaderDTO {
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
@@ -55,4 +56,9 @@ export class InvoiceHeaderDTO {
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('ventaTotal', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('ventaTotal', 'IsNotEmpty') })
   ventaTotal: number;
+
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('status', 'IsInt') })
+  status: InvoicesStatus;
 }

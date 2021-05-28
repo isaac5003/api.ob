@@ -10,11 +10,14 @@ export class InvoiceReserveDataDTO {
 
   @IsNotEmpty({ message: validationMessage('sequenceForm', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('documentType', 'IsInt') })
-  sequenceForm: number;
+  @IsInt({ message: validationMessage('sequenceForm', 'IsInt') })
+  sequenceFrom: number;
+
+  @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
+  authorization: string;
 
   @IsNotEmpty({ message: validationMessage('sequenceTo', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('documentType', 'IsInt') })
+  @IsInt({ message: validationMessage('sequenceTo', 'IsInt') })
   sequenceTo: number;
 }

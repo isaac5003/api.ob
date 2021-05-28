@@ -36,6 +36,7 @@ import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { format } from 'date-fns';
+import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -244,8 +245,8 @@ export class InvoicesService {
     };
   }
 
-  async getDocuments(company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
-    const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+  async getDocuments(company: Company, filter: DocumentFilterDTO): Promise<ResponseListDTO<InvoicesDocument>> {
+    const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company, filter);
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
     const documents = documentTypes.map((dt) => {
@@ -408,7 +409,8 @@ export class InvoicesService {
         .map((d) => {
           return {
             customer: d.customerName,
-            date: d.invoiceDate.split('-').reverse().join('/'),
+
+            date: d.invoiceDate ? format(new Date(d.invoiceDate), 'dd/MM/yyyy') : null,
             documentNumber: `${d.authorization} - ${d.sequence}`,
             status: { id: d.status.id, name: d.status.name },
             vGravada: d.subtotal,
@@ -442,7 +444,7 @@ export class InvoicesService {
   }
 
   async generateReportInvoiceList(company: Company, filter: ReportFilterDTO): Promise<ReportsDTO> {
-    const { startDate, endDate, documentType, customer, seller, zone, status, service } = filter;
+    const { startDate, endDate, documentType, customer } = filter;
 
     let params = {};
     params = { startDate, endDate };
@@ -450,27 +452,19 @@ export class InvoicesService {
     if (customer) {
       params = { ...params, customer };
     }
-    if (seller) {
-      params = { ...params, seller };
+    if (documentType) {
+      params = { ...params, documentType };
     }
-    if (zone) {
-      params = { ...params, zone };
-    }
-    if (status) {
-      params = { ...params, status };
-    }
-    if (service) {
-      params = { ...params, service };
-    }
+
     const sales = await this.invoiceRepository.getInvoices(company, params);
 
     const invoices = sales.map((d) => {
       return {
         customer: d.customerName,
-        date: d.invoiceDate.split('-').reverse().join('/'),
+        code: d.documentType.code,
+        date: d.invoiceDate ? format(new Date(d.invoiceDate), 'dd/MM/yyyy') : null,
         documentNumber: `${d.authorization} - ${d.sequence}`,
         total: d.ventaTotal,
-        documentType: d.documentType,
       };
     });
 
@@ -482,8 +476,7 @@ export class InvoicesService {
     return report;
   }
   async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
-    let invoices = await this.invoiceRepository.getInvoices(company, filter);
-    invoices = invoices.slice(0, 5);
+    const invoices = await this.invoiceRepository.getInvoices(company, filter);
 
     const sales = invoices.map((i) => {
       return {
@@ -627,11 +620,22 @@ export class InvoicesService {
     branch: Branch,
     data: InvoiceReserveDataDTO,
   ): Promise<ResponseMinimalDTO> {
+    console.log(data);
+
+    if (data.sequenceFrom > data.sequenceTo) {
+      throw new BadRequestException('El primer número de correlativo no puede ser mayor que el segundo.');
+    }
     const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.documentType]);
+    const { authorization } = await this.invoicesDocumentRepository.getSequenceAvailable(company, data.documentType);
+    if (authorization != data.authorization) {
+      throw new BadRequestException(
+        'La autorización a la que pertenece el documento seleccionado no coincide, contacta con tu administrador.',
+      );
+    }
 
     const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(4);
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, data.documentType);
-    if (data.sequenceForm < document.current || data.sequenceTo > document.final) {
+    if (data.sequenceFrom < document.current || data.sequenceTo > document.final) {
       throw new BadRequestException(
         `El numero de sequencia debe ser mayor o igual a ${document.current} y menor o igual a ${document.final}`,
       );
@@ -642,7 +646,7 @@ export class InvoicesService {
     });
 
     const sequence = [];
-    for (let s = data.sequenceForm; s <= data.sequenceTo; s++) {
+    for (let s = data.sequenceFrom; s <= data.sequenceTo; s++) {
       sequence.push(s);
     }
 
@@ -662,7 +666,7 @@ export class InvoicesService {
 
     await this.invoiceRepository.createReserveInvoice(company, branch, invoiceValues);
 
-    if (data.sequenceForm == document.current) {
+    if (data.sequenceFrom == document.current) {
       await this.invoicesDocumentRepository.updateInvoiceDocument(
         document.id,
         { current: data.sequenceTo + 1 },
@@ -728,6 +732,7 @@ export class InvoicesService {
       invoicesZone: invoiceSeller.invoicesZone,
       customerType: customer.customerType,
       customerTypeNatural: customer.customerTypeNatural,
+      status: data.header.status,
     };
 
     await this.invoiceRepository.updateInvoice(id, company, header);

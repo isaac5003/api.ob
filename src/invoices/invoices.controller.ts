@@ -39,6 +39,7 @@ import { InvoiceUpdateHeaderDTO } from './dtos/invoice-header-update.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
+import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -224,8 +225,11 @@ export class InvoicesController {
 
   @Get('/documents')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getInvoiceDocuments(@GetAuthData('company') company: Company): Promise<ResponseListDTO<InvoicesDocument>> {
-    return await this.invoice.getDocuments(company);
+  async getInvoiceDocuments(
+    @GetAuthData('company') company: Company,
+    @Query() filter: DocumentFilterDTO,
+  ): Promise<ResponseListDTO<InvoicesDocument>> {
+    return await this.invoice.getDocuments(company, filter);
   }
 
   @Get('/documents/:id')

@@ -22,6 +22,7 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
           'ac.isParent',
           'ac.description',
           'sa.id',
+          'pc.id',
           'pc.code',
           'pc.name',
         ])
