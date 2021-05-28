@@ -16,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Company } from '../companies/entities/Company.entity';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
+import { ReportsDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { InvoicesDocumentType } from './entities/InvoicesDocumentType.entity';
 import { InvoicesStatus } from './entities/InvoicesStatus.entity';
 import { InvoicesZone } from './entities/InvoicesZone.entity';
@@ -285,11 +285,17 @@ export class InvoicesController {
 
   @Get('/report/general')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getReport(
+  async getReport(@Query() filter: ReportFilterDTO, @GetAuthData('company') company: Company): Promise<ReportsDTO> {
+    return await this.invoice.generateReport(company, filter);
+  }
+
+  @Get('/report/invoice-list')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getReportInvoiceList(
     @Query() filter: ReportFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Invoice>> {
-    return await this.invoice.generateReport(company, filter);
+  ): Promise<ReportsDTO> {
+    return await this.invoice.generateReportInvoiceList(company, filter);
   }
 
   @Get()
