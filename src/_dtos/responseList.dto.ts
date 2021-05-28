@@ -40,3 +40,8 @@ export class ServiceReportGeneralDTO {
   company: Partial<Company>;
   services: any[];
 }
+
+export class ReportsDTO {
+  company: Partial<Company>;
+  invoices: any[];
+}

@@ -6,7 +6,7 @@ import { CustomerRepository } from '../customers/repositories/Customer.repositor
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
 import { FilterDTO } from '../_dtos/filter.dto';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
+import { ReportsDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { InvoiceDataDTO } from './dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from './dtos/invoice-filter.dto';
 import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';
@@ -374,7 +374,7 @@ export class InvoicesService {
     };
   }
 
-  async generateReport(company: Company, filter: ReportFilterDTO): Promise<ResponseListDTO<Invoice>> {
+  async generateReport(company: Company, filter: ReportFilterDTO): Promise<ReportsDTO> {
     let documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
     const { startDate, endDate, documentType, customer, seller, zone, status, service } = filter;
     if (documentType) {
@@ -401,7 +401,7 @@ export class InvoicesService {
     }
     const sales = await this.invoiceRepository.getInvoices(company, params);
 
-    const report = documentTypes.map((dt) => {
+    const invoices = documentTypes.map((dt) => {
       const documents = sales
         .filter((s) => s.documentType.id == dt.id)
         .map((d) => {
@@ -432,7 +432,53 @@ export class InvoicesService {
       };
     });
 
-    return new ResponseListDTO(plainToClass(Invoice, report));
+    const report = {
+      company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      invoices,
+    };
+
+    return report;
+  }
+
+  async generateReportInvoiceList(company: Company, filter: ReportFilterDTO): Promise<ReportsDTO> {
+    const { startDate, endDate, documentType, customer, seller, zone, status, service } = filter;
+
+    let params = {};
+    params = { startDate, endDate };
+
+    if (customer) {
+      params = { ...params, customer };
+    }
+    if (seller) {
+      params = { ...params, seller };
+    }
+    if (zone) {
+      params = { ...params, zone };
+    }
+    if (status) {
+      params = { ...params, status };
+    }
+    if (service) {
+      params = { ...params, service };
+    }
+    const sales = await this.invoiceRepository.getInvoices(company, params);
+
+    const invoices = sales.map((d) => {
+      return {
+        customer: d.customerName,
+        date: d.invoiceDate.split('-').reverse().join('/'),
+        documentNumber: `${d.authorization} - ${d.sequence}`,
+        total: d.ventaTotal,
+        documentType: d.documentType,
+      };
+    });
+
+    const report = {
+      company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      invoices,
+    };
+
+    return report;
   }
   async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
     const invoices = await this.invoiceRepository.getInvoices(company, filter);
