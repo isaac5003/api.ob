@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsISO8601 } from 'class-validator';
 import { validationMessage } from '../../_tools';
 
 export class InvoiceHeaderDTO {
@@ -18,7 +18,7 @@ export class InvoiceHeaderDTO {
   invoicesPaymentsCondition: string;
 
   @IsNotEmpty({ message: validationMessage('invoiceDate', 'IsNotEmpty') })
-  @IsString({ message: validationMessage('invoiceDate', 'IsString') })
+  @IsISO8601({}, { message: validationMessage('invoiceDate', 'IsISO8601') })
   invoiceDate: string;
 
   @Transform(({ value }) => parseFloat(value))

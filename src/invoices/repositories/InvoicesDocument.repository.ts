@@ -106,7 +106,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     invoiceDocuments = invoiceDocuments.map((i) => {
       return {
         ...i,
-        documentLayout: JSON.parse(i.documentLayout),
+        documentLayout: i.documentLayout,
       };
     });
     return invoiceDocuments;
@@ -133,6 +133,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     try {
       return await this.update({ id, company }, data);
     } catch (error) {
+      console.error(error);
       logDatabaseError(reponame, error);
     }
   }

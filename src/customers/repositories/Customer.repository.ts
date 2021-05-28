@@ -21,13 +21,13 @@ export class CustomerRepository extends Repository<Customer> {
       switch (type) {
         case 'clientes':
           query.andWhere('customer.isCustomer =:customer', { customer: true });
-          if (active) {
+          if (active == true || active == false) {
             query.andWhere('customer.isActiveCustomer = :active', { active });
           }
           break;
         case 'proveedores':
           query.andWhere('customer.isProvider =:customer', { customer: true });
-          if (active) {
+          if (active == true || active == false) {
             query.andWhere('customer.isActiveProvider = :active', { active });
           }
           break;
@@ -104,6 +104,7 @@ export class CustomerRepository extends Repository<Customer> {
       const customer = this.create({ company, ...data });
       response = await this.save(customer);
     } catch (error) {
+      console.error(error);
       logDatabaseError(type, error);
     }
     return await response;

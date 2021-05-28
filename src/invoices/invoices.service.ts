@@ -35,6 +35,7 @@ import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
+import { format } from 'date-fns';
 
 @Injectable()
 export class InvoicesService {
@@ -481,13 +482,15 @@ export class InvoicesService {
     return report;
   }
   async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
-    const invoices = await this.invoiceRepository.getInvoices(company, filter);
+    let invoices = await this.invoiceRepository.getInvoices(company, filter);
+    invoices = invoices.slice(0, 5);
+
     const sales = invoices.map((i) => {
       return {
         id: i.id,
         authorization: i.authorization,
         sequence: i.sequence,
-        invoiceDate: i.invoiceDate ? i.invoiceDate.split('-').reverse().join('/') : null,
+        invoiceDate: i.invoiceDate ? format(new Date(i.invoiceDate), 'dd/MM/yyyy') : null,
         customerName: i.customerName,
         ventaTotal: i.ventaTotal,
         documentType: i.documentType,
@@ -521,6 +524,8 @@ export class InvoicesService {
 
     const invoice = {
       ...invoiceAll,
+      invoiceRawDate: invoiceAll.invoiceDate,
+      invoiceDate: format(new Date(invoiceAll.invoiceDate), 'dd/MM/yyyy'),
       details,
       customer: invoiceAll.customer
         ? {

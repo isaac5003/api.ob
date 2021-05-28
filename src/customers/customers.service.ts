@@ -248,6 +248,7 @@ export class CustomersService {
     const { id } = customer;
     const branch = {
       ...data.branch,
+      name: data.branch.name ? data.branch.name : 'Sucursal principal',
       customer: id,
     };
     await this.customerBranchRepository.createBranch(branch, type);
