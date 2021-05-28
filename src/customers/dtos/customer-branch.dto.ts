@@ -5,16 +5,15 @@ import { State } from '../../system/entities/State.entity';
 import { validationMessage } from '../../_tools';
 
 export class BranchDataDTO {
-  @IsNotEmpty({ message: validationMessage('name', 'IsNotEmpty') })
+  @IsOptional()
   @IsString({ message: validationMessage('name', 'IsString') })
   name: string;
 
-  @IsNotEmpty({ message: validationMessage('contactName', 'IsNotEmpty') })
+  @IsOptional()
   @IsString({ message: validationMessage('contactName', 'IsString') })
   contactName: string;
 
   @IsOptional()
-  @IsString({ message: validationMessage('contactInfo', 'IsBooleanString') })
   contactInfo: { phone: string[]; emails: string[] };
 
   @IsNotEmpty({ message: validationMessage('address1', 'IsNotEmpty') })

@@ -16,7 +16,7 @@ import { plainToClass } from 'class-transformer';
 import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Company } from '../companies/entities/Company.entity';
 import { FilterDTO } from '../_dtos/filter.dto';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
+import { ReportsEntriesDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-update.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
@@ -42,6 +42,12 @@ import { EntriesService } from './entries.service';
 @UseGuards(AuthGuard())
 export class EntriesController {
   constructor(private entries: EntriesService) {}
+
+  @Get('/report/print-entry/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getReportEntry(@GetAuthData('company') company: Company, @Param('id') id: string): Promise<ReportsEntriesDTO> {
+    return await this.entries.generateReportEntry(company, id);
+  }
 
   @Get('/catalog')
   @UsePipes(new ValidationPipe({ transform: true }))

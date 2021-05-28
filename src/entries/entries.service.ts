@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { Company } from '../companies/entities/Company.entity';
 
 import { FilterDTO } from '../_dtos/filter.dto';
-import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
+import { ReportsEntriesDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
 import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
@@ -52,6 +52,7 @@ export class EntriesService {
 
   async getAccountingCatalogs(company: Company, filter: FilterDTO): Promise<AccountingCatalog[]> {
     const catalog = await this.accountingCatalogRepository.getAccountingCatalogs(company, filter);
+
     let accounts = [];
     accounts = catalog
       .map((c) => {
@@ -70,24 +71,34 @@ export class EntriesService {
     return accounts;
   }
 
+  async generateReportEntry(company: Company, id: string): Promise<ReportsEntriesDTO> {
+    const entry = await this.accountingEntryRepository.getEntry(company, id);
+    const report = {
+      company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      entry,
+    };
+
+    return report;
+  }
+
   async createAccount(
     accounts: AccountingCreateDTO[],
-    parentsCatalog: string,
+    parentCatalog: string,
     company: Company,
   ): Promise<ResponseMinimalDTO> {
     let parent;
 
-    const account = await this.accountingCatalogRepository.createAccounts({ accounts, parentsCatalog }, company);
+    const account = await this.accountingCatalogRepository.createAccounts({ accounts, parentCatalog }, company);
 
-    if (parentsCatalog) {
-      parent = await this.accountingCatalogRepository.getAccountingCatalog(parentsCatalog, company, false);
+    if (parentCatalog) {
+      parent = await this.accountingCatalogRepository.getAccountingCatalog(parentCatalog, company, false);
 
       const data = {
         ...parent,
         isParent: true,
       };
 
-      await this.accountingCatalogRepository.updateAccount(parentsCatalog, data, company);
+      await this.accountingCatalogRepository.updateAccount(parentCatalog, data, company);
     }
 
     return {
@@ -784,6 +795,7 @@ export class EntriesService {
 
   async getEntries(company: Company, filter: EntriesFilterDTO): Promise<ResponseListDTO<AccountingEntry>> {
     const entries = await this.accountingEntryRepository.getEntries(company, filter);
+
     const entry = entries.map((e) => {
       const entri = {
         ...e,
@@ -793,12 +805,7 @@ export class EntriesService {
 
       return entri;
     });
-    // for (const entry of entries) {
-    //   entri = {
-    //     ...entry,
-    //     cargo: entry.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
-    //   };
-    // }
+
     return new ResponseListDTO(plainToClass(AccountingEntry, entry));
   }
 

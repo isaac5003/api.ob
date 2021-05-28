@@ -11,15 +11,18 @@ const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)
 export class AccountingEntryRepository extends Repository<AccountingEntry> {
   async getSeries(company: Company, data: SeriesDTO): Promise<ResponseMinimalDTO> {
-    let entries: AccountingEntry[];
+    let entries;
     try {
-      entries = await this.find({
-        select: ['serie', 'date'],
-        where: {
-          company,
-          date: MoreThanOrEqual(startOfMonth(new Date(data.date))) || LessThanOrEqual(endOfMonth(new Date(data.date))),
-        },
-      });
+      entries = await this.createQueryBuilder('ae')
+        .select(['ae.serie', 'ae.date'])
+        .leftJoin('ae.accountingEntryType', 'aet')
+        .where('ae.company = :company', { company: company.id })
+        .andWhere('aet.id = :accountingEntryType', { accountingEntryType: data.accountingEntryType })
+        .andWhere('ae.date >= :startDate', {
+          startDate: startOfMonth(new Date(data.date)),
+        })
+        .andWhere('ae.date <= :endDate', { endDate: endOfMonth(new Date(data.date)) })
+        .getMany();
     } catch (error) {
       logDatabaseError('series', error);
     }
@@ -42,7 +45,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
 
       let entries = this.createQueryBuilder('entries')
         .select([
-          'entries.id ',
+          'entries.id',
           'entries.serie',
           'entries.title',
           'entries.date',
@@ -51,7 +54,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
           'aet.id',
           'aet.name',
           'aet.code',
-          'SUM(aed.cargo) cargo',
+          'sum(aed.cargo) cargo',
           'aed.id',
           'aed.cargo',
         ])
@@ -67,13 +70,23 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
           search: `%${search}%`,
         });
       }
+      if (order && prop) {
+        let field = `entries.${prop}`;
+        switch (prop) {
+          case 'cargo':
+            field = `cargo`;
+            break;
 
+          case 'accountingEntryType':
+            field = `aet.id`;
+            break;
+        }
+        entries.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
+      } else {
+        entries = entries.orderBy('entries.createdAt', 'DESC');
+      }
       if (limit && page) {
-        entries = entries.limit(limit).offset(limit ? (page ? page - 1 : 0 * limit) : null);
-
-        // entries = entries
-        //   .take(limit)
-        //   .skip(limit ? (page ? page - 1 : 0) * limit : null);
+        entries = entries.limit(limit).offset(page * limit);
       }
 
       if (squared == true) {
@@ -97,17 +110,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
           entryType,
         });
       }
-      if (order && prop) {
-        switch (prop) {
-          case 'accountingEntryType':
-            entries = entries.orderBy('entries.accountingEntryType', order == 'ascending' ? 'ASC' : 'DESC');
-            break;
-          default:
-            entries = entries.orderBy(`${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
-        }
-      } else {
-        entries = entries.orderBy('entries.createdAt', 'DESC');
-      }
+
       return await entries.getMany();
     } catch (error) {
       console.error(error);

@@ -3,18 +3,31 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 
 const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
 export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
-  async getInvoicesDocuments(company: Company): Promise<InvoicesDocument[]> {
+  async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocument[]> {
+    const { active, documentType } = filter;
+
     let documents: InvoicesDocument[];
+
     const leftJoinAndSelect = {
       dt: 'i.documentType',
     };
+
+    let filters = {};
+    if (documentType) {
+      filters = { company, dt: documentType };
+    }
+    if (active == true || active == false) {
+      filters == { ...filters, active };
+    }
+
     try {
       documents = await this.find({
-        where: { company },
+        where: filter,
         join: {
           alias: 'i',
           leftJoinAndSelect,
@@ -106,7 +119,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     invoiceDocuments = invoiceDocuments.map((i) => {
       return {
         ...i,
-        documentLayout: JSON.parse(i.documentLayout),
+        documentLayout: i.documentLayout,
       };
     });
     return invoiceDocuments;
@@ -133,6 +146,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     try {
       return await this.update({ id, company }, data);
     } catch (error) {
+      console.error(error);
       logDatabaseError(reponame, error);
     }
   }

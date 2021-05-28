@@ -10,12 +10,10 @@ export class AccountingCatalogDTO {
   description: string;
 
   @IsNotEmpty({ message: validationMessage('isAcreedora', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('isAcreedora', 'IsBoolean') })
   isAcreedora: boolean;
 
   @IsNotEmpty({ message: validationMessage('isBalance', 'IsNotEmpty') })
-  @Transform(({ value }) => (value.toLowerCase() === 'true' ? true : value.toLowerCase() == 'false' ? false : 1))
   @IsBoolean({ message: validationMessage('isBalance', 'IsBoolean') })
   isBalance: boolean;
 }
