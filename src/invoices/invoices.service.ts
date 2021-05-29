@@ -351,8 +351,7 @@ export class InvoicesService {
   }
 
   async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
-    let { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    documentLayout = JSON.parse(documentLayout);
+    const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
     return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
   }
 
