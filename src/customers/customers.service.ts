@@ -55,7 +55,7 @@ export class CustomersService {
         nrc: company.nrc,
         nit: company.nit,
       },
-      name: 'REPORTE GENERAL DE CLIENTES',
+      name: type == 'clientes' ? 'REPORTE GENERAL DE CLIENTES' : 'REPORTE GENERAL DE PROVEEDORES',
       customers: customers
         .map((c) => {
           const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
@@ -106,7 +106,7 @@ export class CustomersService {
         nrc: company.nrc,
         nit: company.nit,
       },
-      name: 'PERFIL DEL CLIENTE',
+      name: type == 'cliente' ? 'PERFIL DEL CLIENTE' : 'PERFIL DEL PROVEEDOR',
 
       customer: {
         ...customer,
