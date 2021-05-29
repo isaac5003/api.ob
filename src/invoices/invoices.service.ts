@@ -556,6 +556,8 @@ export class InvoicesService {
     const allInvoicesReserved = await this.invoiceRepository.getInvoices(company, {
       status: 4,
       documentType: data.header.documentType,
+      order: 'ascending',
+      prop: 'sequence',
     });
 
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(
@@ -619,8 +621,6 @@ export class InvoicesService {
     branch: Branch,
     data: InvoiceReserveDataDTO,
   ): Promise<ResponseMinimalDTO> {
-    console.log(data);
-
     if (data.sequenceFrom > data.sequenceTo) {
       throw new BadRequestException('El primer número de correlativo no puede ser mayor que el segundo.');
     }
