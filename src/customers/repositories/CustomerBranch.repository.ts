@@ -2,6 +2,7 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { BranchDataDTO } from '../dtos/customer-branch.dto';
 import { CustomerBranch } from '../entities/CustomerBranch.entity';
+import { CustomerIdDTO } from '../dtos/customer-id.dto';
 
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
@@ -25,23 +26,39 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
     return branches;
   }
 
-  async createBranch(data: BranchDataDTO, type: string): Promise<CustomerBranch> {
+  async createBranch(data: BranchDataDTO[], type: string): Promise<CustomerBranch[]> {
     // crea sucursal
-    let response: CustomerBranch;
+    let response: CustomerBranch[];
     try {
-      const branch = this.create({ ...data });
+      const branch = this.create([...data]);
       response = await this.save(branch);
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(type, error);
     }
     return await response;
   }
 
-  async updateBranch(id: string, data: BranchDataDTO, type): Promise<any> {
-    return this.update({ id }, data);
+  async updateBranch(id: string, data: Partial<BranchDataDTO>, type): Promise<any> {
+    try {
+      return this.update({ id }, data);
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(type, error);
+    }
   }
 
-  async getCustomerCustomerBranch(id: string, type: string): Promise<CustomerBranch> {
+  async deleteBranch(id: string, type: string): Promise<any> {
+    try {
+      return await this.delete({ id });
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(type, error);
+    }
+  }
+
+  async getCustomerCustomerBranch(id: string, type: string, customerId: string): Promise<CustomerBranch> {
     let customerBranch: CustomerBranch;
     const leftJoinAndSelect = {
       c: 'cb.country',
@@ -50,18 +67,16 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
     };
 
     try {
-      customerBranch = await this.findOneOrFail(
-        { id },
-        {
-          join: {
-            alias: 'cb',
-            leftJoinAndSelect,
-          },
+      customerBranch = await this.findOneOrFail({
+        where: { id: id, customer: customerId },
+        join: {
+          alias: 'cb',
+          leftJoinAndSelect,
         },
-      );
+      });
     } catch (error) {
       console.error(error);
-      logDatabaseError(type, error);
+      logDatabaseError(`sucursal del ${type}`, error);
     }
     return customerBranch;
   }

@@ -20,6 +20,7 @@ import { AccountingCatalogRepository } from '../entries/repositories/AccountingC
 import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
+import { BranchDataDTO } from './dtos/customer-branch.dto';
 
 @Injectable()
 export class CustomersService {
@@ -212,6 +213,76 @@ export class CustomersService {
     return this.customerBranchRepository.getCustomerBranches(id, type);
   }
 
+  async getCustomerBranch(id: string, customer: string, type = 'cliente'): Promise<CustomerBranch> {
+    return this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
+  }
+
+  async createBranches(
+    data: BranchDataDTO[],
+    customerId: string,
+    company: Company,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    const customer = await this.customerRepository.getCustomer(customerId, company, type);
+    const branches = data.map((b) => {
+      return {
+        ...b,
+        name: b.name,
+        customer: customer.id,
+        default: b.default == true || b.default == false ? b.default : false,
+      };
+    });
+    const createdBranches = await this.customerBranchRepository.createBranch(branches, type);
+    return {
+      ids: createdBranches.map((b) => b.id),
+      message: 'Se han creado las sucursales correctamente.',
+    };
+  }
+
+  async updateBranch(
+    id: string,
+    data: Partial<BranchDataDTO>,
+    customerId: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    const update = await this.customerBranchRepository.updateBranch(id, data, type);
+
+    return {
+      message: update.affected > 0 ? 'La sucursal se actualizo correctamente.' : 'No se pudo actulizar la sucursal.',
+    };
+  }
+
+  async updateBranchDefault(
+    id: string,
+
+    customer: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
+    const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type);
+    const branchDefault = await this.customerBranchRepository.updateBranch(id, { default: true }, type);
+    await this.customerBranchRepository.updateBranch(
+      customerBranch.find((b) => b.default).id,
+      { default: false },
+      type,
+    );
+    return {
+      message: 'Se ha marcado como sucursal principal correctamente.',
+    };
+  }
+
+  async deleteBranch(id: string, customerId: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    const deletedBranch = await this.customerBranchRepository.deleteBranch(id, type);
+
+    return {
+      message: deletedBranch.affected
+        ? 'La sucursal se elimino correctamente.'
+        : 'La susursal no se ha podidop eliminar.',
+    };
+  }
+
   async getCustomerTypes(): Promise<CustomerType[]> {
     return this.customerTypeRepository.getCustomerTypes();
   }
@@ -251,7 +322,7 @@ export class CustomersService {
       name: data.branch.name ? data.branch.name : 'Sucursal principal',
       customer: id,
     };
-    await this.customerBranchRepository.createBranch(branch, type);
+    await this.customerBranchRepository.createBranch([branch], type);
     return {
       id: customer.id,
       message,

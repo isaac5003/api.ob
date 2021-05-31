@@ -16,6 +16,7 @@ import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomersService } from 'src/customers/customers.service';
+import { BranchDataDTO } from 'src/customers/dtos/customer-branch.dto';
 import { CustomerDataDTO } from 'src/customers/dtos/customer-data.dto';
 import { CustomerFilterDTO } from 'src/customers/dtos/customer-filter.dto';
 import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-integration.dto';
@@ -96,8 +97,56 @@ export class ProvidersController {
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id, 'proveedor');
+    const branches = await this.customersService.getCustomerBranches(id);
     return new ResponseListDTO(plainToClass(CustomerBranch, branches));
+  }
+
+  @Get('/:providerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getCustomerBranch(
+    @Param('id') id: string,
+    @Param('providerId') provider: string,
+  ): Promise<ResponseSingleDTO<CustomerBranch>> {
+    const branch = await this.customersService.getCustomerBranch(id, provider, 'proveedor');
+    return new ResponseSingleDTO(plainToClass(CustomerBranch, branch));
+  }
+
+  @Post('/:providerId/branches')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createCustomerBranches(
+    @Body('branches') data: BranchDataDTO[],
+    @Param('providerId') providerId: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.customersService.createBranches(data, providerId, company, 'proveedores');
+  }
+
+  @Put('/:providerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerBranch(
+    @Param('id') id: string,
+    @Body('branch') data: BranchDataDTO,
+    @Param('providerId') provider: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranch(id, data, provider, 'proveedor');
+  }
+
+  @Put('/:providerId/branches/default/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerDefault(
+    @Param('id') id: string,
+    @Param('providerId') provider: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranchDefault(id, provider, 'proveedor');
+  }
+
+  @Delete('/:providerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteCustomerBranch(
+    @Param('id') id: string,
+    @Param('providerId') providerId: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.deleteBranch(id, providerId, 'proveedor');
   }
 
   @Put('/:id/integrations')
