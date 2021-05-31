@@ -1,4 +1,4 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './User.entity';
 
 @Entity()
@@ -12,9 +12,9 @@ export class Recovery extends BaseEntity {
   @Column({ default: false })
   used: boolean;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
-  @OneToMany(() => User, (user) => user.profile)
-  users: User[];
+  @ManyToOne(() => User, (user) => user)
+  user: User;
 }

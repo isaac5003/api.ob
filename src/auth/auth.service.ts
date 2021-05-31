@@ -29,6 +29,8 @@ import { BranchRepository } from 'src/companies/repositories/Branch.repository';
 import { CompanyRepository } from 'src/companies/repositories/Company.repository';
 import { Profile } from './entities/Profile.entity';
 import { updatePassWordDTO } from './dtos/auth-update-password.dto';
+import { ResetPasswordDTO } from './dtos/auth-reset-password.dto';
+import { differenceInMinutes, getMinutes, getTime, parseISO } from 'date-fns';
 
 @Injectable()
 export class AuthService {
@@ -227,7 +229,7 @@ export class AuthService {
 
     const user = await this.userRepository.getUserByEmail(email);
 
-    if (!user) {
+    if (!user || !user.isActive) {
       throw new BadRequestException(
         'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
       );
@@ -263,6 +265,22 @@ export class AuthService {
 
     return {
       message,
+    };
+  }
+
+  async resetPassword(data: ResetPasswordDTO): Promise<ResponseMinimalDTO> {
+    const tokenData = await this.recoveryRepository.getTokenByToken(data.token);
+    if (differenceInMinutes(Date.now(), new Date(tokenData.createdAt)) > 10 || tokenData.used) {
+      throw new BadRequestException('El token ha expirado, debes solicitar un nuevo cambio de contraseña.');
+    }
+
+    const newPassword = bcrypt.hashSync(data.newPassword, 10);
+
+    await this.userRepository.updateUserPassword(tokenData.user.id, newPassword);
+    await this.recoveryRepository.updateRecovery(tokenData.id, { used: true });
+
+    return {
+      message: 'La contraseña ha sido actualizada correctamente.',
     };
   }
 }

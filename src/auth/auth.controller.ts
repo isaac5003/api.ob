@@ -12,6 +12,7 @@ import { User } from './entities/User.entity';
 import { GetAuthData } from './get-auth-data.decorator';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
+import { ResetPasswordDTO } from './dtos/auth-reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -65,5 +66,11 @@ export class AuthController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async recoveryPassword(@Body() user: UserRecoveryDTO): Promise<ResponseMinimalDTO> {
     return this.authService.recoveryPassword(user);
+  }
+
+  @Put('/reset-password')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async resetPassword(@Body() data: ResetPasswordDTO): Promise<ResponseMinimalDTO> {
+    return await this.authService.resetPassword(data);
   }
 }
