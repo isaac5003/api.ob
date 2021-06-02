@@ -14,7 +14,7 @@ export class BranchDataDTO {
   contactName: string;
 
   @IsOptional()
-  contactInfo: { phone: string[]; emails: string[] };
+  contactInfo: { phones: string[]; emails: string[] };
 
   @IsOptional()
   @IsBoolean({ message: validationMessage('default', 'IsBoolean') })

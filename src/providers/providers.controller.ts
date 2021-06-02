@@ -25,6 +25,7 @@ import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { CustomerTaxerType } from 'src/customers/entities/CustomerTaxerType.entity';
 import { CustomerType } from 'src/customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { IsCustomerDTO } from './dtos/provider-isCustomer.dto';
 import { ProviderStatusDTO } from './dtos/provider-updateStatus.dto';
@@ -96,8 +97,11 @@ export class ProvidersController {
 
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id);
+  async getCustomerBranches(
+    @Param('id') id: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseListDTO<CustomerBranch>> {
+    const branches = await this.customersService.getCustomerBranches(id, filter);
     return new ResponseListDTO(plainToClass(CustomerBranch, branches));
   }
 
@@ -131,13 +135,14 @@ export class ProvidersController {
     return this.customersService.updateBranch(id, data, provider, 'proveedor');
   }
 
-  @Put('/:providerId/branches/default/:id')
+  @Put('/:providerId/branches/:id/default')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerDefault(
     @Param('id') id: string,
     @Param('providerId') provider: string,
+    @Query() filter: FilterDTO,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateBranchDefault(id, provider, 'proveedor');
+    return this.customersService.updateBranchDefault(id, filter, provider, 'proveedor');
   }
 
   @Delete('/:providerId/branches/:id')

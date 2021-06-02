@@ -34,7 +34,7 @@ export class CustomerBranch extends BaseEntity {
   @Column({ nullable: true })
   address2: string;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })

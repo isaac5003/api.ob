@@ -29,6 +29,7 @@ import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { IsProviderDTO } from './dtos/customers-isprovider.dto';
 import { BranchDataDTO } from './dtos/customer-branch.dto';
 import { CustomerIdDTO } from './dtos/customer-id.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 @Controller('customers')
 @UseGuards(AuthGuard())
 export class CustomersController {
@@ -106,8 +107,11 @@ export class CustomersController {
 
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id);
+  async getCustomerBranches(
+    @Param('id') id: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseListDTO<CustomerBranch>> {
+    const branches = await this.customersService.getCustomerBranches(id, filter);
     return new ResponseListDTO(plainToClass(CustomerBranch, branches));
   }
 
@@ -141,13 +145,14 @@ export class CustomersController {
     return this.customersService.updateBranch(id, data, customer);
   }
 
-  @Put('/:customerId/branches/default/:id')
+  @Put('/:customerId/branches/:id/default')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerDefault(
     @Param('id') id: string,
     @Param('customerId') customer: string,
+    @Query() filter: FilterDTO,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateBranchDefault(id, customer);
+    return this.customersService.updateBranchDefault(id, filter, customer);
   }
 
   @Delete('/:customerId/branches/:id')

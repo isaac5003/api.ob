@@ -2,28 +2,54 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { BranchDataDTO } from '../dtos/customer-branch.dto';
 import { CustomerBranch } from '../entities/CustomerBranch.entity';
-import { CustomerIdDTO } from '../dtos/customer-id.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
-  async getCustomerBranches(id: string, type: string): Promise<CustomerBranch[]> {
-    let branches: CustomerBranch[];
+  async getCustomerBranches(id: string, type: string, filter: FilterDTO): Promise<CustomerBranch[]> {
     try {
-      branches = await this.find({
-        where: { customer: id },
-        join: {
-          alias: 'branch',
-          leftJoinAndSelect: {
-            counttry: 'branch.country',
-            state: 'branch.state',
-            city: 'branch.city',
-          },
-        },
-      });
+      const { limit, page, search, order, prop } = filter;
+
+      const query = this.createQueryBuilder('branch')
+        .leftJoinAndSelect('branch.country', 'bc')
+        .leftJoinAndSelect('branch.state', 'bs')
+        .leftJoinAndSelect('branch.city', 'bct')
+        .where('branch.customer=:id', { id: id });
+
+      if (search) {
+        query.andWhere('(LOWER(branch.name) LIKE :search OR LOWER(branch.contactName) LIKE :search)', {
+          search: `%${search}%`,
+        });
+      }
+
+      if (limit && page) {
+        query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
+      }
+
+      if (order && prop) {
+        let field = `branch.${prop}`;
+        switch (prop) {
+          case 'country':
+            field = `bc.id`;
+            break;
+          case 'state':
+            field = `bs.id`;
+            break;
+          case 'city':
+            field = `bct.id`;
+            break;
+        }
+        query.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
+      } else {
+        query.orderBy('branch.createdAt', 'DESC');
+      }
+
+      return await query.getMany();
     } catch (error) {
-      logDatabaseError(type, error);
+      console.error(error);
+
+      logDatabaseError(`sucursal del ${type}`, error);
     }
-    return branches;
   }
 
   async createBranch(data: BranchDataDTO[], type: string): Promise<CustomerBranch[]> {

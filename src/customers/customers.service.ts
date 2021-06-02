@@ -21,6 +21,7 @@ import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
 import { BranchDataDTO } from './dtos/customer-branch.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 
 @Injectable()
 export class CustomersService {
@@ -209,8 +210,8 @@ export class CustomersService {
     return new ResponseSingleDTO(plainToClass(Customer, tributary));
   }
 
-  async getCustomerBranches(id: string, type = 'cliente'): Promise<CustomerBranch[]> {
-    return this.customerBranchRepository.getCustomerBranches(id, type);
+  async getCustomerBranches(id: string, filter?: FilterDTO, type = 'cliente'): Promise<CustomerBranch[]> {
+    return this.customerBranchRepository.getCustomerBranches(id, type, filter);
   }
 
   async getCustomerBranch(id: string, customer: string, type = 'cliente'): Promise<CustomerBranch> {
@@ -255,12 +256,12 @@ export class CustomersService {
 
   async updateBranchDefault(
     id: string,
-
+    filter: FilterDTO,
     customer: string,
     type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
-    const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type);
+    const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type, filter);
     const branchDefault = await this.customerBranchRepository.updateBranch(id, { default: true }, type);
     await this.customerBranchRepository.updateBranch(
       customerBranch.find((b) => b.default).id,
@@ -273,7 +274,7 @@ export class CustomersService {
   }
 
   async deleteBranch(id: string, customerId: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
-    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    const branchToDelete = await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
     const deletedBranch = await this.customerBranchRepository.deleteBranch(id, type);
 
     return {
