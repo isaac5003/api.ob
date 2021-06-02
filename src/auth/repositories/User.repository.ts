@@ -14,6 +14,7 @@ export class UserRepository extends Repository<User> {
         .leftJoinAndSelect('a.module', 'm')
         .leftJoinAndSelect('a.company', 'c')
         .leftJoinAndSelect('a.branch', 'b')
+        .orderBy('c.name', 'ASC')
         .getOne();
       return user;
     } catch (error) {
