@@ -8,18 +8,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
-import { Customer } from '../../customers/entities/Customer.entity';
-import { InvoicesPaymentsCondition } from './InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from './InvoicesSeller.entity';
-import { InvoicesZone } from './InvoicesZone.entity';
-import { InvoicesStatus } from './InvoicesStatus.entity';
-import { CustomerType } from '../../customers/entities/CustomerType.entity';
-import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
-import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
-import { InvoiceDetail } from './InvoiceDetail.entity';
-import { Branch } from '../../companies/entities/Branch.entity';
-import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
 export class Purchase extends BaseEntity {
