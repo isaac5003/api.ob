@@ -30,7 +30,7 @@ import { CompanyRepository } from 'src/companies/repositories/Company.repository
 import { Profile } from './entities/Profile.entity';
 import { updatePassWordDTO } from './dtos/auth-update-password.dto';
 import { ResetPasswordDTO } from './dtos/auth-reset-password.dto';
-import { differenceInMinutes, getMinutes, getTime, parseISO } from 'date-fns';
+import { differenceInMinutes } from 'date-fns';
 
 @Injectable()
 export class AuthService {

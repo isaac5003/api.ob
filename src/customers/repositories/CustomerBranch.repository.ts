@@ -6,7 +6,11 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
-  async getCustomerBranches(id: string, type: string, filter: FilterDTO): Promise<CustomerBranch[]> {
+  async getCustomerBranches(
+    id: string,
+    type: string,
+    filter: FilterDTO,
+  ): Promise<{ data: CustomerBranch[]; count: number }> {
     try {
       const { limit, page, search, order, prop } = filter;
 
@@ -22,6 +26,7 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
         });
       }
 
+      const count = await query.getCount();
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
       }
@@ -44,7 +49,7 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
         query.orderBy('branch.createdAt', 'DESC');
       }
 
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.error(error);
 

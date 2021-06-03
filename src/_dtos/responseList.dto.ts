@@ -1,13 +1,13 @@
 import { Company } from 'src/companies/entities/Company.entity';
 import { AccountingEntry } from 'src/entries/entities/AccountingEntry.entity';
 
-export class ResponseListDTO<T> {
-  count: number;
+export class ResponseListDTO<T, C> {
+  count: C;
   data: T[];
 
-  constructor(data: T[]) {
+  constructor(data: T[], count: C) {
     let index = 1;
-    this.count = data.length;
+    this.count = count;
     this.data = data.map((d) => {
       return {
         index: index++,

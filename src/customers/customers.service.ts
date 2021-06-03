@@ -49,7 +49,7 @@ export class CustomersService {
   ) {}
 
   async generateReportGeneral(company: Company, type = 'clientes'): Promise<any> {
-    const customers = await this.customerRepository.getCustomers(company, { branch: true }, type);
+    const { data } = await this.customerRepository.getCustomers(company, { branch: true }, type);
 
     const report = {
       company: {
@@ -58,7 +58,7 @@ export class CustomersService {
         nit: company.nit,
       },
       name: type == 'clientes' ? 'REPORTE GENERAL DE CLIENTES' : 'REPORTE GENERAL DE PROVEEDORES',
-      customers: customers
+      customers: data
         .map((c) => {
           const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
           return {
@@ -73,7 +73,7 @@ export class CustomersService {
             ...cu,
           };
         }),
-      providers: customers
+      providers: data
         .map((c) => {
           const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
           return {
@@ -132,8 +132,12 @@ export class CustomersService {
     return report;
   }
 
-  async getCustomers(company: Company, data: CustomerFilterDTO, type = 'clientes'): Promise<Customer[]> {
-    return await this.customerRepository.getCustomers(company, data, type);
+  async getCustomers(
+    company: Company,
+    data: CustomerFilterDTO,
+    type = 'clientes',
+  ): Promise<{ data: Customer[]; count: number }> {
+    return this.customerRepository.getCustomers(company, data, type);
   }
 
   async getCustomer(company: Company, id: string, type = 'cliente'): Promise<Customer> {
@@ -170,7 +174,6 @@ export class CustomersService {
   async updateCustomerSettingsIntegrations(
     company: Company,
     data: AccountignCatalogIntegrationDTO,
-    type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
@@ -210,7 +213,11 @@ export class CustomersService {
     return new ResponseSingleDTO(plainToClass(Customer, tributary));
   }
 
-  async getCustomerBranches(id: string, filter?: FilterDTO, type = 'cliente'): Promise<CustomerBranch[]> {
+  async getCustomerBranches(
+    id: string,
+    filter?: FilterDTO,
+    type = 'cliente',
+  ): Promise<{ data: CustomerBranch[]; count: number }> {
     return this.customerBranchRepository.getCustomerBranches(id, type, filter);
   }
 
@@ -262,9 +269,8 @@ export class CustomersService {
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
     const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type, filter);
-    const branchDefault = await this.customerBranchRepository.updateBranch(id, { default: true }, type);
     await this.customerBranchRepository.updateBranch(
-      customerBranch.find((b) => b.default).id,
+      customerBranch.data.find((b) => b.default).id,
       { default: false },
       type,
     );
@@ -274,7 +280,7 @@ export class CustomersService {
   }
 
   async deleteBranch(id: string, customerId: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
-    const branchToDelete = await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
     const deletedBranch = await this.customerBranchRepository.deleteBranch(id, type);
 
     return {
@@ -284,15 +290,15 @@ export class CustomersService {
     };
   }
 
-  async getCustomerTypes(): Promise<CustomerType[]> {
+  async getCustomerTypes(): Promise<{ data: CustomerType[]; count: number }> {
     return this.customerTypeRepository.getCustomerTypes();
   }
 
-  async getCustomerTaxerTypes(): Promise<CustomerTaxerType[]> {
+  async getCustomerTaxerTypes(): Promise<{ data: CustomerTaxerType[]; count: number }> {
     return this.customerTaxerTypeRepository.getCustomerTaxerTypes();
   }
 
-  async getCustomerTypeNaturals(): Promise<CustomerTypeNatural[]> {
+  async getCustomerTypeNaturals(): Promise<{ data: CustomerTypeNatural[]; count: number }> {
     return this.customerTypeNaturalRepository.getCustomerTypeNaturals();
   }
 

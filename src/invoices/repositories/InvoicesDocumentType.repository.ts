@@ -5,7 +5,7 @@ import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 const reponame = 'tipo de documento';
 @EntityRepository(InvoicesDocumentType)
 export class InvoicesDocumentTypeRepository extends Repository<InvoicesDocumentType> {
-  async getInvoiceDocumentsType(): Promise<InvoicesDocumentType[]> {
+  async getInvoiceDocumentsType(): Promise<{ data: InvoicesDocumentType[]; count: number }> {
     let documentTypes: InvoicesDocumentType[];
     try {
       documentTypes = await this.find({
@@ -16,7 +16,7 @@ export class InvoicesDocumentTypeRepository extends Repository<InvoicesDocumentT
     } catch (error) {
       logDatabaseError(reponame, error);
     }
-    return documentTypes;
+    return { data: documentTypes, count: documentTypes.length };
   }
 
   async documentTypesByIds(id: number[]): Promise<InvoicesDocumentType[]> {

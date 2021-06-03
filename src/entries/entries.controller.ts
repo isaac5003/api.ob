@@ -12,7 +12,6 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { plainToClass } from 'class-transformer';
 import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Company } from '../companies/entities/Company.entity';
 import { FilterDTO } from '../_dtos/filter.dto';
@@ -54,9 +53,8 @@ export class EntriesController {
   async getCatalog(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<AccountingCatalog>> {
-    const accountingCatalogs = await this.entries.getAccountingCatalogs(company, filter);
-    return new ResponseListDTO(plainToClass(AccountingCatalog, accountingCatalogs));
+  ): Promise<ResponseListDTO<AccountingCatalog, number>> {
+    return this.entries.getAccountingCatalogs(company, filter);
   }
 
   @Post('/catalog')
@@ -86,9 +84,8 @@ export class EntriesController {
 
   @Get('/types')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getEntryTypes(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingEntryType>> {
-    const entryTypes = await this.entries.getEntryTypes(company);
-    return new ResponseListDTO(plainToClass(AccountingEntryType, entryTypes));
+  async getEntryTypes(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingEntryType, number>> {
+    return this.entries.getEntryTypes(company);
   }
 
   @Get('/serie')
@@ -98,9 +95,10 @@ export class EntriesController {
   }
 
   @Get('/register-type')
-  async getRegisterType(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingRegisterType>> {
-    const registerType = await this.entries.getResgisterType(company);
-    return new ResponseListDTO(plainToClass(AccountingRegisterType, registerType));
+  async getRegisterType(
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseListDTO<AccountingRegisterType, number>> {
+    return this.entries.getResgisterType(company);
   }
 
   @Get('/setting/general')
@@ -223,8 +221,8 @@ export class EntriesController {
   async getEntries(
     @GetAuthData('company') company: Company,
     @Query() filter: EntriesFilterDTO,
-  ): Promise<ResponseListDTO<AccountingEntry>> {
-    return await this.entries.getEntries(company, filter);
+  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number>> {
+    return this.entries.getEntries(company, filter);
   }
 
   @Get('/:id')

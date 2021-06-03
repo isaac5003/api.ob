@@ -1,5 +1,4 @@
 import { Controller, Get } from '@nestjs/common';
-import { plainToClass } from 'class-transformer';
 import { ResponseListDTO } from '../_dtos/responseList.dto';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
@@ -11,20 +10,17 @@ export class SystemController {
   constructor(private system: SystemService) {}
 
   @Get('/countries')
-  async getCountries(): Promise<ResponseListDTO<Country>> {
-    const countries = await this.system.getCountries();
-    return new ResponseListDTO(plainToClass(Country, countries));
+  async getCountries(): Promise<ResponseListDTO<Country, number>> {
+    return this.system.getCountries();
   }
 
   @Get('/states')
-  async getStates(): Promise<ResponseListDTO<State>> {
-    const states = await this.system.getStates();
-    return new ResponseListDTO(plainToClass(State, states));
+  async getStates(): Promise<ResponseListDTO<State, number>> {
+    return await this.system.getStates();
   }
 
   @Get('/cities')
-  async getCitites(): Promise<ResponseListDTO<City>> {
-    const cities = await this.system.getCities();
-    return new ResponseListDTO(plainToClass(City, cities));
+  async getCitites(): Promise<ResponseListDTO<City, number>> {
+    return this.system.getCities();
   }
 }

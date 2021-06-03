@@ -20,15 +20,15 @@ export class SystemService {
     private cityRepository: CityRepository,
   ) {}
 
-  async getCountries(): Promise<Country[]> {
-    return await this.countryRepository.getCountries();
+  async getCountries(): Promise<{ data: Country[]; count: number }> {
+    return this.countryRepository.getCountries();
   }
 
-  async getStates(): Promise<State[]> {
+  async getStates(): Promise<{ data: State[]; count: number }> {
     return await this.stateRepository.getStates();
   }
 
-  async getCities(): Promise<City[]> {
-    return await this.cityRepository.getCities();
+  async getCities(): Promise<{ data: City[]; count: number }> {
+    return this.cityRepository.getCities();
   }
 }

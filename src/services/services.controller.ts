@@ -38,9 +38,8 @@ export class ServicesController {
   // FOR SERVICES /
   @Get('/selling-types')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getSellingTypes(): Promise<ResponseListDTO<SellingType>> {
-    const sellingType = await this.service.getSellyingTypes();
-    return new ResponseListDTO(plainToClass(SellingType, sellingType));
+  async getSellingTypes(): Promise<ResponseListDTO<SellingType, number>> {
+    return this.service.getSellyingTypes();
   }
 
   // FOR SETTINGS
@@ -147,8 +146,8 @@ export class ServicesController {
   async getServices(
     @Query() filter: ServiceFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Service>> {
-    return await this.service.getServices(company, filter);
+  ): Promise<ResponseListDTO<Service, number>> {
+    return this.service.getServices(company, filter);
   }
 
   @Post('/')

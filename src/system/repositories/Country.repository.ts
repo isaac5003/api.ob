@@ -4,7 +4,7 @@ import { Country } from '../entities/Country.entity';
 
 @EntityRepository(Country)
 export class CountryRepository extends Repository<Country> {
-  async getCountries(): Promise<Country[]> {
+  async getCountries(): Promise<{ data: Country[]; count: number }> {
     let country: Country[];
 
     try {
@@ -13,6 +13,6 @@ export class CountryRepository extends Repository<Country> {
       console.error(error);
       logDatabaseError('paises', error);
     }
-    return country;
+    return { data: country, count: country.length };
   }
 }

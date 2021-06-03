@@ -1,5 +1,5 @@
-import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested, IsBoolean } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested } from 'class-validator';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../_tools';
 import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';

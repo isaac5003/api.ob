@@ -4,7 +4,7 @@ import { City } from '../entities/City.entity';
 
 @EntityRepository(City)
 export class CityRepository extends Repository<City> {
-  async getCities(): Promise<City[]> {
+  async getCities(): Promise<{ data: City[]; count: number }> {
     let cities: City[];
     const leftJoinAndSelect = {
       s: 'c.state',
@@ -21,6 +21,6 @@ export class CityRepository extends Repository<City> {
       console.error(error);
       logDatabaseError('ciudades', error);
     }
-    return cities;
+    return { data: cities, count: cities.length };
   }
 }
