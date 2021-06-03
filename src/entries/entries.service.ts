@@ -458,8 +458,8 @@ export class EntriesService {
                 entryNumber: `Partida #${a.accountingEntry.serie}`,
                 entryName: a.concept,
                 date: a.accountingEntry.date,
-                cargo: a.cargo ? a.cargo.toFixed(2) : 0,
-                abono: a.abono ? a.abono.toFixed(2) : 0,
+                cargo: a.cargo ? a.cargo : 0,
+                abono: a.abono ? a.abono : 0,
                 balance: 0,
               };
             });
@@ -485,8 +485,8 @@ export class EntriesService {
                     balance: currentBalance,
                   };
                 }),
-              totalAbono: movements.reduce((a, b) => a + b.abono, 0),
-              totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
+              totalAbono: movements.reduce((a, b) => a + parseFloat(b.abono), 0),
+              totalCargo: movements.reduce((a, b) => a + parseFloat(b.cargo), 0),
               currentBalance,
             };
           })
