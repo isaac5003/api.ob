@@ -516,19 +516,21 @@ export class InvoicesService {
 
     let details = [];
     if (invoiceAll.status.id != 4) {
-      details = invoiceAll.invoiceDetails.map((d) => {
-        const { id, name } = d.service;
-        delete d.service;
-        return {
-          ...d,
-          service: { id, name },
-        };
-      });
-      delete invoiceAll.invoiceDetails;
-      delete invoiceAll.invoicesPaymentsCondition.active;
-      delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-      delete invoiceAll.invoicesSeller.active;
-      delete invoiceAll.invoicesZone.active;
+      if (invoiceAll.invoiceDetails[0].service) {
+        details = invoiceAll.invoiceDetails.map((d) => {
+          const { id, name } = d.service;
+          delete d.service;
+          return {
+            ...d,
+            service: { id, name },
+          };
+        });
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition.active;
+        delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+        delete invoiceAll.invoicesSeller.active;
+        delete invoiceAll.invoicesZone.active;
+      }
     }
 
     const invoice = {
