@@ -37,6 +37,7 @@ import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { format } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
+import { CustomerIdDTO } from 'src/customers/dtos/customer-id.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -544,6 +545,7 @@ export class InvoicesService {
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
       'cliente',
+      customer.id,
     );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
@@ -694,6 +696,7 @@ export class InvoicesService {
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
       'cliente',
+      customer.id,
     );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(

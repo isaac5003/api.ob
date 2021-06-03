@@ -27,6 +27,9 @@ import { CustomerType } from './entities/CustomerType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { IsProviderDTO } from './dtos/customers-isprovider.dto';
+import { BranchDataDTO } from './dtos/customer-branch.dto';
+import { CustomerIdDTO } from './dtos/customer-id.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 @Controller('customers')
 @UseGuards(AuthGuard())
 export class CustomersController {
@@ -104,9 +107,61 @@ export class CustomersController {
 
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id);
+  async getCustomerBranches(
+    @Param('id') id: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseListDTO<CustomerBranch>> {
+    const branches = await this.customersService.getCustomerBranches(id, filter);
     return new ResponseListDTO(plainToClass(CustomerBranch, branches));
+  }
+
+  @Get('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getCustomerBranch(
+    @Param('id') id: string,
+    @Param('customerId') customer: string,
+  ): Promise<ResponseSingleDTO<CustomerBranch>> {
+    const branch = await this.customersService.getCustomerBranch(id, customer);
+    return new ResponseSingleDTO(plainToClass(CustomerBranch, branch));
+  }
+
+  @Post('/:customerId/branches')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createCustomerBranches(
+    @Body('branches') data: BranchDataDTO[],
+    @Param('customerId') customerId: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.customersService.createBranches(data, customerId, company);
+  }
+
+  @Put('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerBranch(
+    @Param('id') id: string,
+    @Body('branch') data: BranchDataDTO,
+    @Param('customerId') customer: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranch(id, data, customer);
+  }
+
+  @Put('/:customerId/branches/:id/default')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerDefault(
+    @Param('id') id: string,
+    @Param('customerId') customer: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranchDefault(id, filter, customer);
+  }
+
+  @Delete('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteCustomerBranch(
+    @Param('id') id: string,
+    @Param('customerId') customerId: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.deleteBranch(id, customerId);
   }
 
   @Put('/:id')
