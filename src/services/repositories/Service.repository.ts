@@ -24,7 +24,7 @@ export class ServiceRepository extends Repository<Service> {
     }
   }
 
-  async getFilteredServices(company: Company, filter?: ServiceFilterDTO): Promise<Service[]> {
+  async getFilteredServices(company: Company, filter?: ServiceFilterDTO): Promise<{ data: Service[]; count: number }> {
     const { limit, page, search, active, prop, order, type, fromAmount, toAmount } = filter;
 
     try {
@@ -48,14 +48,16 @@ export class ServiceRepository extends Repository<Service> {
         query.andWhere('s.cost <= :toAmount', { toAmount });
       }
 
-      // applies pagination
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
-
       // filter by type
       if (type) {
         query.andWhere('s.sellingType = :type', { type });
+      }
+
+      const queryc = await query.getCount();
+
+      // applies pagination
+      if (limit && page) {
+        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
 
       // sort by prop}
@@ -65,7 +67,10 @@ export class ServiceRepository extends Repository<Service> {
         query.orderBy('s.createdAt', 'DESC');
       }
 
-      return await query.getMany();
+      return {
+        data: await query.getMany(),
+        count: queryc,
+      };
     } catch (error) {
       logDatabaseError(reponame, error);
     }

@@ -9,7 +9,10 @@ import { InvoicesZone } from '../entities/InvoicesZone.entity';
 const reponame = 'zonas';
 @EntityRepository(InvoicesZone)
 export class InvoicesZoneRepository extends Repository<InvoicesZone> {
-  async getInvoicesZones(company: Company, filter: Partial<FilterDTO>): Promise<InvoicesZone[]> {
+  async getInvoicesZones(
+    company: Company,
+    filter: Partial<FilterDTO>,
+  ): Promise<{ data: InvoicesZone[]; count: number }> {
     const { limit, page, search, active } = filter;
     try {
       const query = this.createQueryBuilder('iz').where({ company }).orderBy('iz.createdAt', 'DESC');
@@ -23,11 +26,12 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
           search: `%${search}%`,
         });
       }
+      const count = await query.getCount();
       // applies pagination
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.log(error);
       logDatabaseError(reponame, error);

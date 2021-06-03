@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, IsNumber, IsISO8601, IsOptional, IsInt } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsISO8601, IsOptional, IsInt } from 'class-validator';
 import { validationMessage } from '../../_tools';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 

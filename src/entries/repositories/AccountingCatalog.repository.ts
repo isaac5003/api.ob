@@ -8,7 +8,10 @@ import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
 const reponame = 'catalogo de cuentas';
 @EntityRepository(AccountingCatalog)
 export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
-  async getAccountingCatalogs(company: Company, filter: FilterDTO): Promise<AccountingCatalog[]> {
+  async getAccountingCatalogs(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<{ data: AccountingCatalog[]; count: number }> {
     try {
       const { search, limit, page } = filter;
 
@@ -37,10 +40,11 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
         });
       }
 
+      const count = await query.getCount();
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
       }
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.error(error);
 

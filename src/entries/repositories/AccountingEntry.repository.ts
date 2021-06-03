@@ -1,6 +1,6 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
-import { EntityRepository, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
 import { startOfMonth, endOfMonth } from 'date-fns';
@@ -39,7 +39,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
     };
   }
 
-  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<AccountingEntry[]> {
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: AccountingEntry[]; count: number }> {
     try {
       const { limit, page, search, squared, accounted, startDate, endDate, entryType, prop, order } = filter;
 
@@ -85,9 +85,6 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
       } else {
         entries = entries.orderBy('entries.createdAt', 'DESC');
       }
-      if (limit && page) {
-        entries = entries.limit(limit).offset(page * limit);
-      }
 
       if (squared == true) {
         entries = entries.andWhere('entries.squared = :squared', {
@@ -111,7 +108,12 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
         });
       }
 
-      return await entries.getMany();
+      const count = await entries.getCount();
+      if (limit && page) {
+        entries = entries.limit(limit).offset(page * limit);
+      }
+
+      return { data: await entries.getMany(), count };
     } catch (error) {
       console.error(error);
 

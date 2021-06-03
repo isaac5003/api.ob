@@ -13,7 +13,7 @@ describe('SERVICES MODULE', () => {
   beforeEach(async () => {
     const { body } = await request(app)
       .post('/auth/login')
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .send({ email: 'demo@prueba.com', password: '123456789' });
     token = `Bearer ${body.access_token}`;
   });
@@ -30,7 +30,7 @@ describe('SERVICES MODULE', () => {
   it('POST / creates a new service', () => {
     return request(app)
       .post(path)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .send(newServicePayload)
       .expect(201)
@@ -46,7 +46,7 @@ describe('SERVICES MODULE', () => {
     it('wrong cost value type', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...newServicePayload, cost: 'hola' })
         .expect(400)
@@ -59,7 +59,7 @@ describe('SERVICES MODULE', () => {
     it('wrong incIva value type', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...newServicePayload, incIva: 'hola' })
         .expect(400)
@@ -72,7 +72,7 @@ describe('SERVICES MODULE', () => {
     it('wrong incRenta value type', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...newServicePayload, incIva: 'hola' })
         .expect(400)
@@ -88,7 +88,7 @@ describe('SERVICES MODULE', () => {
     it('omitting name', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, incIva, incRenta })
         .expect(400)
@@ -101,7 +101,7 @@ describe('SERVICES MODULE', () => {
     it('omitting cost', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ name, sellingType, description, incIva, incRenta })
         .expect(400)
@@ -114,7 +114,7 @@ describe('SERVICES MODULE', () => {
     it('omitting sellingType', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, name, description, incIva, incRenta })
         .expect(400)
@@ -127,7 +127,7 @@ describe('SERVICES MODULE', () => {
     it('omitting description', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, name, incIva, incRenta })
         .expect(400)
@@ -140,7 +140,7 @@ describe('SERVICES MODULE', () => {
     it('omitting incIva', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, name, incRenta })
         .expect(400)
@@ -153,7 +153,7 @@ describe('SERVICES MODULE', () => {
     it('omitting incRenta', () => {
       return request(app)
         .post(path)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, incIva, name })
         .expect(400)
@@ -167,7 +167,7 @@ describe('SERVICES MODULE', () => {
   it('GET /:id rejects when no token is sent', () => {
     return request(app)
       .get(`${path}/${id}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .expect(401)
       .expect(({ body }) => {
         expect(body.message).toBe('Unauthorized');
@@ -193,7 +193,7 @@ describe('SERVICES MODULE', () => {
   it('GET /:id rejects when no valid id format is sent', () => {
     return request(app)
       .get(`${path}/wrong-id`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -204,7 +204,7 @@ describe('SERVICES MODULE', () => {
   it('GET /:id rejects when no existing id is sent', () => {
     return request(app)
       .get(`${path}/${v1()}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -215,7 +215,7 @@ describe('SERVICES MODULE', () => {
   it('PUT /:id rejects when no token is sent', () => {
     return request(app)
       .put(`${path}/${id}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .expect(401)
       .expect(({ body }) => {
         expect(body.message).toBe('Unauthorized');
@@ -225,7 +225,7 @@ describe('SERVICES MODULE', () => {
   it('PUT /:id provides a response', () => {
     return request(app)
       .put(`${path}/${id}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .send(editServicePayload)
       .expect(200)
@@ -254,7 +254,7 @@ describe('SERVICES MODULE', () => {
     it('wrong cost value type', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...editServicePayload, cost: 'hola' })
         .expect(400)
@@ -267,7 +267,7 @@ describe('SERVICES MODULE', () => {
     it('wrong incIva value type', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...editServicePayload, incIva: 'hola' })
         .expect(400)
@@ -280,7 +280,7 @@ describe('SERVICES MODULE', () => {
     it('wrong incRenta value type', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ ...editServicePayload, incIva: 'hola' })
         .expect(400)
@@ -296,7 +296,7 @@ describe('SERVICES MODULE', () => {
     it('omitting name', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, incIva, incRenta })
         .expect(400)
@@ -309,7 +309,7 @@ describe('SERVICES MODULE', () => {
     it('omitting cost', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ name, sellingType, description, incIva, incRenta })
         .expect(400)
@@ -322,7 +322,7 @@ describe('SERVICES MODULE', () => {
     it('omitting sellingType', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, name, description, incIva, incRenta })
         .expect(400)
@@ -335,7 +335,7 @@ describe('SERVICES MODULE', () => {
     it('omitting description', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, name, incIva, incRenta })
         .expect(400)
@@ -348,7 +348,7 @@ describe('SERVICES MODULE', () => {
     it('omitting incIva', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, name, incRenta })
         .expect(400)
@@ -361,7 +361,7 @@ describe('SERVICES MODULE', () => {
     it('omitting incRenta', () => {
       return request(app)
         .put(`${path}/${id}`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .set('Content-Type', 'application/json')
         .set('Authorization', token)
         .send({ cost, sellingType, description, incIva, name })
         .expect(400)
@@ -375,7 +375,7 @@ describe('SERVICES MODULE', () => {
   it('PUT /:id rejects when no valid id format is sent', () => {
     return request(app)
       .put(`${path}/wrong-id`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -386,7 +386,7 @@ describe('SERVICES MODULE', () => {
   it('PUT /:id rejects when no existing id is sent', () => {
     return request(app)
       .put(`${path}/${v1()}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -397,7 +397,7 @@ describe('SERVICES MODULE', () => {
   it('DELETE /:id rejects when no token is sent', () => {
     return request(app)
       .delete(`${path}/${id}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .expect(401)
       .expect(({ body }) => {
         expect(body.message).toBe('Unauthorized');
@@ -407,7 +407,7 @@ describe('SERVICES MODULE', () => {
   it('DELETE /:id rejects when no valid id format is sent', () => {
     return request(app)
       .delete(`${path}/wrong-id`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -418,7 +418,7 @@ describe('SERVICES MODULE', () => {
   it('DELETE /:id rejects when no existing id is sent', () => {
     return request(app)
       .delete(`${path}/${v1()}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(400)
       .expect(({ body }) => {
@@ -429,7 +429,7 @@ describe('SERVICES MODULE', () => {
   it('DELETE /:id provides a response', () => {
     return request(app)
       .delete(`${path}/${id}`)
-      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .set('Content-Type', 'application/json')
       .set('Authorization', token)
       .expect(200)
       .expect(({ body }) => {

@@ -10,7 +10,11 @@ import { ProviderStatusDTO } from 'src/providers/dtos/provider-updateStatus.dto'
 
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
-  async getCustomers(company: Company, filter: Partial<CustomerFilterDTO>, type: string): Promise<Customer[]> {
+  async getCustomers(
+    company: Company,
+    filter: Partial<CustomerFilterDTO>,
+    type: string,
+  ): Promise<{ data: Customer[]; count: number }> {
     try {
       const { active, limit, page, search, order, prop, branch } = filter;
       const query = this.createQueryBuilder('customer')
@@ -43,6 +47,8 @@ export class CustomerRepository extends Repository<Customer> {
         });
       }
 
+      const count = await query.getCount();
+
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
       }
@@ -53,7 +59,7 @@ export class CustomerRepository extends Repository<Customer> {
         query.orderBy('customer.createdAt', 'DESC');
       }
 
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.error(error);
 

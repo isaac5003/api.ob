@@ -17,7 +17,7 @@ import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 const reponame = 'documento';
 @EntityRepository(Invoice)
 export class InvoiceRepository extends Repository<Invoice> {
-  async getInvoices(company: Company, filter: Partial<InvoiceFilterDTO>): Promise<Invoice[]> {
+  async getInvoices(company: Company, filter: Partial<InvoiceFilterDTO>): Promise<{ data: Invoice[]; count: number }> {
     const {
       limit,
       page,
@@ -115,13 +115,13 @@ export class InvoiceRepository extends Repository<Invoice> {
           },
         );
       }
-
+      const count = await query.getCount();
       // applies pagination
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
 
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.error(error);
       logDatabaseError(reponame, error);

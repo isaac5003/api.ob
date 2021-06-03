@@ -6,7 +6,7 @@ import { AccountingEntryType } from '../entities/AccountingEntryType.entity';
 const reponame = 'tipo de partida contable';
 @EntityRepository(AccountingEntryType)
 export class AccountingEntryTypeRepository extends Repository<AccountingEntryType> {
-  async getEntryTypes(company: Company): Promise<AccountingEntryType[]> {
+  async getEntryTypes(company: Company): Promise<{ data: AccountingEntryType[]; count: number }> {
     let entryTypes: AccountingEntryType[];
     try {
       entryTypes = await this.find({
@@ -16,7 +16,7 @@ export class AccountingEntryTypeRepository extends Repository<AccountingEntryTyp
     } catch (error) {
       logDatabaseError(reponame, error);
     }
-    return entryTypes;
+    return { data: entryTypes, count: entryTypes.length };
   }
 
   async getEntryType(company: Company, id: string): Promise<AccountingEntryType> {
