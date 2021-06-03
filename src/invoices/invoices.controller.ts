@@ -39,6 +39,7 @@ import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
+import { plainToClass } from 'class-transformer';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -46,13 +47,15 @@ export class InvoicesController {
   constructor(private invoice: InvoicesService) {}
 
   @Get('/document-types')
-  async getInvoicesDocumentType(): Promise<ResponseListDTO<InvoicesDocumentType, number>> {
-    return this.invoice.getInvoicesDocumentTypes();
+  async getInvoicesDocumentType(): Promise<ResponseListDTO<InvoicesDocumentType, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesDocumentTypes();
+    return new ResponseListDTO(plainToClass(InvoicesDocumentType, data), count);
   }
 
   @Get('/status')
-  async getInvoicesStatus(): Promise<ResponseListDTO<InvoicesStatus, number>> {
-    return this.invoice.getInvoicesStatuses();
+  async getInvoicesStatus(): Promise<ResponseListDTO<InvoicesStatus, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesStatuses();
+    return new ResponseListDTO(plainToClass(InvoicesStatus, data), count);
   }
 
   @Put('/status/void/:id')
@@ -84,8 +87,9 @@ export class InvoicesController {
   async getInvoicesZones(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesZone, number>> {
-    return this.invoice.getInvoicesZones(company, filter);
+  ): Promise<ResponseListDTO<InvoicesZone, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesZones(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesZone, data), count, filter.page, filter.limit);
   }
 
   @Post('/zones')
@@ -130,8 +134,9 @@ export class InvoicesController {
   async getInvoicesPaymentConditions(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesPaymentsCondition, number>> {
-    return this.invoice.getInvoicesPaymentConditions(company, filter);
+  ): Promise<ResponseListDTO<InvoicesPaymentsCondition, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesPaymentConditions(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesPaymentsCondition, data), count, filter.page, filter.limit);
   }
 
   @Post('/payment-condition')
@@ -176,8 +181,9 @@ export class InvoicesController {
   async getInvoicesSellers(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesSeller, number>> {
-    return this.invoice.getInvoicesSellers(company, filter);
+  ): Promise<ResponseListDTO<InvoicesSeller, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesSellers(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesSeller, data), count, filter.page, filter.limit);
   }
 
   @Post('/sellers')
@@ -222,8 +228,9 @@ export class InvoicesController {
   async getInvoiceDocuments(
     @GetAuthData('company') company: Company,
     @Query() filter: DocumentFilterDTO,
-  ): Promise<ResponseListDTO<InvoicesDocument, number>> {
-    return await this.invoice.getDocuments(company, filter);
+  ): Promise<ResponseListDTO<InvoicesDocument, number, number, number>> {
+    const { data, count } = await await this.invoice.getDocuments(company, filter);
+    return new ResponseListDTO(plainToClass(InvoicesDocument, data), count, filter.page, filter.limit);
   }
 
   @Get('/documents/:id')
@@ -301,8 +308,9 @@ export class InvoicesController {
   async getInvoices(
     @Query() filter: InvoiceFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number>> {
-    return this.invoice.getInvoices(company, filter);
+  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoices(company, filter);
+    return new ResponseListDTO(plainToClass(Invoice, data), count, filter.page, filter.limit);
   }
 
   @Get('/:id')

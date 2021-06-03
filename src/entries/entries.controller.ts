@@ -36,6 +36,7 @@ import { AccountingEntryType } from './entities/AccountingEntryType.entity';
 import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
 import { AccountingSetting } from './entities/AccountingSetting.entity';
 import { EntriesService } from './entries.service';
+import { plainToClass } from 'class-transformer';
 
 @Controller('entries')
 @UseGuards(AuthGuard())
@@ -53,8 +54,9 @@ export class EntriesController {
   async getCatalog(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<AccountingCatalog, number>> {
-    return this.entries.getAccountingCatalogs(company, filter);
+  ): Promise<ResponseListDTO<AccountingCatalog, number, number, number>> {
+    const { data, count } = await this.entries.getAccountingCatalogs(company, filter);
+    return new ResponseListDTO(plainToClass(AccountingCatalog, data), count, filter.page, filter.limit);
   }
 
   @Post('/catalog')
@@ -84,8 +86,11 @@ export class EntriesController {
 
   @Get('/types')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getEntryTypes(@GetAuthData('company') company: Company): Promise<ResponseListDTO<AccountingEntryType, number>> {
-    return this.entries.getEntryTypes(company);
+  async getEntryTypes(
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseListDTO<AccountingEntryType, number, number, number>> {
+    const { data, count } = await this.entries.getEntryTypes(company);
+    return new ResponseListDTO(plainToClass(AccountingEntryType, data), count);
   }
 
   @Get('/serie')
@@ -97,8 +102,9 @@ export class EntriesController {
   @Get('/register-type')
   async getRegisterType(
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<AccountingRegisterType, number>> {
-    return this.entries.getResgisterType(company);
+  ): Promise<ResponseListDTO<AccountingRegisterType, number, number, number>> {
+    const { data, count } = await this.entries.getResgisterType(company);
+    return new ResponseListDTO(plainToClass(AccountingRegisterType, data), count);
   }
 
   @Get('/setting/general')
@@ -221,8 +227,9 @@ export class EntriesController {
   async getEntries(
     @GetAuthData('company') company: Company,
     @Query() filter: EntriesFilterDTO,
-  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number>> {
-    return this.entries.getEntries(company, filter);
+  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number, number, number>> {
+    const { data, count } = await this.entries.getEntries(company, filter);
+    return new ResponseListDTO(plainToClass(AccountingEntry, data), count, filter.page, filter.limit);
   }
 
   @Get('/:id')

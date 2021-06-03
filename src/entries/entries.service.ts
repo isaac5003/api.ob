@@ -799,7 +799,7 @@ export class EntriesService {
   async getEntries(
     company: Company,
     filter: EntriesFilterDTO,
-  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number>> {
+  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number, number, number>> {
     const { data, count } = await this.accountingEntryRepository.getEntries(company, filter);
 
     const entry = data.map((e) => {
@@ -815,6 +815,8 @@ export class EntriesService {
     return {
       data: entry,
       count,
+      page: filter.page,
+      limit: filter.limit,
     };
   }
 

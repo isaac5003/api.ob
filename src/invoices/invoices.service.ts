@@ -251,7 +251,10 @@ export class InvoicesService {
     };
   }
 
-  async getDocuments(company: Company, filter: DocumentFilterDTO): Promise<ResponseListDTO<any, number>> {
+  async getDocuments(
+    company: Company,
+    filter: DocumentFilterDTO,
+  ): Promise<ResponseListDTO<any, number, number, number>> {
     const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company, filter);
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
@@ -269,7 +272,7 @@ export class InvoicesService {
             documentType: dt,
           };
     });
-    return { data: documents, count: documents.length };
+    return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
   async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
@@ -480,7 +483,10 @@ export class InvoicesService {
 
     return report;
   }
-  async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Partial<Invoice>, number>> {
+  async getInvoices(
+    company: Company,
+    filter: InvoiceFilterDTO,
+  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
     const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
 
     const sales = data.map((i) => {
@@ -500,6 +506,8 @@ export class InvoicesService {
     return {
       data: sales,
       count,
+      page: filter.page,
+      limit: filter.limit,
     };
   }
 
