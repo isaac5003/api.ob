@@ -194,15 +194,8 @@ export class CustomersService {
   }
 
   async getCustomerTributary(id: string, company: Company, type = 'cliente'): Promise<ResponseSingleDTO<Customer>> {
-    const {
-      dui,
-      nit,
-      nrc,
-      giro,
-      customerType,
-      customerTaxerType,
-      customerTypeNatural,
-    } = await this.customerRepository.getCustomer(id, company, type);
+    const { dui, nit, nrc, giro, customerType, customerTaxerType, customerTypeNatural } =
+      await this.customerRepository.getCustomer(id, company, type);
     const tributary = {
       dui,
       nit,
@@ -271,11 +264,17 @@ export class CustomersService {
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
     const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type, filter);
+
+    //marca como defualt:false la antigua branch
     await this.customerBranchRepository.updateBranch(
       customerBranch.data.find((b) => b.default).id,
       { default: false },
       type,
     );
+
+    //marca con default la nueva branch
+    await this.customerBranchRepository.updateBranch(id, { default: true }, type);
+
     return {
       message: 'Se ha marcado como sucursal principal correctamente.',
     };
