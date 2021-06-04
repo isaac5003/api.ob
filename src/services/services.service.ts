@@ -79,6 +79,7 @@ export class ServicesService {
   }
 
   async updateService(company: Company, id: string, data: serviceDataDTO): Promise<ResponseMinimalDTO> {
+    await this.serviceRepository.getService(company, id);
     await this.sellingTypeRepository.getSellingType((data.sellingType as any) as number);
     const service = await this.serviceRepository.updateService(company, data, id);
     return {
@@ -87,11 +88,23 @@ export class ServicesService {
     };
   }
 
-  async updateServiceStatusIntegration(
+  async updateServiceStatus(company: Company, id: string, data: serviceStatusDTO): Promise<ResponseMinimalDTO> {
+    await this.serviceRepository.getService(company, id);
+    const service = await this.serviceRepository.updateService(company, data, id);
+    return {
+      id: service.id,
+      message: 'El servicio se ha actualizado correctamente.',
+    };
+  }
+  async updateServiceIntegration(
     company: Company,
     id: string,
-    data: serviceStatusDTO | ServiceIntegrationDTO,
+    data: ServiceIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
+    await this.serviceRepository.getService(company, id);
+    if (data.accountingCatalog) {
+      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    }
     const service = await this.serviceRepository.updateService(company, data, id);
     return {
       id: service.id,
