@@ -91,6 +91,17 @@ export class EntriesService {
   ): Promise<ResponseMinimalDTO> {
     let parent;
 
+    const accountsExist = await this.accountingCatalogRepository.getAccountingCatalogsReport(company);
+    const accountsCodes = accountsExist.map((ae) => ae.code);
+
+    for (const account of accounts) {
+      if (accountsCodes.includes(account.code)) {
+        throw new BadRequestException(
+          'No pueden existir códigos duplicados entres las nuevas cuentas y las ya existentes.',
+        );
+      }
+    }
+
     const account = await this.accountingCatalogRepository.createAccounts({ accounts, parentCatalog }, company);
 
     if (parentCatalog) {
@@ -805,10 +816,9 @@ export class EntriesService {
     const entry = data.map((e) => {
       const entri = {
         ...e,
-        // cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
+
         cargo: e.cargo,
       };
-      // delete entri.accountingEntryDetails;
 
       return entri;
     });
