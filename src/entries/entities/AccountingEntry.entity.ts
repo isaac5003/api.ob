@@ -32,7 +32,7 @@ export class AccountingEntry extends BaseEntity {
   @Column({ type: 'boolean' })
   accounted: boolean;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
