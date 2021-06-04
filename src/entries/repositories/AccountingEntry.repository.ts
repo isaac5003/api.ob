@@ -39,37 +39,36 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
     };
   }
 
-  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: AccountingEntry[]; count: number }> {
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: any[]; count: number }> {
     try {
       const { limit, page, search, squared, accounted, startDate, endDate, entryType, prop, order } = filter;
 
-      let entries = this.createQueryBuilder('entries')
+      let entries = this.createQueryBuilder('ae')
         .select([
-          'entries.id',
-          'entries.serie',
-          'entries.title',
-          'entries.date',
-          'entries.squared',
-          'entries.accounted',
+          'ae.id',
+          'ae.serie',
+          'ae.title',
+          'ae.date',
+          'ae.squared',
+          'ae.accounted',
+          'ae.createdAt',
           'aet.id',
           'aet.name',
           'aet.code',
-          'sum(aed.cargo) cargo',
-          'aed.id',
-          'aed.cargo',
         ])
-        .leftJoin('entries.accountingEntryType', 'aet')
-        .leftJoin('entries.accountingEntryDetails', 'aed')
+        .leftJoin('ae.accountingEntryType', 'aet')
+        .leftJoin('ae.accountingEntryDetails', 'aed')
+        .addSelect('sum(aed.cargo) as cargo')
         .where({ company })
-        .groupBy('entries.id')
-        .addGroupBy('aet.id')
-        .addGroupBy('aed.id');
+        .groupBy('ae.id')
+        .addGroupBy('aet.id');
 
       if (search) {
         entries = entries.andWhere('(LOWER(entries.title) LIKE :search) ', {
           search: `%${search}%`,
         });
       }
+
       if (order && prop) {
         let field = `entries.${prop}`;
         switch (prop) {
@@ -110,10 +109,32 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
 
       const count = await entries.getCount();
       if (limit && page) {
-        entries = entries.limit(limit).offset(page * limit);
+        entries = entries.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
 
-      return { data: await entries.getMany(), count };
+      const data = await entries.getRawMany();
+      return {
+        data: data.map((d) => {
+          const aekeys = Object.keys(d).filter((k) => k.startsWith('ae_'));
+          const aetkeys = Object.keys(d).filter((k) => k.startsWith('aet_'));
+          const root = {};
+          const accountingEntryType = {};
+          for (const v of aekeys) {
+            root[v.replace('ae_', '')] = d[v];
+          }
+
+          for (const v of aetkeys) {
+            accountingEntryType[v.replace('aet_', '')] = d[v];
+          }
+
+          return {
+            ...root,
+            cargo: d.cargo,
+            accountingEntryType,
+          };
+        }),
+        count,
+      };
     } catch (error) {
       console.error(error);
 
