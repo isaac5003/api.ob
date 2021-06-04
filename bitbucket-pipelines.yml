@@ -1,5 +1,6 @@
 pipelines:
-  pull requests:
+  default:
     - step:
-      script:
+      script
         - echo "Hello World"
+        
