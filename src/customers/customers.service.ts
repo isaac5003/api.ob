@@ -101,7 +101,7 @@ export class CustomersService {
   async generateReportIndividual(company: Company, id: string, type = 'cliente'): Promise<any> {
     const customer = await this.customerRepository.getCustomer(id, company, type);
     const phone = customer.customerBranches.find((cb) => cb.default).contactInfo;
-    delete customer.isActiveCustomer, delete customer.isActiveProvider, delete customer.isProvider;
+
     const report = {
       company: {
         name: company.name,
@@ -126,8 +126,10 @@ export class CustomersService {
 
     if (type == 'proveedor') {
       delete report.customer;
+      delete report.provider.isActiveCustomer;
     } else {
       delete report.provider;
+      delete report.customer.isActiveProvider;
     }
     return report;
   }
