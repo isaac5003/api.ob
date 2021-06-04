@@ -39,7 +39,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
     };
   }
 
-  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: AccountingEntry[]; count: number }> {
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: any[]; count: number }> {
     try {
       const { limit, page, search, squared, accounted, startDate, endDate, entryType, prop, order } = filter;
 
@@ -51,25 +51,24 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
           'entries.date',
           'entries.squared',
           'entries.accounted',
+          'entries.createdAt',
           'aet.id',
           'aet.name',
           'aet.code',
           'sum(aed.cargo) cargo',
-          'aed.id',
-          'aed.cargo',
         ])
         .leftJoin('entries.accountingEntryType', 'aet')
         .leftJoin('entries.accountingEntryDetails', 'aed')
         .where({ company })
         .groupBy('entries.id')
-        .addGroupBy('aet.id')
-        .addGroupBy('aed.id');
-
+        .addGroupBy('aet.id');
       if (search) {
         entries = entries.andWhere('(LOWER(entries.title) LIKE :search) ', {
           search: `%${search}%`,
         });
       }
+      console.log(await entries.getMany());
+
       if (order && prop) {
         let field = `entries.${prop}`;
         switch (prop) {
@@ -110,7 +109,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
 
       const count = await entries.getCount();
       if (limit && page) {
-        entries = entries.limit(limit).offset(page * limit);
+        entries = entries.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
 
       return { data: await entries.getMany(), count };

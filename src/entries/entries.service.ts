@@ -805,7 +805,8 @@ export class EntriesService {
     const entry = data.map((e) => {
       const entri = {
         ...e,
-        cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
+        // cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
+        cargo: e.cargo,
       };
       delete entri.accountingEntryDetails;
 
