@@ -68,7 +68,6 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
           search: `%${search}%`,
         });
       }
-      console.log(await entries.getRawMany());
 
       if (order && prop) {
         let field = `entries.${prop}`;
