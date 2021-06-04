@@ -808,7 +808,7 @@ export class EntriesService {
         // cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
         cargo: e.cargo,
       };
-      delete entri.accountingEntryDetails;
+      // delete entri.accountingEntryDetails;
 
       return entri;
     });
