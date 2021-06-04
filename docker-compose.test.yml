@@ -9,7 +9,6 @@ services:
     env_file:
       - test.env
     volumes:
-      - demo_openbox_database:/var/lib/postgresql/data
       - ./local.init:/docker-entrypoint-initdb.d
 
   demo_openbox_api:
@@ -23,6 +22,3 @@ services:
       - test.env
     depends_on:
       - demo_openbox_db
-
-volumes:
-  demo_openbox_database: {}
