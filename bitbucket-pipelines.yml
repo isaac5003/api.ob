@@ -12,6 +12,7 @@ pipelines:
     - step:
         name: Test
         script:
+          - docker container ls
           - apk add --update nodejs npm
           - node -v
           - npm -v
