@@ -797,6 +797,11 @@ export class EntriesService {
 
         name = `ESTADO DE RESULTADOS AL ${format(parseISO(data.endDate), 'dd/MM/yyyy')}`;
         break;
+
+      case 'accounting-catalog':
+        accounts = catalog;
+        name = 'CATALOGO DE CUENTAS';
+        break;
     }
 
     return {
