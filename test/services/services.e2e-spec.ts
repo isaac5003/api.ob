@@ -2,7 +2,7 @@ import * as request from 'supertest';
 import { newServicePayload, editServicePayload } from './services.payload';
 import { v1 } from 'uuid';
 
-const app = 'http://localhost:5001';
+const app = 'http://localhost:8001';
 
 describe('SERVICES MODULE', () => {
   const path = '/services';
