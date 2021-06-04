@@ -4,4 +4,5 @@ pipelines:
     - step:
         name: Build and Test
         script:
-          - echo "Hello World"
+          - npm run build
+          - npm run test:e2e
