@@ -2,10 +2,6 @@ image: docker/compose
 pipelines:
   default:
     - step:
-        name: Prepare NodeJS
-        script:
-          - apk add --update nodejs npm
-    - step:
         name: Build Images
         services:
           - docker
@@ -16,4 +12,8 @@ pipelines:
     - step:
         name: Test
         script:
+          - apk add --update nodejs npm
+          - node -v
+          - npm -v
+          - npm install
           - npm run test:e2e
