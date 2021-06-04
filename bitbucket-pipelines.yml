@@ -1,6 +1,7 @@
+image: node:12.15.3
 pipelines:
   default:
     - step:
-      script
-        - echo "Hello World"
-        
+        name: Build and Test
+        script:
+          - echo "Hello World"
