@@ -62,25 +62,25 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true })
   customerGiro: string;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   sum: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   iva: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   subtotal: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ivaRetenido: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventasExentas: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventasNoSujetas: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventaTotal: number;
 
   @Column({ nullable: true })
@@ -92,7 +92,7 @@ export class Invoice extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'date' })
   invoiceDate: string;
 
   @Column({ nullable: true })

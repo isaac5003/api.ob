@@ -16,7 +16,7 @@ export class AccountingSetting extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   type: string;
 
   @Column({ nullable: true })
@@ -34,19 +34,19 @@ export class AccountingSetting extends BaseEntity {
   @Column({ nullable: true, type: 'json' })
   estadoResultados: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'date' })
   periodStart: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'date' })
   peridoEnd: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   legal: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   accountant: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   auditor: string;
 
   @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingSettings)
