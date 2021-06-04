@@ -8,5 +8,6 @@ pipelines:
         caches:
           - node
         script:
+          - apt install nodejs
           - docker-compose -f docker-compose.test.yml up -d
           - npm run test:e2e
