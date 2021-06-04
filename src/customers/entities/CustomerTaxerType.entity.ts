@@ -14,8 +14,9 @@ export class CustomerTaxerType extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
+
   @CreateDateColumn({ select: false })
   createdAt: string;
 

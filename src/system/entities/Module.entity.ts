@@ -14,19 +14,19 @@ export class Module extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   description: string;
 
   @Column({ type: 'json' })
   access: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   reserved: boolean;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   system: boolean;
 
   @CreateDateColumn({ select: false })

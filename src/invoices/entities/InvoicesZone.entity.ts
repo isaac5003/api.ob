@@ -17,7 +17,7 @@ export class InvoicesZone extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
   @CreateDateColumn({ select: false })
@@ -26,7 +26,7 @@ export class InvoicesZone extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
   @OneToMany(() => Invoice, (invoice) => invoice.invoicesZone)

@@ -11,15 +11,15 @@ export class Logger extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   userId: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   module: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   detail: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   userName: string;
 }

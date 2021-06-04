@@ -15,10 +15,10 @@ export class InvoicesDocumentType extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   code: string;
 
   @CreateDateColumn({ select: false })

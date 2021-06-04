@@ -17,10 +17,10 @@ export class InvoicesSeller extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
   @CreateDateColumn({ select: false })

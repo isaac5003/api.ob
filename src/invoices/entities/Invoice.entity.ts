@@ -26,40 +26,40 @@ export class Invoice extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   authorization: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   sequence: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerAddress1: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerAddress2: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerCountry: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerState: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerCity: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerDui: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerNit: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerNrc: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerGiro: string;
 
   @Column({ type: 'decimal', nullable: true })
@@ -83,7 +83,7 @@ export class Invoice extends BaseEntity {
   @Column({ type: 'decimal', nullable: true })
   ventaTotal: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   ventaTotalText: string;
 
   @CreateDateColumn()
@@ -95,13 +95,13 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true, type: 'date' })
   invoiceDate: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   paymentConditionName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   sellerName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   zoneName: string;
 
   @ManyToOne(() => Branch, (branch) => branch.invoices)
