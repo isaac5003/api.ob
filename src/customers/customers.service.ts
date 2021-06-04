@@ -370,7 +370,10 @@ export class CustomersService {
     company: Company,
     type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    await this.customerRepository.getCustomer(id, company, type);
+    if (data.accountingCatalog) {
+      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    }
     await this.customerRepository.updateCustomer(id, data, company, type);
     return {
       message: type == 'cliente' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',

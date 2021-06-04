@@ -206,7 +206,7 @@ export class ProvidersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
     @Body()
-    isCustomer: IsCustomerDTO,
+    { isCustomer }: IsCustomerDTO,
     @Body()
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,

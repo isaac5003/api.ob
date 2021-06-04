@@ -38,7 +38,7 @@ export function validationMessage(fieldname: string, type: string): string {
     case 'IsISO8601':
       return `El campo '${fieldname}' debe ser una fecha en el formato "yyyy-MM-dd".`;
     case 'IsUUID':
-      return `El campo '${fieldname}' debe ser del tipo uuid".`;
+      return `El campo '${fieldname}' debe ser del tipo uuid.`;
     case 'IsNumber':
       return `El campo '${fieldname}' debe ser un numero y debe contener dos decimales.`;
     case 'IsArray':
