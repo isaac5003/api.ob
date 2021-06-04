@@ -1,4 +1,4 @@
-image: node:12.14.1
+image: docker/compose
 pipelines:
   default:
     - step:
@@ -8,6 +8,7 @@ pipelines:
         caches:
           - node
         script:
+          - apt install nodejs
           - npm install
           - npm run build
           - docker-compose -f docker-compose.local.yml up -d
