@@ -3,6 +3,9 @@ pipelines:
   default:
     - step:
         name: Build and Test
+        caches:
+          - node
         script:
+          - npm install
           - npm run build
           - npm run test:e2e
