@@ -14,4 +14,6 @@ pipelines:
           - node -v
           - npm -v
           - npm install
+          - sleep 45
+          - docker container ls 
           - npm run test:e2e
