@@ -1,0 +1,5 @@
+pipelines:
+  pull requests:
+    - step:
+      script:
+        - echo "Hello World"
