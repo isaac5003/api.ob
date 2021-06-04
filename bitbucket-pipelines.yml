@@ -16,5 +16,5 @@ pipelines:
           - npm install
           - sleep 45
           - docker container ls -a
-          - docker container logs demo_openbox_api
+          - docker container logs test_openbox_api
           - npm run test:e2e
