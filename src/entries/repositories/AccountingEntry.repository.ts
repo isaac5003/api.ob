@@ -3,9 +3,10 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, format, parseISO, parseJSON } from 'date-fns';
 import { EntriesFilterDTO } from '../dtos/entries-filter.dto';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
+import { paginateRaw } from 'nestjs-typeorm-paginate';
 
 const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)
@@ -64,13 +65,13 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
         .addGroupBy('aet.id');
 
       if (search) {
-        entries = entries.andWhere('(LOWER(entries.title) LIKE :search) ', {
+        entries = entries.andWhere('(LOWER(ae.title) LIKE :search) ', {
           search: `%${search}%`,
         });
       }
 
       if (order && prop) {
-        let field = `entries.${prop}`;
+        let field = `ae.${prop}`;
         switch (prop) {
           case 'cargo':
             field = `cargo`;
@@ -82,42 +83,40 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
         }
         entries.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
-        entries = entries.orderBy('entries.createdAt', 'DESC');
+        entries = entries.orderBy('ae.createdAt', 'DESC');
       }
 
       if (squared == true) {
-        entries = entries.andWhere('entries.squared = :squared', {
+        entries = entries.andWhere('ae.squared = :squared', {
           squared: squared == true,
         });
       }
       if (accounted == true) {
-        entries = entries.andWhere('entries.accounted = :accounted', {
+        entries = entries.andWhere('ae.accounted = :accounted', {
           accounted: accounted == true,
         });
       }
       if (startDate && endDate) {
-        entries = entries.andWhere('entries.date >= :startDate', {
+        entries = entries.andWhere('ae.date >= :startDate', {
           startDate,
         });
-        entries = entries.andWhere('entries.date <= :endDate', { endDate });
+        entries = entries.andWhere('ae.date <= :endDate', { endDate });
       }
       if (entryType) {
-        entries = entries.andWhere('entries.accountingEntryTypeId = :entryType', {
+        entries = entries.andWhere('ae.accountingEntryTypeId = :entryType', {
           entryType,
         });
       }
 
       const count = await entries.getCount();
-      if (limit && page) {
-        entries = entries.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
 
-      const data = await entries.getRawMany();
+      const data = await paginateRaw<any>(entries, { limit, page });
+
       return {
-        data: data.map((d) => {
+        data: data.items.map((d) => {
           const aekeys = Object.keys(d).filter((k) => k.startsWith('ae_'));
           const aetkeys = Object.keys(d).filter((k) => k.startsWith('aet_'));
-          const root = {};
+          const root: Partial<AccountingEntry> = {};
           const accountingEntryType = {};
           for (const v of aekeys) {
             root[v.replace('ae_', '')] = d[v];
@@ -131,8 +130,10 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
             ...root,
             cargo: d.cargo,
             accountingEntryType,
+            date: format(parseJSON(root.date), 'dd/MM/yyyy'),
           };
         }),
+
         count,
       };
     } catch (error) {
