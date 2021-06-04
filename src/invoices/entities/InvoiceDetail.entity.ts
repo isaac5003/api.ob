@@ -22,7 +22,7 @@ export class InvoiceDetail extends BaseEntity {
   @Column({ type: 'float' })
   unitPrice: number;
 
-  @Column()
+  @Column({ type: 'boolean' })
   incTax: boolean;
 
   @Column({ type: 'float' })
@@ -34,7 +34,7 @@ export class InvoiceDetail extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   chargeDescription: string;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.invoiceDetails)
