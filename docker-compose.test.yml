@@ -7,7 +7,7 @@ services:
     ports:
       - '8000:5432'
     env_file:
-      - demo.env
+      - test.env
     volumes:
       - demo_openbox_database:/var/lib/postgresql/data
       - ./local.init:/docker-entrypoint-initdb.d
@@ -20,7 +20,7 @@ services:
     ports:
       - '8001:3000'
     env_file:
-      - demo.env
+      - test.env
     depends_on:
       - demo_openbox_db
 
