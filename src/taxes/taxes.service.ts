@@ -2,13 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
 import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
+import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { RegisterTaxDTO } from './dtos/taxes-register.dto';
 
 @Injectable()
@@ -69,6 +69,21 @@ export class TaxesService {
     return {
       id: invoice.id,
       message: 'El registro de IVA se creo correctamente.',
+    };
+  }
+
+  async getInvoice(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+    const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
+    console.log(data);
+
+    return {
+      data: data,
+      count,
+      page: filter.page,
+      limit: filter.limit,
     };
   }
 }
