@@ -1,0 +1,24 @@
+version: '3.1'
+
+services:
+  test_openbox_db:
+    container_name: test_openbox_db
+    image: postgres:13.1-alpine
+    ports:
+      - '8000:5432'
+    env_file:
+      - test.env
+    volumes:
+      - ./local.init:/docker-entrypoint-initdb.d
+
+  test_openbox_api:
+    container_name: test_openbox_api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - '8001:3000'
+    env_file:
+      - test.env
+    depends_on:
+      - test_openbox_db
