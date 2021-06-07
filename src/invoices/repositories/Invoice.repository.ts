@@ -14,7 +14,6 @@ import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { RegisterTaxDTO } from 'src/taxes/dtos/taxes-register.dto';
-import { InvoicesDocumentTypeRepository } from './InvoicesDocumentType.repository';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
