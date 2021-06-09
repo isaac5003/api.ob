@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
+import { InvoiceFilterDTO } from 'src/invoices/dtos/invoice-filter.dto';
 import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
 import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
@@ -72,15 +73,25 @@ export class TaxesService {
     };
   }
 
-  async getInvoice(
+  async getInvoices(
     company: Company,
-    filter: FilterDTO,
+    filter: InvoiceFilterDTO,
   ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
     const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
-    console.log(data);
+    const sales = data.map((s) => {
+      return {
+        invoiceDate: s.invoiceDate,
+        customer: s.customer,
+
+        authorization: s.authorization,
+        sequence: s.sequence,
+        documentType: s.documentType,
+        iva: s.iva,
+      };
+    });
 
     return {
-      data: data,
+      data: sales,
       count,
       page: filter.page,
       limit: filter.limit,
