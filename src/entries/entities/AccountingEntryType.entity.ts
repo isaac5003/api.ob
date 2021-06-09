@@ -16,10 +16,10 @@ export class AccountingEntryType extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   code: string;
 
   @CreateDateColumn({ select: false })

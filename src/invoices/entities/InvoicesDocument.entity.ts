@@ -18,19 +18,19 @@ export class InvoicesDocument extends BaseEntity {
   @Column({ nullable: true })
   authorization: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   initial: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   final: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   current: number;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   used: boolean;
 
   @CreateDateColumn({ select: false })
@@ -39,13 +39,13 @@ export class InvoicesDocument extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   isCurrentDocument: boolean;
 
   @Column({ type: 'json', nullable: true })
   documentLayout: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'json' })
   layout: string;
 
   @ManyToOne(() => Company, (company) => company.invoicesDocuments)

@@ -32,6 +32,7 @@
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "date-fns": "^2.21.1",
+    "nestjs-typeorm-paginate": "^2.5.2",
     "nodemailer": "^6.6.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
@@ -39,7 +40,7 @@
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.6",
-    "typeorm": "^0.2.31",
+    "typeorm": "^0.2.34",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -15,40 +15,41 @@ import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 import { Company } from '../../companies/entities/Company.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   shortName: string;
 
-  @Column()
+  @Column({ type: 'boolean' })
   isProvider: boolean;
 
-  @Column()
+  @Column({ type: 'boolean' })
   isCustomer: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   dui: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nrc: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nit: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   giro: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   isActiveCustomer: boolean;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   isActiveProvider: boolean;
 
   @CreateDateColumn()
@@ -77,4 +78,7 @@ export class Customer extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.customer)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.provider)
+  purchases: Purchase[];
 }

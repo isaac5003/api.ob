@@ -26,65 +26,68 @@ export class Invoice extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   authorization: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   sequence: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerAddress1: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerAddress2: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerCountry: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerState: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerCity: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerDui: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerNit: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerNrc: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   customerGiro: string;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   sum: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   iva: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   subtotal: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ivaRetenido: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventasExentas: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventasNoSujetas: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'decimal', nullable: true })
   ventaTotal: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   ventaTotalText: string;
+
+  @Column({ default: 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4', type: 'uuid' })
+  origin: string;
 
   @CreateDateColumn()
   createdAt: string;
@@ -92,16 +95,16 @@ export class Invoice extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'date' })
   invoiceDate: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   paymentConditionName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   sellerName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   zoneName: string;
 
   @ManyToOne(() => Branch, (branch) => branch.invoices)

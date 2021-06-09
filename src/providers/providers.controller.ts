@@ -167,14 +167,8 @@ export class ProvidersController {
   @Get('/report/general')
   async getReportGeneral(
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Customer, number, number, number>> {
-    const { data, count } = await this.customersService.generateReportGeneral(company, 'proveedores');
-    return {
-      data,
-      count,
-      page: null,
-      limit: null,
-    };
+  ): Promise<ResponseListDTO<Partial<Customer>, number, number, number>> {
+    return await this.customersService.generateReportGeneral(company, 'proveedores');
   }
 
   @Get('/report/:id')
@@ -206,7 +200,7 @@ export class ProvidersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
     @Body()
-    isCustomer: IsCustomerDTO,
+    { isCustomer }: IsCustomerDTO,
     @Body()
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,

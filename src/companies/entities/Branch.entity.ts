@@ -16,22 +16,23 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Company } from './Company.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity()
 export class Branch extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'json' })
   contactInfo: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   address1: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   address2: string;
 
   @CreateDateColumn({ select: false })
@@ -57,6 +58,9 @@ export class Branch extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.branch)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.branch)
+  purchases: Purchase[];
 
   @ManyToMany(() => Profile, (profile) => profile.branches)
   profiles: Profile[];

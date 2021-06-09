@@ -3,9 +3,10 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { SeriesDTO } from '../dtos/serie/entries-series.dto';
 import { AccountingEntry } from '../entities/AccountingEntry.entity';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, format, parseISO, parseJSON } from 'date-fns';
 import { EntriesFilterDTO } from '../dtos/entries-filter.dto';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
+import { paginateRaw } from 'nestjs-typeorm-paginate';
 
 const reponame = 'partida contable';
 @EntityRepository(AccountingEntry)
@@ -39,39 +40,38 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
     };
   }
 
-  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: AccountingEntry[]; count: number }> {
+  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<{ data: any[]; count: number }> {
     try {
       const { limit, page, search, squared, accounted, startDate, endDate, entryType, prop, order } = filter;
 
-      let entries = this.createQueryBuilder('entries')
+      let entries = this.createQueryBuilder('ae')
         .select([
-          'entries.id',
-          'entries.serie',
-          'entries.title',
-          'entries.date',
-          'entries.squared',
-          'entries.accounted',
+          'ae.id',
+          'ae.serie',
+          'ae.title',
+          'ae.date',
+          'ae.squared',
+          'ae.accounted',
+          'ae.createdAt',
           'aet.id',
           'aet.name',
           'aet.code',
-          'sum(aed.cargo) cargo',
-          'aed.id',
-          'aed.cargo',
         ])
-        .leftJoin('entries.accountingEntryType', 'aet')
-        .leftJoin('entries.accountingEntryDetails', 'aed')
+        .leftJoin('ae.accountingEntryType', 'aet')
+        .leftJoin('ae.accountingEntryDetails', 'aed')
+        .addSelect('sum(aed.cargo) as cargo')
         .where({ company })
-        .groupBy('entries.id')
-        .addGroupBy('aet.id')
-        .addGroupBy('aed.id');
+        .groupBy('ae.id')
+        .addGroupBy('aet.id');
 
       if (search) {
-        entries = entries.andWhere('(LOWER(entries.title) LIKE :search) ', {
+        entries = entries.andWhere('(LOWER(ae.title) LIKE :search) ', {
           search: `%${search}%`,
         });
       }
+
       if (order && prop) {
-        let field = `entries.${prop}`;
+        let field = `ae.${prop}`;
         switch (prop) {
           case 'cargo':
             field = `cargo`;
@@ -83,37 +83,59 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
         }
         entries.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
-        entries = entries.orderBy('entries.createdAt', 'DESC');
+        entries = entries.orderBy('ae.createdAt', 'DESC');
       }
 
       if (squared == true) {
-        entries = entries.andWhere('entries.squared = :squared', {
+        entries = entries.andWhere('ae.squared = :squared', {
           squared: squared == true,
         });
       }
       if (accounted == true) {
-        entries = entries.andWhere('entries.accounted = :accounted', {
+        entries = entries.andWhere('ae.accounted = :accounted', {
           accounted: accounted == true,
         });
       }
       if (startDate && endDate) {
-        entries = entries.andWhere('entries.date >= :startDate', {
+        entries = entries.andWhere('ae.date >= :startDate', {
           startDate,
         });
-        entries = entries.andWhere('entries.date <= :endDate', { endDate });
+        entries = entries.andWhere('ae.date <= :endDate', { endDate });
       }
       if (entryType) {
-        entries = entries.andWhere('entries.accountingEntryTypeId = :entryType', {
+        entries = entries.andWhere('ae.accountingEntryTypeId = :entryType', {
           entryType,
         });
       }
 
       const count = await entries.getCount();
-      if (limit && page) {
-        entries = entries.limit(limit).offset(page * limit);
-      }
 
-      return { data: await entries.getMany(), count };
+      const data = await paginateRaw<any>(entries, { limit, page });
+
+      return {
+        data: data.items.map((d) => {
+          const aekeys = Object.keys(d).filter((k) => k.startsWith('ae_'));
+          const aetkeys = Object.keys(d).filter((k) => k.startsWith('aet_'));
+          const root: Partial<AccountingEntry> = {};
+          const accountingEntryType = {};
+          for (const v of aekeys) {
+            root[v.replace('ae_', '')] = d[v];
+          }
+
+          for (const v of aetkeys) {
+            accountingEntryType[v.replace('aet_', '')] = d[v];
+          }
+
+          return {
+            ...root,
+            cargo: d.cargo,
+            accountingEntryType,
+            date: format(parseJSON(root.date), 'dd/MM/yyyy'),
+          };
+        }),
+
+        count,
+      };
     } catch (error) {
       console.error(error);
 

@@ -222,14 +222,19 @@ export class EntriesController {
     return await this.entries.getReport(company, date, 'accountMovements');
   }
 
+  @Get('/report/accounting-catalog')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAccount(@GetAuthData('company') company: Company): Promise<any> {
+    return await this.entries.getReport(company, { date: null }, 'accounting-catalog');
+  }
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getEntries(
     @GetAuthData('company') company: Company,
     @Query() filter: EntriesFilterDTO,
   ): Promise<ResponseListDTO<Partial<AccountingEntry>, number, number, number>> {
-    const { data, count } = await this.entries.getEntries(company, filter);
-    return new ResponseListDTO(plainToClass(AccountingEntry, data), count, filter.page, filter.limit);
+    const { data, count, limit, page } = await this.entries.getEntries(company, filter);
+    return new ResponseListDTO(plainToClass(AccountingEntry, data), count, page, limit);
   }
 
   @Get('/:id')

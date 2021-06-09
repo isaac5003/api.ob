@@ -11,13 +11,14 @@ import {
 import { Customer } from './Customer.entity';
 import { CustomerType } from './CustomerType.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity()
 export class CustomerTypeNatural extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
   @CreateDateColumn({ select: false })
@@ -34,4 +35,7 @@ export class CustomerTypeNatural extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.customerTypeNatural)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.providerTypeNatural)
+  purchases: Purchase[];
 }

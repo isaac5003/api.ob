@@ -17,22 +17,22 @@ export class AccountingEntry extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   serie: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   title: string;
 
   @Column({ type: 'date' })
   date: string;
 
-  @Column()
+  @Column({ type: 'boolean' })
   squared: boolean;
 
-  @Column()
+  @Column({ type: 'boolean' })
   accounted: boolean;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })

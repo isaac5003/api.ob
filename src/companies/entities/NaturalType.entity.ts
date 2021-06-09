@@ -14,7 +14,7 @@ export class NaturalType extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
   @CreateDateColumn({ select: false })
   createdAt: string;

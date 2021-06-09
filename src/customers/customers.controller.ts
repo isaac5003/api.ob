@@ -213,7 +213,7 @@ export class CustomersController {
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCustomer(
-    @Body() isProvider: IsProviderDTO,
+    @Body() { isProvider }: IsProviderDTO,
     @Body()
     data: CustomerDataDTO,
     @GetAuthData('company') company: Company,

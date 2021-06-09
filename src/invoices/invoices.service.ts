@@ -35,7 +35,7 @@ import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
 @Injectable()
@@ -119,9 +119,6 @@ export class InvoicesService {
         statuses = [2, 3, 5];
         break;
     }
-
-    console.log(status);
-    console.log(statuses);
 
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
@@ -445,6 +442,10 @@ export class InvoicesService {
 
     const report = {
       company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      name: `DETALLE DE VENTAS EN EL PERIODO DEL ${format(parseISO(startDate), 'dd/MM/yyyy')} AL ${format(
+        parseISO(endDate),
+        'dd/MM/yyyy',
+      )}`,
       invoices,
     };
 
@@ -478,6 +479,10 @@ export class InvoicesService {
 
     const report = {
       company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      name: `LISTADO DE VENTAS EN EL PERIODO DEL ${format(parseISO(startDate), 'dd/MM/yyyy')} AL ${format(
+        parseISO(endDate),
+        'dd/MM/yyyy',
+      )}`,
       invoices,
     };
 
