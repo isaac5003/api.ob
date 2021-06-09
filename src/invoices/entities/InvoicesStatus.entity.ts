@@ -1,5 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Invoice } from './Invoice.entity';
+
 @Entity()
 export class InvoicesStatus extends BaseEntity {
   @PrimaryGeneratedColumn()

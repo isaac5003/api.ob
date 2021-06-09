@@ -11,7 +11,6 @@ import { JwtStrategy } from './jwt.strategy';
 import { CompanyRepository } from '../companies/repositories/Company.repository';
 import { BranchRepository } from '../companies/repositories/Branch.repository';
 import { RecoveryRepository } from './repositories/Recovery.repository';
-
 import { TokenRepository } from 'src/system/repositories/Token.repository';
 @Module({
   imports: [
