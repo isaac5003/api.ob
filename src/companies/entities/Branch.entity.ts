@@ -23,16 +23,16 @@ export class Branch extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'json' })
   contactInfo: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   address1: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   address2: string;
 
   @CreateDateColumn({ select: false })

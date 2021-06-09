@@ -1,4 +1,3 @@
-import { Transform } from 'class-transformer';
 import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 import { validationMessage } from '../../../_tools';
 

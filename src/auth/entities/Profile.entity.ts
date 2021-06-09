@@ -18,13 +18,13 @@ export class Profile extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   description: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   editable: boolean;
 
   @CreateDateColumn({ select: false })
@@ -33,7 +33,7 @@ export class Profile extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   admin: boolean;
 
   @OneToMany(() => Access, (access) => access.profile)

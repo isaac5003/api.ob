@@ -5,14 +5,14 @@ import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 const reponame = 'estado del documento';
 @EntityRepository(InvoicesStatus)
 export class InvoicesStatusRepository extends Repository<InvoicesStatus> {
-  async getInvoicesStatuses(): Promise<InvoicesStatus[]> {
+  async getInvoicesStatuses(): Promise<{ data: InvoicesStatus[]; count: number }> {
     let statuses: InvoicesStatus[];
     try {
       statuses = await this.find();
     } catch (error) {
       logDatabaseError(reponame, error);
     }
-    return statuses;
+    return { data: statuses, count: statuses.length };
   }
 
   async getInvoicesStatus(id: number): Promise<InvoicesStatus> {

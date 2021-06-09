@@ -18,32 +18,32 @@ export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   unique: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   email: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   password: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   names: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   lastnames: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'date' })
   dob: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   changePassword: boolean;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  avatarURL: string;
+  @Column({ nullable: true, type: 'varchar' })
+  avatarUrl: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;

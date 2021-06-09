@@ -22,34 +22,34 @@ export class Customer extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   shortName: string;
 
-  @Column()
+  @Column({ type: 'boolean' })
   isProvider: boolean;
 
-  @Column()
+  @Column({ type: 'boolean' })
   isCustomer: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   dui: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nrc: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nit: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   giro: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   isActiveCustomer: boolean;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   isActiveProvider: boolean;
 
   @CreateDateColumn()

@@ -9,7 +9,7 @@ import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 const reponame = 'vendedor';
 @EntityRepository(InvoicesSeller)
 export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
-  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSeller[]; count: number }> {
     const { limit, page, search, active } = filter;
 
     try {
@@ -29,11 +29,12 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
           search: `%${search}%`,
         });
       }
+      const count = await query.getCount();
       // applies pagination
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
-      return await query.getMany();
+      return { data: await query.getMany(), count };
     } catch (error) {
       console.log(error);
       logDatabaseError(reponame, error);

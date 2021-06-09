@@ -19,16 +19,16 @@ export class Service extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   description: string;
 
   @Column({ type: 'float' })
   cost: number;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
   @CreateDateColumn()
@@ -37,10 +37,10 @@ export class Service extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   incIva: boolean;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   incRenta: boolean;
 
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.service)

@@ -75,12 +75,12 @@ export class InvoicesService {
     private invoicesDocumentRepository: InvoicesDocumentRepository,
   ) {}
 
-  async getInvoicesDocumentTypes(): Promise<InvoicesDocumentType[]> {
-    return await this.invoicesDocumentTypeRepository.getInvoiceDocumentsType();
+  async getInvoicesDocumentTypes(): Promise<{ data: InvoicesDocumentType[]; count: number }> {
+    return this.invoicesDocumentTypeRepository.getInvoiceDocumentsType();
   }
 
-  async getInvoicesStatuses(): Promise<InvoicesStatus[]> {
-    return await this.invoiceStatusRepository.getInvoicesStatuses();
+  async getInvoicesStatuses(): Promise<{ data: InvoicesStatus[]; count: number }> {
+    return this.invoiceStatusRepository.getInvoicesStatuses();
   }
 
   async updateInvoicesStatus(company: Company, id: string, type: string): Promise<ResponseMinimalDTO> {
@@ -136,8 +136,11 @@ export class InvoicesService {
     };
   }
 
-  async getInvoicesZones(company: Company, filter: Partial<FilterDTO>): Promise<InvoicesZone[]> {
-    return await this.invoicesZoneRepository.getInvoicesZones(company, filter);
+  async getInvoicesZones(
+    company: Company,
+    filter: Partial<FilterDTO>,
+  ): Promise<{ data: InvoicesZone[]; count: number }> {
+    return this.invoicesZoneRepository.getInvoicesZones(company, filter);
   }
 
   async createInvoicesZone(company: Company, data: InvoiceZonesDataDTO): Promise<ResponseMinimalDTO> {
@@ -168,8 +171,11 @@ export class InvoicesService {
     };
   }
 
-  async getInvoicesPaymentConditions(company: Company, filter: FilterDTO): Promise<InvoicesPaymentsCondition[]> {
-    return await this.invoicesPaymentsConditionRepository.getInvoicesPaymentConditions(company, filter);
+  async getInvoicesPaymentConditions(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<{ data: InvoicesPaymentsCondition[]; count: number }> {
+    return this.invoicesPaymentsConditionRepository.getInvoicesPaymentConditions(company, filter);
   }
 
   async createInvoicesPaymentCondition(
@@ -206,8 +212,8 @@ export class InvoicesService {
     };
   }
 
-  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<InvoicesSeller[]> {
-    return await this.invoiceSellerRepository.getInvoicesSellers(company, filter);
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSeller[]; count: number }> {
+    return this.invoiceSellerRepository.getInvoicesSellers(company, filter);
   }
 
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
@@ -245,7 +251,10 @@ export class InvoicesService {
     };
   }
 
-  async getDocuments(company: Company, filter: DocumentFilterDTO): Promise<ResponseListDTO<InvoicesDocument>> {
+  async getDocuments(
+    company: Company,
+    filter: DocumentFilterDTO,
+  ): Promise<ResponseListDTO<any, number, number, number>> {
     const existingDocuments = await this.invoicesDocumentRepository.getInvoicesDocuments(company, filter);
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes();
 
@@ -263,7 +272,7 @@ export class InvoicesService {
             documentType: dt,
           };
     });
-    return new ResponseListDTO(plainToClass(InvoicesDocument, documents));
+    return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
   async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
@@ -403,7 +412,7 @@ export class InvoicesService {
     const sales = await this.invoiceRepository.getInvoices(company, params);
 
     const invoices = documentTypes.map((dt) => {
-      const documents = sales
+      const documents = sales.data
         .filter((s) => s.documentType.id == dt.id)
         .map((d) => {
           return {
@@ -457,7 +466,7 @@ export class InvoicesService {
 
     const sales = await this.invoiceRepository.getInvoices(company, params);
 
-    const invoices = sales.map((d) => {
+    const invoices = sales.data.map((d) => {
       return {
         customer: d.customerName,
         code: d.documentType.code,
@@ -474,10 +483,13 @@ export class InvoicesService {
 
     return report;
   }
-  async getInvoices(company: Company, filter: InvoiceFilterDTO): Promise<ResponseListDTO<Invoice>> {
-    const invoices = await this.invoiceRepository.getInvoices(company, filter);
+  async getInvoices(
+    company: Company,
+    filter: InvoiceFilterDTO,
+  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+    const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
 
-    const sales = invoices.map((i) => {
+    const sales = data.map((i) => {
       return {
         id: i.id,
         authorization: i.authorization,
@@ -491,7 +503,12 @@ export class InvoicesService {
       };
     });
 
-    return new ResponseListDTO(plainToClass(Invoice, sales));
+    return {
+      data: sales,
+      count,
+      page: filter.page,
+      limit: filter.limit,
+    };
   }
 
   async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoice>> {
@@ -544,6 +561,7 @@ export class InvoicesService {
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
       'cliente',
+      customer.id,
     );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
@@ -563,7 +581,7 @@ export class InvoicesService {
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(
       company,
       data.header.documentType,
-      allInvoicesReserved.map((ir) => parseInt(ir.sequence)),
+      allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)),
     );
 
     const invoiceHeader = await this.invoiceRepository.createInvoice(
@@ -598,8 +616,8 @@ export class InvoicesService {
     await this.invoiceDetailRepository.createInvoiceDetail(details);
 
     let nextSequence = parseInt(invoiceHeader.sequence) + 1;
-    if (allInvoicesReserved.map((ir) => parseInt(ir.sequence)).includes(nextSequence)) {
-      for (const is of allInvoicesReserved.map((ir) => parseInt(ir.sequence))) {
+    if (allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)).includes(nextSequence)) {
+      for (const is of allInvoicesReserved.data.map((ir) => parseInt(ir.sequence))) {
         for (let s = nextSequence; s <= document.final; s++) {
           if (s != is) {
             nextSequence = s;
@@ -649,7 +667,7 @@ export class InvoicesService {
       sequence.push(s);
     }
 
-    const invoicesSequence = allInvoicesReserved.map((is) => parseInt(is.sequence));
+    const invoicesSequence = allInvoicesReserved.data.map((is) => parseInt(is.sequence));
     const alreadyReserved = invoicesSequence.filter((is) => sequence.includes(is));
     const sequenceToReserve = sequence.filter((s) => !alreadyReserved.includes(s));
 
@@ -694,6 +712,7 @@ export class InvoicesService {
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
       'cliente',
+      customer.id,
     );
     const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(

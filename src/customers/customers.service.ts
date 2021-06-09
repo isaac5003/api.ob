@@ -20,6 +20,8 @@ import { AccountingCatalogRepository } from '../entries/repositories/AccountingC
 import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
+import { BranchDataDTO } from './dtos/customer-branch.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 
 @Injectable()
 export class CustomersService {
@@ -47,7 +49,7 @@ export class CustomersService {
   ) {}
 
   async generateReportGeneral(company: Company, type = 'clientes'): Promise<any> {
-    const customers = await this.customerRepository.getCustomers(company, { branch: true }, type);
+    const { data } = await this.customerRepository.getCustomers(company, { branch: true }, type);
 
     const report = {
       company: {
@@ -56,7 +58,7 @@ export class CustomersService {
         nit: company.nit,
       },
       name: type == 'clientes' ? 'REPORTE GENERAL DE CLIENTES' : 'REPORTE GENERAL DE PROVEEDORES',
-      customers: customers
+      customers: data
         .map((c) => {
           const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
           return {
@@ -71,7 +73,7 @@ export class CustomersService {
             ...cu,
           };
         }),
-      providers: customers
+      providers: data
         .map((c) => {
           const phones = c.customerBranches.find((cb) => cb.default).contactInfo.phones;
           return {
@@ -130,8 +132,12 @@ export class CustomersService {
     return report;
   }
 
-  async getCustomers(company: Company, data: CustomerFilterDTO, type = 'clientes'): Promise<Customer[]> {
-    return await this.customerRepository.getCustomers(company, data, type);
+  async getCustomers(
+    company: Company,
+    data: CustomerFilterDTO,
+    type = 'clientes',
+  ): Promise<{ data: Customer[]; count: number }> {
+    return this.customerRepository.getCustomers(company, data, type);
   }
 
   async getCustomer(company: Company, id: string, type = 'cliente'): Promise<Customer> {
@@ -168,7 +174,6 @@ export class CustomersService {
   async updateCustomerSettingsIntegrations(
     company: Company,
     data: AccountignCatalogIntegrationDTO,
-    type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
@@ -208,19 +213,92 @@ export class CustomersService {
     return new ResponseSingleDTO(plainToClass(Customer, tributary));
   }
 
-  async getCustomerBranches(id: string, type = 'cliente'): Promise<CustomerBranch[]> {
-    return this.customerBranchRepository.getCustomerBranches(id, type);
+  async getCustomerBranches(
+    id: string,
+    filter?: FilterDTO,
+    type = 'cliente',
+  ): Promise<{ data: CustomerBranch[]; count: number }> {
+    return this.customerBranchRepository.getCustomerBranches(id, type, filter);
   }
 
-  async getCustomerTypes(): Promise<CustomerType[]> {
+  async getCustomerBranch(id: string, customer: string, type = 'cliente'): Promise<CustomerBranch> {
+    return this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
+  }
+
+  async createBranches(
+    data: BranchDataDTO[],
+    customerId: string,
+    company: Company,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    const customer = await this.customerRepository.getCustomer(customerId, company, type);
+    const branches = data.map((b) => {
+      return {
+        ...b,
+        name: b.name,
+        customer: customer.id,
+        default: b.default == true || b.default == false ? b.default : false,
+      };
+    });
+    const createdBranches = await this.customerBranchRepository.createBranch(branches, type);
+    return {
+      ids: createdBranches.map((b) => b.id),
+      message: 'Se han creado las sucursales correctamente.',
+    };
+  }
+
+  async updateBranch(
+    id: string,
+    data: Partial<BranchDataDTO>,
+    customerId: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    const update = await this.customerBranchRepository.updateBranch(id, data, type);
+
+    return {
+      message: update.affected > 0 ? 'La sucursal se actualizo correctamente.' : 'No se pudo actulizar la sucursal.',
+    };
+  }
+
+  async updateBranchDefault(
+    id: string,
+    filter: FilterDTO,
+    customer: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
+    const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type, filter);
+    await this.customerBranchRepository.updateBranch(
+      customerBranch.data.find((b) => b.default).id,
+      { default: false },
+      type,
+    );
+    return {
+      message: 'Se ha marcado como sucursal principal correctamente.',
+    };
+  }
+
+  async deleteBranch(id: string, customerId: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
+    await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customerId);
+    const deletedBranch = await this.customerBranchRepository.deleteBranch(id, type);
+
+    return {
+      message: deletedBranch.affected
+        ? 'La sucursal se elimino correctamente.'
+        : 'La susursal no se ha podidop eliminar.',
+    };
+  }
+
+  async getCustomerTypes(): Promise<{ data: CustomerType[]; count: number }> {
     return this.customerTypeRepository.getCustomerTypes();
   }
 
-  async getCustomerTaxerTypes(): Promise<CustomerTaxerType[]> {
+  async getCustomerTaxerTypes(): Promise<{ data: CustomerTaxerType[]; count: number }> {
     return this.customerTaxerTypeRepository.getCustomerTaxerTypes();
   }
 
-  async getCustomerTypeNaturals(): Promise<CustomerTypeNatural[]> {
+  async getCustomerTypeNaturals(): Promise<{ data: CustomerTypeNatural[]; count: number }> {
     return this.customerTypeNaturalRepository.getCustomerTypeNaturals();
   }
 
@@ -251,7 +329,7 @@ export class CustomersService {
       name: data.branch.name ? data.branch.name : 'Sucursal principal',
       customer: id,
     };
-    await this.customerBranchRepository.createBranch(branch, type);
+    await this.customerBranchRepository.createBranch([branch], type);
     return {
       id: customer.id,
       message,

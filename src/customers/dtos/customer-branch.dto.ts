@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
@@ -14,7 +14,11 @@ export class BranchDataDTO {
   contactName: string;
 
   @IsOptional()
-  contactInfo: { phone: string[]; emails: string[] };
+  contactInfo: { phones: string[]; emails: string[] };
+
+  @IsOptional()
+  @IsBoolean({ message: validationMessage('default', 'IsBoolean') })
+  default: boolean;
 
   @IsNotEmpty({ message: validationMessage('address1', 'IsNotEmpty') })
   @IsString({ message: validationMessage('address1', 'IsString') })

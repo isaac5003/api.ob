@@ -1,7 +1,6 @@
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { Recovery } from '../entities/Recovery.entity';
-import { TokenDTO } from '../dtos/auth-token.dto';
 
 @EntityRepository(Recovery)
 export class RecoveryRepository extends Repository<Recovery> {

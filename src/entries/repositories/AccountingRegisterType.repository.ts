@@ -5,7 +5,7 @@ import { AccountingRegisterType } from '../entities/AccountingRegisterType.entit
 
 @EntityRepository(AccountingRegisterType)
 export class AccountingRegisterTypeRepository extends Repository<AccountingRegisterType> {
-  async getResgisterTypes(company: Company): Promise<AccountingRegisterType[]> {
+  async getResgisterTypes(company: Company): Promise<{ data: AccountingRegisterType[]; count: number }> {
     let registerType: AccountingRegisterType[];
     try {
       registerType = await this.find({
@@ -16,7 +16,7 @@ export class AccountingRegisterTypeRepository extends Repository<AccountingRegis
       logDatabaseError('tipos de registro', error);
     }
 
-    return registerType;
+    return { data: registerType, count: registerType.length };
   }
 
   async getRegisterType(company: Company, id: number): Promise<AccountingRegisterType> {

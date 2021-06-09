@@ -20,28 +20,28 @@ export class CustomerBranch extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   contactName: string;
 
   @Column({ type: 'json' })
   contactInfo: { phones: string[]; emails: string[] };
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   address1: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   address2: string;
 
-  @CreateDateColumn({ select: false })
+  @CreateDateColumn()
   createdAt: string;
 
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   default: boolean;
 
   @ManyToOne(() => Customer, (customer) => customer.customerBranches, {

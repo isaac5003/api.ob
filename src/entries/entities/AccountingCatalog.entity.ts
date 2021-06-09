@@ -21,25 +21,25 @@ export class AccountingCatalog extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   code: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   level: number;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   isParent: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'boolean' })
   isAcreedora: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'boolean' })
   isBalance: boolean;
 
   @CreateDateColumn({ select: false })

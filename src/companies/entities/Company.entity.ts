@@ -37,37 +37,37 @@ export class Company extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   unique: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   shortName: string;
 
-  @Column({ default: false })
+  @Column({ default: false, type: 'boolean' })
   outsourcer: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nrc: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   nit: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   dui: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   giro: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   logo: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   security: string;
 
-  @Column({ default: true })
+  @Column({ default: true, type: 'boolean' })
   active: boolean;
 
   @CreateDateColumn({ select: false })

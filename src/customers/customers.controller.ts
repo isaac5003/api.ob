@@ -27,27 +27,29 @@ import { CustomerType } from './entities/CustomerType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { IsProviderDTO } from './dtos/customers-isprovider.dto';
+import { BranchDataDTO } from './dtos/customer-branch.dto';
+import { FilterDTO } from 'src/_dtos/filter.dto';
 @Controller('customers')
 @UseGuards(AuthGuard())
 export class CustomersController {
   constructor(private customersService: CustomersService) {}
 
   @Get('/types')
-  async getTypes(): Promise<ResponseListDTO<CustomerType>> {
-    const types = await this.customersService.getCustomerTypes();
-    return new ResponseListDTO(plainToClass(CustomerType, types));
+  async getTypes(): Promise<ResponseListDTO<CustomerType, number, number, number>> {
+    const { data, count } = await this.customersService.getCustomerTypes();
+    return new ResponseListDTO(plainToClass(CustomerType, data), count);
   }
 
   @Get('/taxer-types')
-  async getTaxerTypes(): Promise<ResponseListDTO<CustomerTaxerType>> {
-    const taxerTypes = await this.customersService.getCustomerTaxerTypes();
-    return new ResponseListDTO(plainToClass(CustomerTaxerType, taxerTypes));
+  async getTaxerTypes(): Promise<ResponseListDTO<CustomerTaxerType, number, number, number>> {
+    const { data, count } = await this.customersService.getCustomerTaxerTypes();
+    return new ResponseListDTO(plainToClass(CustomerTaxerType, data), count);
   }
 
   @Get('/type-naturals')
-  async getTypeNaturals(): Promise<ResponseListDTO<CustomerTypeNatural>> {
-    const typeNatural = await this.customersService.getCustomerTypeNaturals();
-    return new ResponseListDTO(plainToClass(CustomerTypeNatural, typeNatural));
+  async getTypeNaturals(): Promise<ResponseListDTO<CustomerTypeNatural, number, number, number>> {
+    const { data, count } = await this.customersService.getCustomerTypeNaturals();
+    return new ResponseListDTO(plainToClass(CustomerTypeNatural, data), count);
   }
 
   @Get('/setting/integrations')
@@ -104,9 +106,61 @@ export class CustomersController {
 
   @Get('/:id/branches')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async getCustomerBranches(@Param('id') id: string): Promise<ResponseListDTO<CustomerBranch>> {
-    const branches = await this.customersService.getCustomerBranches(id);
-    return new ResponseListDTO(plainToClass(CustomerBranch, branches));
+  async getCustomerBranches(
+    @Param('id') id: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseListDTO<CustomerBranch, number, number, number>> {
+    const { data, count } = await this.customersService.getCustomerBranches(id, filter);
+    return new ResponseListDTO(plainToClass(CustomerBranch, data), count, filter.page, filter.limit);
+  }
+
+  @Get('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getCustomerBranch(
+    @Param('id') id: string,
+    @Param('customerId') customer: string,
+  ): Promise<ResponseSingleDTO<CustomerBranch>> {
+    const branch = await this.customersService.getCustomerBranch(id, customer);
+    return new ResponseSingleDTO(plainToClass(CustomerBranch, branch));
+  }
+
+  @Post('/:customerId/branches')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createCustomerBranches(
+    @Body('branches') data: BranchDataDTO[],
+    @Param('customerId') customerId: string,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.customersService.createBranches(data, customerId, company);
+  }
+
+  @Put('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerBranch(
+    @Param('id') id: string,
+    @Body('branch') data: BranchDataDTO,
+    @Param('customerId') customer: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranch(id, data, customer);
+  }
+
+  @Put('/:customerId/branches/:id/default')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateCustomerDefault(
+    @Param('id') id: string,
+    @Param('customerId') customer: string,
+    @Query() filter: FilterDTO,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.updateBranchDefault(id, filter, customer);
+  }
+
+  @Delete('/:customerId/branches/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async deleteCustomerBranch(
+    @Param('id') id: string,
+    @Param('customerId') customerId: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.customersService.deleteBranch(id, customerId);
   }
 
   @Put('/:id')
@@ -135,8 +189,10 @@ export class CustomersController {
   }
 
   @Get('/report/general')
-  async getReportGeneral(@GetAuthData('company') company: Company): Promise<ResponseListDTO<Customer>> {
-    return await this.customersService.generateReportGeneral(company);
+  async getReportGeneral(
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseListDTO<Customer, number, number, number>> {
+    return this.customersService.generateReportGeneral(company);
   }
 
   @Get('/report/:id')
@@ -149,9 +205,9 @@ export class CustomersController {
   async getCustomers(
     @Query() filter: CustomerFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Customer>> {
-    const customers = await this.customersService.getCustomers(company, filter);
-    return new ResponseListDTO(plainToClass(Customer, customers));
+  ): Promise<ResponseListDTO<Customer, number, number, number>> {
+    const { data, count } = await this.customersService.getCustomers(company, filter);
+    return new ResponseListDTO(plainToClass(Customer, data), count, filter.page, filter.limit);
   }
 
   @Post('/')

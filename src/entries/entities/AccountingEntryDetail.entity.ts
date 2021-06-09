@@ -16,11 +16,12 @@ export class AccountingEntryDetail extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   catalogName: string;
 
-  @Column()
+  @Column({ type: 'varchar' })
   concept: string;
+
   @Column({ nullable: true, type: 'float' })
   cargo: number;
 
@@ -33,7 +34,7 @@ export class AccountingEntryDetail extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'int' })
   order: number;
 
   @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingEntryDetails)

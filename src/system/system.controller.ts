@@ -11,20 +11,20 @@ export class SystemController {
   constructor(private system: SystemService) {}
 
   @Get('/countries')
-  async getCountries(): Promise<ResponseListDTO<Country>> {
-    const countries = await this.system.getCountries();
-    return new ResponseListDTO(plainToClass(Country, countries));
+  async getCountries(): Promise<ResponseListDTO<Country, number, number, number>> {
+    const { data, count } = await this.system.getCountries();
+    return new ResponseListDTO(plainToClass(Country, data), count);
   }
 
   @Get('/states')
-  async getStates(): Promise<ResponseListDTO<State>> {
-    const states = await this.system.getStates();
-    return new ResponseListDTO(plainToClass(State, states));
+  async getStates(): Promise<ResponseListDTO<State, number, number, number>> {
+    const { data, count } = await await this.system.getStates();
+    return new ResponseListDTO(plainToClass(State, data), count);
   }
 
   @Get('/cities')
-  async getCitites(): Promise<ResponseListDTO<City>> {
-    const cities = await this.system.getCities();
-    return new ResponseListDTO(plainToClass(City, cities));
+  async getCitites(): Promise<ResponseListDTO<City, number, number, number>> {
+    const { data, count } = await this.system.getCities();
+    return new ResponseListDTO(plainToClass(City, data), count);
   }
 }

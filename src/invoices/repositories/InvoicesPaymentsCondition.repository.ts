@@ -9,7 +9,10 @@ import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition
 const reponame = 'condiciones de pago';
 @EntityRepository(InvoicesPaymentsCondition)
 export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaymentsCondition> {
-  async getInvoicesPaymentConditions(company: Company, filter: FilterDTO): Promise<InvoicesPaymentsCondition[]> {
+  async getInvoicesPaymentConditions(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<{ data: InvoicesPaymentsCondition[]; count: number }> {
     const { search, active } = filter;
 
     try {
@@ -27,7 +30,8 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
         });
       }
 
-      return await query.getMany();
+      const conditions = await query.getMany();
+      return { data: conditions, count: conditions.length };
     } catch (error) {
       console.log(error);
       logDatabaseError(reponame, error);

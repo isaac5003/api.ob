@@ -50,11 +50,14 @@ export class EntriesService {
     private accountingEntryDetailRepository: AccountingEntryDetailRepository,
   ) {}
 
-  async getAccountingCatalogs(company: Company, filter: FilterDTO): Promise<AccountingCatalog[]> {
-    const catalog = await this.accountingCatalogRepository.getAccountingCatalogs(company, filter);
+  async getAccountingCatalogs(
+    company: Company,
+    filter: FilterDTO,
+  ): Promise<{ data: AccountingCatalog[]; count: number }> {
+    const { data, count } = await this.accountingCatalogRepository.getAccountingCatalogs(company, filter);
 
     let accounts = [];
-    accounts = catalog
+    accounts = data
       .map((c) => {
         return {
           ...c,
@@ -68,7 +71,7 @@ export class EntriesService {
         };
       });
 
-    return accounts;
+    return { data: accounts, count };
   }
 
   async generateReportEntry(company: Company, id: string): Promise<ReportsEntriesDTO> {
@@ -140,16 +143,16 @@ export class EntriesService {
     };
   }
 
-  async getEntryTypes(company: Company): Promise<AccountingEntryType[]> {
-    return await this.accountingEntryTypeRepository.getEntryTypes(company);
+  async getEntryTypes(company: Company): Promise<{ data: AccountingEntryType[]; count: number }> {
+    return this.accountingEntryTypeRepository.getEntryTypes(company);
   }
 
   async getSeries(company: Company, data: SeriesDTO): Promise<ResponseMinimalDTO> {
     return await this.accountingEntryRepository.getSeries(company, data);
   }
 
-  async getResgisterType(company: Company): Promise<AccountingRegisterType[]> {
-    return await this.accountingRegisterTypeRepository.getResgisterTypes(company);
+  async getResgisterType(company: Company): Promise<{ data: AccountingRegisterType[]; count: number }> {
+    return this.accountingRegisterTypeRepository.getResgisterTypes(company);
   }
 
   async getSettings(company: Company, settingType: string): Promise<ResponseSingleDTO<AccountingSetting>> {
@@ -455,8 +458,8 @@ export class EntriesService {
                 entryNumber: `Partida #${a.accountingEntry.serie}`,
                 entryName: a.concept,
                 date: a.accountingEntry.date,
-                cargo: a.cargo ? a.cargo.toFixed(2) : 0,
-                abono: a.abono ? a.abono.toFixed(2) : 0,
+                cargo: a.cargo ? a.cargo : 0,
+                abono: a.abono ? a.abono : 0,
                 balance: 0,
               };
             });
@@ -482,8 +485,8 @@ export class EntriesService {
                     balance: currentBalance,
                   };
                 }),
-              totalAbono: movements.reduce((a, b) => a + b.abono, 0),
-              totalCargo: movements.reduce((a, b) => a + b.cargo, 0),
+              totalAbono: movements.reduce((a, b) => a + parseFloat(b.abono), 0),
+              totalCargo: movements.reduce((a, b) => a + parseFloat(b.cargo), 0),
               currentBalance,
             };
           })
@@ -793,10 +796,13 @@ export class EntriesService {
     };
   }
 
-  async getEntries(company: Company, filter: EntriesFilterDTO): Promise<ResponseListDTO<AccountingEntry>> {
-    const entries = await this.accountingEntryRepository.getEntries(company, filter);
+  async getEntries(
+    company: Company,
+    filter: EntriesFilterDTO,
+  ): Promise<ResponseListDTO<Partial<AccountingEntry>, number, number, number>> {
+    const { data, count } = await this.accountingEntryRepository.getEntries(company, filter);
 
-    const entry = entries.map((e) => {
+    const entry = data.map((e) => {
       const entri = {
         ...e,
         cargo: e.accountingEntryDetails.reduce((a, b) => a + b.cargo, 0),
@@ -806,7 +812,12 @@ export class EntriesService {
       return entri;
     });
 
-    return new ResponseListDTO(plainToClass(AccountingEntry, entry));
+    return {
+      data: entry,
+      count,
+      page: filter.page,
+      limit: filter.limit,
+    };
   }
 
   async getEntry(company: Company, id: string): Promise<ResponseSingleDTO<AccountingEntry>> {
