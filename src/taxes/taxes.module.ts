@@ -8,6 +8,7 @@ import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
+import { TaxesRepository } from './repositories/taxes.repository';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStat
       InvoicesDocumentTypeRepository,
       CustomerRepository,
       InvoicesStatusRepository,
+      TaxesRepository,
     ]),
   ],
 
