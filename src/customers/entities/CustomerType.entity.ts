@@ -35,6 +35,6 @@ export class CustomerType extends BaseEntity {
   @OneToMany(() => Invoice, (invoice) => invoice.customerType)
   invoices: Invoice[];
 
-  // @OneToMany(() => Purchase, (purchase) => purchase.providerType)
-  // purchases: Purchase[];
+  @OneToMany(() => Purchase, (purchase) => purchase.providerType)
+  purchases: Purchase[];
 }

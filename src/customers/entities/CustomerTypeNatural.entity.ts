@@ -36,6 +36,6 @@ export class CustomerTypeNatural extends BaseEntity {
   @OneToMany(() => Invoice, (invoice) => invoice.customerTypeNatural)
   invoices: Invoice[];
 
-  // @OneToMany(() => Purchase, (purchase) => purchase.providerTypeNatural)
-  // purchases: Purchase[];
+  @OneToMany(() => Purchase, (purchase) => purchase.providerTypeNatural)
+  purchases: Purchase[];
 }

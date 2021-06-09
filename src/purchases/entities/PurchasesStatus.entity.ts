@@ -12,6 +12,6 @@ export class PurchasesStatus extends BaseEntity {
   @CreateDateColumn({ select: false })
   createdAt: string;
 
-  // @OneToMany(() => Purchase, (purchase) => purchase.status)
-  // purchases: Purchase[];
+  @OneToMany(() => Purchase, (purchase) => purchase.status)
+  purchases: Purchase[];
 }

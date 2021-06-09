@@ -96,29 +96,29 @@ export class Purchase extends BaseEntity {
   @Column({ nullable: true, type: 'varchar' })
   paymentConditionName: string;
 
-  // @ManyToOne(() => Company, (company) => company.purchases)
-  // company: Company;
+  @ManyToOne(() => Company, (company) => company.purchases)
+  company: Company;
 
-  // @ManyToOne(() => Branch, (branch) => branch.purchases)
-  // branch: Branch;
+  @ManyToOne(() => Branch, (branch) => branch.purchases)
+  branch: Branch;
 
-  // @ManyToOne(() => Customer, (customer) => customer.purchases)
-  // provider: Customer;
+  @ManyToOne(() => Customer, (customer) => customer.purchases)
+  provider: Customer;
 
-  // @ManyToOne(() => CustomerBranch, (customerBranch) => customerBranch.purchases)
-  // providerBranch: CustomerBranch;
+  @ManyToOne(() => CustomerBranch, (customerBranch) => customerBranch.purchases)
+  providerBranch: CustomerBranch;
 
   @ManyToOne(() => PurchasesPaymentsCondition, (purchasesPaymentsCondition) => purchasesPaymentsCondition.purchases)
   purchasePaymentsCondition: PurchasesPaymentsCondition;
 
-  // @ManyToOne(() => PurchasesStatus, (purchaseStatus) => purchaseStatus.purchases)
-  // status: PurchasesStatus;
+  @ManyToOne(() => PurchasesStatus, (purchaseStatus) => purchaseStatus.purchases)
+  status: PurchasesStatus;
 
-  // @ManyToOne(() => CustomerType, (providerType) => providerType.purchases)
-  // providerType: CustomerType;
+  @ManyToOne(() => CustomerType, (providerType) => providerType.purchases)
+  providerType: CustomerType;
 
-  // @ManyToOne(() => CustomerTypeNatural, (providerTypeNatural) => providerTypeNatural.purchases)
-  // providerTypeNatural: CustomerTypeNatural;
+  @ManyToOne(() => CustomerTypeNatural, (providerTypeNatural) => providerTypeNatural.purchases)
+  providerTypeNatural: CustomerTypeNatural;
 
   @ManyToOne(() => PurchasesDocumentType, (purchasesDocumentType) => purchasesDocumentType.purchases)
   documentType: PurchasesDocumentType;
