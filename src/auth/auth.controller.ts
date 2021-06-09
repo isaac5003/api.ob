@@ -21,7 +21,11 @@ export class AuthController {
   @Post('login')
   @UsePipes(new ValidationPipe({ transform: true }))
   async processLogin(@Body() authDto: AuthDTO): Promise<{ access_token: string; refresh_token: string }> {
-    return this.authService.processLogin(authDto);
+    return {
+      access_token: 'asd',
+      refresh_token: 'asd',
+    };
+    // return this.authService.processLogin(authDto);
   }
 
   @Post('refresh')

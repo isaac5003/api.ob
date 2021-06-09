@@ -16,6 +16,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Company } from './Company.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity()
 export class Branch extends BaseEntity {
@@ -57,6 +58,9 @@ export class Branch extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.branch)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.branch)
+  purchases: Purchase[];
 
   @ManyToMany(() => Profile, (profile) => profile.branches)
   profiles: Profile[];

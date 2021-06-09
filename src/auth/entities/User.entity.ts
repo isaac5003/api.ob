@@ -43,7 +43,7 @@ export class User extends BaseEntity {
   isActive: boolean;
 
   @Column({ nullable: true })
-  avatarUrl: string;
+  avatarURL: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;

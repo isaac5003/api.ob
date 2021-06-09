@@ -1,7 +1,8 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Invoice } from './Invoice.entity';
+import { Purchase } from './Purchase.entity';
+
 @Entity()
-export class InvoicesStatus extends BaseEntity {
+export class PurchasesStatus extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -11,6 +12,6 @@ export class InvoicesStatus extends BaseEntity {
   @CreateDateColumn({ select: false })
   createdAt: string;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.status)
-  invoices: Invoice[];
+  @OneToMany(() => Purchase, (purchase) => purchase.status)
+  purchases: Purchase[];
 }

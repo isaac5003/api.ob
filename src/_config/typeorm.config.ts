@@ -9,4 +9,5 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   database: process.env.POSTGRES_DB,
   autoLoadEntities: true,
   synchronize: true,
+  logging: true,
 };
