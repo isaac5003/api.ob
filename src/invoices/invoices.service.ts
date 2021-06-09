@@ -219,7 +219,7 @@ export class InvoicesService {
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      (data.invoicesZone as unknown) as string,
+      data.invoicesZone as unknown as string,
     );
     const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
@@ -286,7 +286,7 @@ export class InvoicesService {
     type: string,
   ): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => (d.documentType as unknown) as number),
+      data.map((d) => d.documentType as unknown as number),
     );
 
     let documentsToProcess = [];
@@ -311,7 +311,7 @@ export class InvoicesService {
         documentsToProcess = data.map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
             isCurrentDocument: true,
             company: company,
           };
@@ -335,7 +335,7 @@ export class InvoicesService {
           .map((d) => {
             return {
               ...d,
-              documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+              documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
             };
           });
 
@@ -605,7 +605,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
+      const service = await this.serviceRepository.getService(company, detail.service as any as string);
       details.push({
         ...detail,
         service,
@@ -758,7 +758,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
+      const service = await this.serviceRepository.getService(company, detail.service as any as string);
       details.push({
         ...detail,
         service,

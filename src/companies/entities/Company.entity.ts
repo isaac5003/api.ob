@@ -118,8 +118,8 @@ export class Company extends BaseEntity {
   @OneToMany(() => Invoice, (invoice) => invoice.company)
   invoices: Invoice[];
 
-  @OneToMany(() => Purchase, (purchase) => purchase.company)
-  purchases: Purchase[];
+  // @OneToMany(() => Purchase, (purchase) => purchase.company)
+  // purchases: Purchase[];
 
   @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.company)
   invoicesDocuments: InvoicesDocument[];
