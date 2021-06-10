@@ -10,6 +10,7 @@ import {
 import { Customer } from './Customer.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity()
 export class CustomerType extends BaseEntity {
@@ -33,4 +34,7 @@ export class CustomerType extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.customerType)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.providerType)
+  purchases: Purchase[];
 }

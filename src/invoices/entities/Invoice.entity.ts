@@ -86,6 +86,9 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true, type: 'varchar' })
   ventaTotalText: string;
 
+  @Column({ default: 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4', type: 'uuid' })
+  origin: string;
+
   @CreateDateColumn()
   createdAt: string;
 

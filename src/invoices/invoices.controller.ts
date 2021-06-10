@@ -242,22 +242,13 @@ export class InvoicesController {
     return await this.invoice.getDocument(company, id);
   }
 
-  @Post('/documents')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async createDocument(
-    @Body('documents') data: InvoiceDocumentDataDTO[],
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    return await this.invoice.createUpdateDocument(company, data, 'create');
-  }
-
   @Put('/documents')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateInvoiceDocument(
     @GetAuthData('company') company: Company,
     @Body('documents') data: InvoiceDocumentUpdateDTO[],
   ): Promise<ResponseMinimalDTO> {
-    return await this.invoice.createUpdateDocument(company, data, 'update');
+    return await this.invoice.createUpdateDocument(company, data);
   }
 
   @Get('/documents/:id/layout')
