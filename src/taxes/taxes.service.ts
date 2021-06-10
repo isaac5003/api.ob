@@ -11,6 +11,7 @@ import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStat
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { RegisterTaxDTO } from './dtos/taxes-register.dto';
+import { TaxesRepository } from './repositories/taxes.repository';
 
 @Injectable()
 export class TaxesService {
@@ -29,6 +30,9 @@ export class TaxesService {
 
     @InjectRepository(InvoicesStatusRepository)
     private invoiceStatusRepository: InvoicesStatusRepository,
+
+    @InjectRepository(TaxesRepository)
+    private taxesRepository: TaxesRepository,
   ) {}
 
   async createInvoice(data: RegisterTaxDTO, company: Company): Promise<ResponseMinimalDTO> {
@@ -46,6 +50,7 @@ export class TaxesService {
           company,
           documentType[0],
           invoiceStatus,
+          'cfb8addb-541b-482f-8fa1-dfe5db03fdf4',
         );
 
         const details = {
@@ -62,7 +67,6 @@ export class TaxesService {
       case 2:
         break;
     }
-    console.log(invoice);
 
     if (!invoice) {
       throw new BadRequestException('No se pudo guardar el registro de IVA');
@@ -73,27 +77,27 @@ export class TaxesService {
     };
   }
 
-  async getInvoices(
-    company: Company,
-    filter: InvoiceFilterDTO,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
-    const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
-    const sales = data.map((s) => {
-      return {
-        invoiceDate: s.invoiceDate,
-        customer: s.customer,
-        authorization: s.authorization,
-        sequence: s.sequence,
-        documentType: s.documentType,
-        iva: s.iva,
-      };
-    });
+  // async getInvoices(
+  //   company: Company,
+  //   filter: InvoiceFilterDTO,
+  // ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+  //   const { data, count } = await this.taxesRepository.getInvoice(company, filter);
+  //   const sales = data.map((s) => {
+  //     return {
+  //       invoiceDate: s.invoiceDate,
+  //       customer: s.customer,
+  //       authorization: s.authorization,
+  //       sequence: s.sequence,
+  //       documentType: s.documentType,
+  //       iva: s.iva,
+  //     };
+  //   });
 
-    return {
-      data: sales,
-      count,
-      page: filter.page,
-      limit: filter.limit,
-    };
-  }
+  //   return {
+  //     data: sales,
+  //     count,
+  //     page: filter.page,
+  //     limit: filter.limit,
+  //   };
+  // }
 }

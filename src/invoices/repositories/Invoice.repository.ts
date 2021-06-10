@@ -254,6 +254,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     company: Company,
     documentType: InvoicesDocumentType,
     status: InvoicesStatus,
+    origin: string,
   ): Promise<Invoice> {
     let response: Invoice;
 
@@ -283,6 +284,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       customerType: customer.customerType,
       customerTypeNatural: customer.customerTypeNatural,
       documentType: documentType,
+      origin,
     };
     try {
       const invoice = this.create({ company, ...header });

@@ -23,13 +23,13 @@ export class TaxesController {
     return this.taxes.createInvoice(data, company);
   }
 
-  @Get('/')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getInvoicesTaxes(
-    @Query() filter: InvoiceFilterDTO,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
-    const { data, count, page, limit } = await this.taxes.getInvoices(company, filter);
-    return new ResponseListDTO(plainToClass(Invoice, data), count, page, limit);
-  }
+  // @Get('/')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async getInvoicesTaxes(
+  //   @Query() filter: InvoiceFilterDTO,
+  //   @GetAuthData('company') company: Company,
+  // ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+  //   const { data, count, page, limit } = await this.taxes.getInvoices(company, filter);
+  //   return new ResponseListDTO(plainToClass(Invoice, data), count, page, limit);
+  // }
 }
