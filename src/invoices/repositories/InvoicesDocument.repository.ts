@@ -9,7 +9,11 @@ const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
 export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
   async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocument[]> {
-    const { active, documentType } = filter;
+    let active, documentType;
+    if (filter) {
+      active = filter.active;
+      documentType = filter.documentType;
+    }
 
     let documents: InvoicesDocument[];
 
