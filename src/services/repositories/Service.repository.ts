@@ -8,13 +8,14 @@ import { serviceStatusDTO } from '../dtos/service-status.dto';
 import { ServiceIntegrationDTO } from '../dtos/service-integration.dto';
 import { ServicesIdsDTO } from '../dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from '../dtos/delete-updateServices/service-update-status.dto';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'servicio';
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
   async getServicesByIds(company: Company, ids: string[]): Promise<Service[]> {
     try {
-      const services = await this.findByIds((ids as unknown) as any[]);
+      const services = await this.findByIds(ids as unknown as any[]);
 
       return services;
     } catch (error) {
@@ -67,8 +68,9 @@ export class ServiceRepository extends Repository<Service> {
         query.orderBy('s.createdAt', 'DESC');
       }
 
+      const data = await paginate<Service>(query, { limit, page });
       return {
-        data: await query.getMany(),
+        data: data.items,
         count: queryc,
       };
     } catch (error) {
@@ -145,10 +147,10 @@ export class ServiceRepository extends Repository<Service> {
   }
 
   async deleteServices(company: Company, id: ServicesIdsDTO): Promise<any> {
-    const services = await this.getServicesByIds(company, (id as unknown) as string[]);
+    const services = await this.getServicesByIds(company, id as unknown as string[]);
     let deletedServices;
     try {
-      deletedServices = await this.delete((id as unknown) as any[]);
+      deletedServices = await this.delete(id as unknown as any[]);
     } catch (error) {
       console.error(error);
 

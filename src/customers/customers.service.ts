@@ -101,7 +101,7 @@ export class CustomersService {
   async generateReportIndividual(company: Company, id: string, type = 'cliente'): Promise<any> {
     const customer = await this.customerRepository.getCustomer(id, company, type);
     const phone = customer.customerBranches.find((cb) => cb.default).contactInfo;
-    delete customer.isActiveCustomer, delete customer.isActiveProvider, delete customer.isProvider;
+
     const report = {
       company: {
         name: company.name,
@@ -126,8 +126,10 @@ export class CustomersService {
 
     if (type == 'proveedor') {
       delete report.customer;
+      delete report.provider.isActiveCustomer;
     } else {
       delete report.provider;
+      delete report.customer.isActiveProvider;
     }
     return report;
   }
@@ -192,15 +194,8 @@ export class CustomersService {
   }
 
   async getCustomerTributary(id: string, company: Company, type = 'cliente'): Promise<ResponseSingleDTO<Customer>> {
-    const {
-      dui,
-      nit,
-      nrc,
-      giro,
-      customerType,
-      customerTaxerType,
-      customerTypeNatural,
-    } = await this.customerRepository.getCustomer(id, company, type);
+    const { dui, nit, nrc, giro, customerType, customerTaxerType, customerTypeNatural } =
+      await this.customerRepository.getCustomer(id, company, type);
     const tributary = {
       dui,
       nit,
@@ -269,11 +264,17 @@ export class CustomersService {
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.getCustomerCustomerBranch(id, type, customer);
     const customerBranch = await this.customerBranchRepository.getCustomerBranches(customer, type, filter);
+
+    //marca como defualt:false la antigua branch
     await this.customerBranchRepository.updateBranch(
       customerBranch.data.find((b) => b.default).id,
       { default: false },
       type,
     );
+
+    //marca con default la nueva branch
+    await this.customerBranchRepository.updateBranch(id, { default: true }, type);
+
     return {
       message: 'Se ha marcado como sucursal principal correctamente.',
     };
@@ -370,7 +371,10 @@ export class CustomersService {
     company: Company,
     type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    await this.customerRepository.getCustomer(id, company, type);
+    if (data.accountingCatalog) {
+      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    }
     await this.customerRepository.updateCustomer(id, data, company, type);
     return {
       message: type == 'cliente' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',

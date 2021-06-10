@@ -30,6 +30,7 @@ import { Branch } from './Branch.entity';
 import { CompanyType } from './CompanyType.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
+import { Purchase } from 'src/purchases/entities/Purchase.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -116,6 +117,9 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => Invoice, (invoice) => invoice.company)
   invoices: Invoice[];
+
+  @OneToMany(() => Purchase, (purchase) => purchase.company)
+  purchases: Purchase[];
 
   @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.company)
   invoicesDocuments: InvoicesDocument[];

@@ -13,6 +13,7 @@ import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -120,8 +121,8 @@ export class InvoiceRepository extends Repository<Invoice> {
       if (limit && page) {
         query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
       }
-
-      return { data: await query.getMany(), count };
+      const data = await paginate<Invoice>(query, { limit, page });
+      return { data: data.items, count };
     } catch (error) {
       console.error(error);
       logDatabaseError(reponame, error);

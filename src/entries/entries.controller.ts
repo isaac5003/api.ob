@@ -222,6 +222,11 @@ export class EntriesController {
     return await this.entries.getReport(company, date, 'accountMovements');
   }
 
+  @Get('/report/accounting-catalog')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async getAccount(@GetAuthData('company') company: Company): Promise<any> {
+    return await this.entries.getReport(company, { date: null }, 'accounting-catalog');
+  }
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getEntries(

@@ -35,7 +35,7 @@ import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
 @Injectable()
@@ -119,9 +119,6 @@ export class InvoicesService {
         statuses = [2, 3, 5];
         break;
     }
-
-    console.log(status);
-    console.log(statuses);
 
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
@@ -219,7 +216,7 @@ export class InvoicesService {
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      (data.invoicesZone as unknown) as string,
+      data.invoicesZone as unknown as string,
     );
     const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
@@ -283,78 +280,76 @@ export class InvoicesService {
   async createUpdateDocument(
     company: Company,
     data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
-    type: string,
   ): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => (d.documentType as unknown) as number),
+      data.map((d) => d.documentType as unknown as number),
     );
 
-    let documentsToProcess = [];
-    switch (type) {
-      case 'create':
-        // Obtiene los documentos ya existentes de los tipos que se van a crear
-        const documents = (await this.invoicesDocumentRepository.getInvoicesDocuments(company)).filter((d) =>
-          documentTypes.map((dt) => dt.id).includes(d.documentType.id),
-        );
+    let documentsToProcessUpdate = [];
+    let documentsToProcessCreate = [];
 
-        const documentsToDisable = documents.map((d) => {
+    const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      data.map((d) => d.id),
+      'unused',
+    );
+
+    if (documentExist.length > 0) {
+      documentsToProcessUpdate = data
+        .filter((d) => documentExist.map((de) => de.id).includes(d.id))
+        .map((d) => {
           return {
             ...d,
-            isCurrentDocument: false,
-            active: false,
+            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
           };
         });
-
-        // Deshabilita los documentos
-        await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
-
-        documentsToProcess = data.map((d) => {
-          return {
-            ...d,
-            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
-            isCurrentDocument: true,
-            company: company,
-          };
-        });
-        break;
-      case 'update':
-        const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
-          company,
-          data.map((d) => d.id),
-          'unused',
-        );
-
-        if (documentExist.length == 0) {
-          throw new BadRequestException(
-            'Los documentos seleccionados no pueden ser actualizados ya que no existen o estan en uso',
-          );
-        }
-
-        documentsToProcess = data
-          .filter((d) => documentExist.map((de) => de.id).includes(d.id))
-          .map((d) => {
-            return {
-              ...d,
-              documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
-            };
-          });
-
-        break;
     }
 
-    const completed = await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToProcess, type);
+    // Obtiene los documentos ya existentes de los tipos que se van a crear
+    let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+    documents = documents.filter((d) => documentTypes.map((dt) => dt.id).includes(d.documentType.id));
+    const documentsToDisable = documents.map((d) => {
+      return {
+        ...d,
+        isCurrentDocument: false,
+        active: false,
+      };
+    });
+    // Deshabilita los documentos
+    await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
+
+    documentsToProcessCreate = data.map((d) => {
+      return {
+        ...d,
+        documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+        isCurrentDocument: true,
+        company: company,
+      };
+    });
+
+    const completedUpdate = await this.invoicesDocumentRepository.createUpdateDocument(
+      company,
+      documentsToProcessUpdate,
+      'update',
+    );
+    const completedCreate = await this.invoicesDocumentRepository.createUpdateDocument(
+      company,
+      documentsToProcessCreate,
+      'create',
+    );
+
     let message = '';
-    switch (type) {
-      case 'create':
-        message = 'Los documentos se han creado correctamente.';
-        break;
-      case 'update':
-        message = 'Los documentos se han actualizado correctamente.';
-        break;
-    }
+    message =
+      completedCreate.length > 0 && completedUpdate.length > 0
+        ? 'Se han creado y actulizado los documentos correctamente'
+        : completedCreate.length > 0
+        ? 'Se han creado los documentos correctamente'
+        : completedUpdate.length > 0
+        ? 'Se han actulizado los documentos correctamente'
+        : 'No se han podido actualizar o crear los documentos.';
 
     return {
-      ids: completed.map((c) => c.id),
+      ids: completedCreate.length > 0 ? completedCreate.map((c) => c.id) : completedUpdate.map((c) => c.id),
       message,
     };
   }
@@ -445,6 +440,10 @@ export class InvoicesService {
 
     const report = {
       company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      name: `DETALLE DE VENTAS EN EL PERIODO DEL ${format(parseISO(startDate), 'dd/MM/yyyy')} AL ${format(
+        parseISO(endDate),
+        'dd/MM/yyyy',
+      )}`,
       invoices,
     };
 
@@ -478,6 +477,10 @@ export class InvoicesService {
 
     const report = {
       company: { name: company.name, nit: company.nit, nrc: company.nrc },
+      name: `LISTADO DE VENTAS EN EL PERIODO DEL ${format(parseISO(startDate), 'dd/MM/yyyy')} AL ${format(
+        parseISO(endDate),
+        'dd/MM/yyyy',
+      )}`,
       invoices,
     };
 
@@ -605,7 +608,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
+      const service = await this.serviceRepository.getService(company, detail.service as any as string);
       details.push({
         ...detail,
         service,
@@ -758,7 +761,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
+      const service = await this.serviceRepository.getService(company, detail.service as any as string);
       details.push({
         ...detail,
         service,

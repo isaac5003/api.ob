@@ -7,6 +7,7 @@ import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dt
 import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
 import { ProviderStatusDTO } from 'src/providers/dtos/provider-updateStatus.dto';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 @EntityRepository(Customer)
 export class CustomerRepository extends Repository<Customer> {
@@ -58,8 +59,8 @@ export class CustomerRepository extends Repository<Customer> {
       } else {
         query.orderBy('customer.createdAt', 'DESC');
       }
-
-      return { data: await query.getMany(), count };
+      const data = await paginate<Customer>(query, { limit, page });
+      return { data: data.items, count };
     } catch (error) {
       console.error(error);
 

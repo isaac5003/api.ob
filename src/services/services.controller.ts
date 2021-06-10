@@ -92,7 +92,7 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
     @Body() data: ServiceIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.updateServiceStatusIntegration(company, id, data);
+    return this.service.updateServiceIntegration(company, id, data);
   }
 
   //DELETE INDIVIDUAL
@@ -128,7 +128,7 @@ export class ServicesController {
     @GetAuthData('company') company: Company,
     @Body() data: serviceStatusDTO,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.updateServiceStatusIntegration(company, id, data);
+    return this.service.updateServiceStatus(company, id, data);
   }
 
   // FOR REPORTS
