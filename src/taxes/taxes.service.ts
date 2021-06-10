@@ -82,7 +82,6 @@ export class TaxesService {
       return {
         invoiceDate: s.invoiceDate,
         customer: s.customer,
-
         authorization: s.authorization,
         sequence: s.sequence,
         documentType: s.documentType,
