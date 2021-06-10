@@ -381,16 +381,31 @@ export class CustomersService {
     };
   }
   async deleteCustomer(company: Company, id: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
-    const result = await this.customerRepository.deleteCustomer(company, id, type);
+    const person = await this.customerRepository.getCustomer(id, company, type);
+    let result;
+    if (type == 'cliente') {
+      if (person.isProvider) {
+        await this.customerRepository.updateCustomer(id, { isCustomer: false }, company, type);
+      } else {
+        result = await this.customerRepository.deleteCustomer(company, id, type);
+        if (result.affected == 0) {
+          throw new BadRequestException(`No se ha podido eliminar el ${type} seleccionado.`);
+        }
+      }
+    } else {
+      if (person.isCustomer) {
+        await this.customerRepository.updateCustomer(id, { isProvider: false }, company, type);
+      } else {
+        result = await this.customerRepository.deleteCustomer(company, id, type);
+        if (result.affected == 0) {
+          throw new BadRequestException(`No se ha podido eliminar el ${type} seleccionado.`);
+        }
+      }
+    }
+
     return {
       message:
-        type == 'cliente'
-          ? result
-            ? 'Se ha eliminado el cliente correctamente'
-            : 'No se ha podido eliminar el cliente'
-          : result
-          ? 'Se ha eliminado el proveedor correctamente'
-          : 'No se ha podido eliminar el proveedor',
+        type == 'cliente' ? 'Se ha eliminado el cliente correctamente' : 'Se ha eliminado el proveedor correctamente',
     };
   }
 }
