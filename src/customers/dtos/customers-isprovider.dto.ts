@@ -1,8 +1,8 @@
-import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 
 export class IsProviderDTO {
-  @IsNotEmpty({ message: validationMessage('isProvider', 'IsNotEmpty') })
+  @IsOptional()
   @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
   isProvider: boolean;
 }

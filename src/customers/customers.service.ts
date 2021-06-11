@@ -149,6 +149,10 @@ export class CustomersService {
       if (!customer.isProvider) {
         throw new BadRequestException('El proveedor seleccionado no existe.');
       }
+    } else {
+      if (!customer.isCustomer) {
+        throw new BadRequestException('El cliente seleccionado no existe.');
+      }
     }
     return customer;
   }
@@ -311,8 +315,8 @@ export class CustomersService {
         ...data,
         isProvider: true,
         isActiveProvider: true,
-        isCustomer: false,
-        isActiveCustomer: false,
+        isCustomer: data.isCustomer ? data.isCustomer : false,
+        isActiveCustomer: data.isCustomer ? data.isCustomer : false,
       };
 
       message = 'Se ha creado el proveedor correctamente';
@@ -320,6 +324,9 @@ export class CustomersService {
       data = {
         ...data,
         isCustomer: true,
+        isProvider: data.isProvider ? data.isProvider : false,
+        isActiveCustomer: true,
+        isActiveProvider: data.isProvider ? data.isProvider : false,
       };
     }
 
@@ -345,8 +352,12 @@ export class CustomersService {
   ): Promise<ResponseMinimalDTO> {
     await this.customerBranchRepository.updateBranch(id, data.branch, type);
     delete data.branch;
+    await this.customerRepository.getCustomer(id, company, type);
+    const updated = await this.customerRepository.updateCustomer(id, data, company, type);
 
-    await this.customerRepository.updateCustomer(id, data, company, type);
+    if (updated.affected == 0) {
+      throw new BadRequestException(`No se ha podido actulizar el ${type} seleccionado.`);
+    }
 
     return {
       message: type == 'cliente' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
