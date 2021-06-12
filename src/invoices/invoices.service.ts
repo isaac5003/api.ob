@@ -277,10 +277,7 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
   }
 
-  async createUpdateDocument(
-    company: Company,
-    data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
-  ): Promise<ResponseMinimalDTO> {
+  async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
       data.map((d) => d.documentType as unknown as number),
     );
@@ -290,7 +287,7 @@ export class InvoicesService {
 
     const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
       company,
-      data.map((d) => d.id),
+      data.filter((d) => d.id).map((d) => d.id),
       'unused',
     );
 
@@ -307,6 +304,7 @@ export class InvoicesService {
 
     // Obtiene los documentos ya existentes de los tipos que se van a crear
     let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+
     documents = documents.filter((d) => documentTypes.map((dt) => dt.id).includes(d.documentType.id));
     const documentsToDisable = documents.map((d) => {
       return {
@@ -315,17 +313,21 @@ export class InvoicesService {
         active: false,
       };
     });
+
     // Deshabilita los documentos
     await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
 
-    documentsToProcessCreate = data.map((d) => {
-      return {
-        ...d,
-        documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
-        isCurrentDocument: true,
-        company: company,
-      };
-    });
+    documentsToProcessCreate = data
+      .filter((d) => !documentExist.map((de) => de.id).includes(d.id))
+      .map((d) => {
+        delete d.id;
+        return {
+          ...d,
+          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          isCurrentDocument: true,
+          company: company,
+        };
+      });
 
     const completedUpdate = await this.invoicesDocumentRepository.createUpdateDocument(
       company,
