@@ -521,7 +521,13 @@ export class InvoicesService {
 
     let details = [];
     if (invoiceAll.status.id != 4) {
-      if (invoiceAll.invoiceDetails[0].service) {
+      if (invoiceAll.origin == '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+        details = invoiceAll.invoiceDetails;
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition;
+        delete invoiceAll.invoicesSeller;
+        delete invoiceAll.invoicesZone;
+      } else if (invoiceAll.invoiceDetails[0].service) {
         details = invoiceAll.invoiceDetails.map((d) => {
           const { id, name } = d.service;
           delete d.service;

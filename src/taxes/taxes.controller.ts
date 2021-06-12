@@ -9,7 +9,7 @@ import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
-import { TaxesHeaderDTO } from './dtos/taxes-header.dto';
+import { TaxesInvoiceHeaderDTO } from './dtos/taxes-header.dto';
 import { TaxesService } from './taxes.service';
 
 @Controller('taxes')
@@ -20,7 +20,7 @@ export class TaxesController {
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createService(
-    @Body() data: TaxesHeaderDTO,
+    @Body() data: TaxesInvoiceHeaderDTO,
 
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,

@@ -13,7 +13,7 @@ import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { TaxesHeaderDTO } from 'src/taxes/dtos/taxes-header.dto';
+import { TaxesInvoiceHeaderDTO } from 'src/taxes/dtos/taxes-header.dto';
 import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'documento';
@@ -172,7 +172,7 @@ export class InvoiceRepository extends Repository<Invoice> {
   async createInvoice(
     company: Company,
     branch: Branch,
-    data: Partial<InvoiceHeaderCreateDTO> | Partial<TaxesHeaderDTO>,
+    data: Partial<InvoiceHeaderCreateDTO> | Partial<TaxesInvoiceHeaderDTO>,
     customer: Customer,
     customerBranch: CustomerBranch,
     invoiceSeller?: InvoicesSeller,
@@ -186,7 +186,7 @@ export class InvoiceRepository extends Repository<Invoice> {
 
     const header = {
       authorization: data.authorization,
-      sequence: `${document.current}`,
+      sequence: document ? `${document.current}` : `${data.sequence}`,
       customerName: customer.name,
       customerAddress1: customerBranch.address1,
       customerAddress2: customerBranch.address2,
@@ -206,7 +206,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       ventaTotal: data.ventaTotal,
       ventaTotalText: numeroALetras(data.ventaTotal),
       invoiceDate: data.invoiceDate,
-      paymentConditionName: invoicesPaymentCondition.name,
+      paymentConditionName: invoicesPaymentCondition ? invoicesPaymentCondition.name : null,
       sellerName: invoiceSeller ? invoiceSeller.name : null,
       zoneName: invoiceSeller ? invoiceSeller.invoicesZone.name : null,
       branch: branch,

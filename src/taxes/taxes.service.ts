@@ -2,16 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { InvoiceFilterDTO } from 'src/invoices/dtos/invoice-filter.dto';
 import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
 import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
-import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
-import { TaxesHeaderDTO } from './dtos/taxes-header.dto';
+import { TaxesInvoiceHeaderDTO, TaxesPurchaseHeaderDTO } from './dtos/taxes-header.dto';
 import { TaxesView } from './entities/taxes-view.entity';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { format } from 'date-fns';
@@ -46,14 +44,18 @@ export class TaxesService {
     private purchaseRepository: PurchaseRepository,
   ) {}
 
-  async createRegister(data: TaxesHeaderDTO, company: Company, branch: Branch): Promise<ResponseMinimalDTO> {
+  async createRegister(
+    data: Partial<TaxesInvoiceHeaderDTO> | Partial<TaxesPurchaseHeaderDTO>,
+    company: Company,
+    branch: Branch,
+  ): Promise<ResponseMinimalDTO> {
     let invoice: Invoice;
 
     switch (data.registerType) {
       case 'invoices':
         const customer = await this.customerRepository.getCustomer(data.customer, company, 'cliente');
         const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.documentType]);
-        const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
+        const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
         invoice = await this.invoiceRepository.createInvoice(
           company,
           branch,
@@ -72,7 +74,7 @@ export class TaxesService {
           quantity: 1,
           unitPrice: data.subtotal,
           chargeDescription: 'Detalle generado automaticamente en modulo de IVA',
-          incTax: false,
+          incTax: true,
           ventaPrice: data.subtotal,
           invoice: invoice,
         };
