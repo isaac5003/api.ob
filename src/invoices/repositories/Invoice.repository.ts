@@ -13,7 +13,7 @@ import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { RegisterTaxDTO } from 'src/taxes/dtos/taxes-register.dto';
+import { TaxesHeaderDTO } from 'src/taxes/dtos/taxes-header.dto';
 import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'documento';
@@ -118,10 +118,7 @@ export class InvoiceRepository extends Repository<Invoice> {
         );
       }
       const count = await query.getCount();
-      // applies pagination
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
+
       const data = await paginate<Invoice>(query, { limit, page });
       return { data: data.items, count };
     } catch (error) {
@@ -175,14 +172,15 @@ export class InvoiceRepository extends Repository<Invoice> {
   async createInvoice(
     company: Company,
     branch: Branch,
-    data: InvoiceHeaderCreateDTO,
+    data: Partial<InvoiceHeaderCreateDTO> | Partial<TaxesHeaderDTO>,
     customer: Customer,
     customerBranch: CustomerBranch,
-    invoiceSeller: InvoicesSeller,
-    invoicesPaymentCondition: InvoicesPaymentsCondition,
-    documentType: InvoicesDocumentType,
-    document: InvoicesDocument,
-    invoiceStatus: InvoicesStatus,
+    invoiceSeller?: InvoicesSeller,
+    invoicesPaymentCondition?: InvoicesPaymentsCondition,
+    documentType?: InvoicesDocumentType,
+    document?: InvoicesDocument,
+    invoiceStatus?: InvoicesStatus,
+    origin?: string,
   ): Promise<Invoice> {
     let response: Invoice;
 
@@ -209,19 +207,20 @@ export class InvoiceRepository extends Repository<Invoice> {
       ventaTotalText: numeroALetras(data.ventaTotal),
       invoiceDate: data.invoiceDate,
       paymentConditionName: invoicesPaymentCondition.name,
-      sellerName: invoiceSeller.name,
-      zoneName: invoiceSeller.invoicesZone.name,
+      sellerName: invoiceSeller ? invoiceSeller.name : null,
+      zoneName: invoiceSeller ? invoiceSeller.invoicesZone.name : null,
       branch: branch,
       company: company,
       customerBranch: customerBranch,
       customer: customer,
       invoicesPaymentsCondition: invoicesPaymentCondition,
       invoicesSeller: invoiceSeller,
-      invoicesZone: invoiceSeller.invoicesZone,
+      invoicesZone: invoiceSeller ? invoiceSeller.invoicesZone : null,
       status: invoiceStatus,
       customerType: customer.customerType,
       customerTypeNatural: customer.customerTypeNatural,
       documentType: documentType,
+      origin: origin ? origin : 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4',
     };
     try {
       const invoice = this.create({ company, ...header });
@@ -247,55 +246,57 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async createTaxesInvoice(
-    data: RegisterTaxDTO,
-    customer: Customer,
-    customerBranch: CustomerBranch,
-    company: Company,
-    documentType: InvoicesDocumentType,
-    status: InvoicesStatus,
-    origin: string,
-  ): Promise<Invoice> {
-    let response: Invoice;
+  // async createTaxesInvoice(
+  //   data: RegisterTaxDTO,
+  //   customer: Customer,
+  //   customerBranch: CustomerBranch,
+  //   company: Company,
+  //   branch: Branch,
+  //   documentType: InvoicesDocumentType,
+  //   status: InvoicesStatus,
+  //   origin: string,
+  // ): Promise<Invoice> {
+  //   let response: Invoice;
 
-    const header = {
-      authorization: data.authorization,
-      sequence: `${data.sequence}`,
-      customerName: customer.name,
-      customerAddress1: customerBranch.address1,
-      customerAddress2: customerBranch.address2,
-      customerCountry: customerBranch.country.name,
-      customerState: customerBranch.state.name,
-      customerCity: customerBranch.city.name,
-      customerDui: customer.dui,
-      customerNit: customer.nit,
-      customerNrc: customer.nrc,
-      customerGiro: customer.giro,
-      sum: data.sum,
-      iva: data.iva,
-      subtotal: data.subtotal,
-      ivaRetenido: data.ivaRetenido,
-      ventaTotal: data.ventaTotal,
-      ventaTotalText: numeroALetras(data.ventaTotal),
-      invoiceDate: data.invoiceDate,
-      status: status,
-      company: company,
-      customerBranch: customerBranch,
-      customerType: customer.customerType,
-      customerTypeNatural: customer.customerTypeNatural,
-      documentType: documentType,
-      origin,
-    };
-    try {
-      const invoice = this.create({ company, ...header });
-      response = await this.save(invoice);
-    } catch (error) {
-      console.error(error);
+  //   const header = {
+  //     authorization: data.authorization,
+  //     sequence: `${data.sequence}`,
+  //     customerName: customer.name,
+  //     customerAddress1: customerBranch.address1,
+  //     customerAddress2: customerBranch.address2,
+  //     customerCountry: customerBranch.country.name,
+  //     customerState: customerBranch.state.name,
+  //     customerCity: customerBranch.city.name,
+  //     customerDui: customer.dui,
+  //     customerNit: customer.nit,
+  //     customerNrc: customer.nrc,
+  //     customerGiro: customer.giro,
+  //     sum: data.sum,
+  //     iva: data.iva,
+  //     subtotal: data.subtotal,
+  //     ivaRetenido: data.ivaRetenido,
+  //     ventaTotal: data.ventaTotal,
+  //     ventaTotalText: numeroALetras(data.ventaTotal),
+  //     invoiceDate: data.invoiceDate,
+  //     status: status,
+  //     company: company,
+  //     customerBranch: customerBranch,
+  //     customerType: customer.customerType,
+  //     customerTypeNatural: customer.customerTypeNatural,
+  //     documentType: documentType,
+  //     origin,
+  //     branch,
+  //   };
+  //   try {
+  //     const invoice = this.create({ company, ...header });
+  //     response = await this.save(invoice);
+  //   } catch (error) {
+  //     console.error(error);
 
-      logDatabaseError(reponame, error);
-    }
-    return await response;
-  }
+  //     logDatabaseError(reponame, error);
+  //   }
+  //   return await response;
+  // }
 
   async updateInvoice(id: string, company: Company, data: Partial<InvoiceHeaderDataDTO>): Promise<any> {
     try {

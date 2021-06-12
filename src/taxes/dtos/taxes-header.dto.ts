@@ -1,12 +1,11 @@
 import { Transform } from 'class-transformer';
 import { IsInt, IsISO8601, IsNotEmpty, IsNumber } from 'class-validator';
+import { InvoiceBaseDTO } from 'src/invoices/dtos/invoice-base.dto';
 import { validationMessage } from 'src/_tools';
 
-export class RegisterTaxDTO {
+export class TaxesHeaderDTO extends InvoiceBaseDTO {
   @IsNotEmpty({ message: validationMessage('registerType', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('registerType', 'IsInt') })
-  registerType: number;
+  registerType: string;
 
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))

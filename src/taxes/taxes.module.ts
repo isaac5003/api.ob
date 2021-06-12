@@ -9,6 +9,7 @@ import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/Invoic
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { TaxesRepository } from './repositories/taxes.repository';
+import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TaxesRepository } from './repositories/taxes.repository';
       CustomerRepository,
       InvoicesStatusRepository,
       TaxesRepository,
+      PurchaseRepository,
     ]),
   ],
 
