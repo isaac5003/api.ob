@@ -9,7 +9,7 @@ import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/Invoic
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
-import { TaxesInvoiceHeaderDTO, TaxesPurchaseHeaderDTO } from './dtos/taxes-header.dto';
+import { TaxesBaseDTO } from './dtos/taxes-base.dto';
 import { TaxesView } from './entities/taxes-view.entity';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { format } from 'date-fns';
@@ -44,11 +44,7 @@ export class TaxesService {
     private purchaseRepository: PurchaseRepository,
   ) {}
 
-  async createRegister(
-    data: Partial<TaxesInvoiceHeaderDTO> | Partial<TaxesPurchaseHeaderDTO>,
-    company: Company,
-    branch: Branch,
-  ): Promise<ResponseMinimalDTO> {
+  async createRegister(data: Partial<TaxesBaseDTO>, company: Company, branch: Branch): Promise<ResponseMinimalDTO> {
     let invoice: Invoice;
 
     switch (data.registerType) {

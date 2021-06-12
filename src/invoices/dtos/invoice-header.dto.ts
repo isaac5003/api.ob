@@ -61,5 +61,5 @@ export class InvoiceHeaderDTO extends InvoiceBaseDTO {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('status', 'IsInt') })
-  status: InvoicesStatus;
+  status: number;
 }

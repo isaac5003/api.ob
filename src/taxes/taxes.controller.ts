@@ -4,12 +4,11 @@ import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
-import { InvoiceFilterDTO } from 'src/invoices/dtos/invoice-filter.dto';
 import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
-import { TaxesInvoiceHeaderDTO } from './dtos/taxes-header.dto';
+import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 import { TaxesService } from './taxes.service';
 
 @Controller('taxes')
@@ -19,9 +18,8 @@ export class TaxesController {
 
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createService(
-    @Body() data: TaxesInvoiceHeaderDTO,
-
+  async createRegister(
+    @Body() data: TaxesHeaderDTO,
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
