@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsUUID } from 'class-validator';
 import { AccountignCatalogIntegrationDTO } from '../../../customers/dtos/customer-integration.dto';
 import { validationMessage } from '../../../_tools';
 import { AccountingCatalog } from '../../entities/AccountingCatalog.entity';
@@ -10,7 +10,6 @@ export class SettingIntegrationsDTO extends AccountignCatalogIntegrationDTO {
   accountingCatalog: AccountingCatalog;
 
   @IsNotEmpty({ message: validationMessage('registerType', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('registerType', 'IsInt') })
-  resgisterType: number;
+  @IsEnum({ automatic: 'automatic', manual: 'manual' }, { message: validationMessage('registerType', 'IsEnum') })
+  registerType: string;
 }
