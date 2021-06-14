@@ -589,6 +589,10 @@ export class InvoicesService {
       allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)),
     );
 
+    if (document.used == false) {
+      await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { used: true }, company);
+    }
+
     const invoiceHeader = await this.invoiceRepository.createInvoice(
       company,
       branch,
