@@ -247,59 +247,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  // async createTaxesInvoice(
-  //   data: RegisterTaxDTO,
-  //   customer: Customer,
-  //   customerBranch: CustomerBranch,
-  //   company: Company,
-  //   branch: Branch,
-  //   documentType: InvoicesDocumentType,
-  //   status: InvoicesStatus,
-  //   origin: string,
-  // ): Promise<Invoice> {
-  //   let response: Invoice;
-
-  //   const header = {
-  //     authorization: data.authorization,
-  //     sequence: `${data.sequence}`,
-  //     customerName: customer.name,
-  //     customerAddress1: customerBranch.address1,
-  //     customerAddress2: customerBranch.address2,
-  //     customerCountry: customerBranch.country.name,
-  //     customerState: customerBranch.state.name,
-  //     customerCity: customerBranch.city.name,
-  //     customerDui: customer.dui,
-  //     customerNit: customer.nit,
-  //     customerNrc: customer.nrc,
-  //     customerGiro: customer.giro,
-  //     sum: data.sum,
-  //     iva: data.iva,
-  //     subtotal: data.subtotal,
-  //     ivaRetenido: data.ivaRetenido,
-  //     ventaTotal: data.ventaTotal,
-  //     ventaTotalText: numeroALetras(data.ventaTotal),
-  //     invoiceDate: data.invoiceDate,
-  //     status: status,
-  //     company: company,
-  //     customerBranch: customerBranch,
-  //     customerType: customer.customerType,
-  //     customerTypeNatural: customer.customerTypeNatural,
-  //     documentType: documentType,
-  //     origin,
-  //     branch,
-  //   };
-  //   try {
-  //     const invoice = this.create({ company, ...header });
-  //     response = await this.save(invoice);
-  //   } catch (error) {
-  //     console.error(error);
-
-  //     logDatabaseError(reponame, error);
-  //   }
-  //   return await response;
-  // }
-
-  async updateInvoice(id: string, company: Company, data: Partial<InvoiceBaseDTO>): Promise<any> {
+  async updateInvoice(id: string, company: Company, data: any): Promise<any> {
     try {
       const invoice = this.update({ id, company }, data);
       return invoice;

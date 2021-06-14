@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsInt, IsISO8601, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsInt, IsISO8601, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { TaxesBaseDTO } from '../taxes-base.dto';
 import { validationMessage } from '../../../_tools';
 
@@ -18,17 +18,17 @@ export class TaxesHeaderDTO extends TaxesBaseDTO {
   @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
   sequence: string;
 
-  @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
+  @IsOptional()
   customer: string;
 
-  @IsNotEmpty({ message: validationMessage('invoiceDate', 'IsNotEmpty') })
+  @IsOptional()
   @IsISO8601({}, { message: validationMessage('invoiceDate', 'IsISO8601') })
   invoiceDate: string;
 
-  @IsNotEmpty({ message: validationMessage('provider', 'IsNotEmpty') })
+  @IsOptional()
   provider: string;
 
-  @IsNotEmpty({ message: validationMessage('purchaseDate', 'IsNotEmpty') })
+  @IsOptional()
   @IsISO8601({}, { message: validationMessage('purchaseDate', 'IsISO8601') })
   purchaseDate: string;
 

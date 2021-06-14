@@ -109,12 +109,12 @@ export class PurchaseHeaderDTO extends PurchaseBaseDTO {
   status: number;
 
   @IsNotEmpty({ message: validationMessage('providerType', 'IsNotEmpty') })
-  providerType: string;
+  providerType: number;
 
   @IsNotEmpty({
     message: validationMessage('providerTypeNatural', 'IsNotEmpty'),
   })
-  providerTypeNatural: string;
+  providerTypeNatural: number;
 
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
   documentType: number;

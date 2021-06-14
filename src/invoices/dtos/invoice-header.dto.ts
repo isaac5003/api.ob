@@ -1,8 +1,6 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsISO8601, IsOptional, IsInt } from 'class-validator';
-import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { validationMessage } from '../../_tools';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { InvoiceBaseDTO } from './invoice-base.dto';
 
 export class InvoiceHeaderDTO extends InvoiceBaseDTO {
