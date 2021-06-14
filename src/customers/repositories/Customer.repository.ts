@@ -50,16 +50,12 @@ export class CustomerRepository extends Repository<Customer> {
 
       const count = await query.getCount();
 
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
-      }
-
       if (order && prop) {
         query.orderBy(`customer.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
         query.orderBy('customer.createdAt', 'DESC');
       }
-      const data = await paginate<Customer>(query, { limit, page });
+      const data = await paginate<Customer>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
       console.error(error);

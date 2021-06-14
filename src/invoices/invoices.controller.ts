@@ -24,7 +24,6 @@ import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { InvoicesPaymentsCondition } from './entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from './entities/InvoicesSeller.entity';
 import { InvoicesDocument } from './entities/InvoicesDocument.entity';
-import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { InvoiceDocumentUpdateDTO } from './dtos/documents/invoice-document-update.dto';
 import { InvoiceDocumentLayoutDTO } from './dtos/documents/invoice-document-layout.dto';
 import { ReportFilterDTO } from './dtos/invoice-report-filter.dto';

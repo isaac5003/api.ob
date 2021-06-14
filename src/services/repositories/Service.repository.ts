@@ -56,11 +56,6 @@ export class ServiceRepository extends Repository<Service> {
 
       const queryc = await query.getCount();
 
-      // applies pagination
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
-
       // sort by prop}
       if (order && prop) {
         query.orderBy(`s.${prop}`, order == 'ascending' ? 'ASC' : 'DESC');
@@ -68,7 +63,7 @@ export class ServiceRepository extends Repository<Service> {
         query.orderBy('s.createdAt', 'DESC');
       }
 
-      const data = await paginate<Service>(query, { limit, page });
+      const data = await paginate<Service>(query, { limit: limit ? limit : null, page: page ? page : null });
       return {
         data: data.items,
         count: queryc,
