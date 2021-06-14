@@ -123,7 +123,7 @@ export class InvoicesService {
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status: status.id });
 
     return {
       message:
@@ -612,7 +612,7 @@ export class InvoicesService {
 
     let message = '';
 
-    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+    if (data.header.sequence != invoiceHeader.sequence) {
       message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
     }
 

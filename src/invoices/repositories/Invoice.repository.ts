@@ -13,8 +13,9 @@ import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { TaxesInvoiceHeaderDTO } from 'src/taxes/dtos/taxes-header.dto';
 import { paginate } from 'nestjs-typeorm-paginate';
+import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
+import { InvoiceUpdateHeaderDTO } from '../dtos/invoice-header-update.dto';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -172,7 +173,7 @@ export class InvoiceRepository extends Repository<Invoice> {
   async createInvoice(
     company: Company,
     branch: Branch,
-    data: Partial<InvoiceHeaderCreateDTO> | Partial<TaxesInvoiceHeaderDTO>,
+    data: Partial<InvoiceBaseDTO>,
     customer: Customer,
     customerBranch: CustomerBranch,
     invoiceSeller?: InvoicesSeller,
@@ -298,7 +299,7 @@ export class InvoiceRepository extends Repository<Invoice> {
   //   return await response;
   // }
 
-  async updateInvoice(id: string, company: Company, data: Partial<InvoiceHeaderDataDTO>): Promise<any> {
+  async updateInvoice(id: string, company: Company, data: Partial<InvoiceBaseDTO>): Promise<any> {
     try {
       const invoice = this.update({ id, company }, data);
       return invoice;

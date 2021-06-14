@@ -11,7 +11,7 @@ export class PurchaseHeaderDTO extends PurchaseBaseDTO {
   authorization: string;
 
   @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
-  sequence: number;
+  sequence: string;
 
   @IsNotEmpty({ message: validationMessage('providerName', 'IsNotEmpty') })
   providerName: string;
@@ -106,7 +106,7 @@ export class PurchaseHeaderDTO extends PurchaseBaseDTO {
   purchasePaymentsCondition: string;
 
   @IsNotEmpty({ message: validationMessage('status', 'IsNotEmpty') })
-  status: PurchasesStatus;
+  status: number;
 
   @IsNotEmpty({ message: validationMessage('providerType', 'IsNotEmpty') })
   providerType: string;
