@@ -257,6 +257,9 @@ export class InvoicesService {
 
     const documents = documentTypes.map((dt) => {
       const found = existingDocuments.find((d) => d.documentType.id == dt.id);
+
+      delete found.documentLayout;
+      delete found.layout;
       return found
         ? { ...found }
         : {
