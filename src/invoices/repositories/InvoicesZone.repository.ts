@@ -5,7 +5,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
-import { paginateRaw } from 'nestjs-typeorm-paginate';
+import { paginate, paginateRaw } from 'nestjs-typeorm-paginate';
 
 const reponame = 'zonas';
 @EntityRepository(InvoicesZone)
@@ -28,7 +28,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
         });
       }
       const count = await query.getCount();
-      const data = await paginateRaw<any>(query, { limit: limit ? limit : null, page: page ? page : null });
+      const data = await paginate<InvoicesZone>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
       console.log(error);
