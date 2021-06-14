@@ -18,6 +18,7 @@ import { PurchaseRepository } from 'src/purchases/repositories/Purchase.reposito
 import { plainToClass } from 'class-transformer';
 import { RInvoice, RPurchase } from './dtos/taxes-response.dto';
 import { Branch } from 'src/companies/entities/Branch.entity';
+import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 
 @Injectable()
 export class TaxesService {
@@ -49,8 +50,10 @@ export class TaxesService {
 
     switch (data.registerType) {
       case 'invoices':
-        const customer = await this.customerRepository.getCustomer(data.customer, company, 'cliente');
-        const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([data.documentType]);
+        const customer = await this.customerRepository.getCustomer(data.customer as string, company, 'cliente');
+        const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
+          data.documentType as number,
+        ]);
         const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
         invoice = await this.invoiceRepository.createInvoice(
           company,
@@ -78,6 +81,24 @@ export class TaxesService {
         await this.invoiceDetailRepository.createInvoiceDetail([details]);
         break;
       case 'purchases':
+        const provider = await this.customerRepository.getCustomer(data.provider as string, company, 'proveedor');
+        const purchaseDocumentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
+          data.documentType as number,
+        ]);
+        const purchasesStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        invoice = await this.invoiceRepository.createInvoice(
+          company,
+          branch,
+          data,
+          customer,
+          customer.customerBranches.find((b) => b.default),
+          null,
+          null,
+          documentType[0],
+          null,
+          invoiceStatus,
+          '53a36e54-bab2-4824-9e43-b40efab8bab9',
+        );
         break;
     }
 
