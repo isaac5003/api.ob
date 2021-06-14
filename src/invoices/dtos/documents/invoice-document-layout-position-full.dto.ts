@@ -15,8 +15,4 @@ export class InvoiceDocumentLayoutPositionFullDTO {
 
   @IsNotEmpty({ message: validationMessage('value', 'IsNotEmpty') })
   value: string;
-
-  @IsNotEmpty({ message: validationMessage('show', 'IsNotEmpty') })
-  @IsBoolean({ message: validationMessage('show', 'IsBoolean') })
-  show: boolean;
 }
