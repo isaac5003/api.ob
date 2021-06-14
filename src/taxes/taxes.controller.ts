@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
@@ -8,6 +8,7 @@ import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
+import { TaxesHeaderCreateDTO } from './dtos/validate/taxes-header-cretae.vdto';
 import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 import { TaxesService } from './taxes.service';
 
@@ -19,7 +20,7 @@ export class TaxesController {
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createRegister(
-    @Body() data: TaxesHeaderDTO,
+    @Body() data: TaxesHeaderCreateDTO,
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
   ): Promise<ResponseMinimalDTO> {
@@ -42,5 +43,15 @@ export class TaxesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseSingleDTO<Partial<Invoice> | Partial<Purchase>>> {
     return await this.taxes.getRegister(id, company);
+  }
+
+  @Put('/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateRegister(
+    @Param('id') id: string,
+    @Body() data: TaxesHeaderDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.taxes.updateRegister(id, company, data);
   }
 }

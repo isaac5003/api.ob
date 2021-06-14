@@ -12,12 +12,15 @@ import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
 import { TaxesBaseDTO } from './dtos/taxes-base.dto';
 import { TaxesView } from './entities/taxes-view.entity';
 import { TaxesRepository } from './repositories/taxes.repository';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 import { plainToClass } from 'class-transformer';
 import { RInvoice, RPurchase } from './dtos/taxes-response.dto';
 import { Branch } from 'src/companies/entities/Branch.entity';
+import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
+import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
+import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
 import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 
 @Injectable()
@@ -43,10 +46,19 @@ export class TaxesService {
 
     @InjectRepository(PurchaseRepository)
     private purchaseRepository: PurchaseRepository,
+
+    @InjectRepository(PurchasesDocumentTypeRepository)
+    private purchasesDocumentTypeRepository: PurchasesDocumentTypeRepository,
+
+    @InjectRepository(PurchasesStatusRepository)
+    private purchasesStatusRepository: PurchasesStatusRepository,
+
+    @InjectRepository(PurchaseDetailRepository)
+    private purchaseDetailRepository: PurchaseDetailRepository,
   ) {}
 
   async createRegister(data: Partial<TaxesBaseDTO>, company: Company, branch: Branch): Promise<ResponseMinimalDTO> {
-    let invoice: Invoice;
+    let invoice: Invoice | Purchase;
 
     switch (data.registerType) {
       case 'invoices':
@@ -82,23 +94,29 @@ export class TaxesService {
         break;
       case 'purchases':
         const provider = await this.customerRepository.getCustomer(data.provider as string, company, 'proveedor');
-        const purchaseDocumentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
+        const purchaseDocumentType = await this.purchasesDocumentTypeRepository.getPurchaseDocumentTypes([
           data.documentType as number,
         ]);
-        const purchasesStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
-        invoice = await this.invoiceRepository.createInvoice(
-          company,
-          branch,
+        const purchasesStatus = await this.purchasesStatusRepository.getPurchsesStatus(5);
+        invoice = await this.purchaseRepository.createPurchase(
           data,
-          customer,
-          customer.customerBranches.find((b) => b.default),
-          null,
-          null,
-          documentType[0],
-          null,
-          invoiceStatus,
+          provider,
+          provider.customerBranches.find((b) => b.default),
+          company,
+          purchaseDocumentType[0],
+          branch,
+          purchasesStatus,
           '53a36e54-bab2-4824-9e43-b40efab8bab9',
         );
+        const purchaseDetails = {
+          quantity: 1,
+          unitPrice: data.subtotal,
+          chargeDescription: 'Detalle generado automaticamente en modulo de IVA',
+          incTax: true,
+          ventaPrice: data.subtotal,
+          purchase: invoice,
+        };
+        await this.purchaseDetailRepository.createPurchaseDetail([purchaseDetails]);
         break;
     }
 
@@ -123,8 +141,9 @@ export class TaxesService {
         name: r.name,
         authorization: r.authorization,
         documentType: r.documentType,
-        registerType: r.type == 'invoices' ? 'Debito fiscal' : 'Credito fiscal',
+        registerType: r.type,
         iva: r.iva,
+        origin: r.origin,
       };
     });
     return {
@@ -155,7 +174,7 @@ export class TaxesService {
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          invoiceDate: data.invoiceDate,
+          invoiceDate: format(parseISO(data.invoiceDate), 'dd/MM/yyyy'),
           customer: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
@@ -173,8 +192,8 @@ export class TaxesService {
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          purchaseDate: data.purchaseDate,
-          customer: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
+          purchaseDate: format(parseISO(data.purchaseDate), 'dd/MM/yyyy'),
+          provider: { id: data.provider.id, name: data.provider.name, shortName: data.provider.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
           ventaTotal: data.ventaTotal,
@@ -183,5 +202,27 @@ export class TaxesService {
 
         return new ResponseSingleDTO(plainToClass(RPurchase, data));
     }
+  }
+
+  async updateRegister(id: string, company: Company, data: Partial<TaxesHeaderDTO>): Promise<ResponseMinimalDTO> {
+    const register = await this.taxesRepository.getRegister(company, id);
+    if (register.origin != '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+      throw new BadRequestException('No puedes actulizar este registro ya que fue generado desde otro modulo.');
+    }
+    let updated;
+    switch (register.type) {
+      case 'invoices':
+        updated = await this.invoiceRepository.updateInvoice(id, company, data);
+        break;
+      case 'purchases':
+        updated = await this.purchaseRepository.updatePurchase(id, company, data);
+        break;
+    }
+    if (updated.affected == 0) {
+      throw new BadRequestException('No se ha podido actulizar el registro de IVA seleccionado.');
+    }
+    return {
+      message: 'Se ha actulizado el registro de IVA correctamente.',
+    };
   }
 }

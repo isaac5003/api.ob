@@ -1,9 +1,11 @@
+import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { Customer } from 'src/customers/entities/Customer.entity';
 import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 
 import { logDatabaseError, numeroALetras } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
+import { PurchaseBaseDTO } from '../dto/purchase-base.dto';
 import { PurchaseHeaderDTO } from '../dto/purchase-header.dto';
 import { Purchase } from '../entities/Purchase.entity';
 import { PurchasesDocumentType } from '../entities/PurchasesDocumentType.entity';
@@ -13,11 +15,12 @@ const reponame = 'compras';
 @EntityRepository(Purchase)
 export class PurchaseRepository extends Repository<Purchase> {
   async createPurchase(
-    data: PurchaseHeaderDTO,
+    data: Partial<PurchaseBaseDTO>,
     provider: Customer,
     providerBranch: CustomerBranch,
     company: Company,
     documentType: PurchasesDocumentType,
+    branch: Branch,
     status: PurchasesStatus,
     origin: string,
   ): Promise<Purchase> {
@@ -45,6 +48,7 @@ export class PurchaseRepository extends Repository<Purchase> {
       purchaseDate: data.purchaseDate,
       status: status,
       company: company,
+      provider: provider,
       providerBranch: providerBranch,
       providerType: provider.customerType,
       providerTypeNatural: provider.customerTypeNatural,
@@ -99,5 +103,14 @@ export class PurchaseRepository extends Repository<Purchase> {
       logDatabaseError(reponame, error);
     }
     return purchase;
+  }
+
+  async updatePurchase(id: string, company: Company, data: any): Promise<any> {
+    try {
+      const purchase = this.update({ id, company }, data);
+      return purchase;
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
   }
 }

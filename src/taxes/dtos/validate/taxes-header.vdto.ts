@@ -4,9 +4,6 @@ import { TaxesBaseDTO } from '../taxes-base.dto';
 import { validationMessage } from '../../../_tools';
 
 export class TaxesHeaderDTO extends TaxesBaseDTO {
-  @IsNotEmpty({ message: validationMessage('registerType', 'IsNotEmpty') })
-  registerType: string;
-
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('documentType', 'IsInt') })

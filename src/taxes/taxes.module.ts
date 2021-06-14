@@ -10,6 +10,9 @@ import { CustomerRepository } from 'src/customers/repositories/Customer.reposito
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
+import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
+import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
+import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { PurchaseRepository } from 'src/purchases/repositories/Purchase.reposito
       InvoicesStatusRepository,
       TaxesRepository,
       PurchaseRepository,
+      PurchasesStatusRepository,
+      PurchasesDocumentTypeRepository,
+      PurchaseDetailRepository,
     ]),
   ],
 
