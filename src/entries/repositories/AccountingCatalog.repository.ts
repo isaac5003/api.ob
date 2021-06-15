@@ -36,8 +36,9 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
         .orderBy('ac.code', 'ASC');
 
       if (search) {
-        query.andWhere('(LOWER(ac.name) LIKE :search) OR (LOWER(ac.code) LIKE :search) ', {
+        query.andWhere('(LOWER(ac.name) LIKE :search) OR (LOWER(ac.code) LIKE :search) AND ac.company = :company', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
 
