@@ -13,7 +13,7 @@ import { PurchaseRepository } from 'src/purchases/repositories/Purchase.reposito
 import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
 import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
 import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService, DependentController } from 'src/auth/auth.service';
 
 @Module({
   imports: [
@@ -32,7 +32,7 @@ import { AuthService } from 'src/auth/auth.service';
     ]),
   ],
 
-  providers: [TaxesService, AuthService],
+  providers: [TaxesService, DependentController],
   controllers: [TaxesController],
 })
 export class TaxesModule {}

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
@@ -25,6 +25,8 @@ import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 import { numeroALetras } from 'src/_tools';
 import { TaxesHeaderCreateDTO } from './dtos/validate/taxes-header-cretae.vdto';
 import { Profile } from 'src/auth/entities/Profile.entity';
+import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/auth/entities/User.entity';
 
 @Injectable()
 export class TaxesService {
@@ -58,19 +60,22 @@ export class TaxesService {
 
     @InjectRepository(PurchaseDetailRepository)
     private purchaseDetailRepository: PurchaseDetailRepository,
+
+    private authService: AuthService,
   ) {}
 
   async createRegister(
     data: Partial<TaxesHeaderCreateDTO>,
     company: Company,
     branch: Branch,
-    profile: Profile,
+    user: User,
   ): Promise<ResponseMinimalDTO> {
     let invoice: Invoice | Purchase;
 
     switch (data.registerType) {
       case 'invoices':
-        if (hasModules(['cfb8addb-541b-482f-8fa1-dfe5db03fdf4'], profile)) {
+        if (await this.authService.hasModules(['cfb8addb-541b-482f-8fa1-dfe5db03fdf4'], user, branch, company)) {
+          throw new ForbiddenException('Debes crear las ventas desde el modulo de ventas.');
         }
         const customer = await this.customerRepository.getCustomer(data.entity as string, company, 'cliente');
         const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
@@ -114,6 +119,9 @@ export class TaxesService {
         await this.invoiceDetailRepository.createInvoiceDetail([details]);
         break;
       case 'purchases':
+        if (await this.authService.hasModules(['cf5e4b29-f09c-438a-8d82-2ef482a9a461'], user, branch, company)) {
+          throw new ForbiddenException('Debes crear las compras desde el modulo de compras.');
+        }
         const provider = await this.customerRepository.getCustomer(data.entity as string, company, 'proveedor');
         const purchaseDocumentType = await this.purchasesDocumentTypeRepository.getPurchaseDocumentTypes([
           data.documentType as number,

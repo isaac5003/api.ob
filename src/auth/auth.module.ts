@@ -32,7 +32,7 @@ import { TokenRepository } from 'src/system/repositories/Token.repository';
       TokenRepository,
     ]),
   ],
-  exports: [JwtStrategy, PassportModule],
+  exports: [JwtStrategy, PassportModule, AuthService],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })

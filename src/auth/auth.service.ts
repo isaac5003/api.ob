@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Dependencies,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -292,5 +293,11 @@ export class AuthService {
     const modulesAccess = loggedBranch.modules.map((m) => m.id);
 
     return modulesAccess.map((m) => modules.includes(m)).some((m) => m);
+  }
+}
+@Dependencies(AuthService)
+export class DependentController {
+  constructor(authService) {
+    authService = authService;
   }
 }

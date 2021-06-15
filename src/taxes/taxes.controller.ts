@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
 import { AuthService } from 'src/auth/auth.service';
 import { Profile } from 'src/auth/entities/Profile.entity';
+import { User } from 'src/auth/entities/User.entity';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
@@ -37,9 +38,9 @@ export class TaxesController {
     @Body() data: TaxesHeaderCreateDTO,
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
-    @GetAuthData('profile') profile: Profile,
+    @GetAuthData('user') user: User,
   ): Promise<ResponseMinimalDTO> {
-    return this.taxes.createRegister(data, company, branch, profile);
+    return this.taxes.createRegister(data, company, branch, user);
   }
 
   @Get('/')
