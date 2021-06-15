@@ -9,7 +9,11 @@ const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
 export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
   async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocument[]> {
-    const { active, documentType } = filter;
+    let active, documentType;
+    if (filter) {
+      active = filter.active;
+      documentType = filter.documentType;
+    }
 
     let documents: InvoicesDocument[];
 
@@ -18,8 +22,9 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     };
 
     let filters = {};
+    filters = { company, isCurrentDocument: true };
     if (documentType) {
-      filters = { company, dt: documentType };
+      filters = { ...filters, dt: documentType };
     }
     if (active == true || active == false) {
       filters == { ...filters, active };
@@ -27,7 +32,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
 
     try {
       documents = await this.find({
-        where: filter,
+        where: filters,
         join: {
           alias: 'i',
           leftJoinAndSelect,
@@ -90,6 +95,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     const leftJoinAndSelect = {
       dt: 'i.documentType',
     };
+
     let filter = {};
     switch (type) {
       case 'used':

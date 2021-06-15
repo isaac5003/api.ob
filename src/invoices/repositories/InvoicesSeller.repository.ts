@@ -5,6 +5,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
+import { paginate, paginateRaw } from 'nestjs-typeorm-paginate';
 
 const reponame = 'vendedor';
 @EntityRepository(InvoicesSeller)
@@ -30,11 +31,8 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
         });
       }
       const count = await query.getCount();
-      // applies pagination
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0 * limit) : null);
-      }
-      return { data: await query.getMany(), count };
+      const data = await paginate<InvoicesSeller>(query, { limit: limit ? limit : null, page: page ? page : null });
+      return { data: data.items, count };
     } catch (error) {
       console.log(error);
       logDatabaseError(reponame, error);

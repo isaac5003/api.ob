@@ -47,7 +47,6 @@ export class Service extends BaseEntity {
   invoiceDetails: InvoiceDetail[];
 
   @ManyToOne(() => Company, (company) => company.services)
-  @JoinColumn({ name: 'company_id' })
   company: Company;
 
   @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.services)

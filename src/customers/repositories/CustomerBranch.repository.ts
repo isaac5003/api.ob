@@ -3,6 +3,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import { BranchDataDTO } from '../dtos/customer-branch.dto';
 import { CustomerBranch } from '../entities/CustomerBranch.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 @EntityRepository(CustomerBranch)
 export class CustomerBranchRepository extends Repository<CustomerBranch> {
@@ -27,9 +28,6 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
       }
 
       const count = await query.getCount();
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
-      }
 
       if (order && prop) {
         let field = `branch.${prop}`;
@@ -48,8 +46,8 @@ export class CustomerBranchRepository extends Repository<CustomerBranch> {
       } else {
         query.orderBy('branch.createdAt', 'DESC');
       }
-
-      return { data: await query.getMany(), count };
+      const data = await paginate<CustomerBranch>(query, { limit: limit ? limit : null, page: page ? page : null });
+      return { data: data.items, count };
     } catch (error) {
       console.error(error);
 

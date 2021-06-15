@@ -50,6 +50,8 @@ export function validationMessage(fieldname: string, type: string): string {
       return `La venta no puede ser ${fieldname} porque tiene un estado que no lo permite.`;
     case 'IsDecimal':
       return `El campo '${fieldname}' debe ser un numero y debe contener dos decimales.`;
+    case 'IsEnum':
+      return `El campo '${fieldname}' debe ser 'automatic' o 'manual'.`;
   }
 }
 

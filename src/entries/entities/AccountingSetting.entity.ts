@@ -9,8 +9,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AccountingCatalog } from './AccountingCatalog.entity';
-import { AccountingRegisterType } from './AccountingRegisterType.entity';
-
 @Entity('')
 export class AccountingSetting extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -49,12 +47,12 @@ export class AccountingSetting extends BaseEntity {
   @Column({ nullable: true, type: 'varchar' })
   auditor: string;
 
+  @Column({ nullable: true, type: 'varchar' })
+  registerType: string;
+
   @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingSettings)
   accountingCatalog: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.accountingSettings)
   company: Company;
-
-  @ManyToOne(() => AccountingRegisterType, (accountingRegisterType) => accountingRegisterType.accountingSettings)
-  registerType: AccountingRegisterType;
 }

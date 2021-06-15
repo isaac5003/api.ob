@@ -257,6 +257,11 @@ export class InvoicesService {
 
     const documents = documentTypes.map((dt) => {
       const found = existingDocuments.find((d) => d.documentType.id == dt.id);
+
+      if (found) {
+        delete found.documentLayout;
+        delete found.layout;
+      }
       return found
         ? { ...found }
         : {
@@ -269,6 +274,7 @@ export class InvoicesService {
             documentType: dt,
           };
     });
+
     return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
@@ -277,88 +283,88 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
   }
 
-  async createUpdateDocument(
-    company: Company,
-    data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
-    type: string,
-  ): Promise<ResponseMinimalDTO> {
+  async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
       data.map((d) => d.documentType as unknown as number),
     );
 
-    let documentsToProcess = [];
-    switch (type) {
-      case 'create':
-        // Obtiene los documentos ya existentes de los tipos que se van a crear
-        const documents = (await this.invoicesDocumentRepository.getInvoicesDocuments(company)).filter((d) =>
-          documentTypes.map((dt) => dt.id).includes(d.documentType.id),
-        );
+    let documentsToProcessUpdate = [];
+    let documentsToProcessCreate = [];
 
-        const documentsToDisable = documents.map((d) => {
-          return {
-            ...d,
-            isCurrentDocument: false,
-            active: false,
-          };
-        });
+    const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
+      company,
+      data.filter((d) => d.id).map((d) => d.id),
+      'unused',
+    );
 
-        // Deshabilita los documentos
-        await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
-
-        documentsToProcess = data.map((d) => {
+    if (documentExist.length > 0) {
+      documentsToProcessUpdate = data
+        .filter((d) => documentExist.map((de) => de.id).includes(d.id))
+        .map((d) => {
           return {
             ...d,
             documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
-            isCurrentDocument: true,
-            company: company,
           };
         });
-        break;
-      case 'update':
-        const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
-          company,
-          data.map((d) => d.id),
-          'unused',
-        );
-
-        if (documentExist.length == 0) {
-          throw new BadRequestException(
-            'Los documentos seleccionados no pueden ser actualizados ya que no existen o estan en uso',
-          );
-        }
-
-        documentsToProcess = data
-          .filter((d) => documentExist.map((de) => de.id).includes(d.id))
-          .map((d) => {
-            return {
-              ...d,
-              documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
-            };
-          });
-
-        break;
     }
 
-    const completed = await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToProcess, type);
+    // Obtiene los documentos ya existentes de los tipos que se van a crear
+    let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+
+    documents = documents.filter((d) => documentTypes.map((dt) => dt.id).includes(d.documentType.id));
+    const documentsToDisable = documents.map((d) => {
+      return {
+        ...d,
+        isCurrentDocument: false,
+        active: false,
+      };
+    });
+
+    // Deshabilita los documentos
+    await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
+
+    documentsToProcessCreate = data
+      .filter((d) => !documentExist.map((de) => de.id).includes(d.id))
+      .map((d) => {
+        delete d.id;
+        return {
+          ...d,
+          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          isCurrentDocument: true,
+          company: company,
+        };
+      });
+
+    const completedUpdate = await this.invoicesDocumentRepository.createUpdateDocument(
+      company,
+      documentsToProcessUpdate,
+      'update',
+    );
+    const completedCreate = await this.invoicesDocumentRepository.createUpdateDocument(
+      company,
+      documentsToProcessCreate,
+      'create',
+    );
+
     let message = '';
-    switch (type) {
-      case 'create':
-        message = 'Los documentos se han creado correctamente.';
-        break;
-      case 'update':
-        message = 'Los documentos se han actualizado correctamente.';
-        break;
-    }
+    message =
+      completedCreate.length > 0 && completedUpdate.length > 0
+        ? 'Se han creado y actulizado los documentos correctamente'
+        : completedCreate.length > 0
+        ? 'Se han creado los documentos correctamente'
+        : completedUpdate.length > 0
+        ? 'Se han actulizado los documentos correctamente'
+        : 'No se han podido actualizar o crear los documentos.';
 
     return {
-      ids: completed.map((c) => c.id),
+      ids: completedCreate.length > 0 ? completedCreate.map((c) => c.id) : completedUpdate.map((c) => c.id),
       message,
     };
   }
 
   async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
     const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, JSON.parse(documentLayout)));
   }
 
   async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
@@ -596,6 +602,10 @@ export class InvoicesService {
       data.header.documentType,
       allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)),
     );
+
+    if (document.used == false) {
+      await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { used: true }, company);
+    }
 
     const invoiceHeader = await this.invoiceRepository.createInvoice(
       company,

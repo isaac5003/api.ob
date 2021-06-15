@@ -4,6 +4,7 @@ import { FilterDTO } from '../../_dtos/filter.dto';
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { AccountingCatalog } from '../entities/AccountingCatalog.entity';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'catalogo de cuentas';
 @EntityRepository(AccountingCatalog)
@@ -41,10 +42,8 @@ export class AccountingCatalogRepository extends Repository<AccountingCatalog> {
       }
 
       const count = await query.getCount();
-      if (limit && page) {
-        query.take(limit).skip(limit ? (page ? page - 1 : 0) * limit : null);
-      }
-      return { data: await query.getMany(), count };
+      const data = await paginate<AccountingCatalog>(query, { limit: limit ? limit : null, page: page ? page : null });
+      return { data: data.items, count };
     } catch (error) {
       console.error(error);
 

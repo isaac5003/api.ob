@@ -10,8 +10,17 @@ import { AccountingSetting } from '../entities/AccountingSetting.entity';
 export class AccountingSettingRepository extends Repository<AccountingSetting> {
   async getSetting(company: Company, settingType: string): Promise<any> {
     let settings: AccountingSetting;
+    const leftJoinAndSelect = {
+      ac: 's.accountingCatalog',
+    };
     try {
-      settings = await this.findOne({ company });
+      settings = await this.findOne({
+        where: { company },
+        join: {
+          alias: 's',
+          leftJoinAndSelect,
+        },
+      });
     } catch (error) {
       logDatabaseError(settingType, error);
     }
@@ -26,6 +35,7 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
     id?: string,
   ): Promise<any> {
     let response;
+
     try {
       let settings;
       switch (type) {
@@ -36,6 +46,8 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
           settings = { company, id, ...data };
           break;
       }
+      console.log(settings);
+
       response = await this.save(settings);
     } catch (error) {
       logDatabaseError(settingType, error);
