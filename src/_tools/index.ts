@@ -1,5 +1,6 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { Profile } from 'src/auth/entities/Profile.entity';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;

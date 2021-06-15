@@ -113,4 +113,14 @@ export class PurchaseRepository extends Repository<Purchase> {
       logDatabaseError(reponame, error);
     }
   }
+
+  async deletePurchase(id: string): Promise<boolean> {
+    try {
+      await this.delete(id);
+    } catch (error) {
+      console.error(error);
+      logDatabaseError(reponame, error);
+    }
+    return true;
+  }
 }

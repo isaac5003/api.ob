@@ -283,4 +283,14 @@ export class AuthService {
       message: 'La contraseña ha sido actualizada correctamente.',
     };
   }
+
+  async hasModules(modules: string[], user: User, branch: Branch, company: Company): Promise<boolean> {
+    const found = await this.getUser(user, branch, company);
+
+    const loggedCompany = found.user.profile.access.find((a) => a.id == found.user.workspace.company.id);
+    const loggedBranch = loggedCompany.branches.find((b) => b.id == found.user.workspace.branch.id);
+    const modulesAccess = loggedBranch.modules.map((m) => m.id);
+
+    return modulesAccess.map((m) => modules.includes(m)).some((m) => m);
+  }
 }

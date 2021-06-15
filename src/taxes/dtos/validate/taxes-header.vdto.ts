@@ -15,19 +15,12 @@ export class TaxesHeaderDTO extends TaxesBaseDTO {
   @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
   sequence: string;
 
-  @IsOptional()
-  customer: string;
+  @IsNotEmpty({ message: validationMessage('entity', 'IsNotEmpty') })
+  entity: string;
 
-  @IsOptional()
-  @IsISO8601({}, { message: validationMessage('invoiceDate', 'IsISO8601') })
-  invoiceDate: string;
-
-  @IsOptional()
-  provider: string;
-
-  @IsOptional()
+  @IsNotEmpty({ message: validationMessage('date', 'IsNotEmpty') })
   @IsISO8601({}, { message: validationMessage('purchaseDate', 'IsISO8601') })
-  purchaseDate: string;
+  date: string;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('sum', 'IsNumber') })
@@ -52,5 +45,5 @@ export class TaxesHeaderDTO extends TaxesBaseDTO {
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('ventaTotal', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('ventaTotal', 'IsNotEmpty') })
-  ventaTotal: number;
+  total: number;
 }

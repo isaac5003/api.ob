@@ -22,6 +22,9 @@ import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/Purc
 import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
 import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
 import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
+import { numeroALetras } from 'src/_tools';
+import { TaxesHeaderCreateDTO } from './dtos/validate/taxes-header-cretae.vdto';
+import { Profile } from 'src/auth/entities/Profile.entity';
 
 @Injectable()
 export class TaxesService {
@@ -57,20 +60,38 @@ export class TaxesService {
     private purchaseDetailRepository: PurchaseDetailRepository,
   ) {}
 
-  async createRegister(data: Partial<TaxesBaseDTO>, company: Company, branch: Branch): Promise<ResponseMinimalDTO> {
+  async createRegister(
+    data: Partial<TaxesHeaderCreateDTO>,
+    company: Company,
+    branch: Branch,
+    profile: Profile,
+  ): Promise<ResponseMinimalDTO> {
     let invoice: Invoice | Purchase;
 
     switch (data.registerType) {
       case 'invoices':
-        const customer = await this.customerRepository.getCustomer(data.customer as string, company, 'cliente');
+        if (hasModules(['cfb8addb-541b-482f-8fa1-dfe5db03fdf4'], profile)) {
+        }
+        const customer = await this.customerRepository.getCustomer(data.entity as string, company, 'cliente');
         const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
           data.documentType as number,
         ]);
         const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        const newData = {
+          authorization: data.authorization,
+          sequence: data.sequence,
+          customer: data.entity,
+          inoviceDate: data.date,
+          sum: data.sum,
+          iva: data.iva,
+          subtotal: data.subtotal,
+          ivaRetenido: data.ivaRetenido,
+          ventaTotal: data.total,
+        };
         invoice = await this.invoiceRepository.createInvoice(
           company,
           branch,
-          data,
+          newData,
           customer,
           customer.customerBranches.find((b) => b.default),
           null,
@@ -93,13 +114,23 @@ export class TaxesService {
         await this.invoiceDetailRepository.createInvoiceDetail([details]);
         break;
       case 'purchases':
-        const provider = await this.customerRepository.getCustomer(data.provider as string, company, 'proveedor');
+        const provider = await this.customerRepository.getCustomer(data.entity as string, company, 'proveedor');
         const purchaseDocumentType = await this.purchasesDocumentTypeRepository.getPurchaseDocumentTypes([
           data.documentType as number,
         ]);
         const purchasesStatus = await this.purchasesStatusRepository.getPurchsesStatus(5);
+        const newDatas = {
+          authorization: data.authorization,
+          sequence: data.sequence,
+          provider: data.entity,
+          purchaseDate: data.date,
+          sum: data.sum,
+          iva: data.iva,
+          subtotal: data.subtotal,
+          compraTotal: data.total,
+        };
         invoice = await this.purchaseRepository.createPurchase(
-          data,
+          newDatas,
           provider,
           provider.customerBranches.find((b) => b.default),
           company,
@@ -207,15 +238,64 @@ export class TaxesService {
   async updateRegister(id: string, company: Company, data: Partial<TaxesHeaderDTO>): Promise<ResponseMinimalDTO> {
     const register = await this.taxesRepository.getRegister(company, id);
     if (register.origin != '53a36e54-bab2-4824-9e43-b40efab8bab9') {
-      throw new BadRequestException('No puedes actulizar este registro ya que fue generado desde otro modulo.');
+      throw new BadRequestException('No puedes editar este registro ya que fue generado desde otro modulo.');
     }
     let updated;
     switch (register.type) {
       case 'invoices':
-        updated = await this.invoiceRepository.updateInvoice(id, company, data);
+        await this.customerRepository.getCustomer(data.entity as string, company, 'cliente');
+        const invoiceToUpdate = {
+          authorization: data.authorization,
+          sequence: data.sequence,
+          customer: data.entity,
+          invoiceDate: data.date,
+          sum: data.sum,
+          iva: data.iva,
+          subtotal: data.subtotal,
+          ivaRetenido: data.ivaRetenido,
+          ventaTotal: data.total,
+          ventaTotalText: numeroALetras(data.total),
+        };
+        const invoice = await this.invoiceRepository.getInvoice(company, id);
+        await this.invoiceDetailRepository.deleteInvoiceDetail([invoice.invoiceDetails[0].id]);
+        updated = await this.invoiceRepository.updateInvoice(id, company, invoiceToUpdate);
+
+        const details = {
+          quantity: 1,
+          unitPrice: data.subtotal,
+          chargeDescription: 'Detalle generado automaticamente en modulo de IVA',
+          incTax: true,
+          ventaPrice: data.subtotal,
+          invoice: invoice,
+        };
+
+        await this.invoiceDetailRepository.createInvoiceDetail([details]);
         break;
       case 'purchases':
-        updated = await this.purchaseRepository.updatePurchase(id, company, data);
+        delete data.ivaRetenido;
+        await this.customerRepository.getCustomer(data.entity as string, company, 'proveedor');
+        const purchaseToUpdate = {
+          authorization: data.authorization,
+          sequence: data.sequence,
+          provider: data.entity,
+          purchaseDate: data.date,
+          sum: data.sum,
+          iva: data.iva,
+          subtotal: data.subtotal,
+          compraTotal: data.total,
+        };
+        const purchase = await this.purchaseRepository.getPurchase(company, id);
+        updated = await this.purchaseRepository.updatePurchase(id, company, purchaseToUpdate);
+
+        const purchaseDetails = {
+          quantity: 1,
+          unitPrice: data.subtotal,
+          chargeDescription: 'Detalle generado automaticamente en modulo de IVA',
+          incTax: true,
+          ventaPrice: data.subtotal,
+          purchase: purchase,
+        };
+        await this.purchaseDetailRepository.createPurchaseDetail([purchaseDetails]);
         break;
     }
     if (updated.affected == 0) {
@@ -223,6 +303,30 @@ export class TaxesService {
     }
     return {
       message: 'Se ha actulizado el registro de IVA correctamente.',
+    };
+  }
+
+  async deleteRegister(id: string, company: Company): Promise<ResponseMinimalDTO> {
+    const register = await this.taxesRepository.getRegister(company, id);
+    if (register.origin != '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+      throw new BadRequestException('No puedes eliminar este registro ya que fue generado desde otro modulo.');
+    }
+    switch (register.type) {
+      case 'invoices':
+        const invoice = await this.invoiceRepository.getInvoice(company, register.id);
+        await this.invoiceDetailRepository.deleteInvoiceDetail(invoice.invoiceDetails.map((d) => d.id));
+        await this.invoiceRepository.deleteInvoice(company, id, invoice);
+        break;
+
+      case 'purchases':
+        const purchase = await this.purchaseRepository.getPurchase(company, register.id);
+        await this.purchaseDetailRepository.deletePurchaseDetail(purchase.purchaseDetails.map((d) => d.id));
+        await this.purchaseRepository.deletePurchase(id);
+        break;
+    }
+
+    return {
+      message: 'Se ha eliminado el registro correctamente.',
     };
   }
 }

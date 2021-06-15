@@ -18,4 +18,16 @@ export class PurchaseDetailRepository extends Repository<PurchaseDetail> {
     }
     return await response;
   }
+  async deletePurchaseDetail(ids: string[]): Promise<boolean> {
+    try {
+      if (ids.length > 0) {
+        await this.delete(ids);
+      }
+    } catch (error) {
+      console.error(error);
+
+      logDatabaseError(reponame, error);
+    }
+    return true;
+  }
 }

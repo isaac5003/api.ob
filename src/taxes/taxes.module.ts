@@ -13,6 +13,7 @@ import { PurchaseRepository } from 'src/purchases/repositories/Purchase.reposito
 import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
 import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
 import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
+import { AuthService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDet
     ]),
   ],
 
-  providers: [TaxesService],
+  providers: [TaxesService, AuthService],
   controllers: [TaxesController],
 })
 export class TaxesModule {}

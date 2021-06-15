@@ -1,6 +1,20 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { plainToClass } from 'class-transformer';
+import { AuthService } from 'src/auth/auth.service';
+import { Profile } from 'src/auth/entities/Profile.entity';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
@@ -15,7 +29,7 @@ import { TaxesService } from './taxes.service';
 @Controller('taxes')
 @UseGuards(AuthGuard())
 export class TaxesController {
-  constructor(private taxes: TaxesService) {}
+  constructor(private taxes: TaxesService, private authService: AuthService) {}
 
   @Post('/')
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -23,8 +37,9 @@ export class TaxesController {
     @Body() data: TaxesHeaderCreateDTO,
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
+    @GetAuthData('profile') profile: Profile,
   ): Promise<ResponseMinimalDTO> {
-    return this.taxes.createRegister(data, company, branch);
+    return this.taxes.createRegister(data, company, branch, profile);
   }
 
   @Get('/')
@@ -53,5 +68,10 @@ export class TaxesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return this.taxes.updateRegister(id, company, data);
+  }
+
+  @Delete('/:id')
+  async deleteRegister(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return await this.taxes.deleteRegister(id, company);
   }
 }
