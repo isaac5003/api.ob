@@ -5,7 +5,7 @@ import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
-import { paginate, paginateRaw } from 'nestjs-typeorm-paginate';
+import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'zonas';
 @EntityRepository(InvoicesZone)
@@ -25,6 +25,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
       if (search) {
         query.andWhere('LOWER(iz.name) LIKE :search', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
       const count = await query.getCount();

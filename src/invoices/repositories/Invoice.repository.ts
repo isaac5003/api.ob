@@ -113,6 +113,7 @@ export class InvoiceRepository extends Repository<Invoice> {
           'LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search OR LOWER(zo.name) LIKE :search OR LOWER(cu.name) LIKE :search OR LOWER(sl.name) LIKE :search',
           {
             search: `%${search}%`,
+            company: company.id,
           },
         );
       }
