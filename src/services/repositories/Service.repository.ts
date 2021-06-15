@@ -35,6 +35,7 @@ export class ServiceRepository extends Repository<Service> {
       if (search) {
         query.andWhere('LOWER(s.name) LIKE :search OR LOWER(s.description) LIKE :search', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
 

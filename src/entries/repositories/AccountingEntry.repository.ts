@@ -67,6 +67,7 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
       if (search) {
         entries = entries.andWhere('(LOWER(ae.title) LIKE :search) ', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
 
