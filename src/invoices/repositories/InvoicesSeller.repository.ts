@@ -28,6 +28,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
       if (search) {
         query.andWhere('LOWER(s.name) LIKE :search', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
       const count = await query.getCount();

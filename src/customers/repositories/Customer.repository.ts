@@ -45,6 +45,7 @@ export class CustomerRepository extends Repository<Customer> {
       if (search) {
         query.andWhere('(LOWER(customer.name) LIKE :search)', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
 
