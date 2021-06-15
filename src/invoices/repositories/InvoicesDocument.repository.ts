@@ -95,6 +95,7 @@ export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
     const leftJoinAndSelect = {
       dt: 'i.documentType',
     };
+
     let filter = {};
     switch (type) {
       case 'used':

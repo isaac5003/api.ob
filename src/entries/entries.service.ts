@@ -12,12 +12,10 @@ import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.dto';
 import { SeriesDTO } from './dtos/serie/entries-series.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
-import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
 import { AccountingSetting } from './entities/AccountingSetting.entity';
 import { AccountingCatalogRepository } from './repositories/AccountingCatalog.repository';
 import { AccountingEntryRepository } from './repositories/AccountingEntry.repository';
 import { AccountingEntryTypeRepository } from './repositories/AccountingEntryType.repository';
-import { AccountingRegisterTypeRepository } from './repositories/AccountingRegisterType.repository';
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
 import { parseISO, differenceInMonths } from 'date-fns';
 import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.dto';
@@ -39,9 +37,6 @@ export class EntriesService {
 
     @InjectRepository(AccountingEntryRepository)
     private accountingEntryRepository: AccountingEntryRepository,
-
-    @InjectRepository(AccountingRegisterTypeRepository)
-    private accountingRegisterTypeRepository: AccountingRegisterTypeRepository,
 
     @InjectRepository(AccountingSettingRepository)
     private accountingSettingRepository: AccountingSettingRepository,
@@ -162,10 +157,6 @@ export class EntriesService {
     return await this.accountingEntryRepository.getSeries(company, data);
   }
 
-  async getResgisterType(company: Company): Promise<{ data: AccountingRegisterType[]; count: number }> {
-    return this.accountingRegisterTypeRepository.getResgisterTypes(company);
-  }
-
   async getSettings(company: Company, settingType: string): Promise<ResponseSingleDTO<AccountingSetting>> {
     const settings = await this.accountingSettingRepository.getSetting(company, settingType);
     let setting = {};
@@ -196,7 +187,7 @@ export class EntriesService {
       case 'integraciones':
         setting = {
           catalog: settings ? (settings.accountingCatalog ? settings.accountingCatalog.id : null) : null,
-          registerType: settings ? (settings.registerType ? settings.registerType.id : null) : null,
+          registerType: settings ? (settings.registerType ? settings.registerType : null) : null,
         };
         break;
     }
@@ -266,8 +257,6 @@ export class EntriesService {
   ): Promise<ResponseMinimalDTO> {
     const settings = await this.accountingSettingRepository.getSetting(company, settingType);
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
-
-    await this.accountingRegisterTypeRepository.getRegisterType(company, data.resgisterType);
 
     if (settings) {
       await this.accountingSettingRepository.updateSetting(company, data, settingType, 'update', settings.id);

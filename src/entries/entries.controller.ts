@@ -33,7 +33,6 @@ import { SeriesDTO } from './dtos/serie/entries-series.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
-import { AccountingRegisterType } from './entities/AccountingRegisterType.entity';
 import { AccountingSetting } from './entities/AccountingSetting.entity';
 import { EntriesService } from './entries.service';
 import { plainToClass } from 'class-transformer';
@@ -97,14 +96,6 @@ export class EntriesController {
   @UsePipes(new ValidationPipe({ transform: true }))
   async getSeries(@GetAuthData('company') company: Company, @Query() data: SeriesDTO): Promise<ResponseMinimalDTO> {
     return await this.entries.getSeries(company, data);
-  }
-
-  @Get('/register-type')
-  async getRegisterType(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<AccountingRegisterType, number, number, number>> {
-    const { data, count } = await this.entries.getResgisterType(company);
-    return new ResponseListDTO(plainToClass(AccountingRegisterType, data), count);
   }
 
   @Get('/setting/general')
