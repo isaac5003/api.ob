@@ -38,7 +38,7 @@ export class InvoiceDocumentDBDTO {
   isCurrentDocument: boolean;
 
   @IsOptional()
-  documentLayout: string;
+  documentLayout: any;
 
   @IsOptional()
   company: Company;

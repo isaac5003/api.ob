@@ -377,11 +377,7 @@ export class InvoicesService {
 
   async createUpdateDocumentLayout(company: Company, id: number, data: InvoiceDocumentLayoutDTO) {
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      document.id,
-      { documentLayout: JSON.stringify(data) },
-      company,
-    );
+    await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { documentLayout: data }, company);
     return {
       message: `La configuracion ha sido guardada correctamente.`,
     };
