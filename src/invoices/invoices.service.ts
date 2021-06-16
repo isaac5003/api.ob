@@ -34,7 +34,6 @@ import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 

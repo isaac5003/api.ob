@@ -16,6 +16,7 @@ import { CustomerBranch } from './CustomerBranch.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
+import { Echarges } from 'src/echarges/entities/echarges.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
@@ -81,4 +82,7 @@ export class Customer extends BaseEntity {
 
   @OneToMany(() => Purchase, (purchase) => purchase.provider)
   purchases: Purchase[];
+
+  @OneToMany(() => Echarges, (echarges) => echarges.customer)
+  echarges: Echarges[];
 }

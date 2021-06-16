@@ -20,6 +20,7 @@ import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 import { InvoiceDetail } from './InvoiceDetail.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
+import { Echarges } from 'src/echarges/entities/echarges.entity';
 
 @Entity()
 export class Invoice extends BaseEntity {
@@ -142,4 +143,7 @@ export class Invoice extends BaseEntity {
 
   @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.invoice)
   invoiceDetails: InvoiceDetail[];
+
+  @OneToMany(() => Echarges, (echarges) => echarges.invoice)
+  echarges: Echarges;
 }
