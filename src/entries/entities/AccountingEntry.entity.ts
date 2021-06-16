@@ -32,6 +32,9 @@ export class AccountingEntry extends BaseEntity {
   @Column({ type: 'boolean' })
   accounted: boolean;
 
+  @Column({ type: 'varchar', default: 'a98b98e6-b2d5-42a3-853d-9516f64eade8' })
+  origin: string;
+
   @CreateDateColumn()
   createdAt: string;
 
