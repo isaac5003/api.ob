@@ -34,7 +34,6 @@ import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
@@ -123,7 +122,7 @@ export class InvoicesService {
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status: status.id });
 
     return {
       message:
@@ -364,7 +363,7 @@ export class InvoicesService {
 
   async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
     const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, JSON.parse(documentLayout)));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
   }
 
   async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
@@ -377,11 +376,7 @@ export class InvoicesService {
 
   async createUpdateDocumentLayout(company: Company, id: number, data: InvoiceDocumentLayoutDTO) {
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      document.id,
-      { documentLayout: JSON.stringify(data) },
-      company,
-    );
+    await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { documentLayout: data }, company);
     return {
       message: `La configuracion ha sido guardada correctamente.`,
     };
@@ -527,19 +522,27 @@ export class InvoicesService {
 
     let details = [];
     if (invoiceAll.status.id != 4) {
-      details = invoiceAll.invoiceDetails.map((d) => {
-        const { id, name } = d.service;
-        delete d.service;
-        return {
-          ...d,
-          service: { id, name },
-        };
-      });
-      delete invoiceAll.invoiceDetails;
-      delete invoiceAll.invoicesPaymentsCondition.active;
-      delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-      delete invoiceAll.invoicesSeller.active;
-      delete invoiceAll.invoicesZone.active;
+      if (invoiceAll.origin == '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+        details = invoiceAll.invoiceDetails;
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition;
+        delete invoiceAll.invoicesSeller;
+        delete invoiceAll.invoicesZone;
+      } else if (invoiceAll.invoiceDetails[0].service) {
+        details = invoiceAll.invoiceDetails.map((d) => {
+          const { id, name } = d.service;
+          delete d.service;
+          return {
+            ...d,
+            service: { id, name },
+          };
+        });
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition.active;
+        delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+        delete invoiceAll.invoicesSeller.active;
+        delete invoiceAll.invoicesZone.active;
+      }
     }
 
     const invoice = {
@@ -614,7 +617,7 @@ export class InvoicesService {
 
     let message = '';
 
-    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+    if (data.header.sequence != invoiceHeader.sequence) {
       message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
     }
 

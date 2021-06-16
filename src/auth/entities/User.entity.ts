@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +13,7 @@ import { Profile } from './Profile.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
+import { EchargesRequest } from 'src/echarges/entities/echargesRequest.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -65,4 +67,7 @@ export class User extends BaseEntity {
 
   @ManyToOne(() => State, (state) => state.users)
   state: State;
+
+  @OneToMany(() => EchargesRequest, (echargesRequest) => echargesRequest.echarges)
+  request: EchargesRequest;
 }
