@@ -30,6 +30,7 @@ import { CompanyType } from './CompanyType.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
+import { Echarges } from 'src/echarges/entities/echarges.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -137,4 +138,7 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => ServiceSetting, (serviceSetting) => serviceSetting.company)
   serviceSettings: ServiceSetting[];
+
+  @OneToMany(() => Echarges, (echarges) => echarges.company)
+  echarges: Echarges[];
 }

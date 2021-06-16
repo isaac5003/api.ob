@@ -51,6 +51,8 @@ export function validationMessage(fieldname: string, type: string): string {
       return `El campo '${fieldname}' debe ser un numero y debe contener dos decimales.`;
     case 'IsEnum':
       return `El campo '${fieldname}' debe ser 'automatic' o 'manual'.`;
+    case 'IsEmail':
+      return `El campo '${fieldname}' debe tener un formato correcto.`;
   }
 }
 
@@ -244,12 +246,13 @@ export async function emailSender(to, subject, html) {
     const mailOptions = { from: '"Openbox Cloud" <no-reply@openbox.cloud>', to, subject, html };
 
     await transporter.sendMail(mailOptions);
-    return { success: true, message: 'Se ha enviado el correo de verificación.' };
+    return { success: true, message: 'Se ha enviado el correo correctamente.' };
   } catch (error) {
+    console.error(error);
+
     return {
       success: false,
-      message:
-        'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
+      message: 'Correo electronico ingresado no es valido.',
     };
   }
 }
