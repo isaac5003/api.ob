@@ -364,7 +364,7 @@ export class InvoicesService {
 
   async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
     const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, JSON.parse(documentLayout)));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
   }
 
   async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
