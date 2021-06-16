@@ -1,5 +1,6 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { Profile } from 'src/auth/entities/Profile.entity';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;
@@ -252,4 +253,16 @@ export async function emailSender(to, subject, html) {
         'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
     };
   }
+}
+
+export function applyMixins(derivedCtor: any, constructors: any[]) {
+  constructors.forEach((baseCtor) => {
+    Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+      Object.defineProperty(
+        derivedCtor.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(baseCtor.prototype, name) || Object.create(null),
+      );
+    });
+  });
 }

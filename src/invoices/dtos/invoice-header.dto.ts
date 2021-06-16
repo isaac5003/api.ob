@@ -1,9 +1,9 @@
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsISO8601, IsOptional, IsInt } from 'class-validator';
 import { validationMessage } from '../../_tools';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoiceBaseDTO } from './invoice-base.dto';
 
-export class InvoiceHeaderDTO {
+export class InvoiceHeaderDTO extends InvoiceBaseDTO {
   @IsNotEmpty({ message: validationMessage('customer', 'IsNotEmpty') })
   customer: string;
 
@@ -60,5 +60,5 @@ export class InvoiceHeaderDTO {
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsInt({ message: validationMessage('status', 'IsInt') })
-  status: InvoicesStatus;
+  status: number;
 }

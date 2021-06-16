@@ -14,6 +14,8 @@ import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
+import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
+import { InvoiceUpdateHeaderDTO } from '../dtos/invoice-header-update.dto';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -172,20 +174,21 @@ export class InvoiceRepository extends Repository<Invoice> {
   async createInvoice(
     company: Company,
     branch: Branch,
-    data: InvoiceHeaderCreateDTO,
+    data: Partial<InvoiceBaseDTO>,
     customer: Customer,
     customerBranch: CustomerBranch,
-    invoiceSeller: InvoicesSeller,
-    invoicesPaymentCondition: InvoicesPaymentsCondition,
-    documentType: InvoicesDocumentType,
-    document: InvoicesDocument,
-    invoiceStatus: InvoicesStatus,
+    invoiceSeller?: InvoicesSeller,
+    invoicesPaymentCondition?: InvoicesPaymentsCondition,
+    documentType?: InvoicesDocumentType,
+    document?: InvoicesDocument,
+    invoiceStatus?: InvoicesStatus,
+    origin?: string,
   ): Promise<Invoice> {
     let response: Invoice;
 
     const header = {
       authorization: data.authorization,
-      sequence: `${document.current}`,
+      sequence: document ? `${document.current}` : `${data.sequence}`,
       customerName: customer.name,
       customerAddress1: customerBranch.address1,
       customerAddress2: customerBranch.address2,
@@ -205,20 +208,21 @@ export class InvoiceRepository extends Repository<Invoice> {
       ventaTotal: data.ventaTotal,
       ventaTotalText: numeroALetras(data.ventaTotal),
       invoiceDate: data.invoiceDate,
-      paymentConditionName: invoicesPaymentCondition.name,
-      sellerName: invoiceSeller.name,
-      zoneName: invoiceSeller.invoicesZone.name,
+      paymentConditionName: invoicesPaymentCondition ? invoicesPaymentCondition.name : null,
+      sellerName: invoiceSeller ? invoiceSeller.name : null,
+      zoneName: invoiceSeller ? invoiceSeller.invoicesZone.name : null,
       branch: branch,
       company: company,
       customerBranch: customerBranch,
       customer: customer,
       invoicesPaymentsCondition: invoicesPaymentCondition,
       invoicesSeller: invoiceSeller,
-      invoicesZone: invoiceSeller.invoicesZone,
+      invoicesZone: invoiceSeller ? invoiceSeller.invoicesZone : null,
       status: invoiceStatus,
       customerType: customer.customerType,
       customerTypeNatural: customer.customerTypeNatural,
       documentType: documentType,
+      origin: origin ? origin : 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4',
     };
     try {
       const invoice = this.create({ company, ...header });
@@ -244,7 +248,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async updateInvoice(id: string, company: Company, data: Partial<InvoiceHeaderDataDTO>): Promise<any> {
+  async updateInvoice(id: string, company: Company, data: any): Promise<any> {
     try {
       const invoice = this.update({ id, company }, data);
       return invoice;

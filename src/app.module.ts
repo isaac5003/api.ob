@@ -9,6 +9,7 @@ import { EntriesModule } from './entries/entries.module';
 import { CompaniesModule } from './companies/companies.module';
 import { SystemModule } from './system/system.module';
 import { ProvidersModule } from './providers/providers.module';
+import { TaxesModule } from './taxes/taxes.module';
 import { PurchasesModule } from './purchases/purchases.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { PurchasesModule } from './purchases/purchases.module';
     CompaniesModule,
     SystemModule,
     ProvidersModule,
+    TaxesModule,
     PurchasesModule,
   ],
 })

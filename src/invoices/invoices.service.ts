@@ -123,7 +123,7 @@ export class InvoicesService {
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status: status.id });
 
     return {
       message:
@@ -523,19 +523,27 @@ export class InvoicesService {
 
     let details = [];
     if (invoiceAll.status.id != 4) {
-      details = invoiceAll.invoiceDetails.map((d) => {
-        const { id, name } = d.service;
-        delete d.service;
-        return {
-          ...d,
-          service: { id, name },
-        };
-      });
-      delete invoiceAll.invoiceDetails;
-      delete invoiceAll.invoicesPaymentsCondition.active;
-      delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-      delete invoiceAll.invoicesSeller.active;
-      delete invoiceAll.invoicesZone.active;
+      if (invoiceAll.origin == '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+        details = invoiceAll.invoiceDetails;
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition;
+        delete invoiceAll.invoicesSeller;
+        delete invoiceAll.invoicesZone;
+      } else if (invoiceAll.invoiceDetails[0].service) {
+        details = invoiceAll.invoiceDetails.map((d) => {
+          const { id, name } = d.service;
+          delete d.service;
+          return {
+            ...d,
+            service: { id, name },
+          };
+        });
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition.active;
+        delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+        delete invoiceAll.invoicesSeller.active;
+        delete invoiceAll.invoicesZone.active;
+      }
     }
 
     const invoice = {
@@ -610,7 +618,7 @@ export class InvoicesService {
 
     let message = '';
 
-    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+    if (data.header.sequence != invoiceHeader.sequence) {
       message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
     }
 
