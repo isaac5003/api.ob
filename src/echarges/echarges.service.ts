@@ -12,6 +12,7 @@ import { EchargesFilterDTO } from './dtos/echages-filter.dto';
 import { EchargesBaseDTO } from './dtos/echarges-base.dto';
 import { EchargesActiveDTO } from './dtos/validate/echarge-active.vdto';
 import { Echarges } from './entities/echarges.entity';
+import { EchargesStatus } from './entities/echargesStatus.entity';
 import { EchargesRepository } from './repositories/echarges.repository';
 import { EchargesRequestRepository } from './repositories/echargesRequest.repository';
 import { EchargesStatusRepository } from './repositories/echargesStatus.repository';
@@ -56,21 +57,28 @@ export class EchargesService {
 
   async createRegister(data: Partial<EchargesBaseDTO>, company: Company, user: User): Promise<ResponseMinimalDTO> {
     let invoice;
+    let description = '';
+    let customer;
     if (data.invoice) {
       invoice = await this.invoiceRepository.getInvoice(company, data.invoice as string);
+      for (const d of invoice.invoiceDetails) {
+        description += `(${d.quantity}) - ${d.chargeDescription}\n`;
+      }
+      customer = await this.customerRepository.getCustomer(data.customer as string, company, 'cliente');
     }
-    const customer = await this.customerRepository.getCustomer(data.customer as string, company, 'cliente');
+
     const status = await this.echargesStatusRepository.getEchargeStatus(1);
+
     const dataToCreate = {
       customerName: data.invoice ? invoice.customer.name : customer.name,
       authorization: data.invoice ? invoice.authorization : data.authorization,
       sequence: data.invoice ? invoice.sequence : data.sequence,
-      description: data.invoice ? invoice.invoiceDetails.map((d) => d.chargeDescription).join(' ') : data.description,
+      description: data.invoice ? description : data.description,
       echargeType: data.invoice ? invoice.documentType.code : 'CE',
       total: data.invoice ? invoice.ventaTotal : data.total,
       origin: data.invoice ? 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4' : '09a5c668-ab54-441e-9fb2-d24b36ae202e',
       company: company,
-      customer: customer,
+      customer: data.invoice ? invoice.customer : customer,
       email: data.email,
       status: status,
       invoice: data.invoice ? invoice : null,
@@ -105,8 +113,30 @@ export class EchargesService {
     if (echarge.origin != '09a5c668-ab54-441e-9fb2-d24b36ae202e') {
       throw new ForbiddenException('No puedes editar este cobro, porque fue generado desde otro modulo.');
     }
+    let invoice;
+    let description = '';
+    if (data.invoice) {
+      invoice = await this.invoiceRepository.getInvoice(company, data.invoice as string);
+      for (const d of invoice.invoiceDetails) {
+        description += `(${d.quantity}) - ${d.chargeDescription}\n`;
+      }
+    }
+    const customer = await this.customerRepository.getCustomer(data.customer as string, company, 'cliente');
 
-    const updated = await this.echargesRepository.updateRegister(data, id, company);
+    const dataToUpdate = {
+      customerName: data.invoice ? invoice.customer.name : customer.name,
+      authorization: data.invoice ? invoice.authorization : data.authorization,
+      sequence: data.invoice ? invoice.sequence : data.sequence,
+      description: data.invoice ? description : data.description,
+      echargeType: data.invoice ? invoice.documentType.code : 'CE',
+      total: data.invoice ? invoice.ventaTotal : data.total,
+      origin: data.invoice ? 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4' : '09a5c668-ab54-441e-9fb2-d24b36ae202e',
+      company: company,
+      customer: customer,
+      email: data.email,
+      invoice: data.invoice ? invoice : null,
+    };
+    const updated = await this.echargesRepository.updateRegister(dataToUpdate, id, company);
 
     if (updated.affected == 0) {
       throw new BadRequestException('No se ha podido actulizar el cobro electronico.');
@@ -133,6 +163,9 @@ export class EchargesService {
         'No puedes desactivar el cobro electronico ya que posee un estado que no lo permite.',
       );
     }
+    if (data.status == 2 && echarge.request.length == 0) {
+      data.status = 1;
+    }
     const update = await this.echargesRepository.updateRegister(data, id, company);
 
     if (update.affected == 0) {
@@ -141,5 +174,27 @@ export class EchargesService {
     return {
       message: 'Se ha actulizado el cobro electronico correctamente.',
     };
+  }
+
+  async sendEcharge(id: string, company: Company, user: User): Promise<ResponseMinimalDTO> {
+    let message = '';
+
+    const echarge = await this.echargesRepository.getEcharge(company, id);
+    const email = await emailSender(echarge.email, 'OPENBOXCLOUD | Reinicio de contraseña.', 'content');
+    if (!email.success) {
+      throw new BadRequestException(`${email.message}`);
+    } else {
+      message = email.message;
+      await this.echargesRepository.updateRegister({ status: 2 }, echarge.id, company);
+      await this.echargesRequestRepository.createRequest(user, echarge);
+    }
+
+    return {
+      message,
+    };
+  }
+
+  async getEchargesStatuses(): Promise<EchargesStatus[]> {
+    return await this.echargesStatusRepository.getEchargeStatuses();
   }
 }

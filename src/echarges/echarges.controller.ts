@@ -10,11 +10,19 @@ import { EchargesActiveDTO } from './dtos/validate/echarge-active.vdto';
 import { EchargesHeaderDTO } from './dtos/validate/echarges-header.vdto';
 import { EchargesService } from './echarges.service';
 import { Echarges } from './entities/echarges.entity';
+import { EchargesStatus } from './entities/echargesStatus.entity';
 
 @Controller('echarges')
 @UseGuards(AuthGuard())
 export class EchargesController {
   constructor(private echargesService: EchargesService) {}
+
+  @Get('/status')
+  async getEchargesStatuses(): Promise<ResponseListDTO<EchargesStatus, number, number, number>> {
+    const statuses = await this.echargesService.getEchargesStatuses();
+    return new ResponseListDTO(plainToClass(EchargesStatus, statuses), statuses.length);
+  }
+
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomers(
@@ -62,5 +70,15 @@ export class EchargesController {
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
     return await this.echargesService.changeActive(id, company, data);
+  }
+
+  @Post('/send/:id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async sendEcharge(
+    @Param('id') id: string,
+    @GetAuthData('company') company: Company,
+    @GetAuthData('user') user: User,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.echargesService.sendEcharge(id, company, user);
   }
 }

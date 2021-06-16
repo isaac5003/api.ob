@@ -41,9 +41,6 @@ export class Echarges extends BaseEntity {
   @Column({ type: 'varchar', default: '09a5c668-ab54-441e-9fb2-d24b36ae202e' })
   origin: string;
 
-  @Column({ type: 'boolean', default: true })
-  active: boolean;
-
   @Column({ type: 'boolean', default: false })
   isPaid: boolean;
 

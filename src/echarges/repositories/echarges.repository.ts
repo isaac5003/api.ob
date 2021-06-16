@@ -48,6 +48,9 @@ export class EchargesRepository extends Repository<Echarges> {
           case 'customer':
             field = `cu.id`;
             break;
+          case 'date':
+            field = `e.createdAt`;
+            break;
         }
         query.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {

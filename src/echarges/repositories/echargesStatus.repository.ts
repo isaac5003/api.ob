@@ -14,4 +14,15 @@ export class EchargesStatusRepository extends Repository<EchargesStatus> {
     }
     return echargesStatus;
   }
+
+  async getEchargeStatuses(): Promise<EchargesStatus[]> {
+    let echargesStatuses: EchargesStatus[];
+    try {
+      echargesStatuses = await this.find();
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+
+    return echargesStatuses;
+  }
 }
