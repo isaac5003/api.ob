@@ -16,9 +16,7 @@ export class EchargesFilterDTO extends FilterDTO {
   customer: string;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('documentType', 'IsInt') })
-  documentType: number;
+  echargesType: string;
 
   @IsOptional()
   @Transform(({ value }) => parseInt(value))

@@ -9,19 +9,18 @@ const reponame = 'registro de cobro electronico';
 @EntityRepository(Echarges)
 export class EchargesRepository extends Repository<Echarges> {
   async getEcharges(company: Company, filter: EchargesFilterDTO): Promise<{ data: Echarges[]; count: number }> {
-    const { limit, page, search, documentType, customer, status, startDate, endDate, prop, order } = filter;
+    const { limit, page, search, echargesType, customer, status, startDate, endDate, prop, order } = filter;
 
     try {
       const query = this.createQueryBuilder('e')
-        // .leftJoinAndSelect('i.documentType', 'dt')
         .leftJoinAndSelect('e.status', 'st')
         .leftJoin('e.customer', 'cu')
         .where({ company });
 
-      // //filter by documentType
-      // if (documentType) {
-      //   query.andWhere('dt.id = :documentType', { documentType });
-      // }
+      //filter by ECHARGEtYPE
+      if (echargesType) {
+        query.andWhere('e.echargeType = :echargesType', { echargesType });
+      }
       //filter by customer
       if (customer) {
         query.andWhere('cu.id = :customer', { customer });
@@ -34,12 +33,12 @@ export class EchargesRepository extends Repository<Echarges> {
 
       // filter by range of dates
       if (startDate) {
-        query.andWhere('i.invoiceDate >= :startDate', {
+        query.andWhere('e.createdAt >= :startDate', {
           startDate,
         });
       }
       if (endDate) {
-        query.andWhere('i.invoiceDate <= :endDate', { endDate });
+        query.andWhere('e.createdAt <= :endDate', { endDate });
       }
 
       // sort by prop}
@@ -52,15 +51,18 @@ export class EchargesRepository extends Repository<Echarges> {
         }
         query.orderBy(field, order == 'ascending' ? 'ASC' : 'DESC');
       } else {
-        query.orderBy('i.createdAt', 'DESC');
+        query.orderBy('e.createdAt', 'DESC');
       }
 
       // filter by search value
       if (search) {
-        query.andWhere('LOWER(cu.name) LIKE :search ', {
-          search: `%${search}%`,
-          company: company.id,
-        });
+        query.andWhere(
+          'LOWER(e.customerName) LIKE :search OR LOWER(e.echargeType) LIKE :search OR e.sequence LIKE :search OR  CAST ( e.total AS varchar ) LIKE :search OR LOWER(st.name) LIKE :search',
+          {
+            search: `%${search}%`,
+            company: company.id,
+          },
+        );
       }
       const count = await query.getCount();
 

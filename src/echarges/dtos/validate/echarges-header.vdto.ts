@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { validationMessage } from 'src/_tools';
 import { EchargesBaseDTO } from '../echarges-base.dto';
 
@@ -22,6 +22,6 @@ export class EchargesHeaderDTO extends EchargesBaseDTO {
   @IsEmail({}, { message: validationMessage('email', 'IsEmail') })
   email: string;
 
-  @IsNotEmpty({ message: validationMessage('notify', 'IsNotEmpty') })
+  @IsOptional()
   notify: boolean;
 }

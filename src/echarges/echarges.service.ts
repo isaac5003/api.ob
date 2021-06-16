@@ -1,13 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToClass } from 'class-transformer';
+import { User } from 'src/auth/entities/User.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
+import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
-import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
+import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { emailSender } from 'src/_tools';
+import { EchargesFilterDTO } from './dtos/echages-filter.dto';
 import { EchargesBaseDTO } from './dtos/echarges-base.dto';
+import { EchargesActiveDTO } from './dtos/validate/echarge-active.vdto';
 import { Echarges } from './entities/echarges.entity';
 import { EchargesRepository } from './repositories/echarges.repository';
+import { EchargesRequestRepository } from './repositories/echargesRequest.repository';
 import { EchargesStatusRepository } from './repositories/echargesStatus.repository';
 
 @Injectable()
@@ -24,16 +30,31 @@ export class EchargesService {
 
     @InjectRepository(EchargesStatusRepository)
     private echargesStatusRepository: EchargesStatusRepository,
+
+    @InjectRepository(EchargesRequestRepository)
+    private echargesRequestRepository: EchargesRequestRepository,
   ) {}
 
-  async getEcharge(company: Company, id: string, type = 'cliente'): Promise<Echarges> {
-    const echarge = await this.echargesRepository.getEcharge(company, id);
-    delete echarge.createdAt;
-
-    return echarge;
+  async getEcharges(company: Company, filter: EchargesFilterDTO): Promise<{ data: Echarges[]; count: number }> {
+    return await this.echargesRepository.getEcharges(company, filter);
   }
 
-  async createRegister(data: Partial<EchargesBaseDTO>, company: Company): Promise<ResponseMinimalDTO> {
+  async getEcharge(company: Company, id: string): Promise<ResponseSingleDTO<Echarges>> {
+    const echarge = await this.echargesRepository.getEcharge(company, id);
+    const data = {
+      ...echarge,
+      customer: {
+        id: echarge.customer.id,
+        name: echarge.customer.name,
+        shortName: echarge.customer.name,
+      },
+      invoice: echarge.invoice ? echarge.invoice.id : null,
+    };
+    delete data.createdAt;
+    return new ResponseSingleDTO(plainToClass(Echarges, data));
+  }
+
+  async createRegister(data: Partial<EchargesBaseDTO>, company: Company, user: User): Promise<ResponseMinimalDTO> {
     let invoice;
     if (data.invoice) {
       invoice = await this.invoiceRepository.getInvoice(company, data.invoice as string);
@@ -64,12 +85,61 @@ export class EchargesService {
       } else {
         message = `${message}, ${email.message}`;
         await this.echargesRepository.updateRegister({ status: 2 }, echarge.id, company);
+        await this.echargesRequestRepository.createRequest(user, echarge);
       }
     }
 
     return {
       id: echarge.id,
       message,
+    };
+  }
+
+  async updateEcharge(
+    id: string,
+    data: Partial<EchargesBaseDTO>,
+    company: Company,
+    user: User,
+  ): Promise<ResponseMinimalDTO> {
+    const echarge = await this.echargesRepository.getEcharge(company, id);
+    if (echarge.origin != '09a5c668-ab54-441e-9fb2-d24b36ae202e') {
+      throw new ForbiddenException('No puedes editar este cobro, porque fue generado desde otro modulo.');
+    }
+
+    const updated = await this.echargesRepository.updateRegister(data, id, company);
+
+    if (updated.affected == 0) {
+      throw new BadRequestException('No se ha podido actulizar el cobro electronico.');
+    }
+    let message = 'Se ha actulizado correctamente el cobro electronico';
+    const email = await emailSender(data.email, 'OPENBOXCLOUD | Notificacion de edicion.', 'content');
+    if (!email.success) {
+      message = `${message}, ${email.message}`;
+    } else {
+      message = `${message}, ${email.message}`;
+      await this.echargesRequestRepository.createRequest(user, echarge);
+    }
+
+    return {
+      message,
+    };
+  }
+
+  async changeActive(id: string, company: Company, data: EchargesActiveDTO): Promise<ResponseMinimalDTO> {
+    const echarge = await this.echargesRepository.getEcharge(company, id);
+
+    if (echarge.status.id == 3) {
+      throw new BadRequestException(
+        'No puedes desactivar el cobro electronico ya que posee un estado que no lo permite.',
+      );
+    }
+    const update = await this.echargesRepository.updateRegister(data, id, company);
+
+    if (update.affected == 0) {
+      throw new BadRequestException('No se ha podido actulizar el cobro electronico.');
+    }
+    return {
+      message: 'Se ha actulizado el cobro electronico correctamente.',
     };
   }
 }
