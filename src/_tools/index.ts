@@ -1,5 +1,6 @@
 import { BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { Profile } from 'src/auth/entities/Profile.entity';
 
 export function logDatabaseError(type: string, error: any): void {
   let message: string;
@@ -49,6 +50,10 @@ export function validationMessage(fieldname: string, type: string): string {
       return `La venta no puede ser ${fieldname} porque tiene un estado que no lo permite.`;
     case 'IsDecimal':
       return `El campo '${fieldname}' debe ser un numero y debe contener dos decimales.`;
+    case 'IsEnum':
+      return `El campo '${fieldname}' debe ser 'automatic' o 'manual'.`;
+    case 'IsEmail':
+      return `El campo '${fieldname}' debe tener un formato correcto.`;
   }
 }
 
@@ -242,12 +247,25 @@ export async function emailSender(to, subject, html) {
     const mailOptions = { from: '"Openbox Cloud" <no-reply@openbox.cloud>', to, subject, html };
 
     await transporter.sendMail(mailOptions);
-    return { success: true, message: 'Se ha enviado el correo de verificación.' };
+    return { success: true, message: 'Se ha enviado el correo correctamente.' };
   } catch (error) {
+    console.error(error);
+
     return {
       success: false,
-      message:
-        'No podemos localizar la dirección de correo electronico ingresada. Ingresa nuevamente tu dirección de correo electronico.',
+      message: 'Correo electronico ingresado no es valido.',
     };
   }
+}
+
+export function applyMixins(derivedCtor: any, constructors: any[]) {
+  constructors.forEach((baseCtor) => {
+    Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+      Object.defineProperty(
+        derivedCtor.prototype,
+        name,
+        Object.getOwnPropertyDescriptor(baseCtor.prototype, name) || Object.create(null),
+      );
+    });
+  });
 }

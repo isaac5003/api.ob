@@ -27,6 +27,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
       if (search) {
         query.andWhere('LOWER(pc.name) LIKE :search', {
           search: `%${search}%`,
+          company: company.id,
         });
       }
 

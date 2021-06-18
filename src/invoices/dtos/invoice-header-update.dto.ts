@@ -14,7 +14,5 @@ export class InvoiceUpdateHeaderDTO extends InvoiceHeaderDTO {
   authorization: string;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('sequence', 'IsInt') })
-  sequence: number;
+  sequence: string;
 }

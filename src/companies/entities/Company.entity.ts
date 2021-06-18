@@ -6,7 +6,6 @@ import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.enti
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
 import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
-import { AccountingRegisterType } from '../../entries/entities/AccountingRegisterType.entity';
 import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
@@ -31,6 +30,7 @@ import { CompanyType } from './CompanyType.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
+import { Echarges } from 'src/echarges/entities/echarges.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -91,9 +91,6 @@ export class Company extends BaseEntity {
   @OneToMany(() => AccountingEntryType, (accountingEntryType) => accountingEntryType.company)
   accountingEntryTypes: AccountingEntryType[];
 
-  @OneToMany(() => AccountingRegisterType, (accountingRegisterType) => accountingRegisterType.company)
-  accountingRegisterTypes: AccountingRegisterType[];
-
   @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.company)
   accountingSettings: AccountingSetting[];
 
@@ -141,4 +138,7 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => ServiceSetting, (serviceSetting) => serviceSetting.company)
   serviceSettings: ServiceSetting[];
+
+  @OneToMany(() => Echarges, (echarges) => echarges.company)
+  echarges: Echarges[];
 }

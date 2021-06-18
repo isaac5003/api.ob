@@ -34,7 +34,6 @@ import { InvoiceZonesDataDTO } from './dtos/zones/invoice-data.dto';
 import { ActiveValidateDTO } from './dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice-data.dto';
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
-import { InvoiceDocumentDataDTO } from './dtos/documents/invoice-document-data.dto';
 import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 
@@ -123,7 +122,7 @@ export class InvoicesService {
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status });
+    await this.invoiceRepository.updateInvoice(invoice.id, company, { status: status.id });
 
     return {
       message:
@@ -257,6 +256,11 @@ export class InvoicesService {
 
     const documents = documentTypes.map((dt) => {
       const found = existingDocuments.find((d) => d.documentType.id == dt.id);
+
+      if (found) {
+        delete found.documentLayout;
+        delete found.layout;
+      }
       return found
         ? { ...found }
         : {
@@ -269,6 +273,7 @@ export class InvoicesService {
             documentType: dt,
           };
     });
+
     return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
@@ -277,10 +282,7 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
   }
 
-  async createUpdateDocument(
-    company: Company,
-    data: InvoiceDocumentDataDTO[] | Partial<InvoiceDocumentUpdateDTO[]>,
-  ): Promise<ResponseMinimalDTO> {
+  async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
       data.map((d) => d.documentType as unknown as number),
     );
@@ -290,7 +292,7 @@ export class InvoicesService {
 
     const documentExist = await this.invoicesDocumentRepository.getDocumentsByIds(
       company,
-      data.map((d) => d.id),
+      data.filter((d) => d.id).map((d) => d.id),
       'unused',
     );
 
@@ -307,6 +309,7 @@ export class InvoicesService {
 
     // Obtiene los documentos ya existentes de los tipos que se van a crear
     let documents = await this.invoicesDocumentRepository.getInvoicesDocuments(company);
+
     documents = documents.filter((d) => documentTypes.map((dt) => dt.id).includes(d.documentType.id));
     const documentsToDisable = documents.map((d) => {
       return {
@@ -315,17 +318,21 @@ export class InvoicesService {
         active: false,
       };
     });
+
     // Deshabilita los documentos
     await this.invoicesDocumentRepository.createUpdateDocument(company, documentsToDisable, 'update');
 
-    documentsToProcessCreate = data.map((d) => {
-      return {
-        ...d,
-        documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
-        isCurrentDocument: true,
-        company: company,
-      };
-    });
+    documentsToProcessCreate = data
+      .filter((d) => !documentExist.map((de) => de.id).includes(d.id))
+      .map((d) => {
+        delete d.id;
+        return {
+          ...d,
+          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          isCurrentDocument: true,
+          company: company,
+        };
+      });
 
     const completedUpdate = await this.invoicesDocumentRepository.createUpdateDocument(
       company,
@@ -369,11 +376,7 @@ export class InvoicesService {
 
   async createUpdateDocumentLayout(company: Company, id: number, data: InvoiceDocumentLayoutDTO) {
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    await this.invoicesDocumentRepository.updateInvoiceDocument(
-      document.id,
-      { documentLayout: JSON.stringify(data) },
-      company,
-    );
+    await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { documentLayout: data }, company);
     return {
       message: `La configuracion ha sido guardada correctamente.`,
     };
@@ -519,19 +522,27 @@ export class InvoicesService {
 
     let details = [];
     if (invoiceAll.status.id != 4) {
-      details = invoiceAll.invoiceDetails.map((d) => {
-        const { id, name } = d.service;
-        delete d.service;
-        return {
-          ...d,
-          service: { id, name },
-        };
-      });
-      delete invoiceAll.invoiceDetails;
-      delete invoiceAll.invoicesPaymentsCondition.active;
-      delete invoiceAll.invoicesPaymentsCondition.cashPayment;
-      delete invoiceAll.invoicesSeller.active;
-      delete invoiceAll.invoicesZone.active;
+      if (invoiceAll.origin == '53a36e54-bab2-4824-9e43-b40efab8bab9') {
+        details = invoiceAll.invoiceDetails;
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition;
+        delete invoiceAll.invoicesSeller;
+        delete invoiceAll.invoicesZone;
+      } else if (invoiceAll.invoiceDetails[0].service) {
+        details = invoiceAll.invoiceDetails.map((d) => {
+          const { id, name } = d.service;
+          delete d.service;
+          return {
+            ...d,
+            service: { id, name },
+          };
+        });
+        delete invoiceAll.invoiceDetails;
+        delete invoiceAll.invoicesPaymentsCondition.active;
+        delete invoiceAll.invoicesPaymentsCondition.cashPayment;
+        delete invoiceAll.invoicesSeller.active;
+        delete invoiceAll.invoicesZone.active;
+      }
     }
 
     const invoice = {
@@ -587,6 +598,10 @@ export class InvoicesService {
       allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)),
     );
 
+    if (document.used == false) {
+      await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { used: true }, company);
+    }
+
     const invoiceHeader = await this.invoiceRepository.createInvoice(
       company,
       branch,
@@ -602,7 +617,7 @@ export class InvoicesService {
 
     let message = '';
 
-    if (data.header.sequence != parseInt(invoiceHeader.sequence)) {
+    if (data.header.sequence != invoiceHeader.sequence) {
       message = `El numero de secuencia asignado fué: ${invoiceHeader.sequence}`;
     }
 

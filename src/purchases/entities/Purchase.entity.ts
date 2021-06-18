@@ -70,16 +70,13 @@ export class Purchase extends BaseEntity {
   subtotal: number;
 
   @Column({ type: 'float', nullable: true })
-  ivaRetenido: number;
+  compraExentas: number;
 
   @Column({ type: 'float', nullable: true })
-  ventasExentas: number;
+  compraNoSujetas: number;
 
   @Column({ type: 'float', nullable: true })
-  ventasNoSujetas: number;
-
-  @Column({ type: 'float', nullable: true })
-  ventaTotal: number;
+  compraTotal: number;
 
   @Column({ default: 'cf5e4b29-f09c-438a-8d82-2ef482a9a461', type: 'uuid' })
   origin: string;

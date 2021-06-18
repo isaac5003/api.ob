@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested } from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested, IsBoolean } from 'class-validator';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../_tools';
 import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';
@@ -31,6 +31,14 @@ export class CustomerDataDTO {
   @IsOptional()
   @IsString({ message: validationMessage('giro', 'IsString') })
   giro: string;
+
+  @IsOptional()
+  @IsBoolean({ message: validationMessage('isCustomer', 'IsBoolean') })
+  isCustomer: boolean;
+
+  @IsOptional()
+  @IsBoolean({ message: validationMessage('isProvider', 'IsBoolean') })
+  isProvider: boolean;
 
   @IsNotEmpty({ message: validationMessage(' customerType', 'IsNotEmpty') })
   @IsInt({ message: validationMessage('customerType', 'IsInt') })

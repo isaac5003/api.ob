@@ -1,5 +1,5 @@
 import { Transform, Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
+import { IsArray, IsInt, isNotEmpty, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator';
 import { validationMessage } from '../../../_tools';
 import { InvoiceDocumentLayoutPositionFullDTO } from './invoice-document-layout-position-full.dto';
 import { InvoiceDocumentLayoutHeaderDTO } from './invoice-document-layout-header.dto';
@@ -30,4 +30,19 @@ export class InvoiceDocumentLayoutDTO {
   @ValidateNested()
   @Type(() => InvoiceDocumentLayoutPositionFullDTO)
   totals: InvoiceDocumentLayoutPositionFullDTO[];
+
+  @IsNotEmpty({ message: validationMessage('fontSizeDetails', 'IsNotEmpty') })
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('fontSizeDetails', 'IsInt') })
+  fontSizeDetails: number;
+
+  @IsNotEmpty({ message: validationMessage('fontSizeHeader', 'IsNotEmpty') })
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('fontSizeHeader', 'IsInt') })
+  fontSizeHeader: number;
+
+  @IsNotEmpty({ message: validationMessage('fontSizeTotals', 'IsNotEmpty') })
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('fontSizeTotals', 'IsInt') })
+  fontSizeTotals: number;
 }

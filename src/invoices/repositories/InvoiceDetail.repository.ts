@@ -6,7 +6,7 @@ import { InvoiceDetail } from '../entities/InvoiceDetail.entity';
 const reponame = 'detalle del documento';
 @EntityRepository(InvoiceDetail)
 export class InvoiceDetailRepository extends Repository<InvoiceDetail[]> {
-  async createInvoiceDetail(data: InvoiceDetailDataDTO[]): Promise<InvoiceDetail> {
+  async createInvoiceDetail(data: Partial<InvoiceDetailDataDTO>[]): Promise<InvoiceDetail> {
     let response;
     try {
       const invoice = this.create([...data]);

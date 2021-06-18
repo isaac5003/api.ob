@@ -13,7 +13,5 @@ export class InvoiceHeaderCreateDTO extends InvoiceHeaderDTO {
   authorization: string;
 
   @IsNotEmpty({ message: validationMessage('sequence', 'IsNotEmpty') })
-  @Transform(({ value }) => parseInt(value))
-  @IsInt({ message: validationMessage('sequence', 'IsInt') })
-  sequence: number;
+  sequence: string;
 }
