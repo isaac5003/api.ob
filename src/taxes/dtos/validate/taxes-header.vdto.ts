@@ -19,7 +19,7 @@ export class TaxesHeaderDTO extends TaxesBaseDTO {
   entity: string;
 
   @IsNotEmpty({ message: validationMessage('date', 'IsNotEmpty') })
-  @IsISO8601({}, { message: validationMessage('purchaseDate', 'IsISO8601') })
+  @IsISO8601({}, { message: validationMessage('date', 'IsISO8601') })
   date: string;
 
   @Transform(({ value }) => parseFloat(value))
