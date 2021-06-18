@@ -209,16 +209,17 @@ export class TaxesService {
 
         data = {
           id: data.id,
-          registerType: 'Debito fiscal',
+          registerType: 'invoices',
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          invoiceDate: format(parseISO(data.invoiceDate), 'dd/MM/yyyy'),
-          customer: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
+          date: data.inoviceDate,
+          entity: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
-          ventaTotal: data.ventaTotal,
+          total: data.ventaTotal,
           origin: data.origin,
+          sum: data.sum,
         };
 
         return new ResponseSingleDTO(plainToClass(RInvoice, data));
@@ -227,16 +228,17 @@ export class TaxesService {
 
         data = {
           id: data.id,
-          registerType: 'Credito fiscal',
+          registerType: 'purchases',
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          purchaseDate: format(parseISO(data.purchaseDate), 'dd/MM/yyyy'),
-          provider: { id: data.provider.id, name: data.provider.name, shortName: data.provider.shortName },
+          date: data.purchaseDate,
+          entity: { id: data.provider.id, name: data.provider.name, shortName: data.provider.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
-          ventaTotal: data.ventaTotal,
+          total: data.compraTotal,
           origin: data.origin,
+          sum: data.sum,
         };
 
         return new ResponseSingleDTO(plainToClass(RPurchase, data));
