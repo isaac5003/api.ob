@@ -25,8 +25,6 @@ export class PurchaseRepository extends Repository<Purchase> {
     origin: string,
   ): Promise<Purchase> {
     let response: Purchase;
-    console.log(data);
-
     const header = {
       authorization: data.authorization,
       sequence: `${data.sequence}`,
