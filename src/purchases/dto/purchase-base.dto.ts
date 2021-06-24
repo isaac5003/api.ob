@@ -12,6 +12,8 @@ export class PurchaseBaseDTO {
   sequence: string;
   sum: number;
   iva: number;
+  fovial: number;
+  contrans: number;
   subtotal: number;
   comprasExentas: number;
   comprasNoSujetas: number;
