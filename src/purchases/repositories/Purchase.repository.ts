@@ -6,7 +6,7 @@ import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { PurchaseBaseDTO } from '../dto/purchase-base.dto';
-import { PurchaseHeaderDTO } from '../dto/purchase-header.dto';
+import { PurchaseHeaderDTO } from '../dto/validate/purchase-header.vdto';
 import { Purchase } from '../entities/Purchase.entity';
 import { PurchasesDocumentType } from '../entities/PurchasesDocumentType.entity';
 import { PurchasesStatus } from '../entities/PurchasesStatus.entity';
@@ -38,6 +38,7 @@ export class PurchaseRepository extends Repository<Purchase> {
       providerNit: provider.nit,
       providerNrc: provider.nrc,
       providerGiro: provider.giro,
+      branch: branch,
       sum: data.sum,
       iva: data.iva,
       subtotal: data.subtotal,
@@ -54,6 +55,8 @@ export class PurchaseRepository extends Repository<Purchase> {
       providerTypeNatural: provider.customerTypeNatural,
       documentType: documentType,
       origin,
+      fovial: data.fovial,
+      contrans: data.contrans,
     };
     try {
       const purchase = this.create({ company, ...header });

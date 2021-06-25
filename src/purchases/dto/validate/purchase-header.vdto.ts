@@ -3,8 +3,8 @@ import { IsISO8601, IsNotEmpty, IsNumber, IsOptional } from 'class-validator';
 import { Branch } from 'src/companies/entities/Branch.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { validationMessage } from 'src/_tools';
-import { PurchasesStatus } from '../entities/PurchasesStatus.entity';
-import { PurchaseBaseDTO } from './purchase-base.dto';
+import { PurchasesStatus } from '../../entities/PurchasesStatus.entity';
+import { PurchaseBaseDTO } from '../purchase-base.dto';
 
 export class PurchaseHeaderDTO extends PurchaseBaseDTO {
   @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
@@ -52,6 +52,16 @@ export class PurchaseHeaderDTO extends PurchaseBaseDTO {
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('iva', 'IsNumber') })
   @IsNotEmpty({ message: validationMessage('iva', 'IsNotEmpty') })
   iva: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('fovial', 'IsNumber') })
+  @IsOptional()
+  fovial: number;
+
+  @Transform(({ value }) => parseFloat(value))
+  @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('contrans', 'IsNumber') })
+  @IsOptional()
+  contrans: number;
 
   @Transform(({ value }) => parseFloat(value))
   @IsNumber({ maxDecimalPlaces: 2 }, { message: validationMessage('subTotal', 'IsNumber') })
