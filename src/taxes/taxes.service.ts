@@ -183,6 +183,8 @@ export class TaxesService {
         registerType: r.type,
         iva: r.iva,
         origin: r.origin,
+        sequence: r.sequence,
+        sum: r.sum,
       };
     });
     return {
