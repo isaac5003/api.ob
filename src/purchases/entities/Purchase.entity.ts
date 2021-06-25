@@ -67,6 +67,12 @@ export class Purchase extends BaseEntity {
   iva: number;
 
   @Column({ type: 'float', nullable: true })
+  fovial: number;
+
+  @Column({ type: 'float', nullable: true })
+  contrans: number;
+
+  @Column({ type: 'float', nullable: true })
   subtotal: number;
 
   @Column({ type: 'float', nullable: true })
