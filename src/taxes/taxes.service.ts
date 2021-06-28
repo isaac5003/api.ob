@@ -215,7 +215,7 @@ export class TaxesService {
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          date: data.inoviceDate,
+          date: data.invoiceDate,
           entity: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
