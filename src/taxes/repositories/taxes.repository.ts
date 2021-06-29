@@ -9,7 +9,8 @@ const reponame = 'registro de iva';
 @EntityRepository(TaxesView)
 export class TaxesRepository extends Repository<TaxesView> {
   async getRegisters(company: Company, filter: Partial<TaxesFilterDTO>): Promise<{ data: TaxesView[]; count: number }> {
-    const { limit, page, search, documentType, customer, startDate, endDate, prop, order, registerType } = filter;
+    const { limit, page, search, documentType, customer, startDate, endDate, prop, order, registerType, provider } =
+      filter;
     try {
       const query = this.createQueryBuilder('r').where('r.company =:company', { company: company.id });
       //filter by documentType
@@ -23,9 +24,19 @@ export class TaxesRepository extends Repository<TaxesView> {
       }
 
       //filter by customer
-      if (customer) {
+      if (customer && !provider) {
         query.andWhere('r.customerId = :customer', { customer });
+        query.andWhere('r.type = :type', { type: 'invoices' });
       }
+      if (provider && !customer) {
+        query.andWhere('r.customerId = :provider', { provider });
+        query.andWhere('r.type = :type', { type: 'purchases' });
+      }
+      if (customer && provider) {
+        query.andWhere('r.type = :type AND r.type = :type2', { type: 'invoices', type2: 'purchases' });
+      }
+
+      //filter by provider
 
       // filter by range of dates
       if (startDate) {

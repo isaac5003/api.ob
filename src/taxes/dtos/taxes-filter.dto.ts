@@ -13,6 +13,9 @@ export class TaxesFilterDTO extends FilterDTO {
   customer: string;
 
   @IsOptional()
+  provider: string;
+
+  @IsOptional()
   @IsISO8601({}, { message: validationMessage('startDate', 'IsISO8601') })
   startDate: string;
 
