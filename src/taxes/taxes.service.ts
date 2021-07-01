@@ -142,7 +142,7 @@ export class TaxesService {
           provider,
           provider.customerBranches.find((b) => b.default),
           company,
-          purchaseDocumentType[0],
+          purchaseDocumentType.data[0],
           branch,
           purchasesStatus,
           '53a36e54-bab2-4824-9e43-b40efab8bab9',
