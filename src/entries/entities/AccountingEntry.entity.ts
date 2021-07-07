@@ -11,6 +11,7 @@ import {
 import { AccountingEntryType } from './AccountingEntryType.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
 import { Company } from '../../companies/entities/Company.entity';
+import { Invoice } from 'src/invoices/entities/Invoice.entity';
 
 @Entity()
 export class AccountingEntry extends BaseEntity {
@@ -49,4 +50,7 @@ export class AccountingEntry extends BaseEntity {
 
   @OneToMany(() => AccountingEntryDetail, (accountingEntryDetail) => accountingEntryDetail.accountingEntry)
   accountingEntryDetails: AccountingEntryDetail[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.accountingEntry)
+  invoice: Invoice;
 }
