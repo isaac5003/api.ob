@@ -5,8 +5,6 @@ import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { InvoiceHeaderCreateDTO } from '../dtos/invoice-header-create.dto';
-import { InvoiceHeaderDataDTO } from '../dtos/invoice-header-data.dto';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
@@ -15,7 +13,6 @@ import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
-import { InvoiceUpdateHeaderDTO } from '../dtos/invoice-header-update.dto';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -248,9 +245,9 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async updateInvoice(id: string, company: Company, data: any): Promise<any> {
+  async updateInvoice(id: string[], data: any): Promise<any> {
     try {
-      const invoice = this.update({ id, company }, data);
+      const invoice = this.update(id, data);
       return invoice;
     } catch (error) {
       logDatabaseError(reponame, error);
