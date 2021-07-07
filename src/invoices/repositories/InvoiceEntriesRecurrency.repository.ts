@@ -6,9 +6,9 @@ const reponame = 'recurrencia';
 @EntityRepository(InvoicesEntriesRecurrency)
 export class InvoicesEntriesRecurrencyRepository extends Repository<InvoicesEntriesRecurrency> {
   async getInvoicesEntriesRecurrencies(): Promise<{ data: InvoicesEntriesRecurrency[]; count: number }> {
-    let currencies: InvoicesEntriesRecurrency[];
+    let recurrencies: InvoicesEntriesRecurrency[];
     try {
-      currencies = await this.find({
+      recurrencies = await this.find({
         order: {
           createdAt: 'DESC',
         },
@@ -16,6 +16,6 @@ export class InvoicesEntriesRecurrencyRepository extends Repository<InvoicesEntr
     } catch (error) {
       logDatabaseError(reponame, error);
     }
-    return { data: currencies, count: currencies.length };
+    return { data: recurrencies, count: recurrencies.length };
   }
 }
