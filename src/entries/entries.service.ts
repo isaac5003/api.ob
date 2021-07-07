@@ -186,7 +186,12 @@ export class EntriesService {
         break;
       case 'integraciones':
         setting = {
-          catalog: settings ? (settings.accountingCatalog ? settings.accountingCatalog.id : null) : null,
+          debitCatalog: settings ? (settings.accountingDebitCatalog ? settings.accountingDebitCatalog.id : null) : null,
+          creditCatalog: settings
+            ? settings.accountingCreditCatalog
+              ? settings.accountingCreditCatalog.id
+              : null
+            : null,
           registerType: settings ? (settings.registerType ? settings.registerType : null) : null,
         };
         break;
@@ -256,7 +261,8 @@ export class EntriesService {
     settingType: string,
   ): Promise<ResponseMinimalDTO> {
     const settings = await this.accountingSettingRepository.getSetting(company, settingType);
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingDebitCatalog, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCreditCatalog, company);
 
     if (settings) {
       await this.accountingSettingRepository.updateSetting(company, data, settingType, 'update', settings.id);
