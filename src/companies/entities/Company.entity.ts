@@ -1,7 +1,7 @@
 import { Access } from '../../auth/entities/Access.entity';
 import { Profile } from '../../auth/entities/Profile.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
+import { CustomerIntegrations } from '../../customers/entities/CustomerIntegrations.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
@@ -109,8 +109,8 @@ export class Company extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];
 
-  @OneToMany(() => CustomerSetting, (customerSetting) => customerSetting.company)
-  customerSettings: CustomerSetting[];
+  @OneToMany(() => CustomerIntegrations, (customerIntegrations) => customerIntegrations.company)
+  customerIntegrations: CustomerIntegrations[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.company)
   invoices: Invoice[];

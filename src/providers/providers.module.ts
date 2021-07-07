@@ -4,7 +4,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CustomersService } from 'src/customers/customers.service';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
-import { CustomerSettingRepository } from 'src/customers/repositories/CustomerSetting.repository';
+import { CustomerIntegrationsRepository } from 'src/customers/repositories/CustomerIntegrations.repository';
 import { CustomerTaxerTypeRepository } from 'src/customers/repositories/CustomerTaxerType.repository';
 import { CustomerTypeRepository } from 'src/customers/repositories/CustomerType.repository';
 import { CustomerTypeNaturalRepository } from 'src/customers/repositories/CustomerTypeNatural.repository';
@@ -17,7 +17,7 @@ import { ProvidersController } from './providers.controller';
     TypeOrmModule.forFeature([
       CustomerRepository,
       CustomerBranchRepository,
-      CustomerSettingRepository,
+      CustomerIntegrationsRepository,
       CustomerTaxerTypeRepository,
       CustomerTypeRepository,
       CustomerTypeNaturalRepository,

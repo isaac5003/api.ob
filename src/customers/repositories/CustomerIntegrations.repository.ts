@@ -2,13 +2,13 @@ import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { AccountignCatalogIntegrationDTO } from '../dtos/customer-integration.dto';
-import { CustomerSetting } from '../entities/CustomerSetting.entity';
+import { CustomerIntegrations } from '../entities/CustomerIntegrations.entity';
 
 const reponame = 'configuraciones de integracion';
-@EntityRepository(CustomerSetting)
-export class CustomerSettingRepository extends Repository<CustomerSetting> {
-  async getCustomerSettingIntegrations(company: Company): Promise<CustomerSetting> {
-    let settingIntegrations: CustomerSetting;
+@EntityRepository(CustomerIntegrations)
+export class CustomerIntegrationsRepository extends Repository<CustomerIntegrations> {
+  async getCustomerIntegrations(company: Company): Promise<CustomerIntegrations> {
+    let settingIntegrations: CustomerIntegrations;
     const leftJoinAndSelect = {
       csi: 'cs.accountingCatalog',
     };
@@ -29,9 +29,12 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     }
     return settingIntegrations;
   }
-  async createSettingIntegration(company: Company, data: AccountignCatalogIntegrationDTO): Promise<CustomerSetting> {
+  async cretaeCustomerIntegration(
+    company: Company,
+    data: AccountignCatalogIntegrationDTO,
+  ): Promise<CustomerIntegrations> {
     // crea sucursal
-    let response: CustomerSetting;
+    let response: CustomerIntegrations;
     try {
       const settings = this.create({ company, ...data });
       response = await this.save(settings);
@@ -41,7 +44,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
     return await response;
   }
 
-  async updateCustomerSetting(company: Company, data: AccountignCatalogIntegrationDTO): Promise<void> {
+  async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO): Promise<void> {
     try {
       this.update({ company }, data);
     } catch (error) {
