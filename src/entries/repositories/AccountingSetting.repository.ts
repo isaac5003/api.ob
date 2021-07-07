@@ -11,7 +11,8 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
   async getSetting(company: Company, settingType: string): Promise<any> {
     let settings: AccountingSetting;
     const leftJoinAndSelect = {
-      ac: 's.accountingCatalog',
+      adc: 's.accountingDebitCatalog',
+      acc: 's.accountingCreditCatalog',
     };
     try {
       settings = await this.findOne({
@@ -22,6 +23,8 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
         },
       });
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(settingType, error);
     }
     return settings;
@@ -46,10 +49,11 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
           settings = { company, id, ...data };
           break;
       }
-      console.log(settings);
 
       response = await this.save(settings);
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(settingType, error);
     }
 
