@@ -19,7 +19,7 @@ export class AccessRepository extends Repository<Access> {
 
     try {
       companiesWithIntegrations = await this.createQueryBuilder('c')
-        .select(['co.id', 'co.name', 'co.shortName'])
+        .select(['c.id', 'co.id', 'co.name', 'co.shortName'])
         .leftJoin('c.company', 'co')
         .where('c.module =:module', { module: receiverModule })
         .andWhere('c.module=:module', { module: integratedModule })
@@ -28,6 +28,6 @@ export class AccessRepository extends Repository<Access> {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener el listado de empresas.');
     }
-    return companiesWithIntegrations;
+    return companiesWithIntegrations.map((c) => c.company.id);
   }
 }

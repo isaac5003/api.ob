@@ -93,12 +93,6 @@ export class AuthService {
     const access_token = await this.jwtService.sign(payload);
     const refresh_token = await this.jwtService.sign(payload);
 
-    console.log(
-      await this.accessRepository.getCompaniesWithIntegrations(
-        'cfb8addb-541b-482f-8fa1-dfe5db03fdf4',
-        'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-      ),
-    );
     return { access_token, refresh_token };
   }
 
