@@ -272,7 +272,7 @@ export class TaxesService {
         };
         const invoice = await this.invoiceRepository.getInvoice(company, id);
         await this.invoiceDetailRepository.deleteInvoiceDetail([invoice.invoiceDetails[0].id]);
-        updated = await this.invoiceRepository.updateInvoice(id, company, invoiceToUpdate);
+        updated = await this.invoiceRepository.updateInvoice([id], invoiceToUpdate);
 
         const details = {
           quantity: 1,
