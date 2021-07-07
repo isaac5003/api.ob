@@ -39,11 +39,18 @@ import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 import { plainToClass } from 'class-transformer';
+import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
 export class InvoicesController {
   constructor(private invoice: InvoicesService) {}
+
+  @Get('/recurrencies')
+  async getInvoiceEntriesRecurrencies(): Promise<ResponseListDTO<InvoicesEntriesRecurrency, number, number, number>> {
+    const { data, count } = await this.invoice.getInvoicesEntriesRecurrencies();
+    return new ResponseListDTO(plainToClass(InvoicesEntriesRecurrency, data), count);
+  }
 
   @Get('/document-types')
   async getInvoicesDocumentType(): Promise<ResponseListDTO<InvoicesDocumentType, number, number, number>> {
