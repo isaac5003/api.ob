@@ -21,6 +21,7 @@ import { InvoiceDetail } from './InvoiceDetail.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Echarges } from 'src/echarges/entities/echarges.entity';
+import { AccountingEntry } from 'src/entries/entities/AccountingEntry.entity';
 
 @Entity()
 export class Invoice extends BaseEntity {
@@ -108,6 +109,9 @@ export class Invoice extends BaseEntity {
   @Column({ nullable: true, type: 'varchar' })
   zoneName: string;
 
+  @Column({ type: 'boolean', default: false })
+  createEntry: boolean;
+
   @ManyToOne(() => Branch, (branch) => branch.invoices)
   branch: Branch;
 
@@ -146,4 +150,7 @@ export class Invoice extends BaseEntity {
 
   @OneToMany(() => Echarges, (echarges) => echarges.invoice)
   echarges: Echarges;
+
+  @ManyToOne(() => AccountingEntry, (entry) => entry.invoice)
+  accountingEntry: AccountingEntry;
 }

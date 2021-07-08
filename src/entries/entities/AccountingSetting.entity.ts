@@ -50,8 +50,11 @@ export class AccountingSetting extends BaseEntity {
   @Column({ nullable: true, type: 'varchar' })
   registerType: string;
 
-  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.accountingSettings)
-  accountingCatalog: AccountingCatalog;
+  @ManyToOne(() => AccountingCatalog, (accountingDebitCatalog) => accountingDebitCatalog.accountingSettingsDebito)
+  accountingDebitCatalog: AccountingCatalog;
+
+  @ManyToOne(() => AccountingCatalog, (accountingCreditCatalog) => accountingCreditCatalog.accountingSettingsDebito)
+  accountingCreditCatalog: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.accountingSettings)
   company: Company;

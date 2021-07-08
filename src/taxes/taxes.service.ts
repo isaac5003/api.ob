@@ -9,10 +9,9 @@ import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/Invoic
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
-import { TaxesBaseDTO } from './dtos/taxes-base.dto';
 import { TaxesView } from './entities/taxes-view.entity';
 import { TaxesRepository } from './repositories/taxes.repository';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { Purchase } from 'src/purchases/entities/Purchase.entity';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 import { plainToClass } from 'class-transformer';
@@ -24,7 +23,6 @@ import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDet
 import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
 import { numeroALetras } from 'src/_tools';
 import { TaxesHeaderCreateDTO } from './dtos/validate/taxes-header-cretae.vdto';
-import { Profile } from 'src/auth/entities/Profile.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { User } from 'src/auth/entities/User.entity';
 
@@ -136,13 +134,15 @@ export class TaxesService {
           iva: data.iva,
           subtotal: data.subtotal,
           compraTotal: data.total,
+          fovial: data.fovial,
+          contrans: data.contrans,
         };
         invoice = await this.purchaseRepository.createPurchase(
           newDatas,
           provider,
           provider.customerBranches.find((b) => b.default),
           company,
-          purchaseDocumentType[0],
+          purchaseDocumentType.data[0],
           branch,
           purchasesStatus,
           '53a36e54-bab2-4824-9e43-b40efab8bab9',
@@ -183,6 +183,8 @@ export class TaxesService {
         registerType: r.type,
         iva: r.iva,
         origin: r.origin,
+        sequence: r.sequence,
+        sum: r.sum,
       };
     });
     return {
@@ -213,7 +215,7 @@ export class TaxesService {
           documentType: data.documentType,
           authorization: data.authorization,
           sequence: data.sequence,
-          date: data.inoviceDate,
+          date: data.invoiceDate,
           entity: { id: data.customer.id, name: data.customer.name, shortName: data.customer.shortName },
           subtotal: data.subtotal,
           iva: data.iva,
@@ -239,6 +241,8 @@ export class TaxesService {
           total: data.compraTotal,
           origin: data.origin,
           sum: data.sum,
+          fovial: data.fovial,
+          contrans: data.contrans,
         };
 
         return new ResponseSingleDTO(plainToClass(RPurchase, data));
@@ -268,7 +272,7 @@ export class TaxesService {
         };
         const invoice = await this.invoiceRepository.getInvoice(company, id);
         await this.invoiceDetailRepository.deleteInvoiceDetail([invoice.invoiceDetails[0].id]);
-        updated = await this.invoiceRepository.updateInvoice(id, company, invoiceToUpdate);
+        updated = await this.invoiceRepository.updateInvoice([id], invoiceToUpdate);
 
         const details = {
           quantity: 1,
@@ -293,6 +297,8 @@ export class TaxesService {
           iva: data.iva,
           subtotal: data.subtotal,
           compraTotal: data.total,
+          fovial: data.fovial,
+          contrans: data.contrans,
         };
         const purchase = await this.purchaseRepository.getPurchase(company, id);
         updated = await this.purchaseRepository.updatePurchase(id, company, purchaseToUpdate);

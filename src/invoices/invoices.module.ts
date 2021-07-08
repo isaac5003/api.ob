@@ -14,6 +14,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CustomerRepository } from '../customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
+import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ServiceRepository } from '../services/repositories/Service.repository';
       CustomerRepository,
       CustomerBranchRepository,
       ServiceRepository,
+      InvoicesEntriesRecurrencyRepository,
     ]),
   ],
   providers: [InvoicesService],
