@@ -14,7 +14,7 @@ import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
-import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
+import { CustomerIntegrationsRepository } from './repositories/CustomerIntegrations.repository';
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
@@ -44,8 +44,8 @@ export class CustomersService {
     @InjectRepository(CustomerTypeNaturalRepository)
     private customerTypeNaturalRepository: CustomerTypeNaturalRepository,
 
-    @InjectRepository(CustomerSettingRepository)
-    private customerSettingRepository: CustomerSettingRepository,
+    @InjectRepository(CustomerIntegrationsRepository)
+    private customerIntegrationsRepository: CustomerIntegrationsRepository,
   ) {}
 
   async generateReportGeneral(company: Company, type = 'clientes'): Promise<any> {
@@ -168,7 +168,7 @@ export class CustomersService {
   }
 
   async getCustomerSettingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
+    const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
 
     return {
       integrations: {
@@ -183,15 +183,15 @@ export class CustomersService {
   ): Promise<ResponseMinimalDTO> {
     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
 
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
+    const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
     if (settings) {
-      await this.customerSettingRepository.updateCustomerSetting(company, data);
+      await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
       return {
         message: 'La integración ha sido actualizada correctamente.',
       };
     }
 
-    await this.customerSettingRepository.createSettingIntegration(company, data);
+    await this.customerIntegrationsRepository.createCustomerIntegrations(company, data);
     return {
       message: 'La integración ha sido agregada correctamente.',
     };

@@ -1,6 +1,13 @@
 import { Company } from '../../companies/entities/Company.entity';
-import { BaseEntity, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Module } from 'src/system/entities/Module.entity';
 
 @Entity()
@@ -8,7 +15,10 @@ export class CustomerIntegrations extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ type: 'varchar' })
   metaKey;
+
+  @Column({ type: 'varchar' })
   metaValue;
 
   @CreateDateColumn({ select: false })
@@ -17,7 +27,7 @@ export class CustomerIntegrations extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @ManyToOne(() => Company, (company) => company.customerIntegrations)
+  @ManyToOne(() => Company, (company) => company.customerIntegration)
   company: Company;
 
   @ManyToOne(() => Module, (module) => module.customerIntegration)
