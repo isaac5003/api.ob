@@ -15,11 +15,8 @@ export class CustomerSetting extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar' })
-  metaKey: string;
-
-  @Column({ type: 'varchar' })
-  metaValue: string;
+  metaKey;
+  metaValue;
 
   @CreateDateColumn({ select: false })
   createdAt: string;

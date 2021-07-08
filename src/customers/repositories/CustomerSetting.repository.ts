@@ -43,7 +43,7 @@ export class CustomerSettingRepository extends Repository<CustomerSetting> {
 
   async updateCustomerSetting(company: Company, data: AccountignCatalogIntegrationDTO): Promise<void> {
     try {
-      // this.update({ company }, data);
+      this.update({ company }, data);
     } catch (error) {
       logDatabaseError(reponame, error);
     }

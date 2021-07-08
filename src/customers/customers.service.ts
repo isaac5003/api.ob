@@ -172,7 +172,7 @@ export class CustomersService {
 
     return {
       integrations: {
-        // catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
+        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
       },
     };
   }
