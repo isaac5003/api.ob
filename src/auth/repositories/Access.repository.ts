@@ -1,6 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { Company } from 'src/companies/entities/Company.entity';
-import { Module } from 'src/system/entities/Module.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { Access } from '../entities/Access.entity';
 
