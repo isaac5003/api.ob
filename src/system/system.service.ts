@@ -37,9 +37,9 @@ export class SystemService {
     return this.cityRepository.getCities();
   }
 
-  async hashIntegration(company: Company, receiverModule: string, integratedModule: string): Promise<boolean> {
+  async hashIntegration(company: Company, receivedModule: string, integratedModule: string): Promise<boolean> {
     const companiesWithIntegrations = await this.accessRepository.getCompaniesWithIntegrations(
-      receiverModule,
+      receivedModule,
       integratedModule,
     );
     if (!companiesWithIntegrations.includes(company)) {
