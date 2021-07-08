@@ -1,4 +1,3 @@
-import { CustomerIntegrations } from 'src/customers/entities/CustomerIntegrations.entity';
 import {
   BaseEntity,
   Column,
@@ -38,7 +37,4 @@ export class Module extends BaseEntity {
 
   @OneToMany(() => Access, (access) => access.module)
   accesses: Access[];
-
-  @OneToMany(() => CustomerIntegrations, (customerIntegration) => customerIntegration.module)
-  customerIntegration: CustomerIntegrations[];
 }
