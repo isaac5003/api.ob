@@ -22,6 +22,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
 import { BranchDataDTO } from './dtos/customer-branch.dto';
 import { FilterDTO } from 'src/_dtos/filter.dto';
+import { ModuleRepository } from 'src/system/repositories/Module.repository';
 
 @Injectable()
 export class CustomersService {
@@ -46,6 +47,9 @@ export class CustomersService {
 
     @InjectRepository(CustomerIntegrationsRepository)
     private customerIntegrationsRepository: CustomerIntegrationsRepository,
+
+    @InjectRepository(ModuleRepository)
+    private moduleRepository: ModuleRepository,
   ) {}
 
   async generateReportGeneral(company: Company, type = 'clientes'): Promise<any> {
@@ -169,11 +173,37 @@ export class CustomersService {
 
   async getCustomerSettingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
+    const modules = await this.moduleRepository.getModules();
 
+    // // 1. Obtener solo los modulos que tengo en configuraciones
+    // const filteredModules = [...new Set(settings.map((s) => s.module.id))];
+    // // console.log(filteredModules)
+    // //resulta que solo tenemos uno el de CONTA.
+
+    // // 2. Filtro de mi listado de modulos los que tengo en filtered modules.
+    // const foundModules = modules.filter((m) => filteredModules.includes(m.id));
+    // // console.log(foundModules)
+    // // Ya encontre los modulos, y ahora tengo acceso al shortname, recorro este arreglo
+
+    // const integrations = {};
+    // for (const f of foundModules) {
+    //   const values = settings
+    //     .filter((s) => filteredModules.includes(s.module.id))
+    //     .map((s) => {
+    //       return {
+    //         metaKey: s.metaKey,
+    //         metaValue: s.metaValue,
+    //       };
+    //     });
+    //   // console.log(values)
+    //   const data = {};
+    //   for (const v of values) {
+    //     data[v.metaKey] = v.metaValue;
+    //   }
+    //   integrations[f.shortName] = data;
+    // }
     return {
-      integrations: {
-        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
-      },
+      integrations: 'hola',
     };
   }
 

@@ -9,6 +9,7 @@ import { CustomerTaxerTypeRepository } from 'src/customers/repositories/Customer
 import { CustomerTypeRepository } from 'src/customers/repositories/CustomerType.repository';
 import { CustomerTypeNaturalRepository } from 'src/customers/repositories/CustomerTypeNatural.repository';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { ModuleRepository } from 'src/system/repositories/Module.repository';
 import { ProvidersController } from './providers.controller';
 
 @Module({
@@ -22,6 +23,7 @@ import { ProvidersController } from './providers.controller';
       CustomerTypeRepository,
       CustomerTypeNaturalRepository,
       AccountingCatalogRepository,
+      ModuleRepository,
     ]),
   ],
   controllers: [ProvidersController],

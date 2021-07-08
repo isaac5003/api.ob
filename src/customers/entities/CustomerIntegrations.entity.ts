@@ -18,7 +18,7 @@ export class CustomerIntegrations extends BaseEntity {
   @Column({ type: 'varchar' })
   metaKey;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   metaValue;
 
   @CreateDateColumn({ select: false })

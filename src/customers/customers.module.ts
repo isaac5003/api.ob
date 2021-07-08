@@ -10,6 +10,7 @@ import { CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { AuthModule } from '../auth/auth.module';
+import { ModuleRepository } from 'src/system/repositories/Module.repository';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from '../auth/auth.module';
       CustomerTypeRepository,
       CustomerTypeNaturalRepository,
       AccountingCatalogRepository,
+      ModuleRepository,
     ]),
   ],
   controllers: [CustomersController],

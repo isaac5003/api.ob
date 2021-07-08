@@ -7,22 +7,21 @@ import { CustomerIntegrations } from '../entities/CustomerIntegrations.entity';
 const reponame = 'configuraciones de integracion';
 @EntityRepository(CustomerIntegrations)
 export class CustomerIntegrationsRepository extends Repository<CustomerIntegrations> {
-  async getCustomerIntegrations(company: Company): Promise<CustomerIntegrations> {
-    let settingIntegrations: CustomerIntegrations;
+  async getCustomerIntegrations(company: Company): Promise<CustomerIntegrations[]> {
+    let settingIntegrations: CustomerIntegrations[];
     const leftJoinAndSelect = {
-      csi: 'cs.accountingCatalog',
+      com: 'ci.company',
+      module: 'ci.module',
     };
 
     try {
-      settingIntegrations = await this.findOne(
-        { company },
-        {
-          join: {
-            alias: 'cs',
-            leftJoinAndSelect,
-          },
+      settingIntegrations = await this.find({
+        where: { company },
+        join: {
+          alias: 'ci',
+          leftJoinAndSelect,
         },
-      );
+      });
     } catch (error) {
       console.error(error);
       logDatabaseError(reponame, error);
@@ -44,7 +43,7 @@ export class CustomerIntegrationsRepository extends Repository<CustomerIntegrati
     return await response;
   }
 
-  async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO): Promise<void> {
+  async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO | any): Promise<void> {
     try {
       this.update({ company }, data);
     } catch (error) {
