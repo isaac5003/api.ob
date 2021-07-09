@@ -9,7 +9,7 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   autoLoadEntities: true,
-  synchronize: process.env.NODE_ENV=development,
+  synchronize: true,
   migrations: [join(__dirname, 'src/migrations/*.ts')],
   cli: {
     migrationsDir: './src/migrations',
