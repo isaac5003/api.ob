@@ -1,5 +1,6 @@
 FROM node:lts-slim
 WORKDIR /usr/app
+COPY ./ormconfig.ts ./
 COPY ./package.json ./
 COPY ./nest-cli.json ./
 COPY ./tsconfig.build.json ./
