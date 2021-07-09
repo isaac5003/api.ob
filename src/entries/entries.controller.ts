@@ -18,10 +18,9 @@ import { FilterDTO } from '../_dtos/filter.dto';
 import { ReportsEntriesDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
 import { AccountingUpdateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-update.dto';
-import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
-import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.dto';
-import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
-import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.dto';
+import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-setting.vdto';
+import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.vdto';
+import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.vdto';
 import { BalanceEstadoDTO } from './dtos/report/entries-balance-startdate.dto';
 import { EntryDetailsDTO } from './dtos/entry-details/entries-details-create.dto';
 import { EntryHeaderDataDTO } from './dtos/entry-header/entries-entry-header-create.dto';
@@ -108,13 +107,6 @@ export class EntriesController {
     return await this.entries.getSettings(company, 'firmantes');
   }
 
-  @Get('/setting/integrations')
-  async getSettingIntegrations(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<AccountingSetting>> {
-    return await this.entries.getSettings(company, 'integraciones');
-  }
-
   @Get('/setting/balance-general')
   async getSettingBalanceGeneral(
     @GetAuthData('company') company: Company,
@@ -145,15 +137,6 @@ export class EntriesController {
     @Body() data: SettingSignaturesDTO,
   ): Promise<ResponseMinimalDTO> {
     return await this.entries.updateSettingSignatures(company, data, 'firmantes');
-  }
-
-  @Put('/setting/integrations')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateSettingIntegrations(
-    @GetAuthData('company') company: Company,
-    @Body() data: SettingIntegrationsDTO,
-  ): Promise<ResponseMinimalDTO> {
-    return await this.entries.updateSettingIntegrations(company, data, 'integraciones');
   }
 
   @Put('/setting/balance-general')
