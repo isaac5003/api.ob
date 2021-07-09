@@ -1,9 +1,8 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.dto';
-import { SettingIntegrationsDTO } from '../dtos/settings/entries-setting-integration.dto';
-import { SettingSignaturesDTO } from '../dtos/settings/entries-setting-signatures.dto';
+import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.vdto';
+import { SettingSignaturesDTO } from '../dtos/settings/entries-setting-signatures.vdto';
 import { AccountingSetting } from '../entities/AccountingSetting.entity';
 
 @EntityRepository(AccountingSetting)
@@ -32,7 +31,7 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
 
   async updateSetting(
     company: Company,
-    data: SettingGeneralDTO | SettingSignaturesDTO | SettingIntegrationsDTO | any,
+    data: SettingGeneralDTO | SettingSignaturesDTO | any,
     settingType: string,
     type: string,
     id?: string,
