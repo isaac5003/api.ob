@@ -8,4 +8,4 @@ COPY .prettierrc ./
 COPY .eslintrc.js ./
 RUN yarn install
 COPY ./src ./src
-CMD ["npm", "run", "migration:run", "&&", "npm", "run", "start"]
+CMD ["npm", "run", "start"]
