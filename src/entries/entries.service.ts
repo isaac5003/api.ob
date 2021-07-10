@@ -321,6 +321,8 @@ export class EntriesService {
           'rangeDetails',
         );
 
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         previousDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
           company,
           {
@@ -328,6 +330,8 @@ export class EntriesService {
           },
           'previousDetail',
         );
+
+        previousDetails = previousDetails.filter((a) => a.accountingEntry.accounted);
         break;
 
       case 'accountMovements':
@@ -341,6 +345,8 @@ export class EntriesService {
           'rangeDetails',
         );
 
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         previousDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
           company,
           {
@@ -349,6 +355,8 @@ export class EntriesService {
           },
           'previousDetail',
         );
+
+        previousDetails = previousDetails.filter((a) => a.accountingEntry.accounted);
 
         break;
       case 'balance-general':
@@ -361,6 +369,9 @@ export class EntriesService {
           },
           'rangeDetails',
         );
+
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         break;
     }
 
@@ -378,6 +389,7 @@ export class EntriesService {
       case 'diarioMayor':
         affectedCatalog = [...new Set(rangeDetails.map((d) => d.accountingCatalog.code))];
         // obtiene el saldo inicial por cuenta
+
         accounts = affectedCatalog
           .map((c) => {
             const account = catalog.find((ct) => ct.code == c);
