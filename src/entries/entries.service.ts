@@ -6,9 +6,8 @@ import { Company } from '../companies/entities/Company.entity';
 import { FilterDTO } from '../_dtos/filter.dto';
 import { ReportsEntriesDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { AccountingCreateDTO } from './dtos/accounting-catalog/entries-accountingcatalog-create.dto';
-import { SettingIntegrationsDTO } from './dtos/settings/entries-setting-integration.dto';
-import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-seting.dto';
-import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.dto';
+import { EstadoBalanceDTO } from './dtos/settings/entries-balanceestado-setting.vdto';
+import { SettingGeneralDTO } from './dtos/settings/entries-setting-general.vdto';
 import { SeriesDTO } from './dtos/serie/entries-series.dto';
 import { AccountingCatalog } from './entities/AccountingCatalog.entity';
 import { AccountingEntryType } from './entities/AccountingEntryType.entity';
@@ -18,7 +17,7 @@ import { AccountingEntryRepository } from './repositories/AccountingEntry.reposi
 import { AccountingEntryTypeRepository } from './repositories/AccountingEntryType.repository';
 import { AccountingSettingRepository } from './repositories/AccountingSetting.repository';
 import { parseISO, differenceInMonths } from 'date-fns';
-import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.dto';
+import { SettingSignaturesDTO } from './dtos/settings/entries-setting-signatures.vdto';
 import { AccountingEntry } from './entities/AccountingEntry.entity';
 import { EntriesFilterDTO } from './dtos/entries-filter.dto';
 import { AccountingEntryDetailRepository } from './repositories/AccountingEntryDetail.repository';
@@ -157,6 +156,12 @@ export class EntriesService {
     return await this.accountingEntryRepository.getSeries(company, data);
   }
 
+  /**
+   *
+   * @param company compañia en la que esta logado el usuario que hace la peticion
+   * @param settingType --Tipo de configuracón que se desea obtener
+   * @returns --Retorna un objeto con las propiedad periodStart, periodEnd, accountinCreditCatalog, accountingDebitCatalog
+   */
   async getSettings(company: Company, settingType: string): Promise<ResponseSingleDTO<AccountingSetting>> {
     const settings = await this.accountingSettingRepository.getSetting(company, settingType);
     let setting = {};
@@ -165,6 +170,16 @@ export class EntriesService {
         setting = {
           periodStart: settings ? settings.periodStart : '',
           periodEnd: settings ? settings.peridoEnd : '',
+          accountingDebitCatalog: settings
+            ? settings.accountingDebitCatalog
+              ? settings.accountingDebitCatalog.id
+              : null
+            : 'null',
+          accountingCreditCatalog: settings
+            ? settings.accountingCreditCatalog
+              ? settings.accountingCreditCatalog.id
+              : null
+            : 'null',
         };
         break;
       case 'firmantes':
@@ -184,22 +199,25 @@ export class EntriesService {
           estadoResultados: settings ? (settings.estadoResultados ? settings.estadoResultados : null) : null,
         };
         break;
-      case 'integraciones':
-        setting = {
-          catalog: settings ? (settings.accountingCatalog ? settings.accountingCatalog.id : null) : null,
-          registerType: settings ? (settings.registerType ? settings.registerType : null) : null,
-        };
-        break;
     }
     return new ResponseSingleDTO(plainToClass(AccountingSetting, setting));
   }
 
+  /**
+   *
+   * @param company --Compañia desde la esta logado el usuario que hace la peticion
+   * @param data --Datos requeridos para el correcto procesamientos y funcionamiento
+   * @param settingType --Tipo de configuracion que se desea actulizar o crear
+   * @returns un mensaje notificando que se creo correctamente
+   * Es utilizado para actulizar o guardar la data de configuraciones generales de un usuario
+   */
   async updateSettingGeneral(
     company: Company,
     data: SettingGeneralDTO,
     settingType: string,
   ): Promise<ResponseMinimalDTO> {
-    const { peridoEnd, periodStart } = data;
+    const { peridoEnd, periodStart, accountingCreditCatalog, accountingDebitCatalog } = data;
+
     if (parseISO(peridoEnd) < parseISO(periodStart)) {
       throw new BadRequestException('La fecha final no puede ser menor que la fecha inicial');
     }
@@ -213,7 +231,7 @@ export class EntriesService {
     if (settingGeneral) {
       await this.accountingSettingRepository.updateSetting(
         company,
-        { periodStart, peridoEnd },
+        { periodStart, peridoEnd, accountingCreditCatalog, accountingDebitCatalog },
         settingType,
         'update',
         settingGeneral.id,
@@ -223,7 +241,12 @@ export class EntriesService {
         message: 'Configuracion general del modulo de contabilidad actualizada correctamente.',
       };
     }
-    await this.accountingSettingRepository.updateSetting(company, { periodStart, peridoEnd }, settingType, 'create');
+    await this.accountingSettingRepository.updateSetting(
+      company,
+      { periodStart, peridoEnd, accountingDebitCatalog, accountingCreditCatalog },
+      settingType,
+      'create',
+    );
     return {
       message: 'Configuracion general del modulo de contabilidad creada correctamente.',
     };
@@ -247,28 +270,6 @@ export class EntriesService {
 
     return {
       message: 'Configuracion de los firmantes del modulo de contabilidad creada correctamente.',
-    };
-  }
-
-  async updateSettingIntegrations(
-    company: Company,
-    data: SettingIntegrationsDTO,
-    settingType: string,
-  ): Promise<ResponseMinimalDTO> {
-    const settings = await this.accountingSettingRepository.getSetting(company, settingType);
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
-
-    if (settings) {
-      await this.accountingSettingRepository.updateSetting(company, data, settingType, 'update', settings.id);
-
-      return {
-        message: 'Los datos de integración han sido actualizados correctamente.',
-      };
-    }
-    await this.accountingSettingRepository.updateSetting(company, data, settingType, 'create');
-
-    return {
-      message: 'Los datos de integración han sido creados correctamente.',
     };
   }
 

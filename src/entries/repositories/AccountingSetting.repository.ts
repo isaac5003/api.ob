@@ -1,9 +1,8 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.dto';
-import { SettingIntegrationsDTO } from '../dtos/settings/entries-setting-integration.dto';
-import { SettingSignaturesDTO } from '../dtos/settings/entries-setting-signatures.dto';
+import { SettingGeneralDTO } from '../dtos/settings/entries-setting-general.vdto';
+import { SettingSignaturesDTO } from '../dtos/settings/entries-setting-signatures.vdto';
 import { AccountingSetting } from '../entities/AccountingSetting.entity';
 
 @EntityRepository(AccountingSetting)
@@ -11,7 +10,8 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
   async getSetting(company: Company, settingType: string): Promise<any> {
     let settings: AccountingSetting;
     const leftJoinAndSelect = {
-      ac: 's.accountingCatalog',
+      adc: 's.accountingDebitCatalog',
+      acc: 's.accountingCreditCatalog',
     };
     try {
       settings = await this.findOne({
@@ -22,6 +22,8 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
         },
       });
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(settingType, error);
     }
     return settings;
@@ -29,7 +31,7 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
 
   async updateSetting(
     company: Company,
-    data: SettingGeneralDTO | SettingSignaturesDTO | SettingIntegrationsDTO | any,
+    data: SettingGeneralDTO | SettingSignaturesDTO | any,
     settingType: string,
     type: string,
     id?: string,
@@ -46,10 +48,11 @@ export class AccountingSettingRepository extends Repository<AccountingSetting> {
           settings = { company, id, ...data };
           break;
       }
-      console.log(settings);
 
       response = await this.save(settings);
     } catch (error) {
+      console.error(error);
+
       logDatabaseError(settingType, error);
     }
 

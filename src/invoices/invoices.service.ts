@@ -36,6 +36,8 @@ import { InvoicePaymentConditionDataDTO } from './dtos/payment-condition/invoice
 import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
+import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
+import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
 
 @Injectable()
 export class InvoicesService {
@@ -72,8 +74,14 @@ export class InvoicesService {
 
     @InjectRepository(InvoicesDocumentRepository)
     private invoicesDocumentRepository: InvoicesDocumentRepository,
+
+    @InjectRepository(InvoicesEntriesRecurrencyRepository)
+    private invoicesEntriesRecurrencyRepository: InvoicesEntriesRecurrencyRepository,
   ) {}
 
+  async getInvoicesEntriesRecurrencies(): Promise<{ data: InvoicesEntriesRecurrency[]; count: number }> {
+    return this.invoicesEntriesRecurrencyRepository.getInvoicesEntriesRecurrencies();
+  }
   async getInvoicesDocumentTypes(): Promise<{ data: InvoicesDocumentType[]; count: number }> {
     return this.invoicesDocumentTypeRepository.getInvoiceDocumentsType();
   }
@@ -122,7 +130,8 @@ export class InvoicesService {
     if (!statuses.includes(invoice.status.id)) {
       throw new BadRequestException('La venta tiene un estado que no permite esta acción.');
     }
-    await this.invoiceRepository.updateInvoice(invoice.id, company, { status: status.id });
+
+    await this.invoiceRepository.updateInvoice([id], { status: status.id });
 
     return {
       message:
@@ -771,7 +780,7 @@ export class InvoicesService {
       status: data.header.status,
     };
 
-    await this.invoiceRepository.updateInvoice(id, company, header);
+    await this.invoiceRepository.updateInvoice([id], header);
     const ids = invoice.invoiceDetails.map((id) => id.id);
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
