@@ -371,7 +371,6 @@ export class EntriesService {
         );
 
         rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
-        console.log(rangeDetails);
 
         break;
     }
