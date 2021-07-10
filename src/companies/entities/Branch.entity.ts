@@ -16,7 +16,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Company } from './Company.entity';
-import { Purchase } from 'src/purchases/entities/Purchase.entity';
+import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()
 export class Branch extends BaseEntity {

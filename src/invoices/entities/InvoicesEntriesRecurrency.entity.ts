@@ -5,7 +5,7 @@ export class InvoicesEntriesRecurrency extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
-  @Column({ default: false, type: 'varchar' })
+  @Column({ type: 'varchar' })
   name: string;
 
   @CreateDateColumn({ select: false })

@@ -18,7 +18,7 @@ services:
     working_dir: /usr/api
     ports:
       - '5001:3000'
-    command: bash -c "npm run migration:run && npm run start:debug"
+    command: bash -c "npm run migration:run "
     env_file:
       - local.env
     depends_on:

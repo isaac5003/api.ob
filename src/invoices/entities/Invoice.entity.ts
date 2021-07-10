@@ -20,8 +20,8 @@ import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 import { InvoiceDetail } from './InvoiceDetail.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
-import { Echarges } from 'src/echarges/entities/echarges.entity';
-import { AccountingEntry } from 'src/entries/entities/AccountingEntry.entity';
+import { Echarges } from '../../echarges/entities/echarges.entity';
+import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 
 @Entity()
 export class Invoice extends BaseEntity {
