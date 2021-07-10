@@ -1,15 +1,9 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { join } from 'path';
-import { ConfigModule } from '@nestjs/config';
-// import * as dotenv from 'dotenv';
-require('dotenv').config({ path: './local.env' });
-// dotenv.config({ path: '/local.env' });
-ConfigModule.forRoot();
+import * as dotenv from 'dotenv';
+dotenv.config({ path: './local.env' });
 
-console.log(process.env.POSTGRES_HOST);
 module.exports = {
   type: 'postgres',
-
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT),
   username: process.env.POSTGRES_USER,
@@ -23,5 +17,3 @@ module.exports = {
     migrationsDir: './src/migrations',
   },
 };
-
-// module.exports = typeOrmConfig;
