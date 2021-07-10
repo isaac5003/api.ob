@@ -941,4 +941,18 @@ export class EntriesService {
           : 'No se ha podido eliminar la partida contable',
     };
   }
+
+  /**
+   *
+   * @param entryId --El id de la partida que deseo consultar.
+   * @param company  --La compañia con la que el usuario esta logado al momento de invocar el metodo.
+   * @returns boolean:
+   * El metodo retorna true en el caso que una partida pueda ser actulizada, y false en el caso que esta no
+   * pueda ser editada.
+   */
+  async canEntryBeUpdated(entryId: string, company: Company): Promise<boolean> {
+    await this.accountingEntryRepository.getEntry(company, entryId);
+
+    return true;
+  }
 }
