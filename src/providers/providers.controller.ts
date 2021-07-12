@@ -154,15 +154,15 @@ export class ProvidersController {
     return this.customersService.deleteBranch(id, providerId, 'proveedor');
   }
 
-  @Put('/:id/integrations')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCustomerIntegration(
-    @Param('id') id: string,
-    @Body() data: AccountignCatalogIntegrationDTO,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.UpdateCustomerIntegration(id, data, company, 'proveedor');
-  }
+  // @Put('/:id/integrations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async updateCustomerIntegration(
+  //   @Param('id') id: string,
+  //   @Body() data: AccountignCatalogIntegrationDTO,
+  //   @GetAuthData('company') company: Company,
+  // ): Promise<ResponseMinimalDTO> {
+  //   return await this.customersService.UpdateCustomerIntegration(id, data, company, 'proveedor');
+  // }
 
   @Get('/report/general')
   async getReportGeneral(

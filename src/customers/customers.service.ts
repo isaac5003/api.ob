@@ -200,27 +200,42 @@ export class CustomersService {
       for (const v of values) {
         data[v.metaKey] = v.metaValue;
       }
-      //TODO pendiente de continuar las migraciones para que detecte el camposhortName
 
       integrations[f.shortName] = data;
     }
-    return {
-      integrations: 'hola',
-    };
+    return Object.keys(integrations).length > 0
+      ? integrations
+      : { integrations: { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } } };
   }
 
   async updateCustomerSettingsIntegrations(
     company: Company,
     data: AccountignCatalogIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
 
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
-    if (settings) {
-      await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
-      return {
-        message: 'La integración ha sido actualizada correctamente.',
-      };
+    const accountingCatalogCXC = settings.find((s) => s.metaKey == 'accountingCatalogCXC');
+    const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
+
+    const setting = [];
+    if (!accountingCatalogCXC) {
+      // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+      setting.push({
+        company: company,
+        module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+        metaKey: 'accountingCatalogCXC',
+        metaValue: data.accountingCatalogCXC,
+      });
+    }
+    if (!accountingCatalogSales) {
+      setting.push({
+        company: company,
+        module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+        metaKey: 'accountingCatalogSales',
+        metaValue: data.accountingCatalogSales,
+      });
     }
 
     await this.customerIntegrationsRepository.createCustomerIntegrations(company, data);
@@ -408,21 +423,21 @@ export class CustomersService {
     };
   }
 
-  async UpdateCustomerIntegration(
-    id: string,
-    data: AccountignCatalogIntegrationDTO,
-    company: Company,
-    type = 'cliente',
-  ): Promise<ResponseMinimalDTO> {
-    await this.customerRepository.getCustomer(id, company, type);
-    if (data.accountingCatalog) {
-      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
-    }
-    await this.customerRepository.updateCustomer(id, data, company, type);
-    return {
-      message: type == 'cliente' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
-    };
-  }
+  // async UpdateCustomerIntegration(
+  //   id: string,
+  //   data: AccountignCatalogIntegrationDTO,
+  //   company: Company,
+  //   type = 'cliente',
+  // ): Promise<ResponseMinimalDTO> {
+  //   await this.customerRepository.getCustomer(id, company, type);
+  //   if (data.accountingCatalog) {
+  //     await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+  //   }
+  //   await this.customerRepository.updateCustomer(id, data, company, type);
+  //   return {
+  //     message: type == 'cliente' ? 'El cliente se actualizo correctamente' : 'El proveedor se actualizo correctamente',
+  //   };
+  // }
   async deleteCustomer(company: Company, id: string, type = 'cliente'): Promise<ResponseMinimalDTO> {
     const person = await this.customerRepository.getCustomer(id, company, type);
     let result;

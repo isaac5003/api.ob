@@ -173,15 +173,15 @@ export class CustomersController {
     return this.customersService.updateCustomer(id, data, company);
   }
 
-  @Put('/:id/integrations')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCustomerIntegration(
-    @Param('id') id: string,
-    @Body() data: AccountignCatalogIntegrationDTO,
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.UpdateCustomerIntegration(id, data, company);
-  }
+  // @Put('/:id/integrations')
+  // @UsePipes(new ValidationPipe({ transform: true }))
+  // async updateCustomerIntegration(
+  //   @Param('id') id: string,
+  //   @Body() data: AccountignCatalogIntegrationDTO,
+  //   @GetAuthData('company') company: Company,
+  // ): Promise<ResponseMinimalDTO> {
+  //   return await this.customersService.UpdateCustomerIntegration(id, data, company);
+  // }
 
   @Delete('/:id')
   async deleteCustomer(@Param('id') id: string, @GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {

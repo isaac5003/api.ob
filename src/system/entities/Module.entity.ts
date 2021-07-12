@@ -1,4 +1,4 @@
-import { CustomerIntegrations } from 'src/customers/entities/CustomerIntegrations.entity';
+import { CustomerIntegrations } from '../../customers/entities/CustomerIntegrations.entity';
 import {
   BaseEntity,
   Column,
@@ -29,6 +29,9 @@ export class Module extends BaseEntity {
 
   @Column({ default: false, type: 'boolean' })
   system: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  shortName: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;

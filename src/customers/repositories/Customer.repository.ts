@@ -115,11 +115,7 @@ export class CustomerRepository extends Repository<Customer> {
   }
   async updateCustomer(
     id: string,
-    data:
-      | Partial<CustomerDataDTO>
-      | Partial<CustomerStatusDTO>
-      | Partial<ProviderStatusDTO>
-      | Partial<AccountignCatalogIntegrationDTO>,
+    data: Partial<CustomerDataDTO> | Partial<CustomerStatusDTO> | Partial<ProviderStatusDTO>,
     company: Company,
     type: string,
   ): Promise<any> {

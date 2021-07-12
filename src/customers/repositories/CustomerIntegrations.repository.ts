@@ -28,10 +28,7 @@ export class CustomerIntegrationsRepository extends Repository<CustomerIntegrati
     }
     return settingIntegrations;
   }
-  async createCustomerIntegrations(
-    company: Company,
-    data: AccountignCatalogIntegrationDTO,
-  ): Promise<CustomerIntegrations> {
+  async createCustomerIntegrations(company: Company, data: any): Promise<CustomerIntegrations> {
     // crea sucursal
     let response: CustomerIntegrations;
     try {

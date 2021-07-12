@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Module } from 'src/system/entities/Module.entity';
+import { Module } from '../../system/entities/Module.entity';
 
 @Entity()
 export class CustomerIntegrations extends BaseEntity {
@@ -16,10 +16,10 @@ export class CustomerIntegrations extends BaseEntity {
   id: string;
 
   @Column({ type: 'varchar' })
-  metaKey;
+  metaKey: string;
 
   @Column({ type: 'varchar', nullable: true })
-  metaValue;
+  metaValue: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
