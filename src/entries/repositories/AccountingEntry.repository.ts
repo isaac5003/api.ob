@@ -196,13 +196,17 @@ export class AccountingEntryRepository extends Repository<AccountingEntry> {
   async deleteEntry(company: Company, id: string): Promise<boolean> {
     const entryHeader = await this.getEntry(company, id);
     delete entryHeader.accountingEntryDetails;
+    let result;
     try {
-      await this.delete(entryHeader);
+      result = await this.delete(entryHeader.id);
     } catch (error) {
       console.error(error);
 
       logDatabaseError(reponame, error);
     }
-    return true;
+    if (result.affected == 1) {
+      return true;
+    }
+    return false;
   }
 }
