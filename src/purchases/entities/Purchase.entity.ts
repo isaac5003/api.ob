@@ -1,9 +1,9 @@
-import { Branch } from 'src/companies/entities/Branch.entity';
-import { Company } from 'src/companies/entities/Company.entity';
-import { Customer } from 'src/customers/entities/Customer.entity';
-import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
-import { CustomerType } from 'src/customers/entities/CustomerType.entity';
-import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
+import { Branch } from '../../companies/entities/Branch.entity';
+import { Company } from '../../companies/entities/Company.entity';
+import { Customer } from '../../customers/entities/Customer.entity';
+import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
+import { CustomerType } from '../../customers/entities/CustomerType.entity';
+import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import {
   BaseEntity,
   Column,

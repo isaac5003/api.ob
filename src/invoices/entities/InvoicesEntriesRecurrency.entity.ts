@@ -2,10 +2,10 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } 
 
 @Entity()
 export class InvoicesEntriesRecurrency extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'int' })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ default: false, type: 'varchar' })
+  @Column({ type: 'varchar' })
   name: string;
 
   @CreateDateColumn({ select: false })
