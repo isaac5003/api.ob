@@ -181,15 +181,9 @@ export class CustomersService {
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
     const modules = await this.moduleRepository.getModules();
 
-    // 1. Obtener solo los modulos que tengo en configuraciones
     const filteredModules = [...new Set(settings.map((s) => s.module.id))];
-    // console.log(filteredModules)
-    //resulta que solo tenemos uno el de CONTA.
 
-    // 2. Filtro de mi listado de modulos los que tengo en filtered modules.
     const foundModules = modules.filter((m) => filteredModules.includes(m.id));
-    // console.log(foundModules)
-    // Ya encontre los modulos, y ahora tengo acceso al shortname, recorro este arreglo
 
     const integrations = {};
     for (const f of foundModules) {
@@ -201,7 +195,7 @@ export class CustomersService {
             metaValue: s.metaValue,
           };
         });
-      // console.log(values)
+
       const data = {};
       for (const v of values) {
         data[v.metaKey] = v.metaValue;

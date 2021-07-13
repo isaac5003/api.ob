@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class OB4421626127809079 implements MigrationInterface {
-  name = 'OB4421626127809079';
-
+export class OB4421626216395405 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`ALTER TABLE "invoices_entries_recurrency" ALTER COLUMN "name" DROP DEFAULT`);
   }

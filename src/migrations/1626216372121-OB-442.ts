@@ -1,8 +1,7 @@
 import { Module } from '../system/entities/Module.entity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class OB4421626122420312 implements MigrationInterface {
-  name = 'OB4421626122420312';
+export class OB4421626216372121 implements MigrationInterface {
   private modules = [
     { id: 'a98b98e6-b2d5-42a3-853d-9516f64eade8', shortName: 'entries' },
     { id: '0f88f2ea-aae9-44ad-8df0-0ee3debbf167', shortName: 'services' },
