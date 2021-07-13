@@ -1,6 +1,6 @@
-import { join } from 'path';
+timport { join } from 'path';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: './local.env' });
+dotenv.config({ path: './test.env' });
 
 module.exports = {
   type: 'postgres',
