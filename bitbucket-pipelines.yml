@@ -13,5 +13,6 @@ pipelines:
             - apk add --update nodejs npm
             - npm install
             - docker container ls -a
-            - npm run test:e2e
+            - sleep 10
             - docker container ls -a
+            - npm run test:e2e
