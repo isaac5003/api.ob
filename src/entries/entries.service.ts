@@ -321,6 +321,8 @@ export class EntriesService {
           'rangeDetails',
         );
 
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         previousDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
           company,
           {
@@ -328,6 +330,8 @@ export class EntriesService {
           },
           'previousDetail',
         );
+
+        previousDetails = previousDetails.filter((a) => a.accountingEntry.accounted);
         break;
 
       case 'accountMovements':
@@ -341,6 +345,8 @@ export class EntriesService {
           'rangeDetails',
         );
 
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         previousDetails = await this.accountingEntryDetailRepository.getDetailsForReport(
           company,
           {
@@ -349,6 +355,8 @@ export class EntriesService {
           },
           'previousDetail',
         );
+
+        previousDetails = previousDetails.filter((a) => a.accountingEntry.accounted);
 
         break;
       case 'balance-general':
@@ -361,6 +369,9 @@ export class EntriesService {
           },
           'rangeDetails',
         );
+
+        rangeDetails = rangeDetails.filter((a) => a.accountingEntry.accounted);
+
         break;
     }
 
@@ -378,6 +389,7 @@ export class EntriesService {
       case 'diarioMayor':
         affectedCatalog = [...new Set(rangeDetails.map((d) => d.accountingCatalog.code))];
         // obtiene el saldo inicial por cuenta
+
         accounts = affectedCatalog
           .map((c) => {
             const account = catalog.find((ct) => ct.code == c);
@@ -854,6 +866,16 @@ export class EntriesService {
     return new ResponseSingleDTO(plainToClass(AccountingEntry, entrie));
   }
 
+  /**
+   *
+   * @param company ----Compañia con la que esta logada el usuario que invoica la peticion
+   * @param header  --Objeto de datos que se necesecitan para hacer el insert o update de la partida contable que se desea crear o actualizar
+   * @param details --Arreglo de objetos que poseen los datos necesarios o requeridos para crear los deralles (EntryDetailsDTO)
+   * @param type  --Tipo de acción que se desea realizar, ("create" || "update")
+   * @param id  --Parametro opcional, id de la partida contable que se desea actulizar
+   * @returns  -Retora el mensaje de exito en caso que asi sea acompañado del id del partida creada, si no retorna el mensaje de error
+   * --Metodo utilizado para estructurar la logica a realizar  ala hora de crear o actulizar partidas contables
+   */
   async createUpdateEntry(
     company: Company,
     header: any,
@@ -892,7 +914,9 @@ export class EntriesService {
         id: entry.id,
       };
 
-      await this.accountingEntryDetailRepository.deleteEntryDetail(entry.accountingEntryDetails.map((e) => e.id));
+      if (entry.accountingEntryDetails.length > 0) {
+        await this.accountingEntryDetailRepository.deleteEntryDetail(entry.accountingEntryDetails.map((e) => e.id));
+      }
     }
 
     const entryHeader = await this.accountingEntryRepository.createUpdateEntry(headerInsert, type);
@@ -924,21 +948,47 @@ export class EntriesService {
     };
   }
 
+  /**
+   *
+   * @param company --Compañia con la que esta logada el usuario que invoica la peticion
+   * @param id --Id de la partida contable que se desea eliminar
+   * @returns  Retorna un mensaje de exito o mensaje de error en caso que no  haya sido posible eliminar el registro
+   */
   async deleteEntry(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const entry = await this.accountingEntryRepository.getEntry(company, id);
 
-    const resultDetails = await this.accountingEntryDetailRepository.deleteEntryDetail(
-      entry.accountingEntryDetails.map((e) => {
-        return { id: e.id, company };
-      }),
-    );
+    if (entry.accountingEntryDetails.length > 0) {
+      const resultDetails = await this.accountingEntryDetailRepository.deleteEntryDetail(
+        entry.accountingEntryDetails.map((e) => {
+          return { id: e.id, company };
+        }),
+      );
 
+      if (!resultDetails) {
+        throw new BadRequestException('No se ha podido eliminar la partida contable, contacta con tu administrador.');
+      }
+    }
     const resultHeader = await this.accountingEntryRepository.deleteEntry(company, id);
+
+    if (!resultHeader) {
+      throw new BadRequestException('No se ha podido eliminar la partida contable, contacta con tu administrador.');
+    }
     return {
-      message:
-        resultDetails && resultHeader
-          ? 'Se ha eliminado la partida contable correctamente'
-          : 'No se ha podido eliminar la partida contable',
+      message: 'Se ha eliminado la partida contable correctamente',
     };
+  }
+
+  /**
+   *
+   * @param entryId --El id de la partida que deseo consultar.
+   * @param company  --La compañia con la que el usuario esta logado al momento de invocar el metodo.
+   * @returns boolean:
+   * El metodo retorna true en el caso que una partida pueda ser actulizada, y false en el caso que esta no
+   * pueda ser editada.
+   */
+  async canEntryBeUpdated(entryId: string, company: Company): Promise<boolean> {
+    await this.accountingEntryRepository.getEntry(company, entryId);
+
+    return true;
   }
 }

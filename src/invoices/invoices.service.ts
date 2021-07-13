@@ -832,4 +832,19 @@ export class InvoicesService {
       message: result ? 'Se ha eliminado la venta correctamente' : 'No se ha podido eliminar venta',
     };
   }
+
+  /**
+   *
+   * @param invoiceId --El id de la venta que se desea consultar
+   * @param company  --El id de la compañia a la que pertenece la venta y el usuario logado a ala hora de invocar el metodo
+   * @returns   * Retorna un objeto con la propiedad {createEntry: boolean, entryId}
+   * Dicho metodo sirve para
+   */
+  async saleHasIntegration(invoiceId: string, company: Company): Promise<boolean> {
+    const invoice = await this.invoiceRepository.getInvoice(company, invoiceId);
+    if (invoice.createEntry && invoice.accountingEntry.id) {
+      return true;
+    }
+    return false;
+  }
 }
