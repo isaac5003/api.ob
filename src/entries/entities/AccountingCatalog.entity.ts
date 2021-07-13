@@ -65,8 +65,11 @@ export class AccountingCatalog extends BaseEntity {
   @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.accountingCreditCatalog)
   accountingSettingsCredito: AccountingSetting[];
 
-  @OneToMany(() => Customer, (customer) => customer.accountingCatalog)
-  customers: Customer[];
+  @OneToMany(() => Customer, (customer) => customer.accountingCatalogCXC)
+  customersCXC: Customer[];
+
+  @OneToMany(() => Customer, (customer) => customer.accountingCatalogSales)
+  customersSales: Customer[];
 
   @OneToMany(() => Service, (service) => service.accountingCatalog)
   services: Service[];

@@ -19,7 +19,6 @@ export class UserRepository extends Repository<User> {
       return user;
     } catch (error) {
       console.error(error);
-
       throw new InternalServerErrorException('Error al obtener el usuario seleccionado.');
     }
   }

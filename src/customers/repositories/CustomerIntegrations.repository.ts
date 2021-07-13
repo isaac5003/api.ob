@@ -28,23 +28,22 @@ export class CustomerIntegrationsRepository extends Repository<CustomerIntegrati
     }
     return settingIntegrations;
   }
-  async createCustomerIntegrations(company: Company, data: any): Promise<CustomerIntegrations> {
+  async createCustomerIntegrations(data: any): Promise<CustomerIntegrations> {
     // crea sucursal
     let response: CustomerIntegrations;
     try {
-      const settings = this.create({ company, ...data });
-      response = await this.save(settings);
+      response = await this.save(data);
     } catch (error) {
       logDatabaseError(reponame, error);
     }
     return await response;
   }
 
-  async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO | any): Promise<void> {
-    try {
-      this.update({ company }, data);
-    } catch (error) {
-      logDatabaseError(reponame, error);
-    }
-  }
+  // async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO | any): Promise<void> {
+  //   try {
+  //     this.update({ company }, data);
+  //   } catch (error) {
+  //     logDatabaseError(reponame, error);
+  //   }
+  // }
 }

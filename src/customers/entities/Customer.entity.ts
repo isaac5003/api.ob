@@ -59,8 +59,11 @@ export class Customer extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customers)
-  accountingCatalog: AccountingCatalog;
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customersCXC)
+  accountingCatalogCXC: AccountingCatalog;
+
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customersSales)
+  accountingCatalogSales: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.customers)
   company: Company;
