@@ -38,12 +38,4 @@ export class CustomerIntegrationsRepository extends Repository<CustomerIntegrati
     }
     return await response;
   }
-
-  // async updateCustomerIntegrations(company: Company, data: AccountignCatalogIntegrationDTO | any): Promise<void> {
-  //   try {
-  //     this.update({ company }, data);
-  //   } catch (error) {
-  //     logDatabaseError(reponame, error);
-  //   }
-  // }
 }
