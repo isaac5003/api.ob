@@ -840,12 +840,11 @@ export class InvoicesService {
    * @returns   * Retorna un objeto con la propiedad {createEntry: boolean, entryId}
    * Dicho metodo sirve para
    */
-  async saleHasIntegration(invoiceId: string, company: Company): Promise<{ createEntry: boolean; entryId: string }> {
+  async saleHasIntegration(invoiceId: string, company: Company): Promise<boolean> {
     const invoice = await this.invoiceRepository.getInvoice(company, invoiceId);
     if (invoice.createEntry && invoice.accountingEntry.id) {
-      return { createEntry: invoice.createEntry, entryId: invoice.accountingEntry.id };
-    } else {
-      return { createEntry: false, entryId: null };
+      return true;
     }
+    return false;
   }
 }
