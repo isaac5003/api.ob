@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import * as ormconfig from '../ormconfig';
+import ormconfig from '../ormconfig';
 import { ServicesModule } from './services/services.module';
 import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
@@ -16,7 +16,7 @@ import { EchargesModule } from './echarges/echarges.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({ ...ormconfig, keepConnectionAlive: true, autoLoadEntities: true }),
+    TypeOrmModule.forRoot(ormconfig),
     ServicesModule,
     AuthModule,
     CustomersModule,

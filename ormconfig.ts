@@ -1,10 +1,9 @@
-const { join } = require('path');
-// import { join } from 'path';
-const dotenv = require('dotenv');
-// import * as dotenv from 'dotenv';
+import { join } from 'path';
+import * as dotenv from 'dotenv';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 dotenv.config({ path: './local.env' });
 
-module.exports = {
+const ormconfig: TypeOrmModuleOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT),
@@ -19,3 +18,5 @@ module.exports = {
     migrationsDir: './src/migrations',
   },
 };
+
+export default ormconfig;
