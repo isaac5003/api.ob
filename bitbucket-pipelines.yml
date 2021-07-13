@@ -16,5 +16,7 @@ pipelines:
             - docker container ls -a
             - sleep 10
             - docker container ls -a
+            - docker container logs test_openbox_api
+            - curl http://0.0.0.0:8001
             - curl http://localhost:8001
             - npm run test:e2e
