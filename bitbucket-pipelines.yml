@@ -14,3 +14,4 @@ pipelines:
             - npm install
             - docker container ls -a
             - npm run test:e2e
+            - docker container ls -a
