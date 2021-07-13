@@ -376,22 +376,25 @@ export class BACKWARD1626197471403 implements MigrationInterface {
     } catch (error) {}
     try {
       await queryRunner.query(`CREATE VIEW "taxes_view" AS 
-  SELECT 
-    p.id AS id, p.authorization AS authorization, p.sequence AS sequence,p."providerId" AS "customerId", p."providerName" AS name, p.iva AS iva,pdt.id AS "documentTypeId", pdt.name AS "documentType", p.origin AS origin, 'purchases' AS type, p."companyId" AS company,
-    p."purchaseDate" AS date, p."createdAt" AS "createdAt", p."sum" AS "sum"
-  FROM purchase p 
-  LEFT JOIN purchases_document_type pdt ON pdt.id = p."documentTypeId"
-  LEFT JOIN company company ON company.id = p."companyId"
-  UNION ALL
-  SELECT 
-    i.id AS id, i.authorization AS authorization, i.sequence AS sequence,i."customerId" AS "customerId", i."customerName" AS name, i.iva AS iva,idt.id AS "documentTypeId", idt.name AS "documentType", i.origin AS origin, 'invoices' AS type, i."companyId" AS company,
-    i."invoiceDate" AS date,i."createdAt" AS "createdAt", i."sum" AS "sum" 
-  FROM invoice i 
-  LEFT JOIN invoices_document_type idt ON idt.id = i."documentTypeId"
-  LEFT JOIN company company ON company.id = i."companyId"
-  WHERE i."statusId" != 4 AND i."statusId" !=3
- 
- `);
+      SELECT 
+        p.id AS id, p.authorization AS authorization, p.sequence AS sequence,p."providerId" AS "customerId", p."providerName" AS name, p.iva AS iva,pdt.id AS "documentTypeId", pdt.name AS "documentType", p.origin AS origin, 'purchases' AS type, p."companyId" AS company,
+        p."purchaseDate" AS date, p."createdAt" AS "createdAt", p."sum" AS "sum"
+      FROM purchase p 
+      LEFT JOIN purchases_document_type pdt ON pdt.id = p."documentTypeId"
+      LEFT JOIN company company ON company.id = p."companyId"
+      UNION ALL
+      SELECT 
+        i.id AS id, i.authorization AS authorization, i.sequence AS sequence,i."customerId" AS "customerId", i."customerName" AS name, i.iva AS iva,idt.id AS "documentTypeId", idt.name AS "documentType", i.origin AS origin, 'invoices' AS type, i."companyId" AS company,
+        i."invoiceDate" AS date,i."createdAt" AS "createdAt", i."sum" AS "sum" 
+      FROM invoice i 
+      LEFT JOIN invoices_document_type idt ON idt.id = i."documentTypeId"
+      LEFT JOIN company company ON company.id = i."companyId"
+      WHERE i."statusId" != 4 AND i."statusId" !=3
+    
+    `);
+    } catch (error) {}
+    try {
+      await queryRunner.query(`ALTER TABLE "user" DROP COLUMN "avatarUrl"`);
     } catch (error) {}
     try {
       await queryRunner.query(
@@ -413,6 +416,9 @@ export class BACKWARD1626197471403 implements MigrationInterface {
         'public',
         'taxes_view',
       ]);
+    } catch (error) {}
+    try {
+      await queryRunner.query(`ALTER TABLE "user" ADD "avatarUrl" character varying`);
     } catch (error) {}
     try {
       await queryRunner.query(`DROP VIEW "taxes_view"`);
