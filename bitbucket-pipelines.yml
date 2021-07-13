@@ -15,4 +15,5 @@ pipelines:
             - docker container ls -a
             - sleep 10
             - docker container ls -a
+            - curl http://localhost:8001
             - npm run test:e2e
