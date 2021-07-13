@@ -44,9 +44,6 @@ export class User extends BaseEntity {
   @Column({ default: true, type: 'boolean' })
   isActive: boolean;
 
-  @Column({ nullable: true, type: 'varchar' })
-  avatarUrl: string;
-
   @CreateDateColumn({ select: false })
   createdAt: string;
 
