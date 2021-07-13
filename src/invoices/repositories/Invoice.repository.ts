@@ -142,6 +142,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       is: 'i.invoicesSeller',
       iz: 'i.invoicesZone',
       status: 'i.status',
+      e: 'i.accountingEntry',
     };
 
     for (const table of joins) {
