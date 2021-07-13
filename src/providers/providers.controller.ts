@@ -64,7 +64,7 @@ export class ProvidersController {
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data);
+    return this.customersService.updateCustomerSettingsIntegrations(company, data, 'entries');
   }
 
   @Put('/status/:id')

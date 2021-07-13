@@ -11,7 +11,6 @@ import {
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
 import { AccountingSetting } from './AccountingSetting.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
 import { Company } from '../../companies/entities/Company.entity';
@@ -66,11 +65,11 @@ export class AccountingCatalog extends BaseEntity {
   @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.accountingCreditCatalog)
   accountingSettingsCredito: AccountingSetting[];
 
-  @OneToMany(() => Customer, (customer) => customer.accountingCatalog)
-  customers: Customer[];
+  @OneToMany(() => Customer, (customer) => customer.accountingCatalogCXC)
+  customersCXC: Customer[];
 
-  @OneToMany(() => CustomerSetting, (customerSetting) => customerSetting.accountingCatalog)
-  customerSettings: CustomerSetting[];
+  @OneToMany(() => Customer, (customer) => customer.accountingCatalogSales)
+  customersSales: Customer[];
 
   @OneToMany(() => Service, (service) => service.accountingCatalog)
   services: Service[];
