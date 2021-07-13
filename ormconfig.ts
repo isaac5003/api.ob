@@ -1,4 +1,4 @@
-const join = require('path');
+const { join } = require('path');
 // import { join } from 'path';
 const dotenv = require('dotenv');
 // import * as dotenv from 'dotenv';
