@@ -1,6 +1,8 @@
-timport { join } from 'path';
-import * as dotenv from 'dotenv';
-dotenv.config({ path: './test.env' });
+const join = require('path');
+// import { join } from 'path';
+const dotenv = require('dotenv');
+// import * as dotenv from 'dotenv';
+dotenv.config({ path: './local.env' });
 
 module.exports = {
   type: 'postgres',
@@ -11,7 +13,7 @@ module.exports = {
   database: process.env.POSTGRES_DB,
   entities: [__dirname + '/**/entities/*.entity{.ts,.js}'],
   synchronize: false,
-  migrationsRun: true,
+  // migrationsRun: true,
   migrations: [join(__dirname, 'src/migrations/*{.ts,.js}')],
   cli: {
     migrationsDir: './src/migrations',
