@@ -1,7 +1,7 @@
 import { join } from 'path';
 import * as dotenv from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-dotenv.config({ path: './local.env' });
+dotenv.config({ path: process.env.PATH });
 
 const ormconfig: TypeOrmModuleOptions = {
   type: 'postgres',
