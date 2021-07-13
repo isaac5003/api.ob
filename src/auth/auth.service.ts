@@ -147,7 +147,6 @@ export class AuthService {
         names: userLogged.names,
         lastnames: userLogged.lastnames,
         changePassword: userLogged.changePassword,
-        avatarURL: userLogged.avatarUrl,
         profile: {
           id: userLogged.profile.id,
           name: userLogged.profile.name,

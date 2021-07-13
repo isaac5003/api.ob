@@ -1,6 +1,6 @@
-import { Company } from 'src/companies/entities/Company.entity';
-import { Customer } from 'src/customers/entities/Customer.entity';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
+import { Company } from '../../companies/entities/Company.entity';
+import { Customer } from '../../customers/entities/Customer.entity';
+import { Invoice } from '../../invoices/entities/Invoice.entity';
 import {
   BaseEntity,
   Column,

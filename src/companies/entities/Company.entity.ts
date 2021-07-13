@@ -29,8 +29,8 @@ import { Branch } from './Branch.entity';
 import { CompanyType } from './CompanyType.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
-import { Purchase } from 'src/purchases/entities/Purchase.entity';
-import { Echarges } from 'src/echarges/entities/echarges.entity';
+import { Purchase } from '../../purchases/entities/Purchase.entity';
+import { Echarges } from '../../echarges/entities/echarges.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {

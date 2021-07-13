@@ -9,4 +9,6 @@ COPY .prettierrc ./
 COPY .eslintrc.js ./
 RUN yarn install
 COPY ./src ./src
-CMD ["npm", "run", "start"]
+COPY ./start.sh /
+RUN chmod +x /start.sh
+CMD ["/start.sh"]

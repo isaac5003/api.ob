@@ -13,7 +13,7 @@ import { Profile } from './Profile.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
-import { EchargesRequest } from 'src/echarges/entities/echargesRequest.entity';
+import { EchargesRequest } from '../../echarges/entities/echargesRequest.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -43,9 +43,6 @@ export class User extends BaseEntity {
 
   @Column({ default: true, type: 'boolean' })
   isActive: boolean;
-
-  @Column({ nullable: true, type: 'varchar' })
-  avatarUrl: string;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
