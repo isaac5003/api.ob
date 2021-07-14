@@ -4,9 +4,10 @@ import { ServiceRepository } from './repositories/Service.repository';
 import { SellingTypeRepository } from './repositories/SellingType.repository';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
-import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
+import { ServiceIntegrationsRepository } from './repositories/ServiceIntegrations.repository';
 import { AuthModule } from '../auth/auth.module';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 
 @Module({
   imports: [
@@ -14,8 +15,9 @@ import { AccountingCatalogRepository } from '../entries/repositories/AccountingC
     TypeOrmModule.forFeature([
       ServiceRepository,
       SellingTypeRepository,
-      ServiceSettingRepository,
+      ServiceIntegrationsRepository,
       AccountingCatalogRepository,
+      ModuleRepository,
     ]),
   ],
   controllers: [ServicesController],

@@ -30,9 +30,9 @@ export class ResponseSingleDTO<T> {
 export class ResponseMinimalDTO {
   id?: string;
   ids?: string[];
-  integrations?: any;
   message?: string;
   nextSerie?: number;
+  entries?: any;
 }
 
 export class ResponseUserDTO {

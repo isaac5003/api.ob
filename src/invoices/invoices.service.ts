@@ -559,14 +559,12 @@ export class InvoicesService {
         return Object.keys(integrations).length > 0
           ? integrations
           : {
-              integrations: {
-                entries: {
-                  cashPaymentAccountingCatalog: null,
-                  automaticIntegration: false,
-                  activeIntegration: false,
-                  registerService: false,
-                  recurencyFrecuency: null,
-                },
+              entries: {
+                cashPaymentAccountingCatalog: null,
+                automaticIntegration: false,
+                activeIntegration: false,
+                registerService: false,
+                recurencyFrecuency: null,
               },
             };
     }
@@ -622,10 +620,10 @@ export class InvoicesService {
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
             metaKey: 'automaticIntegration',
-            metaValue: `${data.activeIntegration}`,
+            metaValue: `${data.automaticIntegration}`,
           });
         } else {
-          setting.push({ ...automaticIntegration, metaValue: `${data.activeIntegration}` });
+          setting.push({ ...automaticIntegration, metaValue: `${data.automaticIntegration}` });
         }
         if (!registerService) {
           setting.push({

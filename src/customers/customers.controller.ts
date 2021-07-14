@@ -90,13 +90,14 @@ export class CustomersController {
     return new ResponseSingleDTO(plainToClass(Customer, customer));
   }
 
-  @Get('/:id/integrations')
+  @Get('/:id/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerIntegration(
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerIntegration(id, company);
+    return await this.customersService.getCustomerIntegration(id, company, integratedModule);
   }
 
   @Get('/:id/tributary')
@@ -177,14 +178,15 @@ export class CustomersController {
     return this.customersService.updateCustomer(id, data, company);
   }
 
-  @Put('/:id/integrations')
+  @Put('/:id/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerIntegration(
     @Param('id') id: string,
+    @Param('shortname') integratedModule: string,
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.UpdateCustomerIntegration(id, data, company);
+    return await this.customersService.UpdateCustomerIntegration(id, data, company, integratedModule);
   }
 
   @Delete('/:id')

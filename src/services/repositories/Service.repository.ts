@@ -84,7 +84,8 @@ export class ServiceRepository extends Repository<Service> {
     for (const table of joins) {
       switch (table) {
         case 'ac':
-          leftJoinAndSelect['ac'] = 's.accountingCatalog';
+          leftJoinAndSelect['acCXC'] = 's.accountingCatalogCXC';
+          leftJoinAndSelect['acSales'] = 's.accountingCatalogSales';
           break;
       }
     }
