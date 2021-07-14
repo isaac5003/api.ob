@@ -513,9 +513,10 @@ export class InvoicesService {
   }
 
   /**
-   * Metodo para estructurar y validar la data que se debe de mostrar en la respuesta de la petición
+   * Metodo para estructurar y validar los campos de configuración que se muestran en cada una
+   * de las integraciones con otros modulos
    * @param company --Compañia con la que esta logado el usuario que solicita el metodo
-   * @returns
+   * @returns las configuraciones almacenadas de las integraciones con los diferentes modulos
    */
   async getInvoicesIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
     const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
@@ -572,13 +573,14 @@ export class InvoicesService {
   }
 
   /**
-   * Metodo utilizado para estructurar la data que se necesita enviar al  metodo createInvoicesIntegrations
-   * @param company --compañia con la que esta logado el ususario que invoca el metodo
-   * @param data --Campos requeridos para crear las configuraciones necesarias
-   * @param integratedModule --modulo al que se desean guarar configuraciones
-   * @returns
+   * Metodo utilizado para estructutrear la data necesaria para creear o actulizar los registros en configuraciones
+   * de intgraciones con otros modulos
+   * @param company compañia con la que esta logado el ususario que invoca el metodo
+   * @param data Campos requeridos para crear las configuraciones necesarias
+   * @param integratedModule modulo al que se desean guarar configuraciones
+   * @returns Retorna el mensaje de exito o error notificando cualquiera de los casos
    */
-  async updateInvoicesIntegrations(
+  async upsertInvoicesIntegrations(
     company: Company,
     data: Partial<InvoiceIntegrationBaseDTO>,
     integratedModule: string,
@@ -604,8 +606,7 @@ export class InvoicesService {
         const recurencyFrecuency = settings.find((s) => s.metaKey == 'recurencyFrecuency');
         const recurrencyOption = settings.find((s) => s.metaKey == 'recurrencyOption');
 
-        if (Object.keys(cashPaymentAccountingCatalog).length == 0) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+        if (!cashPaymentAccountingCatalog) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -615,16 +616,8 @@ export class InvoicesService {
         } else {
           setting.push({ ...cashPaymentAccountingCatalog, metaValue: data.cashPaymentAccountingCatalog });
         }
-        if (Object.keys(activeIntegration).length == 0) {
-          setting.push({
-            company: company,
-            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-            metaKey: 'activeIntegration',
-            metaValue: 'true',
-          });
-        }
-        if (Object.keys(automaticIntegration).length == 0) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+
+        if (!automaticIntegration) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -634,8 +627,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...automaticIntegration, metaValue: `${data.activeIntegration}` });
         }
-        if (Object.keys(registerService).length == 0) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+        if (!registerService) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -645,8 +637,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...registerService, metaValue: `${data.registerService}` });
         }
-        if (Object.keys(recurencyFrecuency).length == 0) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+        if (!recurencyFrecuency) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -656,8 +647,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...recurencyFrecuency, metaValue: `${data.recurrencyFrecuency}` });
         }
-        if (Object.keys(recurrencyOption).length == 0) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+        if (!recurrencyOption) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -670,7 +660,7 @@ export class InvoicesService {
         break;
     }
 
-    await this.invoicesIntegrationsRepository.createInvoicesIntegrations(setting);
+    await this.invoicesIntegrationsRepository.upsertInvoicesIntegrations(setting);
     return {
       message: 'La integración ha sido actualizada correctamente.',
     };
@@ -688,10 +678,10 @@ export class InvoicesService {
       case 'entries':
         await this.invoicesEntriesRecurrencyRepository.getRecurrency(data.recurrencyFrecuency as number);
 
-        const activeIntegration = settings
-          .filter((s) => s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8')
-          .find((s) => s.metaKey == 'activeIntegration');
-        if (Object.keys(activeIntegration).length == 0) {
+        const activeIntegration = settings.find(
+          (s) => s.metaKey == 'activeIntegration' && s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+        );
+        if (!activeIntegration) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -705,7 +695,7 @@ export class InvoicesService {
         break;
     }
 
-    await this.invoicesIntegrationsRepository.createInvoicesIntegrations(setting);
+    await this.invoicesIntegrationsRepository.upsertInvoicesIntegrations(setting);
     return {
       message: 'La integración ha sido actualizada correctamente.',
     };

@@ -10,8 +10,8 @@ export class InvoicesIntegrationsRepository extends Repository<InvoicesIntegrati
   /**
    *
    * Metodo utilizado para obtener las configuraciones de integraciones de invoices
-   * @param company --Comapnia en la que esta logado el ususario que solicita el metodo
-   * @returns
+   * @param company Comapnia en la que esta logado el ususario que solicita el metodo
+   * @returns un arreglo con todos los registros que existen en las configuraciones de integraciones
    */
   async getInvoicesIntegrations(company: Company): Promise<InvoicesIntegrations[]> {
     let settingIntegrations: InvoicesIntegrations[];
@@ -38,10 +38,9 @@ export class InvoicesIntegrationsRepository extends Repository<InvoicesIntegrati
   /**
    * Metodo utilizado para crear o actulizar las configuraciones de integraciones de ventas
    * @param data --Los cmapos requeridos para crear o actulizar las configuraciones de integraciones.
-   * @returns
+   * @returns un arreglo con los campos que se han actualizado o creado
    */
-  async createInvoicesIntegrations(data: any): Promise<InvoicesIntegrations> {
-    // crea sucursal
+  async upsertInvoicesIntegrations(data: any): Promise<InvoicesIntegrations> {
     let response: InvoicesIntegrations;
     try {
       response = await this.save(data);

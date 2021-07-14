@@ -317,7 +317,7 @@ export class InvoicesController {
     @GetAuthData('company') company: Company,
     @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.invoice.updateInvoicesIntegrations(company, data, integratedModule);
+    return this.invoice.upsertInvoicesIntegrations(company, data, integratedModule);
   }
 
   @Put('/setting/integrations/:shortname/active')
