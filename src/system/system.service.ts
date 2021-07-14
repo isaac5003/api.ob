@@ -1,7 +1,7 @@
 import { Dependencies, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AccessRepository } from 'src/auth/repositories/Access.repository';
-import { Company } from 'src/companies/entities/Company.entity';
+import { AccessRepository } from '../auth/repositories/Access.repository';
+import { Company } from '../companies/entities/Company.entity';
 import { InvoicesIntegrationsRepository } from 'src/invoices/repositories/InvoicesIntegration.repository';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
