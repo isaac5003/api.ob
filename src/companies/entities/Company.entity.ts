@@ -31,6 +31,7 @@ import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -138,6 +139,9 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => CustomerIntegrations, (customerIntegrations) => customerIntegrations.company)
   customerIntegration: CustomerIntegrations[];
+
+  @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.company)
+  invoicesIntegration: InvoicesIntegrations[];
 
   @OneToMany(() => Echarges, (echarges) => echarges.company)
   echarges: Echarges[];
