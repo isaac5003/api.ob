@@ -40,6 +40,7 @@ import { InvoiceSellerDataDTO } from './dtos/sellers/invoice-data.dto';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 import { plainToClass } from 'class-transformer';
 import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
+import { InvoicesIntegrationsDTO } from './dtos/validate/invoice-integration.vdto';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -298,6 +299,20 @@ export class InvoicesController {
     @GetAuthData('company') company: Company,
   ): Promise<ReportsDTO> {
     return await this.invoice.generateReportInvoiceList(company, filter);
+  }
+
+  @Get('/setting/integrations')
+  async getSettingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
+    return await this.invoice.getInvoicesIntegrations(company);
+  }
+
+  @Put('/setting/integrations')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async updateSettingIntegrations(
+    @Body() data: InvoicesIntegrationsDTO,
+    @GetAuthData('company') company: Company,
+  ): Promise<ResponseMinimalDTO> {
+    return this.invoice.updateInvoicesIntegrations(company, data, 'entries');
   }
 
   @Get()

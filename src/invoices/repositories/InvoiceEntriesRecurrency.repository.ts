@@ -18,4 +18,15 @@ export class InvoicesEntriesRecurrencyRepository extends Repository<InvoicesEntr
     }
     return { data: recurrencies, count: recurrencies.length };
   }
+
+  async getRecurrency(id: number): Promise<InvoicesEntriesRecurrency[]> {
+    let invoicesRecurrencies;
+    try {
+      invoicesRecurrencies = await this.findOneOrFail(id);
+    } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+
+    return invoicesRecurrencies;
+  }
 }

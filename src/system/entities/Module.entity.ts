@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Access } from '../../auth/entities/Access.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
 
 @Entity()
 export class Module extends BaseEntity {
@@ -44,4 +45,7 @@ export class Module extends BaseEntity {
 
   @OneToMany(() => CustomerIntegrations, (customerIntegration) => customerIntegration.module)
   customerIntegration: CustomerIntegrations[];
+
+  @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.module)
+  invoicesIntegration: InvoicesIntegrations[];
 }
