@@ -13,7 +13,7 @@ import { InvoicesPaymentsCondition } from '../../invoices/entities/InvoicesPayme
 import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
 import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
 import { Service } from '../../services/entities/Service.entity';
-import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
+import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 import {
   BaseEntity,
   Column,
@@ -134,14 +134,14 @@ export class Company extends BaseEntity {
   @OneToMany(() => Service, (service) => service.company)
   services: Service[];
 
-  @OneToMany(() => ServiceSetting, (serviceSetting) => serviceSetting.company)
-  serviceSettings: ServiceSetting[];
-
   @OneToMany(() => CustomerIntegrations, (customerIntegrations) => customerIntegrations.company)
   customerIntegration: CustomerIntegrations[];
 
   @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.company)
   invoicesIntegration: InvoicesIntegrations[];
+
+  @OneToMany(() => ServiceIntegrations, (serviceIntegration) => serviceIntegration.company)
+  serviceIntegrations: ServiceIntegrations[];
 
   @OneToMany(() => Echarges, (echarges) => echarges.company)
   echarges: Echarges[];

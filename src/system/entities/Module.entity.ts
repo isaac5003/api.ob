@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { Access } from '../../auth/entities/Access.entity';
 import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
+import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 
 @Entity()
 export class Module extends BaseEntity {
@@ -48,4 +49,7 @@ export class Module extends BaseEntity {
 
   @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.module)
   invoicesIntegration: InvoicesIntegrations[];
+
+  @OneToMany(() => ServiceIntegrations, (serviceIntegration) => serviceIntegration.module)
+  serviceIntegrations: ServiceIntegrations[];
 }

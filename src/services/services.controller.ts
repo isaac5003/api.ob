@@ -44,17 +44,21 @@ export class ServicesController {
   }
 
   // FOR SETTINGS
-  @Get('/setting/integrations')
-  async settingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
-    return this.service.getSettingsIntegrations(company);
+  @Get('/setting/integrations/:shortname')
+  async settingIntegrations(
+    @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    return this.service.getServiceSettingIntegrations(company, integratedModule);
   }
 
-  @Put('/setting/integrations')
-  async updateSettingIntegrations(
+  @Put('/setting/integrations/:shortname')
+  async upsertSettingIntegrations(
     @Body() data: ServiceIntegrationDTO,
     @GetAuthData('company') company: Company,
+    @Param('shortname') intergatedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.updateSettingsIntegrations(company, data);
+    return this.service.upsertServicesSettingsIntegrations(company, data, intergatedModule);
   }
 
   // FOR SERVICES:/ID
@@ -67,12 +71,13 @@ export class ServicesController {
     return new ResponseSingleDTO(plainToClass(Service, service));
   }
 
-  @Get('/:id/integrations')
+  @Get('/:id/integrations/:shortname')
   async getServiceIntegrations(
     @Param('id') id: string,
+    @Param('shortname') integratedModule: string,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.getServiceIntegrations(company, id);
+    return this.service.getServiceIntegrations(company, id, integratedModule);
   }
 
   @Put('/:id')
@@ -85,14 +90,15 @@ export class ServicesController {
     return this.service.updateService(company, id, data);
   }
 
-  @Put('/:id/integrations')
+  @Put('/:id/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateServiceIntegrations(
     @Param('id') id: string,
+    @Param('shortname') integratedModule: string,
     @GetAuthData('company') company: Company,
     @Body() data: ServiceIntegrationDTO,
   ): Promise<ResponseMinimalDTO> {
-    return this.service.updateServiceIntegration(company, id, data);
+    return this.service.updateServiceIntegration(company, id, data, integratedModule);
   }
 
   //DELETE INDIVIDUAL

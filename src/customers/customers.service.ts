@@ -161,20 +161,32 @@ export class CustomersService {
     return customer;
   }
 
-  async getCustomerIntegration(id: string, company: Company, type = 'cliente'): Promise<ResponseMinimalDTO> {
-    const { accountingCatalogSales, accountingCatalogCXC } = await this.customerRepository.getCustomer(
-      id,
-      company,
-      type,
-      ['ac'],
-    );
+  async getCustomerIntegration(
+    id: string,
+    company: Company,
+    integratedModule: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    let integrations = {};
+    switch (integratedModule) {
+      case 'entries':
+        const { accountingCatalogSales, accountingCatalogCXC } = await this.customerRepository.getCustomer(
+          id,
+          company,
+          type,
+          ['ac'],
+        );
 
-    return {
-      integrations: {
-        accountingCatalogCXC: accountingCatalogCXC ? accountingCatalogCXC.id : null,
-        accountingCatalogSales: accountingCatalogSales ? accountingCatalogSales.id : null,
-      },
-    };
+        integrations = {
+          ...integrations,
+          entries: {
+            accountingCatalogSales: accountingCatalogSales ? accountingCatalogSales.id : null,
+            accountingCatalogCXC: accountingCatalogCXC ? accountingCatalogCXC.id : null,
+          },
+        };
+        break;
+    }
+    return integrations;
   }
 
   async getCustomerSettingIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
@@ -209,7 +221,7 @@ export class CustomersService {
     }
     return Object.keys(integrations).length > 0
       ? integrations
-      : { integrations: { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } } };
+      : { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } };
   }
 
   async updateCustomerSettingsIntegrations(
@@ -442,12 +454,17 @@ export class CustomersService {
     id: string,
     data: AccountignCatalogIntegrationDTO,
     company: Company,
+    integratedModule: string,
     type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     await this.customerRepository.getCustomer(id, company, type);
-    if (data.accountingCatalogCXC && data.accountingCatalogSales) {
-      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
-      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+    switch (integratedModule) {
+      case 'entries':
+        if (data.accountingCatalogCXC && data.accountingCatalogSales) {
+          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+        }
+        break;
     }
     await this.customerRepository.updateCustomer(id, data, company, type);
     return {
