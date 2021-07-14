@@ -15,4 +15,16 @@ export class ModuleRepository extends Repository<Module> {
     }
     return modules;
   }
+
+  async getModule(id: string): Promise<Module> {
+    let module: Module;
+
+    try {
+      module = await this.findOneOrFail(id);
+    } catch (error) {
+      console.error(error);
+      logDatabaseError('modulos', error);
+    }
+    return module;
+  }
 }

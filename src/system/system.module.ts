@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AccessRepository } from 'src/auth/repositories/Access.repository';
+import { AccessRepository } from '../auth/repositories/Access.repository';
+import { InvoicesIntegrationsRepository } from '../invoices/repositories/InvoicesIntegration.repository';
 import { CityRepository } from './repositories/City.repository';
 import { CountryRepository } from './repositories/Country.repository';
 import { GenderRepository } from './repositories/Gender.repository';
@@ -22,8 +23,11 @@ import { SystemService } from './system.service';
       StateRepository,
       TokenRepository,
       AccessRepository,
+      ModuleRepository,
+      InvoicesIntegrationsRepository,
     ]),
   ],
+  exports: [SystemService],
   controllers: [SystemController],
   providers: [SystemService],
 })
