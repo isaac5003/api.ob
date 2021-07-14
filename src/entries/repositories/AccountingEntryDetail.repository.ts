@@ -69,15 +69,19 @@ export class AccountingEntryDetailRepository extends Repository<AccountingEntryD
   }
 
   async deleteEntryDetail(ids: any[]): Promise<boolean> {
+    let result;
     try {
       if (ids.length > 0) {
-        await this.delete(ids);
+        result = await this.delete(ids);
       }
     } catch (error) {
       console.error(error);
 
       logDatabaseError(reponame, error);
     }
-    return true;
+    if (result.affected > 0) {
+      return true;
+    }
+    return false;
   }
 }

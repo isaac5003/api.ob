@@ -809,7 +809,6 @@ CREATE TABLE public."user" (
     dob date,
     "changePassword" boolean DEFAULT true NOT NULL,
     "isActive" boolean DEFAULT true NOT NULL,
-    "avatarURL" character varying,
     "createdAt" timestamp without time zone DEFAULT now() NOT NULL,
     "updatedAt" timestamp without time zone DEFAULT now() NOT NULL,
     "genderId" uuid,
@@ -13039,9 +13038,9 @@ dc760fc9-4a15-4f46-9a94-e972466bc887	eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aW
 -- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public."user" (id, "unique", email, password, names, lastnames, dob, "changePassword", "isActive", "avatarURL", "createdAt", "updatedAt", "genderId", "countryId", "stateId", "cityId", "profileId") FROM stdin;
-d0a1677f-2f60-4bbf-a207-e925eb46ac12	UH859SY	demo@prueba.com	$2b$10$M0oPod7ZcVTuk5/lJdm5IOBTyYjQ9uUeP774WbStc.b54RM2IN14y	Usuario De	Prueba	1989-05-28	f	t	\N	2019-09-14 17:15:38.205514	2021-01-26 17:38:12.32699	a7974280-429d-4cb1-b0f7-dfb45c8c394a	1	5	73	015beb54-5d84-40ea-883a-a344c7c789e9
-5b650688-0f64-4579-92ed-28bee72da0fa	UN522LO	demo2@prueba.com	$2b$10$M0oPod7ZcVTuk5/lJdm5IOBTyYjQ9uUeP774WbStc.b54RM2IN14y	Otro Usuario	De Prueba	1989-05-28	t	t	\N	2019-09-14 17:15:38.205514	2021-01-26 17:38:12.32699	a7974280-429d-4cb1-b0f7-dfb45c8c394a	1	5	73	45f6f88c-89e6-4537-af82-b0cb9cfc8d89
+COPY public."user" (id, "unique", email, password, names, lastnames, dob, "changePassword", "isActive", "createdAt", "updatedAt", "genderId", "countryId", "stateId", "cityId", "profileId") FROM stdin;
+d0a1677f-2f60-4bbf-a207-e925eb46ac12	UH859SY	demo@prueba.com	$2b$10$M0oPod7ZcVTuk5/lJdm5IOBTyYjQ9uUeP774WbStc.b54RM2IN14y	Usuario De	Prueba	1989-05-28	f	t	2019-09-14 17:15:38.205514	2021-01-26 17:38:12.32699	a7974280-429d-4cb1-b0f7-dfb45c8c394a	1	5	73	015beb54-5d84-40ea-883a-a344c7c789e9
+5b650688-0f64-4579-92ed-28bee72da0fa	UN522LO	demo2@prueba.com	$2b$10$M0oPod7ZcVTuk5/lJdm5IOBTyYjQ9uUeP774WbStc.b54RM2IN14y	Otro Usuario	De Prueba	1989-05-28	t	t	2019-09-14 17:15:38.205514	2021-01-26 17:38:12.32699	a7974280-429d-4cb1-b0f7-dfb45c8c394a	1	5	73	45f6f88c-89e6-4537-af82-b0cb9cfc8d89
 \.
 
 

@@ -15,6 +15,9 @@ import { CustomerRepository } from '../customers/repositories/Customer.repositor
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
 import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
+import { ModuleRepository } from 'src/system/repositories/Module.repository';
+import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
+import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 
 @Module({
   imports: [
@@ -32,6 +35,9 @@ import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntri
       CustomerBranchRepository,
       ServiceRepository,
       InvoicesEntriesRecurrencyRepository,
+      ModuleRepository,
+      InvoicesIntegrationsRepository,
+      AccountingCatalogRepository,
     ]),
   ],
   providers: [InvoicesService],

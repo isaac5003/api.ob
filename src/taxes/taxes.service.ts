@@ -12,19 +12,19 @@ import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
 import { TaxesView } from './entities/taxes-view.entity';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { format } from 'date-fns';
-import { Purchase } from 'src/purchases/entities/Purchase.entity';
+import { Purchase } from '../purchases/entities/Purchase.entity';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 import { plainToClass } from 'class-transformer';
 import { RInvoice, RPurchase } from './dtos/taxes-response.dto';
-import { Branch } from 'src/companies/entities/Branch.entity';
-import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
-import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
-import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
+import { Branch } from '../companies/entities/Branch.entity';
+import { PurchasesDocumentTypeRepository } from '../purchases/repositories/PurchaseDocumentType.repository';
+import { PurchasesStatusRepository } from '../purchases/repositories/PurchaseStatus.repository';
+import { PurchaseDetailRepository } from '../purchases/repositories/PurchaseDetail.repository';
 import { TaxesHeaderDTO } from './dtos/validate/taxes-header.vdto';
-import { numeroALetras } from 'src/_tools';
+import { numeroALetras } from '../_tools';
 import { TaxesHeaderCreateDTO } from './dtos/validate/taxes-header-cretae.vdto';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from 'src/auth/entities/User.entity';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/entities/User.entity';
 
 @Injectable()
 export class TaxesService {

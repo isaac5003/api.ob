@@ -15,8 +15,8 @@ import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
 import { Invoice } from '../../invoices/entities/Invoice.entity';
 import { Company } from '../../companies/entities/Company.entity';
-import { Purchase } from 'src/purchases/entities/Purchase.entity';
-import { Echarges } from 'src/echarges/entities/echarges.entity';
+import { Purchase } from '../../purchases/entities/Purchase.entity';
+import { Echarges } from '../../echarges/entities/echarges.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
@@ -59,8 +59,11 @@ export class Customer extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customers)
-  accountingCatalog: AccountingCatalog;
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customersCXC)
+  accountingCatalogCXC: AccountingCatalog;
+
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customersSales)
+  accountingCatalogSales: AccountingCatalog;
 
   @ManyToOne(() => Company, (company) => company.customers)
   company: Company;

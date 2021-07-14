@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import typeOrmConfig from '../ormconfig';
+
+import ormconfig from '../ormconfig';
 import { ServicesModule } from './services/services.module';
 import { AuthModule } from './auth/auth.module';
 import { CustomersModule } from './customers/customers.module';
@@ -15,7 +16,7 @@ import { EchargesModule } from './echarges/echarges.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeOrmConfig),
+    TypeOrmModule.forRoot(ormconfig),
     ServicesModule,
     AuthModule,
     CustomersModule,
