@@ -52,18 +52,22 @@ export class CustomersController {
     return new ResponseListDTO(plainToClass(CustomerTypeNatural, data), count);
   }
 
-  @Get('/setting/integrations')
-  async getSettingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerSettingIntegrations(company);
+  @Get('/setting/integrations/:shortname')
+  async getSettingIntegrations(
+    @GetAuthData('company') company: Company,
+    @Param('shortname') integratedValue: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.customersService.getCustomerSettingIntegrations(company, integratedValue);
   }
 
-  @Put('/setting/integrations')
+  @Put('/setting/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateSettingIntegrations(
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data, 'entries');
+    return this.customersService.updateCustomerSettingsIntegrations(company, data, integratedModule);
   }
 
   @Put('/status/:id')

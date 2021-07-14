@@ -517,52 +517,58 @@ export class InvoicesService {
    * @param company --Compañia con la que esta logado el usuario que solicita el metodo
    * @returns
    */
-  async getInvoicesIntegrations(company: Company): Promise<ResponseMinimalDTO> {
+  async getInvoicesIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
     const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
-    const modules = await this.moduleRepository.getModules();
+    switch (integratedModule) {
+      case 'entries':
+        const modules = await this.moduleRepository.getModules();
 
-    const filteredModules = [...new Set(settings.map((s) => s.module.id))];
+        const filteredModules = [...new Set(settings.map((s) => s.module.id))];
 
-    const foundModules = modules.filter((m) => filteredModules.includes(m.id));
+        const foundModules = modules.filter((m) => filteredModules.includes(m.id));
 
-    const integrations = {};
-    for (const f of foundModules) {
-      const values = settings
-        .filter((s) => filteredModules.includes(s.module.id))
-        .map((s) => {
-          return {
-            metaKey: s.metaKey,
-            metaValue: s.metaValue,
-          };
-        });
+        const integrations = {};
+        for (const f of foundModules) {
+          const values = settings
+            .filter((s) => filteredModules.includes(s.module.id))
+            .map((s) => {
+              return {
+                metaKey: s.metaKey,
+                metaValue: s.metaValue,
+              };
+            });
 
-      const data = {};
-      for (const v of values) {
-        if (v.metaKey == 'registerService' || v.metaKey == 'activeIntegration' || v.metaKey == 'automaticIntegration') {
-          data[v.metaKey] = v.metaValue == 'true' ? true : false;
-        } else if (v.metaKey == 'recurencyFrecuency') {
-          data[v.metaKey] = parseInt(v.metaValue);
-        } else {
-          data[v.metaKey] = v.metaValue;
+          const data = {};
+          for (const v of values) {
+            if (
+              v.metaKey == 'registerService' ||
+              v.metaKey == 'activeIntegration' ||
+              v.metaKey == 'automaticIntegration'
+            ) {
+              data[v.metaKey] = v.metaValue == 'true' ? true : false;
+            } else if (v.metaKey == 'recurencyFrecuency') {
+              data[v.metaKey] = parseInt(v.metaValue);
+            } else {
+              data[v.metaKey] = v.metaValue;
+            }
+          }
+
+          integrations[f.shortName] = data;
         }
-      }
-
-      integrations[f.shortName] = data;
+        return Object.keys(integrations).length > 0
+          ? integrations
+          : {
+              integrations: {
+                entries: {
+                  cashPaymentAccountingCatalog: null,
+                  automaticIntegration: false,
+                  activeIntegration: false,
+                  registerService: false,
+                  recurencyFrecuency: null,
+                },
+              },
+            };
     }
-    return Object.keys(integrations).length > 0
-      ? integrations
-      : {
-          integrations: {
-            entries: {
-              cashPaymentAccountingCatalog: null,
-              automaticIntegration: false,
-              activeIntegration: false,
-              registerService: false,
-              recurencyFrecuency: null,
-              recurencyOption: null,
-            },
-          },
-        };
   }
 
   /**
@@ -577,16 +583,15 @@ export class InvoicesService {
     data: Partial<InvoiceIntegrationBaseDTO>,
     integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+    let settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
     const setting = [];
 
     switch (integratedModule) {
       case 'entries':
-        console.log(data.cashPaymentAccountingCatalog);
         await this.invoicesEntriesRecurrencyRepository.getRecurrency(data.recurrencyFrecuency as number);
 
         await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.cashPaymentAccountingCatalog, company);
-
+        settings = settings.filter((s) => s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8');
         const activeIntegration = settings.find((s) => s.metaKey == 'activeIntegration');
         if (activeIntegration ? activeIntegration.metaValue == 'false' : false) {
           throw new BadRequestException(
@@ -599,7 +604,7 @@ export class InvoicesService {
         const recurencyFrecuency = settings.find((s) => s.metaKey == 'recurencyFrecuency');
         const recurrencyOption = settings.find((s) => s.metaKey == 'recurrencyOption');
 
-        if (!cashPaymentAccountingCatalog) {
+        if (Object.keys(cashPaymentAccountingCatalog).length == 0) {
           // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
           setting.push({
             company: company,
@@ -610,7 +615,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...cashPaymentAccountingCatalog, metaValue: data.cashPaymentAccountingCatalog });
         }
-        if (!activeIntegration) {
+        if (Object.keys(activeIntegration).length == 0) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
@@ -618,7 +623,7 @@ export class InvoicesService {
             metaValue: 'true',
           });
         }
-        if (!automaticIntegration) {
+        if (Object.keys(automaticIntegration).length == 0) {
           // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
           setting.push({
             company: company,
@@ -629,7 +634,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...automaticIntegration, metaValue: `${data.activeIntegration}` });
         }
-        if (!registerService) {
+        if (Object.keys(registerService).length == 0) {
           // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
           setting.push({
             company: company,
@@ -640,7 +645,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...registerService, metaValue: `${data.registerService}` });
         }
-        if (!recurencyFrecuency) {
+        if (Object.keys(recurencyFrecuency).length == 0) {
           // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
           setting.push({
             company: company,
@@ -651,7 +656,7 @@ export class InvoicesService {
         } else {
           setting.push({ ...recurencyFrecuency, metaValue: `${data.recurrencyFrecuency}` });
         }
-        if (!recurrencyOption) {
+        if (Object.keys(recurrencyOption).length == 0) {
           // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
           setting.push({
             company: company,
@@ -662,6 +667,41 @@ export class InvoicesService {
         } else {
           setting.push({ ...recurrencyOption, metaValue: data.recurrencyOption });
         }
+        break;
+    }
+
+    await this.invoicesIntegrationsRepository.createInvoicesIntegrations(setting);
+    return {
+      message: 'La integración ha sido actualizada correctamente.',
+    };
+  }
+
+  async updateInvoicesIntegrationsActive(
+    company: Company,
+    data: Partial<InvoiceIntegrationBaseDTO>,
+    integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+    const setting = [];
+
+    switch (integratedModule) {
+      case 'entries':
+        await this.invoicesEntriesRecurrencyRepository.getRecurrency(data.recurrencyFrecuency as number);
+
+        const activeIntegration = settings
+          .filter((s) => s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8')
+          .find((s) => s.metaKey == 'activeIntegration');
+        if (Object.keys(activeIntegration).length == 0) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'activeIntegration',
+            metaValue: 'true',
+          });
+        } else {
+          setting.push({ ...activeIntegration, metaValue: `${data.activeIntegration}` });
+        }
+
         break;
     }
 

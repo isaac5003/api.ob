@@ -177,31 +177,35 @@ export class CustomersService {
     };
   }
 
-  async getCustomerSettingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
+  async getCustomerSettingIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
     const modules = await this.moduleRepository.getModules();
-
-    const filteredModules = [...new Set(settings.map((s) => s.module.id))];
-
-    const foundModules = modules.filter((m) => filteredModules.includes(m.id));
-
     const integrations = {};
-    for (const f of foundModules) {
-      const values = settings
-        .filter((s) => filteredModules.includes(s.module.id))
-        .map((s) => {
-          return {
-            metaKey: s.metaKey,
-            metaValue: s.metaValue,
-          };
-        });
+    switch (integratedModule) {
+      case 'entries':
+        const filteredModules = [...new Set(settings.map((s) => s.module.id))];
 
-      const data = {};
-      for (const v of values) {
-        data[v.metaKey] = v.metaValue;
-      }
+        const foundModules = modules.filter((m) => filteredModules.includes(m.id));
 
-      integrations[f.shortName] = data;
+        for (const f of foundModules) {
+          const values = settings
+            .filter((s) => filteredModules.includes(s.module.id))
+            .map((s) => {
+              return {
+                metaKey: s.metaKey,
+                metaValue: s.metaValue,
+              };
+            });
+
+          const data = {};
+          for (const v of values) {
+            data[v.metaKey] = v.metaValue;
+          }
+
+          integrations[f.shortName] = data;
+        }
+
+        break;
     }
     return Object.keys(integrations).length > 0
       ? integrations

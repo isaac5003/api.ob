@@ -2,8 +2,9 @@ import { Transform } from 'class-transformer';
 import { IsBoolean, IsInt, IsNotEmpty, IsUUID } from 'class-validator';
 import { AccountingCatalog } from '../../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../../_tools';
+import { InvoiceIntegrationActiveDTO } from './invoice-integration-active.vdto';
 
-export class InvoicesIntegrationsDTO {
+export class InvoicesIntegrationsDTO extends InvoiceIntegrationActiveDTO {
   @IsNotEmpty({ message: validationMessage('cashPaymentAccountingCatalog', 'IsNotEmpty') })
   @IsUUID('4', { message: validationMessage('cashPaymentAccountingCatalog', 'IsUUID') })
   cashPaymentAccountingCatalog: AccountingCatalog;
