@@ -13,8 +13,11 @@ export class OB4421626216453690 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "customer" ADD CONSTRAINT "FK_d98d74cecb41215f03c1c5c0642" FOREIGN KEY ("accountingCatalogSalesId") REFERENCES "accounting_catalog"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
   }
 
@@ -28,8 +31,11 @@ export class OB4421626216453690 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "customer" ADD CONSTRAINT "FK_aebc7646cc39ef7d93ec1089213" FOREIGN KEY ("accountingCatalogId") REFERENCES "accounting_catalog"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
   }
 }

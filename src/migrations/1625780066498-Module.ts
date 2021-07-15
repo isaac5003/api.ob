@@ -29,26 +29,32 @@ export class Module1625780066498 implements MigrationInterface {
   ];
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    for (const m of this.modules) {
+    for (const { id, name, description, access } of this.modules) {
       try {
-        await queryRunner.connection.createQueryBuilder().insert().into('module').values(m).execute();
+        await queryRunner.query(`INSERT INTO "module" (id, name, description, access) values ($1, $2, $3, $4)`, [
+          id,
+          name,
+          description,
+          access,
+        ]);
+        await queryRunner.commitTransaction();
       } catch (error) {
-        console.log(error);
+        await queryRunner.rollbackTransaction();
+      } finally {
+        if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
       }
     }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    for (const m of this.modules) {
+    for (const { id } of this.modules) {
       try {
-        await queryRunner.connection
-          .createQueryBuilder()
-          .delete()
-          .from('module')
-          .where('id = :id', { id: m.id })
-          .execute();
+        await queryRunner.query(`DELETE FROM "module" WHERE id = $1`, [id]);
+        await queryRunner.commitTransaction();
       } catch (error) {
-        console.log(error);
+        await queryRunner.rollbackTransaction();
+      } finally {
+        if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
       }
     }
   }
