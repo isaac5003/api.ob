@@ -15,7 +15,12 @@ export class OB4461626272559306 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "service" ADD CONSTRAINT "FK_373e5a370453869ffdde366f8d3" FOREIGN KEY ("accountingCatalogSalesId") REFERENCES "accounting_catalog"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
-    } catch (error) {}
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+    }
     try {
       await queryRunner.query(
         `CREATE TABLE "service_integrations" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "metaKey" character varying NOT NULL, "metaValue" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "companyId" uuid, "moduleId" uuid, CONSTRAINT "PK_355419692d69158ee97ec2b8492" PRIMARY KEY ("id"))`,
@@ -26,7 +31,12 @@ export class OB4461626272559306 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "service_integrations" ADD CONSTRAINT "FK_a30302b8b6e18c148bcc08b2b02" FOREIGN KEY ("moduleId") REFERENCES "module"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
-    } catch (error) {}
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -34,7 +44,12 @@ export class OB4461626272559306 implements MigrationInterface {
       await queryRunner.query(`ALTER TABLE "service_integrations" DROP CONSTRAINT "FK_a30302b8b6e18c148bcc08b2b02"`);
       await queryRunner.query(`ALTER TABLE "service_integrations" DROP CONSTRAINT "FK_1e1823b7961f661cbcc088e00c8"`);
       await queryRunner.query(`DROP TABLE "service_integrations"`);
-    } catch (error) {}
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+    }
     try {
       await queryRunner.query(`ALTER TABLE "service" DROP CONSTRAINT "FK_373e5a370453869ffdde366f8d3"`);
       await queryRunner.query(`ALTER TABLE "service" DROP CONSTRAINT "FK_421426b2c8e19b70f669390c3ef"`);
@@ -44,6 +59,11 @@ export class OB4461626272559306 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "service" ADD CONSTRAINT "FK_e8972c66c19f02a5b09936876cc" FOREIGN KEY ("accountingCatalogId") REFERENCES "accounting_catalog"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
-    } catch (error) {}
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+    }
   }
 }

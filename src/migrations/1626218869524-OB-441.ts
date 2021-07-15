@@ -14,8 +14,11 @@ export class OB4411626218869524 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "invoices_integrations" ADD CONSTRAINT "FK_199bc95e5190848c3745030c739" FOREIGN KEY ("moduleId") REFERENCES "module"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
   }
 
@@ -24,8 +27,11 @@ export class OB4411626218869524 implements MigrationInterface {
       await queryRunner.query(`ALTER TABLE "invoices_integrations" DROP CONSTRAINT "FK_199bc95e5190848c3745030c739"`);
       await queryRunner.query(`ALTER TABLE "invoices_integrations" DROP CONSTRAINT "FK_0a95de90ba01a16e30c3bf6ed13"`);
       await queryRunner.query(`DROP TABLE "invoices_integrations"`);
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
   }
 }
