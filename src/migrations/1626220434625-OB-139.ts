@@ -10,7 +10,7 @@ export class OB1391626220434625 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     for (const { id, name, code } of this.documents) {
       try {
-        await queryRunner.manager.query(`INSERT INTO "invoices_document_type" (id, name, code) values ($1, $2, $3)`, [
+        await queryRunner.query(`INSERT INTO "invoices_document_type" (id, name, code) values ($1, $2, $3)`, [
           id,
           name,
           code,

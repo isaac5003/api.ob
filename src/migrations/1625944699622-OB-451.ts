@@ -15,26 +15,42 @@ export class OB4511625944699622 implements MigrationInterface {
       await queryRunner.query(
         `CREATE TABLE "invoices_entries_recurrency" ("id" SERIAL NOT NULL, "name" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c7b73985be3f083b3589b530d1c" PRIMARY KEY ("id"))`,
       );
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
-    for (const r of this.recurrencies) {
+    for (const { id, name } of this.recurrencies) {
       try {
-        await queryRunner.manager.insert(InvoicesEntriesRecurrency, r);
+        await queryRunner.query(`INSERT INTO "invoices_entries_recurrency" (id, name) values ($1, $2)`, [id, name]);
+        await queryRunner.commitTransaction();
       } catch (error) {
-        console.error(error);
+        await queryRunner.rollbackTransaction();
+      } finally {
+        if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
       }
     }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    for (const r of this.recurrencies.map((r) => r.id)) {
+    for (const { id } of this.recurrencies) {
       try {
-        await queryRunner.manager.delete(InvoicesEntriesRecurrency, r);
-      } catch (error) {}
+        await queryRunner.query(`DELETE FROM "invoices_entries_recurrency" WHERE ID = $1`, [id]);
+        await queryRunner.commitTransaction();
+      } catch (error) {
+        await queryRunner.rollbackTransaction();
+      } finally {
+        if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+      }
     }
     try {
       await queryRunner.query(`DROP TABLE "invoices_entries_recurrency"`);
-    } catch (error) {}
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
+    }
   }
 }
