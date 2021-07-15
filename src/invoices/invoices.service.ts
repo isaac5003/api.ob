@@ -593,7 +593,7 @@ export class InvoicesService {
         await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.cashPaymentAccountingCatalog, company);
         settings = settings.filter((s) => s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8');
         const activeIntegration = settings.find((s) => s.metaKey == 'activeIntegration');
-        if (activeIntegration ? activeIntegration.metaValue == 'false' : false) {
+        if (activeIntegration ? activeIntegration.metaValue == 'false' : true) {
           throw new BadRequestException(
             'No se pueden actulizar las configuraciones, porque esta se encuentra inactiva.',
           );
