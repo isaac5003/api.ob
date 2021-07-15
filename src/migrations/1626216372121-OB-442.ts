@@ -17,8 +17,11 @@ export class OB4421626216372121 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     try {
       await queryRunner.query(`ALTER TABLE "module" ADD "shortName" character varying`);
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
 
     try {
@@ -31,15 +34,21 @@ export class OB4421626216372121 implements MigrationInterface {
       await queryRunner.query(
         `ALTER TABLE "customer_integrations" ADD CONSTRAINT "FK_631d3c75a04821a634f22a36dc9" FOREIGN KEY ("moduleId") REFERENCES "module"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
       );
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
 
-    for (const m of this.modules) {
+    for (const { id, shortName } of this.modules) {
       try {
-        await queryRunner.manager.update(Module, { id: m.id }, { shortName: m.shortName });
+        await queryRunner.query(`UPDATE "module" SET "shortName" = $1 WHERE id = $2`, [shortName, id]);
+        await queryRunner.commitTransaction();
       } catch (error) {
-        console.log(error);
+        await queryRunner.rollbackTransaction();
+      } finally {
+        if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
       }
     }
   }
@@ -49,13 +58,19 @@ export class OB4421626216372121 implements MigrationInterface {
       await queryRunner.query(`ALTER TABLE "customer_integrations" DROP CONSTRAINT "FK_631d3c75a04821a634f22a36dc9"`);
       await queryRunner.query(`ALTER TABLE "customer_integrations" DROP CONSTRAINT "FK_8153e39ca8d99e2ac00f6f90ebb"`);
       await queryRunner.query(`DROP TABLE "customer_integrations"`);
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
     try {
       await queryRunner.query(`ALTER TABLE "module" DROP COLUMN "shortName"`);
+      await queryRunner.commitTransaction();
     } catch (error) {
-      console.error(error);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      if (!queryRunner.isTransactionActive) await queryRunner.startTransaction();
     }
   }
 }
