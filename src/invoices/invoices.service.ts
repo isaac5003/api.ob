@@ -547,7 +547,7 @@ export class InvoicesService {
               v.metaKey == 'automaticIntegration'
             ) {
               data[v.metaKey] = v.metaValue == 'true' ? true : false;
-            } else if (v.metaKey == 'recurencyFrecuency') {
+            } else if (v.metaKey == 'recurrencyFrecuency') {
               data[v.metaKey] = parseInt(v.metaValue);
             } else {
               data[v.metaKey] = v.metaValue;
@@ -564,7 +564,7 @@ export class InvoicesService {
                 automaticIntegration: false,
                 activeIntegration: false,
                 registerService: false,
-                recurencyFrecuency: null,
+                recurrencyFrecuency: null,
               },
             };
     }
@@ -601,7 +601,7 @@ export class InvoicesService {
         const cashPaymentAccountingCatalog = settings.find((s) => s.metaKey == 'cashPaymentAccountingCatalog');
         const automaticIntegration = settings.find((s) => s.metaKey == 'automaticIntegration');
         const registerService = settings.find((s) => s.metaKey == 'registerService');
-        const recurencyFrecuency = settings.find((s) => s.metaKey == 'recurencyFrecuency');
+        const recurrencyFrecuency = settings.find((s) => s.metaKey == 'recurrencyFrecuency');
         const recurrencyOption = settings.find((s) => s.metaKey == 'recurrencyOption');
 
         if (!cashPaymentAccountingCatalog) {
@@ -635,15 +635,15 @@ export class InvoicesService {
         } else {
           setting.push({ ...registerService, metaValue: `${data.registerService}` });
         }
-        if (!recurencyFrecuency) {
+        if (!recurrencyFrecuency) {
           setting.push({
             company: company,
             module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-            metaKey: 'recurencyFrecuency',
+            metaKey: 'recurrencyFrecuency',
             metaValue: `${data.recurrencyFrecuency}`,
           });
         } else {
-          setting.push({ ...recurencyFrecuency, metaValue: `${data.recurrencyFrecuency}` });
+          setting.push({ ...recurrencyFrecuency, metaValue: `${data.recurrencyFrecuency}` });
         }
         if (!recurrencyOption) {
           setting.push({

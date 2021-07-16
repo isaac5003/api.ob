@@ -893,7 +893,7 @@ export class EntriesService {
       message = `El numero de serie asignado fué: ${nextSerie}`;
     }
 
-    const entryType = await this.accountingEntryTypeRepository.getEntryType(company, header.accountingEntryType);
+    const entryType = await this.accountingEntryTypeRepository.getEntryType(header.accountingEntryType);
 
     let headerInsert = {};
     headerInsert = {

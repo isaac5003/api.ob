@@ -89,9 +89,6 @@ export class Company extends BaseEntity {
   @OneToMany(() => AccountingEntryDetail, (accountingEntryDetail) => accountingEntryDetail.company)
   accountingEntryDetails: AccountingEntryDetail[];
 
-  @OneToMany(() => AccountingEntryType, (accountingEntryType) => accountingEntryType.company)
-  accountingEntryTypes: AccountingEntryType[];
-
   @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.company)
   accountingSettings: AccountingSetting[];
 
