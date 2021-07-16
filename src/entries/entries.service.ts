@@ -917,6 +917,7 @@ export class EntriesService {
 
       headerInsert = {
         ...headerInsert,
+        serie: entry.serie,
         id: entry.id,
       };
 
