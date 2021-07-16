@@ -148,8 +148,14 @@ export class EntriesService {
     };
   }
 
-  async getEntryTypes(company: Company): Promise<{ data: AccountingEntryType[]; count: number }> {
-    return this.accountingEntryTypeRepository.getEntryTypes(company);
+  async getEntryTypes(): Promise<{ data: Partial<AccountingEntryType>[]; count: number }> {
+    const entryTypes = await this.accountingEntryTypeRepository.getEntryTypes();
+    return {
+      ...entryTypes,
+      data: entryTypes.data.map((t) => {
+        return { id: t.id, name: t.name, code: t.code };
+      }),
+    };
   }
 
   async getSeries(company: Company, data: SeriesDTO): Promise<ResponseMinimalDTO> {
@@ -893,7 +899,7 @@ export class EntriesService {
       message = `El numero de serie asignado fué: ${nextSerie}`;
     }
 
-    const entryType = await this.accountingEntryTypeRepository.getEntryType(company, header.accountingEntryType);
+    const entryType = await this.accountingEntryTypeRepository.getEntryType(header.accountingEntryType);
 
     let headerInsert = {};
     headerInsert = {

@@ -4,7 +4,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -13,14 +12,17 @@ import { AccountingEntry } from './AccountingEntry.entity';
 
 @Entity()
 export class AccountingEntryType extends BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn({ type: 'int' })
+  id: number;
 
   @Column({ type: 'varchar' })
   name: string;
 
   @Column({ type: 'varchar' })
   code: string;
+
+  @Column({ type: 'boolean', default: true })
+  private: boolean;
 
   @CreateDateColumn({ select: false })
   createdAt: string;
@@ -30,7 +32,4 @@ export class AccountingEntryType extends BaseEntity {
 
   @OneToMany(() => AccountingEntry, (accountingEntry) => accountingEntry.accountingEntryType)
   accountingEntries: AccountingEntry[];
-
-  @ManyToOne(() => Company, (company) => company.accountingEntryTypes)
-  company: Company;
 }
