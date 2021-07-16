@@ -3,7 +3,7 @@ import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from '../../_tools';
-import { EntityRepository, Repository } from 'typeorm';
+import { EntityRepository, In, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
@@ -13,6 +13,7 @@ import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
+import { format, subDays, subMonths } from 'date-fns';
 
 const reponame = 'documento';
 @EntityRepository(Invoice)
@@ -117,7 +118,8 @@ export class InvoiceRepository extends Repository<Invoice> {
         );
       }
       const count = await query.getCount();
-
+      console.log(await this.getInvoicesForEntries([company.id], 4));
+      console.log((await this.getInvoicesForEntries([company.id], 4))[0]);
       const data = await paginate<Invoice>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
@@ -164,6 +166,18 @@ export class InvoiceRepository extends Repository<Invoice> {
         },
       );
     } catch (error) {
+      logDatabaseError(reponame, error);
+    }
+
+    return invoice;
+  }
+
+  async getInvoiceById(id: string): Promise<Invoice> {
+    let invoice: Invoice;
+    try {
+      invoice = await this.findOne(id);
+    } catch (error) {
+      console.error(error);
       logDatabaseError(reponame, error);
     }
     return invoice;
@@ -263,5 +277,118 @@ export class InvoiceRepository extends Repository<Invoice> {
       logDatabaseError(reponame, error);
     }
     return true;
+  }
+
+  async getInvoicesForEntries(
+    companies: string[],
+    recurrency?: number,
+    invoiceId?: string,
+  ): Promise<Partial<Invoice>[]> {
+    let query;
+    let accountingEntry = null;
+    try {
+      query = this.createQueryBuilder('i')
+        .select([
+          'i.id',
+          'cu.id',
+          'cu.name',
+          'i.invoiceDate',
+          'i.companyId',
+          'i.accountingEntryId',
+          'i.createEntry',
+          'd.id',
+          's.id',
+          'd.ventaPrice',
+          'd.quantity',
+          's.name',
+          'c.id',
+          'c.name',
+          'ii.id',
+          'ii.metaKey',
+          'ii.metaValue',
+        ])
+        .leftJoin('i.customer', 'cu')
+        .leftJoin('i.company', 'c')
+        .leftJoin('i.invoiceDetails', 'd')
+        .leftJoin('d.service', 's')
+        .leftJoin('i.status', 'st')
+        .leftJoin('c.invoicesIntegration', 'ii')
+        .where('i.company IN (:...companies)', { companies })
+        .andWhere('i.createEntry =true')
+
+        .andWhere('ii.module  =:module', { module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8' })
+        .andWhere('i.status IN (:...status)', { status: [1, 2, 5] });
+
+      if (!invoiceId) {
+        query.andWhere('i.accountingEntryId IS NULL');
+      } else {
+        const currentInvoice = await this.getInvoiceById(invoiceId);
+        accountingEntry = currentInvoice.accountingEntry;
+        query.andWhere('i.id=:accountingEntry', { accountingEntry });
+      }
+
+      query = await query.getMany();
+    } catch (error) {
+      console.error(error);
+      logDatabaseError('reponame', error);
+    }
+
+    let invoices;
+    if (!invoiceId) {
+      const frecuencyOption = format(Date.now(), 'cccccc');
+      switch (recurrency) {
+        case 1:
+          invoices = query.filter(
+            (i) =>
+              parseInt(i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyFrecuency').metaValue) ==
+                1 && i.invoiceDate == format(subDays(Date.now(), 1), 'yyyy-MM-dd'),
+          );
+
+          break;
+        case 2:
+          invoices = query.filter(
+            (i) =>
+              parseInt(i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyFrecuency').metaValue) ==
+                2 &&
+              i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyOption').metaValue ==
+                frecuencyOption &&
+              i.invoiceDate == format(subDays(Date.now(), 1), 'yyyy-MM-dd'),
+          );
+
+          break;
+        case 3:
+          invoices = query.filter(
+            (i) =>
+              parseInt(i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyFrecuency').metaValue) ==
+                3 &&
+              i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyOption').metaValue ==
+                frecuencyOption &&
+              i.invoiceDate == format(subDays(Date.now(), 1), 'yyyy-MM-dd'),
+          );
+          break;
+        case 4:
+          invoices = query.filter(
+            (i) =>
+              parseInt(i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyFrecuency').metaValue) ==
+                4 &&
+              i.company.invoicesIntegration.find((ii) => ii.metaKey == 'recurrencyOption').metaValue ==
+                format(Date.now(), 'd') &&
+              i.invoiceDate >= format(subMonths(new Date(), 1), 'yyyy-MM-dd') &&
+              i.invoiceDate < format(Date.now(), 'yyyy-MM-dd'),
+          );
+          break;
+      }
+    }
+
+    const values = companies
+      .map((c) => {
+        return {
+          id: accountingEntry,
+          invoices: invoices.filter((i) => i.company.id == c),
+        };
+      })
+      .filter((v) => v.invoices.length > 0);
+
+    return values;
   }
 }
