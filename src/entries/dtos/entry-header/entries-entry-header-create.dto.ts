@@ -1,11 +1,14 @@
-import { IsBoolean, IsISO8601, IsNotEmpty } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsInt, IsISO8601, IsNotEmpty, IsNumber } from 'class-validator';
 import { validationMessage } from '../../../_tools';
 
 export class EntryHeaderDataDTO {
   @IsNotEmpty({
     message: validationMessage('accountingEntryType', 'IsNotEmpty'),
   })
-  accountingEntryType: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('accountingEntryType', 'IsInt') })
+  accountingEntryType: number;
 
   @IsNotEmpty({ message: validationMessage('title', 'IsNotEmpty') })
   title: string;
