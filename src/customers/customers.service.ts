@@ -160,7 +160,14 @@ export class CustomersService {
     }
     return customer;
   }
-
+  /**
+   * Metodo utilizado para obtener las configuraciones de integraciones individuale de cada cliente o proveedor
+   * @param id del cliente o proveedor al que se le desean obtener las configuraciones
+   * @param company compañia del usuario que invoica el metodo
+   * @param integratedModule modulo del qu ese desean obtener las configuraciones
+   * @param type si es cliente o proveedor al que se desean obtener las ocnfiguraciones
+   * @returns retorna un objeto con las congiguraciones para ese cliente
+   */
   async getCustomerIntegration(
     id: string,
     company: Company,
@@ -170,26 +177,49 @@ export class CustomersService {
     let integrations = {};
     switch (integratedModule) {
       case 'entries':
-        const { accountingCatalogSales, accountingCatalogCXC } = await this.customerRepository.getCustomer(
-          id,
-          company,
-          type,
-          ['ac'],
-        );
-
-        integrations = {
-          ...integrations,
-          entries: {
-            accountingCatalogSales: accountingCatalogSales ? accountingCatalogSales.id : null,
-            accountingCatalogCXC: accountingCatalogCXC ? accountingCatalogCXC.id : null,
-          },
-        };
+        const settingsIntegrations = await this.customerRepository.getCustomer(id, company, type, ['ac']);
+        if (type == 'cliente') {
+          integrations = {
+            ...integrations,
+            entries: {
+              accountingCatalogSales: settingsIntegrations.accountingCatalogSales
+                ? settingsIntegrations.accountingCatalogSales.id
+                : null,
+              accountingCatalogCXC: settingsIntegrations.accountingCatalogCXC
+                ? settingsIntegrations.accountingCatalogCXC.id
+                : null,
+            },
+          };
+        } else if (type == 'proveedor') {
+          integrations = {
+            ...integrations,
+            entries: {
+              accountingCatalogPurchases: settingsIntegrations.accountingCatalogPurchases
+                ? settingsIntegrations.accountingCatalogPurchases.id
+                : null,
+              accountingCatalogCXP: settingsIntegrations.accountingCatalogCXP
+                ? settingsIntegrations.accountingCatalogCXP.id
+                : null,
+            },
+          };
+        }
         break;
     }
     return integrations;
   }
 
-  async getCustomerSettingIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
+  /**
+   *
+   * @param company compañia con la que esta logado el usuario que invoca el emtodo
+   * @param integratedModule shortname del modulo del que se desea obtener configuraciones
+   * @param type si se estan obteniendo confuguraciones de clientes o de proveedores
+   * @returns retorna un objeto con las configuraciones agrupadas por cada modulo
+   */
+  async getCustomerSettingIntegrations(
+    company: Company,
+    integratedModule: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
     const modules = await this.moduleRepository.getModules();
     const integrations = {};
@@ -211,7 +241,25 @@ export class CustomersService {
 
           const data = {};
           for (const v of values) {
-            data[v.metaKey] = v.metaValue;
+            if (type == 'cliente') {
+              switch (v.metaKey) {
+                case 'accountingCatalogCXC':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+                case 'accountingCatalogSales':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+              }
+            } else if (type == 'proveedor') {
+              switch (v.metaKey) {
+                case 'accountingCatalogCXP':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+                case 'accountingCatalogPurchases':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+              }
+            }
           }
 
           integrations[f.shortName] = data;
@@ -219,47 +267,103 @@ export class CustomersService {
 
         break;
     }
-    return Object.keys(integrations).length > 0
-      ? integrations
-      : { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } };
+    if (type == 'cliente') {
+      return Object.keys(integrations).length > 0 && Object.keys(integrations['entries']).length > 0
+        ? integrations
+        : { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } };
+    } else if (type == 'proveedor') {
+      return Object.keys(integrations).length > 0 && Object.keys(integrations['entries']).length > 0
+        ? integrations
+        : { entries: { accountingCatalogCXP: null, accountingCatalogPurchases: null } };
+    }
   }
 
-  async updateCustomerSettingsIntegrations(
+  /**
+   * Metodo utilizado para actulizar o insertas configuraciones de integraciones generales de clientes y proveedores
+   * @param company compañia con la que esta logado el usuario que invoca el metodo
+   * @param data Campos necesario que se insertaran o actualizaran
+   * @param integratedModule shortname del modulo con el que se desean actulizar o insertar configuraciones de intergacion
+   * @param type si las integraciones se estan actulizando apra cliente o proveedor
+   * @returns mensaje de exito en el caso que asi fuese
+   */
+  async upsertCustomerSettingsIntegrations(
     company: Company,
     data: AccountignCatalogIntegrationDTO,
     integratedModule: string,
+    type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
     const setting = [];
 
     switch (integratedModule) {
       case 'entries':
-        await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
-        await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+        if (type == 'cliente') {
+          if (data.accountingCatalogSales) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+          }
+          if (data.accountingCatalogCXC) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+          }
 
-        const accountingCatalogCXC = settings.find((s) => s.metaKey == 'accountingCatalogCXC');
-        const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
+          const accountingCatalogCXC = settings.find((s) => s.metaKey == 'accountingCatalogCXC');
+          const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
 
-        if (!accountingCatalogCXC) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
-          setting.push({
-            company: company,
-            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-            metaKey: 'accountingCatalogCXC',
-            metaValue: data.accountingCatalogCXC,
-          });
-        } else {
-          setting.push({ ...accountingCatalogCXC, metaValue: data.accountingCatalogCXC });
-        }
-        if (!accountingCatalogSales) {
-          setting.push({
-            company: company,
-            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-            metaKey: 'accountingCatalogSales',
-            metaValue: data.accountingCatalogSales,
-          });
-        } else {
-          setting.push({ ...accountingCatalogSales, metaValue: data.accountingCatalogSales });
+          if (!accountingCatalogCXC) {
+            // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogCXC',
+              metaValue: data.accountingCatalogCXC,
+            });
+          } else {
+            setting.push({ ...accountingCatalogCXC, metaValue: data.accountingCatalogCXC });
+          }
+          if (!accountingCatalogSales) {
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogSales',
+              metaValue: data.accountingCatalogSales,
+            });
+          } else {
+            setting.push({ ...accountingCatalogSales, metaValue: data.accountingCatalogSales });
+          }
+        } else if (type == 'proveedor') {
+          if (data.accountingCatalogPurchases) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+              data.accountingCatalogPurchases,
+              company,
+            );
+          }
+          if (data.accountingCatalogCXP) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXP, company);
+          }
+
+          const accountingCatalogCXP = settings.find((s) => s.metaKey == 'accountingCatalogCXP');
+          const accountingCatalogPurchases = settings.find((s) => s.metaKey == 'accountingCatalogPurchases');
+
+          if (!accountingCatalogCXP) {
+            // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogCXP',
+              metaValue: data.accountingCatalogCXP,
+            });
+          } else {
+            setting.push({ ...accountingCatalogCXP, metaValue: data.accountingCatalogCXP });
+          }
+          if (!accountingCatalogPurchases) {
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogPurchases',
+              metaValue: data.accountingCatalogPurchases,
+            });
+          } else {
+            setting.push({ ...accountingCatalogPurchases, metaValue: data.accountingCatalogPurchases });
+          }
         }
 
         break;
@@ -450,6 +554,15 @@ export class CustomersService {
     };
   }
 
+  /**
+   * Metodo utilizado para actualizar las configuraciones de integracion de clientes y proveedores individualmente
+   * @param id del cliente o proveedor al que se desean actulizar las configuraciones de integraciones
+   * @param data Campos necesarios o campos que se estan mandando a actulizar
+   * @param company compañia con la que esta logado el usuario que invoca el metdo
+   * @param integratedModule 'Modulo al que se le desean actulizar las configuraciones
+   * @param type que configuraciones se estan actulizando, cliente o proveedor
+   * @returns Mensaje de exito
+   */
   async UpdateCustomerIntegration(
     id: string,
     data: AccountignCatalogIntegrationDTO,
@@ -460,9 +573,19 @@ export class CustomersService {
     await this.customerRepository.getCustomer(id, company, type);
     switch (integratedModule) {
       case 'entries':
-        if (data.accountingCatalogCXC && data.accountingCatalogSales) {
-          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
-          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+        if (type == 'cliente') {
+          if (data.accountingCatalogCXC && data.accountingCatalogSales) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+          }
+        } else if (type == 'proveedor') {
+          if (data.accountingCatalogCXP && data.accountingCatalogPurchases) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXP, company);
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+              data.accountingCatalogPurchases,
+              company,
+            );
+          }
         }
         break;
     }

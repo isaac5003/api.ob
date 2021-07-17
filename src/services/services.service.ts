@@ -67,14 +67,11 @@ export class ServicesService {
     let integrations = {};
     switch (integratedModule) {
       case 'entries':
-        const { accountingCatalogSales, accountingCatalogCXC } = await this.serviceRepository.getService(company, id, [
-          'ac',
-        ]);
+        const { accountingCatalogSales } = await this.serviceRepository.getService(company, id, ['ac']);
 
         integrations = {
           ...integrations,
           entries: {
-            accountingCatalogCXC: accountingCatalogCXC ? accountingCatalogCXC.id : null,
             accountingCatalogSales: accountingCatalogSales ? accountingCatalogSales.id : null,
           },
         };
@@ -119,8 +116,7 @@ export class ServicesService {
 
     switch (integratedModule) {
       case 'entries':
-        if (data.accountingCatalogCXC && data.accountingCatalogSales) {
-          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+        if (data.accountingCatalogSales) {
           await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
         }
         break;
@@ -244,7 +240,7 @@ export class ServicesService {
 
         break;
     }
-    const nullResponse = { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } };
+    const nullResponse = { entries: { accountingCatalogSales: null } };
     return Object.keys(integrations).length > 0 ? integrations : nullResponse;
   }
 
@@ -266,22 +262,9 @@ export class ServicesService {
     switch (integratedModule) {
       case 'entries':
         await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
-        await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
 
-        const accountingCatalogCXC = settings.find((s) => s.metaKey == 'accountingCatalogCXC');
         const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
 
-        if (!accountingCatalogCXC) {
-          // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
-          setting.push({
-            company: company,
-            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
-            metaKey: 'accountingCatalogCXC',
-            metaValue: data.accountingCatalogCXC,
-          });
-        } else {
-          setting.push({ ...accountingCatalogCXC, metaValue: data.accountingCatalogCXC });
-        }
         if (!accountingCatalogSales) {
           setting.push({
             company: company,
