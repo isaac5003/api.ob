@@ -172,6 +172,11 @@ export class InvoiceRepository extends Repository<Invoice> {
     return invoice;
   }
 
+  /**
+   * Metodo utilizado para obtener una venta mediante el id
+   * @param id de la venta que se desea obtener
+   * @returns un objeto del tipo invoice, donde se devuelven todos los campos del header
+   */
   async getInvoiceById(id: string): Promise<Invoice> {
     let invoice: Invoice;
     try {
@@ -279,6 +284,15 @@ export class InvoiceRepository extends Repository<Invoice> {
     return true;
   }
 
+  /**
+   * Metodo utilizado para obtener las ventas que pertecen a cada una de las compañias si estas cumples las condiciones
+   * requeridas para obtenerlas
+   * @param companies Un arreglo de ids de compañias que tienen integracion activa
+   * @param recurrency parametro opcional,id de la recurrencia que esta invoicando el metodo del cronjob
+   * @param invoiceId parametro opcional, id de la venta que se esta actulizando
+   * @returns retorna un arreglo de objetos, que contienen las ventas que pertenecen a cada una de las compañias
+   * que se reciben
+   */
   async getInvoicesForEntries(
     companies: string[],
     recurrency?: number,
