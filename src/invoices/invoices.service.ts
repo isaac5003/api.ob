@@ -1220,6 +1220,6 @@ export class InvoicesService {
       });
     }
 
-    return JSON.stringify(preparedInvoices);
+    return preparedInvoices;
   }
 }
