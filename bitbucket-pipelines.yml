@@ -11,7 +11,7 @@ pipelines:
           script:
             - docker-compose -f docker-compose.test.yml up -d
             - apk add --update nodejs npm
-            - sleep 45
+            - sleep 75
             - npm install
             - docker container logs test_openbox_api
             - npm run test:e2e
