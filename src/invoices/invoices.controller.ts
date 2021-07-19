@@ -42,6 +42,7 @@ import { plainToClass } from 'class-transformer';
 import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
 import { InvoicesIntegrationsDTO } from './dtos/validate/invoice-integration.vdto';
 import { InvoiceIntegrationActiveDTO } from './dtos/validate/invoice-integration-active.vdto';
+import { User } from '../auth/entities/User.entity';
 
 @Controller('invoices')
 @UseGuards(AuthGuard())
@@ -355,8 +356,9 @@ export class InvoicesController {
     @Body('details') details: InvoiceDetailDTO[],
     @GetAuthData('company') company: Company,
     @GetAuthData('branch') branch: Branch,
+    @GetAuthData('user') user: User,
   ): Promise<ResponseMinimalDTO> {
-    return this.invoice.createInvoice(company, branch, { header, details });
+    return this.invoice.createInvoice(company, branch, { header, details }, user);
   }
 
   @Post('/reserved')

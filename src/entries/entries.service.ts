@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Dependencies, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { Company } from '../companies/entities/Company.entity';
@@ -919,7 +919,6 @@ export class EntriesService {
         ...headerInsert,
         serie: entry.serie,
         id: entry.id,
-        serie: entry.serie,
       };
 
       if (entry.accountingEntryDetails.length > 0) {
@@ -998,5 +997,12 @@ export class EntriesService {
     await this.accountingEntryRepository.getEntry(company, entryId);
 
     return true;
+  }
+}
+
+@Dependencies(EntriesService)
+export class EntriesDependsService {
+  constructor(entriesServices) {
+    entriesServices = entriesServices;
   }
 }

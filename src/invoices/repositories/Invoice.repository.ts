@@ -291,11 +291,7 @@ export class InvoiceRepository extends Repository<Invoice> {
    * @returns retorna un arreglo de objetos, que contienen las ventas que pertenecen a cada una de las compañias
    * que se reciben
    */
-  async getInvoicesForEntries(
-    companies: string[],
-    recurrency?: number,
-    invoiceId?: string,
-  ): Promise<Partial<Invoice>[]> {
+  async getInvoicesForEntries(companies: string[], recurrency: number, invoiceId?: string): Promise<any[]> {
     let query;
     let accountingEntry = null;
     try {
@@ -313,17 +309,33 @@ export class InvoiceRepository extends Repository<Invoice> {
           'd.ventaPrice',
           'd.quantity',
           's.name',
+          's.incIva',
           'c.id',
           'c.name',
           'ii.id',
           'ii.metaKey',
           'ii.metaValue',
+          'ip.id',
+          'ip.name',
+          'ip.cashPayment',
+          'idt.id',
+          'idt.name',
+          'idt.code',
+          'i.authorization',
+          'i.sequence',
+          'i.ventaTotal',
+          'i.iva',
+          'i.sum',
+          'd.unitPrice',
+          'd.quantity',
         ])
         .leftJoin('i.customer', 'cu')
         .leftJoin('i.company', 'c')
         .leftJoin('i.invoiceDetails', 'd')
         .leftJoin('d.service', 's')
         .leftJoin('i.status', 'st')
+        .leftJoin('i.documentType', 'idt')
+        .leftJoin('i.invoicesPaymentsCondition', 'ip')
         .leftJoin('c.invoicesIntegration', 'ii')
         .where('i.company IN (:...companies)', { companies })
         .andWhere('i.createEntry =true')

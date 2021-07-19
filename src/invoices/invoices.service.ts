@@ -39,9 +39,16 @@ import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto'
 import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
 import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
 import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
-import { ModuleRepository } from 'src/system/repositories/Module.repository';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 import { InvoiceIntegrationBaseDTO } from './dtos/invoice-integration-base.dto';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/entities/User.entity';
+import * as globals from '../_tools/globals';
+import { AccessRepository } from '../auth/repositories/Access.repository';
+import { CustomersService } from '../customers/customers.service';
+import { EntriesService } from '../entries/entries.service';
+import { ServicesService } from '../services/services.service';
 
 @Injectable()
 export class InvoicesService {
@@ -90,6 +97,14 @@ export class InvoicesService {
 
     @InjectRepository(AccountingCatalogRepository)
     private accountingCatalogRepository: AccountingCatalogRepository,
+
+    private authService: AuthService,
+    private customerService: CustomersService,
+    private entriesService: EntriesService,
+    private serviceService: ServicesService,
+
+    @InjectRepository(AccessRepository)
+    private accessRepository: AccessRepository,
   ) {}
 
   async getInvoicesEntriesRecurrencies(): Promise<{ data: InvoicesEntriesRecurrency[]; count: number }> {
@@ -780,7 +795,7 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
 
-  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
+  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO, user: User): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.getCustomer(data.header.customer, company, 'cliente');
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
@@ -856,6 +871,9 @@ export class InvoicesService {
     }
     await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { current: nextSequence }, company);
 
+    if (await this.authService.hasModules(['entries'], user, branch, company)) {
+      await this.invoiceRepository.updateInvoice([invoiceHeader.id], { createEntry: true });
+    }
     return {
       id: invoiceHeader.id,
       message: `La venta ha sido registrada correctamente. ${message}`,
@@ -1047,5 +1065,161 @@ export class InvoicesService {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Metodo utilizado para estructurrar la informacion necesaria para la creacion de partidas contables mediante el uso de cronjobs
+   * @param companiesWithIntegrations Arreglo de compañias que tienen integraciones activas
+   * @param recurrencyFrecuency Frecuency con la que se debe obtner las ventas
+   * @returns REturna un arreglo con las partidas contables a crear separadas cada una de ellas por compañia
+   */
+  async prepareInvoicesForEntries(companiesWithIntegrations: string[], recurrencyFrecuency: number): Promise<any> {
+    const invoicesForEntries = await this.invoiceRepository.getInvoicesForEntries(
+      companiesWithIntegrations,
+      recurrencyFrecuency,
+    );
+
+    const FCP = format(Date.now(), 'yyyy-MM-dd');
+
+    const preparedInvoices = [];
+    for (const invoice of invoicesForEntries) {
+      const details = [];
+
+      for (const i of invoice.invoices) {
+        let accountingCatalog;
+        if (i.invoicesPaymentsCondition.cashPayment) {
+          accountingCatalog = (await this.getInvoicesIntegrations(i.company.id, 'entries')).entries
+            .cashPaymentAccountingCatalog;
+        } else {
+          accountingCatalog = (
+            await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries', 'cliente')
+          ).entries.accountingCatalogCXC
+            ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                .accountingCatalogCXC
+            : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries', 'cliente')).entries
+                .accountingCatalogCXC;
+        }
+
+        details.push({
+          accountingCatalog,
+          concept: `${i.documentType.code} ${i.authorization}${i.sequence} -  ${
+            (await this.accountingCatalogRepository.getAccountingCatalog(accountingCatalog, i.company, false)).name
+          }`,
+          cargo: parseFloat(i.ventaTotal),
+          abono: 0,
+          order: invoice.invoices.indexOf(i) + 1,
+          catalogName: (
+            await this.accountingCatalogRepository.getAccountingCatalog(accountingCatalog, i.company, false)
+          ).name,
+          accountingEntry: null,
+          company: i.company.id,
+        });
+        details.push({
+          accountingCatalog: (await this.entriesService.getSettings(i.company, 'general')).data.accountingDebitCatalog,
+          concept: `${i.documentType.code} ${i.authorization}${i.sequence} - Debito Fiscal`,
+          cargo: 0,
+          abono: parseFloat(i.iva),
+          order: invoice.invoices.indexOf(i) + 2,
+          catalogName: (
+            await this.accountingCatalogRepository.getAccountingCatalog(
+              (
+                await this.entriesService.getSettings(i.company, 'general')
+              ).data.accountingDebitCatalog as any as string,
+              i.company,
+              false,
+            )
+          ).name,
+          accountingEntry: null,
+          company: i.company.id,
+        });
+
+        if ((await this.getInvoicesIntegrations(i.company.id, 'entries')).entries.registerService) {
+          for (const id of i.invoiceDetails) {
+            details.push({
+              accountingCatalog: (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries'))
+                .entries.accountingCatalogSales
+                ? (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                    .accountingCatalogSales
+                : (await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')).entries
+                    .accountingCatalogSales,
+
+              concept: `${i.documentType.code} ${i.authorization}${i.sequence} - VENTA`,
+              cargo: 0,
+              abono: id.service.incTax
+                ? (parseFloat(id.unitPrice) / 1.13) * parseFloat(id.quantity)
+                : parseFloat(id.quantity) * parseFloat(id.unitPrice),
+              order: invoice.invoices.indexOf(i) + 3,
+              catalogName: (
+                await this.accountingCatalogRepository.getAccountingCatalog(
+                  (
+                    await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
+                  ).entries.accountingCatalogSales
+                    ? (
+                        await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
+                      ).entries.accountingCatalogSales
+                    : (
+                        await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')
+                      ).entries.accountingCatalogSales,
+                  i.company,
+                  false,
+                )
+              ).name,
+              accountingEntry: null,
+              company: i.company.id,
+            });
+          }
+        } else {
+          details.push({
+            accountingCatalog: (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries'))
+              .entries.accountingCatalogSales
+              ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                  .accountingCatalogSales
+              : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')).entries
+                  .accountingCatalogSales,
+            concept: `${i.documentType.code} ${i.authorization}${i.sequence} - VENTA`,
+            cargo: 0,
+            abono: parseFloat(i.sum),
+            order: invoice.invoices.indexOf(i) + 3,
+            catalogName: (
+              await this.accountingCatalogRepository.getAccountingCatalog(
+                (
+                  await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
+                ).entries.accountingCatalogSales
+                  ? (
+                      await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
+                    ).entries.accountingCatalogSales
+                  : (
+                      await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')
+                    ).entries.accountingCatalogSales,
+                i.company,
+                false,
+              )
+            ).name,
+            accountingEntry: null,
+            company: i.company.id,
+          });
+        }
+      }
+
+      preparedInvoices.push({
+        company: invoice.invoices[0].company.id,
+        entry: {
+          header: {
+            title: `Partida de ventas correspondiente a ${format(parseISO(FCP), 'dd/MM/yyyy')}`,
+            date: FCP,
+            squared:
+              invoice.invoices.reduce((a, b) => a + parseFloat(b.ventaTotal), 0) ==
+              invoice.invoices.reduce((a, b) => a + parseFloat(b.iva), 0) +
+                invoice.invoices.reduce((a, b) => a + parseFloat(b.sum), 0),
+            accounted: false,
+            accountingEntryType: 4,
+          },
+          details,
+          invoices: invoice.invoices.map((i) => i.id),
+        },
+      });
+    }
+
+    return JSON.stringify(preparedInvoices);
   }
 }

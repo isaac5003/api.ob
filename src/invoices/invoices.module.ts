@@ -15,13 +15,24 @@ import { CustomerRepository } from '../customers/repositories/Customer.repositor
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
 import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
-import { ModuleRepository } from 'src/system/repositories/Module.repository';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
-import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { DependentController } from '../auth/auth.service';
+import { AccessRepository } from '../auth/repositories/Access.repository';
+import { CustomerDependsService } from '../customers/customers.service';
+import { CustomersModule } from '../customers/customers.module';
+import { EntriesDependsService } from '../entries/entries.service';
+import { EntriesModule } from '../entries/entries.module';
+import { ServiceDependsService } from '../services/services.service';
+import { ServicesModule } from '../services/services.module';
 
 @Module({
   imports: [
     AuthModule,
+    CustomersModule,
+    EntriesModule,
+    ServicesModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoiceDetailRepository,
@@ -38,9 +49,16 @@ import { AccountingCatalogRepository } from 'src/entries/repositories/Accounting
       ModuleRepository,
       InvoicesIntegrationsRepository,
       AccountingCatalogRepository,
+      AccessRepository,
     ]),
   ],
-  providers: [InvoicesService],
+  providers: [
+    InvoicesService,
+    DependentController,
+    CustomerDependsService,
+    EntriesDependsService,
+    ServiceDependsService,
+  ],
   controllers: [InvoicesController],
 })
 export class InvoicesModule {}

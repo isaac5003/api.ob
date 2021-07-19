@@ -6,11 +6,11 @@ import { CustomerIntegrationsRepository } from './repositories/CustomerIntegrati
 import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
 import { CustomerTypeRepository } from './repositories/CustomerType.repository';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
-import { CustomersService } from './customers.service';
+import { CustomerDependsService, CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { AuthModule } from '../auth/auth.module';
-import { ModuleRepository } from 'src/system/repositories/Module.repository';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 
 @Module({
   imports: [
@@ -26,6 +26,7 @@ import { ModuleRepository } from 'src/system/repositories/Module.repository';
       ModuleRepository,
     ]),
   ],
+  exports: [CustomersService],
   controllers: [CustomersController],
   providers: [CustomersService],
 })

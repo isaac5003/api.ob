@@ -18,11 +18,11 @@ import { CustomerIntegrationsRepository } from './repositories/CustomerIntegrati
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Dependencies, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
 import { BranchDataDTO } from './dtos/customer-branch.dto';
-import { FilterDTO } from 'src/_dtos/filter.dto';
-import { ModuleRepository } from 'src/system/repositories/Module.repository';
+import { FilterDTO } from '../_dtos/filter.dto';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 
 @Injectable()
 export class CustomersService {
@@ -180,7 +180,6 @@ export class CustomersService {
         const settingsIntegrations = await this.customerRepository.getCustomer(id, company, type, ['ac']);
         if (type == 'cliente') {
           integrations = {
-            ...integrations,
             entries: {
               accountingCatalogSales: settingsIntegrations.accountingCatalogSales
                 ? settingsIntegrations.accountingCatalogSales.id
@@ -621,5 +620,12 @@ export class CustomersService {
       message:
         type == 'cliente' ? 'Se ha eliminado el cliente correctamente' : 'Se ha eliminado el proveedor correctamente',
     };
+  }
+}
+
+@Dependencies(CustomersService)
+export class CustomerDependsService {
+  constructor(customerService) {
+    customerService = customerService;
   }
 }
