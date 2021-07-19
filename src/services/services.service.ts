@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Dependencies, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ModuleRepository } from 'src/system/repositories/Module.repository';
 import { ResponseMinimalDTO, ServiceReportGeneralDTO } from 'src/_dtos/responseList.dto';
@@ -283,5 +283,12 @@ export class ServicesService {
     return {
       message: 'La integración ha sido actualizada correctamente.',
     };
+  }
+}
+
+@Dependencies(ServicesService)
+export class ServiceDependsService {
+  constructor(serviceService) {
+    serviceService = serviceService;
   }
 }

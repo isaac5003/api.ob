@@ -20,6 +20,7 @@ import { ModuleRepository } from '../system/repositories/Module.repository';
       ModuleRepository,
     ]),
   ],
+  exports: [ServicesService],
   controllers: [ServicesController],
   providers: [ServicesService],
 })
