@@ -20,6 +20,9 @@ export class PurchasesDocumentType extends BaseEntity {
   @Column()
   code: string;
 
+  @Column({ type: 'boolean', default: false })
+  includeInTaxes: boolean;
+
   @CreateDateColumn({ select: false })
   createdAt: string;
 
