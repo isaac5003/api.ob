@@ -118,8 +118,6 @@ export class InvoiceRepository extends Repository<Invoice> {
         );
       }
       const count = await query.getCount();
-      console.log(await this.getInvoicesForEntries([company.id], 4));
-      console.log((await this.getInvoicesForEntries([company.id], 4))[0]);
       const data = await paginate<Invoice>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
