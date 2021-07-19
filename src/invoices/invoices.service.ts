@@ -871,7 +871,7 @@ export class InvoicesService {
     }
     await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { current: nextSequence }, company);
 
-    if (await this.authService.hasModules(['entries'], user, branch, company)) {
+    if (await this.authService.hasModules([globals.entriesModuleId], user, branch, company)) {
       await this.invoiceRepository.updateInvoice([invoiceHeader.id], { createEntry: true });
     }
     return {
