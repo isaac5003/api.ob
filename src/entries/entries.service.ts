@@ -890,6 +890,7 @@ export class EntriesService {
       headerInsert = {
         ...headerInsert,
         id: entry.id,
+        serie: entry.serie,
       };
 
       await this.accountingEntryDetailRepository.deleteEntryDetail(entry.accountingEntryDetails.map((e) => e.id));
