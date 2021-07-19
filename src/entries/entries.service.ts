@@ -919,6 +919,7 @@ export class EntriesService {
         ...headerInsert,
         serie: entry.serie,
         id: entry.id,
+        serie: entry.serie,
       };
 
       if (entry.accountingEntryDetails.length > 0) {
