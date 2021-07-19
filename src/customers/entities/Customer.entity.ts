@@ -65,6 +65,12 @@ export class Customer extends BaseEntity {
   @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.customersSales)
   accountingCatalogSales: AccountingCatalog;
 
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.providerCXP)
+  accountingCatalogCXP: AccountingCatalog;
+
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.providerPurchase)
+  accountingCatalogPurchases: AccountingCatalog;
+
   @ManyToOne(() => Company, (company) => company.customers)
   company: Company;
 

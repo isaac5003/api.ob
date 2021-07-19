@@ -67,7 +67,7 @@ export class CustomersController {
     @GetAuthData('company') company: Company,
     @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data, integratedModule);
+    return this.customersService.upsertCustomerSettingsIntegrations(company, data, integratedModule);
   }
 
   @Put('/status/:id')

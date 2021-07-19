@@ -82,6 +82,8 @@ export class CustomerRepository extends Repository<Customer> {
         case 'ac':
           leftJoinAndSelect['acCXC'] = 'c.accountingCatalogCXC';
           leftJoinAndSelect['acSales'] = 'c.accountingCatalogSales';
+          leftJoinAndSelect['acCXP'] = 'c.accountingCatalogCXP';
+          leftJoinAndSelect['acPurchases'] = 'c.accountingCatalogPurchases';
           break;
       }
     }

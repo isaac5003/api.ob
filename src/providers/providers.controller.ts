@@ -58,7 +58,7 @@ export class ProvidersController {
     @GetAuthData('company') company: Company,
     @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerSettingIntegrations(company, integratedModule);
+    return await this.customersService.getCustomerSettingIntegrations(company, integratedModule, 'proveedor');
   }
 
   @Put('/setting/integrations/:shortname')
@@ -68,7 +68,7 @@ export class ProvidersController {
     @GetAuthData('company') company: Company,
     @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data, integratedModule);
+    return this.customersService.upsertCustomerSettingsIntegrations(company, data, integratedModule, 'proveedor');
   }
 
   @Put('/status/:id')

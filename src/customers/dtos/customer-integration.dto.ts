@@ -10,4 +10,12 @@ export class AccountignCatalogIntegrationDTO {
   @IsOptional()
   @IsUUID('all', { message: validationMessage('accountingCatalogSales', 'IsUUID') })
   accountingCatalogSales: AccountingCatalog;
+
+  @IsOptional()
+  @IsUUID('all', { message: validationMessage('accountingCatalogCXP', 'IsUUID') })
+  accountingCatalogCXP: AccountingCatalog;
+
+  @IsOptional()
+  @IsUUID('all', { message: validationMessage('accountingCatalogSales', 'IsUUID') })
+  accountingCatalogPurchases: AccountingCatalog;
 }
