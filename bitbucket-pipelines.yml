@@ -13,4 +13,5 @@ pipelines:
             - apk add --update nodejs npm
             - sleep 45
             - npm install
+            - docker container logs test_openbox_api
             - npm run test:e2e
