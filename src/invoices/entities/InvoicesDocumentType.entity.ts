@@ -21,6 +21,9 @@ export class InvoicesDocumentType extends BaseEntity {
   @Column({ type: 'varchar' })
   code: string;
 
+  @Column({ type: 'boolean', default: false })
+  includeInTaxes: boolean;
+
   @CreateDateColumn({ select: false })
   createdAt: string;
 
