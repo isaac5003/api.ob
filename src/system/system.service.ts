@@ -53,12 +53,12 @@ export class SystemService {
    * @param integratedModule  id del modulo con el que tiene integracion el receivedModule
    * @returns true o false dependiendo el caso
    */
-  async hasIntegration(company: Company, receivedModule: string, integratedModule: string): Promise<boolean> {
-    const companiesWithIntegrations = await this.accessRepository.getCompaniesWithIntegrations(
-      receivedModule,
-      integratedModule,
-    );
-
+  async hasIntegration(
+    company: Company,
+    receivedModule: string,
+    integratedModule: string,
+    companiesWithIntegrations: string[],
+  ): Promise<boolean> {
     if (!(companiesWithIntegrations as any as string[]).includes(company.id)) {
       return false;
     }

@@ -49,6 +49,8 @@ import { AccessRepository } from '../auth/repositories/Access.repository';
 import { CustomersService } from '../customers/customers.service';
 import { EntriesService } from '../entries/entries.service';
 import { ServicesService } from '../services/services.service';
+import { Cron } from '@nestjs/schedule';
+import { SystemService } from '../system/system.service';
 
 @Injectable()
 export class InvoicesService {
@@ -102,6 +104,7 @@ export class InvoicesService {
     private customerService: CustomersService,
     private entriesService: EntriesService,
     private serviceService: ServicesService,
+    private systemService: SystemService,
 
     @InjectRepository(AccessRepository)
     private accessRepository: AccessRepository,
@@ -1213,6 +1216,7 @@ export class InvoicesService {
                 invoice.invoices.reduce((a, b) => a + parseFloat(b.sum), 0),
             accounted: false,
             accountingEntryType: 4,
+            origin: globals.invoiceModuleId,
           },
           details,
           invoices: invoice.invoices.map((i) => i.id),
@@ -1221,5 +1225,64 @@ export class InvoicesService {
     }
 
     return preparedInvoices;
+  }
+
+  /**
+   * Metodo uitlizado para crear automaticamente las partidas contables mediante el uso de cronjobs el cual corre
+   * todos los dias alas 00:00:00
+   * @returns
+   */
+  @Cron('0 0 0 * * *', {
+    name: 'createSheduledEntriesEntries',
+    timeZone: 'America/El_Salvador',
+  })
+  async createSheduledEntries(): Promise<void> {
+    const companies = await this.accessRepository.getCompaniesWithIntegrations(
+      globals.invoiceModuleId,
+      globals.entriesModuleId,
+    );
+
+    const companiesWithActiveIntegrations = [];
+    for (const c of companies) {
+      if (
+        await this.systemService.hasIntegration(
+          c,
+          globals.invoiceModuleId,
+          globals.entriesModuleId,
+          companies.map((c) => c.id),
+        )
+      ) {
+        companiesWithActiveIntegrations.push(c);
+      }
+    }
+
+    const recurrencies = await this.invoicesEntriesRecurrencyRepository.getInvoicesEntriesRecurrencies();
+
+    const entries = [];
+    for (const r of recurrencies.data) {
+      entries.push(
+        ...(await this.prepareInvoicesForEntries(
+          companiesWithActiveIntegrations.map((c) => c.id),
+          r.id,
+        )),
+      );
+    }
+
+    if (entries.length == 0) {
+      return;
+    }
+
+    for (const c of companiesWithActiveIntegrations) {
+      const entryToCreate = entries.find((e) => e.company == c.id).entry;
+
+      const createdEntry = await this.entriesService.createUpdateEntry(
+        c,
+        entryToCreate.header,
+        entryToCreate.details,
+        'create',
+      );
+
+      await this.invoiceRepository.updateInvoice(entryToCreate.invoices, { accountingEntry: createdEntry.id });
+    }
   }
 }
