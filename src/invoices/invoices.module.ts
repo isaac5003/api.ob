@@ -26,8 +26,8 @@ import { EntriesDependsService } from '../entries/entries.service';
 import { EntriesModule } from '../entries/entries.module';
 import { ServiceDependsService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
-import { SystemDependendService, SystemService } from 'src/system/system.service';
-import { SystemModule } from 'src/system/system.module';
+import { SystemDependendService } from '../system/system.service';
+import { SystemModule } from '../system/system.module';
 
 @Module({
   imports: [
@@ -55,6 +55,7 @@ import { SystemModule } from 'src/system/system.module';
       AccessRepository,
     ]),
   ],
+  exports: [InvoicesService],
   providers: [
     InvoicesService,
     DependentController,

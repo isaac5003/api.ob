@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Dependencies, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { Company } from '../companies/entities/Company.entity';
@@ -104,6 +104,8 @@ export class InvoicesService {
     private customerService: CustomersService,
     private entriesService: EntriesService,
     private serviceService: ServicesService,
+
+    @Inject(forwardRef(() => SystemService))
     private systemService: SystemService,
 
     @InjectRepository(AccessRepository)
@@ -255,7 +257,7 @@ export class InvoicesService {
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      data.invoicesZone as unknown as string,
+      (data.invoicesZone as unknown) as string,
     );
     const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
@@ -324,7 +326,7 @@ export class InvoicesService {
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => d.documentType as unknown as number),
+      data.map((d) => (d.documentType as unknown) as number),
     );
 
     let documentsToProcessUpdate = [];
@@ -342,7 +344,7 @@ export class InvoicesService {
         .map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           };
         });
     }
@@ -368,7 +370,7 @@ export class InvoicesService {
         delete d.id;
         return {
           ...d,
-          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           isCurrentDocument: true,
           company: company,
         };
@@ -851,7 +853,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -1007,7 +1009,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -1125,9 +1127,8 @@ export class InvoicesService {
           order: invoice.invoices.indexOf(i) + 2,
           catalogName: (
             await this.accountingCatalogRepository.getAccountingCatalog(
-              (
-                await this.entriesService.getSettings(i.company, 'general')
-              ).data.accountingDebitCatalog as any as string,
+              ((await this.entriesService.getSettings(i.company, 'general')).data
+                .accountingDebitCatalog as any) as string,
               i.company,
               false,
             )
@@ -1154,15 +1155,12 @@ export class InvoicesService {
               order: invoice.invoices.indexOf(i) + 3,
               catalogName: (
                 await this.accountingCatalogRepository.getAccountingCatalog(
-                  (
-                    await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
-                  ).entries.accountingCatalogSales
-                    ? (
-                        await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
-                      ).entries.accountingCatalogSales
-                    : (
-                        await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')
-                      ).entries.accountingCatalogSales,
+                  (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                    .accountingCatalogSales
+                    ? (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                        .accountingCatalogSales
+                    : (await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')).entries
+                        .accountingCatalogSales,
                   i.company,
                   false,
                 )
@@ -1185,15 +1183,12 @@ export class InvoicesService {
             order: invoice.invoices.indexOf(i) + 3,
             catalogName: (
               await this.accountingCatalogRepository.getAccountingCatalog(
-                (
-                  await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
-                ).entries.accountingCatalogSales
-                  ? (
-                      await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
-                    ).entries.accountingCatalogSales
-                  : (
-                      await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')
-                    ).entries.accountingCatalogSales,
+                (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                  .accountingCatalogSales
+                  ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                      .accountingCatalogSales
+                  : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')).entries
+                      .accountingCatalogSales,
                 i.company,
                 false,
               )
@@ -1284,5 +1279,11 @@ export class InvoicesService {
 
       await this.invoiceRepository.updateInvoice(entryToCreate.invoices, { accountingEntry: createdEntry.id });
     }
+  }
+}
+@Dependencies(InvoicesService)
+export class InvoicesDependendService {
+  constructor(invoicesServices) {
+    invoicesServices = invoicesServices;
   }
 }
