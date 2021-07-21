@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Dependencies, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ModuleRepository } from 'src/system/repositories/Module.repository';
 import { ResponseMinimalDTO, ServiceReportGeneralDTO } from 'src/_dtos/responseList.dto';
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
@@ -13,7 +14,7 @@ import { SellingType } from './entities/SellingType.entity';
 import { Service } from './entities/Service.entity';
 import { SellingTypeRepository } from './repositories/SellingType.repository';
 import { ServiceRepository } from './repositories/Service.repository';
-import { ServiceSettingRepository } from './repositories/ServiceSetting.repository';
+import { ServiceIntegrationsRepository } from './repositories/ServiceIntegrations.repository';
 
 @Injectable()
 export class ServicesService {
@@ -21,14 +22,17 @@ export class ServicesService {
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
 
-    @InjectRepository(ServiceSettingRepository)
-    private serviceSettingRepository: ServiceSettingRepository,
+    @InjectRepository(ServiceIntegrationsRepository)
+    private serviceIntegrationsRepository: ServiceIntegrationsRepository,
 
     @InjectRepository(SellingTypeRepository)
     private sellingTypeRepository: SellingTypeRepository,
 
     @InjectRepository(AccountingCatalogRepository)
     private accountingCatalogRepository: AccountingCatalogRepository,
+
+    @InjectRepository(ModuleRepository)
+    private moduleRepository: ModuleRepository,
   ) {}
 
   async getSellyingTypes(): Promise<{ data: SellingType[]; count: number }> {
@@ -59,18 +63,24 @@ export class ServicesService {
     return this.serviceRepository.getService(company, id);
   }
 
-  async getServiceIntegrations(company: Company, id: string): Promise<ResponseMinimalDTO> {
-    const { accountingCatalog } = await this.serviceRepository.getService(company, id, ['ac']);
+  async getServiceIntegrations(company: Company, id: string, integratedModule): Promise<ResponseMinimalDTO> {
+    let integrations = {};
+    switch (integratedModule) {
+      case 'entries':
+        const { accountingCatalogSales } = await this.serviceRepository.getService(company, id, ['ac']);
 
-    return {
-      integrations: {
-        catalog: accountingCatalog ? accountingCatalog.id : null,
-      },
-    };
+        integrations = {
+          ...integrations,
+          entries: {
+            accountingCatalogSales: accountingCatalogSales ? accountingCatalogSales.id : null,
+          },
+        };
+    }
+    return integrations;
   }
 
   async createService(company: Company, data: serviceDataDTO): Promise<ResponseMinimalDTO> {
-    await this.sellingTypeRepository.getSellingType((data.sellingType as any) as number);
+    await this.sellingTypeRepository.getSellingType(data.sellingType as any as number);
     const service = await this.serviceRepository.createService(company, data);
     return {
       id: service.id,
@@ -80,7 +90,7 @@ export class ServicesService {
 
   async updateService(company: Company, id: string, data: serviceDataDTO): Promise<ResponseMinimalDTO> {
     await this.serviceRepository.getService(company, id);
-    await this.sellingTypeRepository.getSellingType((data.sellingType as any) as number);
+    await this.sellingTypeRepository.getSellingType(data.sellingType as any as number);
     const service = await this.serviceRepository.updateService(company, data, id);
     return {
       id: service.id,
@@ -100,10 +110,16 @@ export class ServicesService {
     company: Company,
     id: string,
     data: ServiceIntegrationDTO,
+    integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
     await this.serviceRepository.getService(company, id);
-    if (data.accountingCatalog) {
-      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+
+    switch (integratedModule) {
+      case 'entries':
+        if (data.accountingCatalogSales) {
+          await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+        }
+        break;
     }
     const service = await this.serviceRepository.updateService(company, data, id);
     return {
@@ -117,7 +133,7 @@ export class ServicesService {
 
     const servicesToUpdate = await this.serviceRepository.getServicesByIds(
       company,
-      (data.ids as unknown) as ServicesIdsDTO['ids'],
+      data.ids as unknown as ServicesIdsDTO['ids'],
     );
 
     const servicesUpdated = await this.serviceRepository.updateServicesStatus(company, {
@@ -155,7 +171,7 @@ export class ServicesService {
     let message = '';
     const deletedServices = [];
     const notDeletedServices = [];
-    const idToCompare = (ids as unknown) as any[];
+    const idToCompare = ids as unknown as any[];
 
     if (idToCompare.length != result.deletedServices.affected) {
       for (const ids of idToCompare) {
@@ -187,31 +203,92 @@ export class ServicesService {
     };
   }
 
-  async getSettingsIntegrations(company: Company): Promise<ResponseMinimalDTO> {
-    const settings = await this.serviceSettingRepository.getSettings(company);
+  /**
+   * Metodo utilizado para estructurar la respuesta y los campos de configuraciones de integracion que se necesita
+   * enviar en la petición
+   * @param company compañia con la que esta logado el usuario que invoic el metodo
+   * @param integratedModule Modulo con el que tiene la integracion el usuario
+   * @returns Retorna un objeto con los campos accountingCatalogCXC y accountingCatalogSales
+   */
+  async getServiceSettingIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
+    const settings = await this.serviceIntegrationsRepository.getServicesIntegrations(company);
+    const modules = await this.moduleRepository.getModules();
+    const integrations = {};
+    switch (integratedModule) {
+      case 'entries':
+        const filteredModules = [...new Set(settings.map((s) => s.module.id))];
 
-    return {
-      integrations: {
-        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
-      },
-    };
+        const foundModules = modules.filter((m) => filteredModules.includes(m.id));
+
+        for (const f of foundModules) {
+          const values = settings
+            .filter((s) => filteredModules.includes(s.module.id))
+            .map((s) => {
+              return {
+                metaKey: s.metaKey,
+                metaValue: s.metaValue,
+              };
+            });
+
+          const data = {};
+          for (const v of values) {
+            data[v.metaKey] = v.metaValue;
+          }
+
+          integrations[f.shortName] = data;
+        }
+
+        break;
+    }
+    const nullResponse = { entries: { accountingCatalogSales: null } };
+    return Object.keys(integrations).length > 0 ? integrations : nullResponse;
   }
 
-  async updateSettingsIntegrations(company: Company, data: ServiceIntegrationDTO): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+  /**
+   * Metodo para procesar la informacion y hacer el update o insert de las configuraciones de integraciones
+   * @param company compañia con la que esta logado el usuario qeu invoca el metodo
+   * @param data Campos necesarios para actualizar o insertar registros de configuraciones, del tipo serviceIntegrationDTO
+   * @param integratedModule Modulo con el que se desean guiarar las configuraciones de integraciones
+   * @returns REtorna el mesanje de exito en caso que no se den errores
+   */
+  async upsertServicesSettingsIntegrations(
+    company: Company,
+    data: ServiceIntegrationDTO,
+    integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    const settings = await this.serviceIntegrationsRepository.getServicesIntegrations(company);
+    const setting = [];
 
-    const settings = await this.serviceSettingRepository.getSettings(company);
+    switch (integratedModule) {
+      case 'entries':
+        await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
 
-    if (settings) {
-      await this.serviceSettingRepository.updateSettings(company, data);
-      return {
-        message: 'La integración ha sido actualizada correctamente.',
-      };
+        const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
+
+        if (!accountingCatalogSales) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'accountingCatalogSales',
+            metaValue: data.accountingCatalogSales,
+          });
+        } else {
+          setting.push({ ...accountingCatalogSales, metaValue: data.accountingCatalogSales });
+        }
+
+        break;
     }
 
-    await this.serviceSettingRepository.createSettings(company, data);
+    await this.serviceIntegrationsRepository.upsertServicesIntegrations(setting);
     return {
-      message: 'La integración ha sido agregada correctamente.',
+      message: 'La integración ha sido actualizada correctamente.',
     };
+  }
+}
+
+@Dependencies(ServicesService)
+export class ServiceDependsService {
+  constructor(serviceService) {
+    serviceService = serviceService;
   }
 }

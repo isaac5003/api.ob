@@ -38,6 +38,17 @@ import { format, parseISO } from 'date-fns';
 import { DocumentFilterDTO } from './dtos/documents/invoice-documnet-filter.dto';
 import { InvoicesEntriesRecurrency } from './entities/InvoicesEntriesRecurrency.entity';
 import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
+import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
+import { ModuleRepository } from '../system/repositories/Module.repository';
+import { InvoiceIntegrationBaseDTO } from './dtos/invoice-integration-base.dto';
+import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
+import { AuthService } from '../auth/auth.service';
+import { User } from '../auth/entities/User.entity';
+import * as globals from '../_tools/globals';
+import { AccessRepository } from '../auth/repositories/Access.repository';
+import { CustomersService } from '../customers/customers.service';
+import { EntriesService } from '../entries/entries.service';
+import { ServicesService } from '../services/services.service';
 
 @Injectable()
 export class InvoicesService {
@@ -77,6 +88,23 @@ export class InvoicesService {
 
     @InjectRepository(InvoicesEntriesRecurrencyRepository)
     private invoicesEntriesRecurrencyRepository: InvoicesEntriesRecurrencyRepository,
+
+    @InjectRepository(InvoicesIntegrationsRepository)
+    private invoicesIntegrationsRepository: InvoicesIntegrationsRepository,
+
+    @InjectRepository(ModuleRepository)
+    private moduleRepository: ModuleRepository,
+
+    @InjectRepository(AccountingCatalogRepository)
+    private accountingCatalogRepository: AccountingCatalogRepository,
+
+    private authService: AuthService,
+    private customerService: CustomersService,
+    private entriesService: EntriesService,
+    private serviceService: ServicesService,
+
+    @InjectRepository(AccessRepository)
+    private accessRepository: AccessRepository,
   ) {}
 
   async getInvoicesEntriesRecurrencies(): Promise<{ data: InvoicesEntriesRecurrency[]; count: number }> {
@@ -224,7 +252,7 @@ export class InvoicesService {
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      data.invoicesZone as unknown as string,
+      (data.invoicesZone as unknown) as string,
     );
     const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
@@ -293,7 +321,7 @@ export class InvoicesService {
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => d.documentType as unknown as number),
+      data.map((d) => (d.documentType as unknown) as number),
     );
 
     let documentsToProcessUpdate = [];
@@ -311,7 +339,7 @@ export class InvoicesService {
         .map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           };
         });
     }
@@ -337,7 +365,7 @@ export class InvoicesService {
         delete d.id;
         return {
           ...d,
-          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           isCurrentDocument: true,
           company: company,
         };
@@ -498,6 +526,194 @@ export class InvoicesService {
 
     return report;
   }
+
+  /**
+   * Metodo para estructurar y validar los campos de configuración que se muestran en cada una
+   * de las integraciones con otros modulos
+   * @param company --Compañia con la que esta logado el usuario que solicita el metodo
+   * @returns las configuraciones almacenadas de las integraciones con los diferentes modulos
+   */
+  async getInvoicesIntegrations(company: Company, integratedModule: string): Promise<ResponseMinimalDTO> {
+    const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+    switch (integratedModule) {
+      case 'entries':
+        const modules = await this.moduleRepository.getModules();
+
+        const filteredModules = [...new Set(settings.map((s) => s.module.id))];
+
+        const foundModules = modules.filter((m) => filteredModules.includes(m.id));
+
+        const integrations = {};
+        for (const f of foundModules) {
+          const values = settings
+            .filter((s) => filteredModules.includes(s.module.id))
+            .map((s) => {
+              return {
+                metaKey: s.metaKey,
+                metaValue: s.metaValue,
+              };
+            });
+
+          const data = {};
+          for (const v of values) {
+            if (
+              v.metaKey == 'registerService' ||
+              v.metaKey == 'activeIntegration' ||
+              v.metaKey == 'automaticIntegration'
+            ) {
+              data[v.metaKey] = v.metaValue == 'true' ? true : false;
+            } else if (v.metaKey == 'recurrencyFrecuency') {
+              data[v.metaKey] = parseInt(v.metaValue);
+            } else {
+              data[v.metaKey] = v.metaValue;
+            }
+          }
+
+          integrations[f.shortName] = data;
+        }
+        return Object.keys(integrations).length > 0
+          ? integrations
+          : {
+              entries: {
+                cashPaymentAccountingCatalog: null,
+                automaticIntegration: false,
+                activeIntegration: false,
+                registerService: false,
+                recurrencyFrecuency: null,
+              },
+            };
+    }
+  }
+
+  /**
+   * Metodo utilizado para estructutrear la data necesaria para creear o actulizar los registros en configuraciones
+   * de intgraciones con otros modulos
+   * @param company compañia con la que esta logado el ususario que invoca el metodo
+   * @param data Campos requeridos para crear las configuraciones necesarias
+   * @param integratedModule modulo al que se desean guarar configuraciones
+   * @returns Retorna el mensaje de exito o error notificando cualquiera de los casos
+   */
+  async upsertInvoicesIntegrations(
+    company: Company,
+    data: Partial<InvoiceIntegrationBaseDTO>,
+    integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    let settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+    const setting = [];
+
+    switch (integratedModule) {
+      case 'entries':
+        await this.invoicesEntriesRecurrencyRepository.getRecurrency(data.recurrencyFrecuency as number);
+
+        await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.cashPaymentAccountingCatalog, company);
+        settings = settings.filter((s) => s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8');
+        const activeIntegration = settings.find((s) => s.metaKey == 'activeIntegration');
+        if (activeIntegration ? activeIntegration.metaValue == 'false' : true) {
+          throw new BadRequestException(
+            'No se pueden actulizar las configuraciones, porque esta se encuentra inactiva.',
+          );
+        }
+        const cashPaymentAccountingCatalog = settings.find((s) => s.metaKey == 'cashPaymentAccountingCatalog');
+        const automaticIntegration = settings.find((s) => s.metaKey == 'automaticIntegration');
+        const registerService = settings.find((s) => s.metaKey == 'registerService');
+        const recurrencyFrecuency = settings.find((s) => s.metaKey == 'recurrencyFrecuency');
+        const recurrencyOption = settings.find((s) => s.metaKey == 'recurrencyOption');
+
+        if (!cashPaymentAccountingCatalog) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'cashPaymentAccountingCatalog',
+            metaValue: data.cashPaymentAccountingCatalog,
+          });
+        } else {
+          setting.push({ ...cashPaymentAccountingCatalog, metaValue: data.cashPaymentAccountingCatalog });
+        }
+
+        if (!automaticIntegration) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'automaticIntegration',
+            metaValue: `${data.automaticIntegration}`,
+          });
+        } else {
+          setting.push({ ...automaticIntegration, metaValue: `${data.automaticIntegration}` });
+        }
+        if (!registerService) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'registerService',
+            metaValue: `${data.registerService}`,
+          });
+        } else {
+          setting.push({ ...registerService, metaValue: `${data.registerService}` });
+        }
+        if (!recurrencyFrecuency) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'recurrencyFrecuency',
+            metaValue: `${data.recurrencyFrecuency}`,
+          });
+        } else {
+          setting.push({ ...recurrencyFrecuency, metaValue: `${data.recurrencyFrecuency}` });
+        }
+        if (!recurrencyOption) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'recurrencyOption',
+            metaValue: data.recurrencyOption,
+          });
+        } else {
+          setting.push({ ...recurrencyOption, metaValue: data.recurrencyOption });
+        }
+        break;
+    }
+
+    await this.invoicesIntegrationsRepository.upsertInvoicesIntegrations(setting);
+    return {
+      message: 'La integración ha sido actualizada correctamente.',
+    };
+  }
+
+  async updateInvoicesIntegrationsActive(
+    company: Company,
+    data: Partial<InvoiceIntegrationBaseDTO>,
+    integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    const settings = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+    const setting = [];
+
+    switch (integratedModule) {
+      case 'entries':
+        await this.invoicesEntriesRecurrencyRepository.getRecurrency(data.recurrencyFrecuency as number);
+
+        const activeIntegration = settings.find(
+          (s) => s.metaKey == 'activeIntegration' && s.module.id == 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+        );
+        if (!activeIntegration) {
+          setting.push({
+            company: company,
+            module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+            metaKey: 'activeIntegration',
+            metaValue: 'true',
+          });
+        } else {
+          setting.push({ ...activeIntegration, metaValue: `${data.activeIntegration}` });
+        }
+
+        break;
+    }
+
+    await this.invoicesIntegrationsRepository.upsertInvoicesIntegrations(setting);
+    return {
+      message: 'La integración ha sido actualizada correctamente.',
+    };
+  }
+
   async getInvoices(
     company: Company,
     filter: InvoiceFilterDTO,
@@ -579,7 +795,7 @@ export class InvoicesService {
     return new ResponseSingleDTO(plainToClass(Invoice, invoice));
   }
 
-  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO): Promise<ResponseMinimalDTO> {
+  async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO, user: User): Promise<ResponseMinimalDTO> {
     const customer = await this.customerRepository.getCustomer(data.header.customer, company, 'cliente');
     const customerBranch = await this.customerBranchRepository.getCustomerCustomerBranch(
       data.header.customerBranch,
@@ -632,7 +848,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -655,6 +871,9 @@ export class InvoicesService {
     }
     await this.invoicesDocumentRepository.updateInvoiceDocument(document.id, { current: nextSequence }, company);
 
+    if (await this.authService.hasModules([globals.entriesModuleId], user, branch, company)) {
+      await this.invoiceRepository.updateInvoice([invoiceHeader.id], { createEntry: true });
+    }
     return {
       id: invoiceHeader.id,
       message: `La venta ha sido registrada correctamente. ${message}`,
@@ -785,7 +1004,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -800,10 +1019,16 @@ export class InvoicesService {
     };
   }
 
+  /**
+   * Metodo utilizado para eliminar documentos de venta
+   * @param company Compañia con la qu eesta logado el usuraio que invoca el metodo
+   * @param id de la venta que se desea eliminar
+   * @returns Returna mensaje de exito o de error en el caso que sea necesario
+   */
   async deleteInvoice(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-    const allowedStatuses = [1];
+    const allowedStatuses = [1, 4];
     if (!allowedStatuses.includes(invoice.status.id)) {
       throw new BadRequestException(
         `La venta seleccionada no puede ser eliminada mientras tenga estado "${invoice.status.name.toUpperCase()}"`,
@@ -811,7 +1036,13 @@ export class InvoicesService {
     }
 
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, invoice.documentType.id);
-    if (document.current - 1 != parseInt(invoice.sequence)) {
+    if (invoice.status.id == 4) {
+      if (parseInt(invoice.sequence) < document.current - 1) {
+        throw new BadRequestException(
+          'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que es menor que el ultimo correlativo ingresado.',
+        );
+      }
+    } else if (document.current - 1 != parseInt(invoice.sequence)) {
       throw new BadRequestException(
         'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
       );
@@ -828,8 +1059,175 @@ export class InvoicesService {
       company,
     );
 
+    if (!result) {
+      throw new BadRequestException('No se ha podido eliminar la venta, contacta con tu administrador.');
+    }
     return {
-      message: result ? 'Se ha eliminado la venta correctamente' : 'No se ha podido eliminar venta',
+      message: 'Se ha eliminado la venta correctamente',
     };
+  }
+
+  /**
+   *
+   * @param invoiceId --El id de la venta que se desea consultar
+   * @param company  --El id de la compañia a la que pertenece la venta y el usuario logado a ala hora de invocar el metodo
+   * @returns   * Retorna un objeto con la propiedad {createEntry: boolean, entryId}
+   * Dicho metodo sirve para
+   */
+  async saleHasIntegration(invoiceId: string, company: Company): Promise<boolean> {
+    const invoice = await this.invoiceRepository.getInvoice(company, invoiceId);
+    if (invoice.createEntry && invoice.accountingEntry.id) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Metodo utilizado para estructurrar la informacion necesaria para la creacion de partidas contables mediante el uso de cronjobs
+   * @param companiesWithIntegrations Arreglo de compañias que tienen integraciones activas
+   * @param recurrencyFrecuency Frecuency con la que se debe obtner las ventas
+   * @returns REturna un arreglo con las partidas contables a crear separadas cada una de ellas por compañia
+   */
+  async prepareInvoicesForEntries(companiesWithIntegrations: string[], recurrencyFrecuency: number): Promise<any> {
+    const invoicesForEntries = await this.invoiceRepository.getInvoicesForEntries(
+      companiesWithIntegrations,
+      recurrencyFrecuency,
+    );
+
+    const FCP = format(Date.now(), 'yyyy-MM-dd');
+
+    const preparedInvoices = [];
+    for (const invoice of invoicesForEntries) {
+      const details = [];
+
+      for (const i of invoice.invoices) {
+        let accountingCatalog;
+        if (i.invoicesPaymentsCondition.cashPayment) {
+          accountingCatalog = (await this.getInvoicesIntegrations(i.company.id, 'entries')).entries
+            .cashPaymentAccountingCatalog;
+        } else {
+          accountingCatalog = (
+            await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries', 'cliente')
+          ).entries.accountingCatalogCXC
+            ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                .accountingCatalogCXC
+            : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries', 'cliente')).entries
+                .accountingCatalogCXC;
+        }
+
+        details.push({
+          accountingCatalog,
+          concept: `${i.documentType.code} ${i.authorization}${i.sequence} -  ${
+            (await this.accountingCatalogRepository.getAccountingCatalog(accountingCatalog, i.company, false)).name
+          }`,
+          cargo: parseFloat(i.ventaTotal),
+          abono: 0,
+          order: invoice.invoices.indexOf(i) + 1,
+          catalogName: (
+            await this.accountingCatalogRepository.getAccountingCatalog(accountingCatalog, i.company, false)
+          ).name,
+          accountingEntry: null,
+          company: i.company.id,
+        });
+        details.push({
+          accountingCatalog: (await this.entriesService.getSettings(i.company, 'general')).data.accountingDebitCatalog,
+          concept: `${i.documentType.code} ${i.authorization}${i.sequence} - Debito Fiscal`,
+          cargo: 0,
+          abono: parseFloat(i.iva),
+          order: invoice.invoices.indexOf(i) + 2,
+          catalogName: (
+            await this.accountingCatalogRepository.getAccountingCatalog(
+              ((await this.entriesService.getSettings(i.company, 'general')).data
+                .accountingDebitCatalog as any) as string,
+              i.company,
+              false,
+            )
+          ).name,
+          accountingEntry: null,
+          company: i.company.id,
+        });
+
+        if ((await this.getInvoicesIntegrations(i.company.id, 'entries')).entries.registerService) {
+          for (const id of i.invoiceDetails) {
+            details.push({
+              accountingCatalog: (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries'))
+                .entries.accountingCatalogSales
+                ? (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                    .accountingCatalogSales
+                : (await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')).entries
+                    .accountingCatalogSales,
+
+              concept: `${i.documentType.code} ${i.authorization}${i.sequence} - VENTA`,
+              cargo: 0,
+              abono: id.service.incTax
+                ? (parseFloat(id.unitPrice) / 1.13) * parseFloat(id.quantity)
+                : parseFloat(id.quantity) * parseFloat(id.unitPrice),
+              order: invoice.invoices.indexOf(i) + 3,
+              catalogName: (
+                await this.accountingCatalogRepository.getAccountingCatalog(
+                  (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                    .accountingCatalogSales
+                    ? (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                        .accountingCatalogSales
+                    : (await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')).entries
+                        .accountingCatalogSales,
+                  i.company,
+                  false,
+                )
+              ).name,
+              accountingEntry: null,
+              company: i.company.id,
+            });
+          }
+        } else {
+          details.push({
+            accountingCatalog: (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries'))
+              .entries.accountingCatalogSales
+              ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                  .accountingCatalogSales
+              : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')).entries
+                  .accountingCatalogSales,
+            concept: `${i.documentType.code} ${i.authorization}${i.sequence} - VENTA`,
+            cargo: 0,
+            abono: parseFloat(i.sum),
+            order: invoice.invoices.indexOf(i) + 3,
+            catalogName: (
+              await this.accountingCatalogRepository.getAccountingCatalog(
+                (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                  .accountingCatalogSales
+                  ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                      .accountingCatalogSales
+                  : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')).entries
+                      .accountingCatalogSales,
+                i.company,
+                false,
+              )
+            ).name,
+            accountingEntry: null,
+            company: i.company.id,
+          });
+        }
+      }
+
+      preparedInvoices.push({
+        company: invoice.invoices[0].company.id,
+        entry: {
+          header: {
+            title: `Partida de ventas correspondiente a ${format(parseISO(FCP), 'dd/MM/yyyy')}`,
+            date: FCP,
+            squared:
+              invoice.invoices.reduce((a, b) => a + parseFloat(b.ventaTotal), 0) ==
+              invoice.invoices.reduce((a, b) => a + parseFloat(b.iva), 0) +
+                invoice.invoices.reduce((a, b) => a + parseFloat(b.sum), 0),
+            accounted: false,
+            accountingEntryType: 4,
+          },
+          details,
+          invoices: invoice.invoices.map((i) => i.id),
+        },
+      });
+    }
+
+    return preparedInvoices;
   }
 }

@@ -83,11 +83,8 @@ export class EntriesController {
   }
 
   @Get('/types')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async getEntryTypes(
-    @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<AccountingEntryType, number, number, number>> {
-    const { data, count } = await this.entries.getEntryTypes(company);
+  async getEntryTypes(): Promise<ResponseListDTO<AccountingEntryType, number, number, number>> {
+    const { data, count } = await this.entries.getEntryTypes();
     return new ResponseListDTO(plainToClass(AccountingEntryType, data), count);
   }
 

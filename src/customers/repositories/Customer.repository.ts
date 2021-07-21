@@ -80,7 +80,10 @@ export class CustomerRepository extends Repository<Customer> {
     for (const table of joins) {
       switch (table) {
         case 'ac':
-          leftJoinAndSelect['ac'] = 'c.accountingCatalog';
+          leftJoinAndSelect['acCXC'] = 'c.accountingCatalogCXC';
+          leftJoinAndSelect['acSales'] = 'c.accountingCatalogSales';
+          leftJoinAndSelect['acCXP'] = 'c.accountingCatalogCXP';
+          leftJoinAndSelect['acPurchases'] = 'c.accountingCatalogPurchases';
           break;
       }
     }
@@ -115,11 +118,7 @@ export class CustomerRepository extends Repository<Customer> {
   }
   async updateCustomer(
     id: string,
-    data:
-      | Partial<CustomerDataDTO>
-      | Partial<CustomerStatusDTO>
-      | Partial<ProviderStatusDTO>
-      | Partial<AccountignCatalogIntegrationDTO>,
+    data: Partial<CustomerDataDTO> | Partial<CustomerStatusDTO> | Partial<ProviderStatusDTO> | any,
     company: Company,
     type: string,
   ): Promise<any> {

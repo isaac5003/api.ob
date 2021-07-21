@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsISO8601, IsOptional } from 'class-validator';
+import { IsBoolean, IsInt, IsISO8601, IsOptional } from 'class-validator';
 import { FilterDTO } from '../../_dtos/filter.dto';
 import { validationMessage } from '../../_tools';
 
@@ -23,5 +23,7 @@ export class EntriesFilterDTO extends FilterDTO {
   endDate: string;
 
   @IsOptional()
-  entryType: string;
+  @Transform(({ value }) => parseInt(value))
+  @IsInt({ message: validationMessage('accountingEntryType', 'IsInt') })
+  entryType: number;
 }

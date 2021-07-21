@@ -6,11 +6,11 @@ import { AccountingEntryType } from '../entities/AccountingEntryType.entity';
 const reponame = 'tipo de partida contable';
 @EntityRepository(AccountingEntryType)
 export class AccountingEntryTypeRepository extends Repository<AccountingEntryType> {
-  async getEntryTypes(company: Company): Promise<{ data: AccountingEntryType[]; count: number }> {
+  async getEntryTypes(): Promise<{ data: AccountingEntryType[]; count: number }> {
     let entryTypes: AccountingEntryType[];
     try {
       entryTypes = await this.find({
-        where: { company },
+        where: { private: false },
         order: { createdAt: 'DESC' },
       });
     } catch (error) {
@@ -19,10 +19,10 @@ export class AccountingEntryTypeRepository extends Repository<AccountingEntryTyp
     return { data: entryTypes, count: entryTypes.length };
   }
 
-  async getEntryType(company: Company, id: string): Promise<AccountingEntryType> {
+  async getEntryType(id: number): Promise<AccountingEntryType> {
     let entryType: AccountingEntryType;
     try {
-      entryType = await this.findOneOrFail({ id, company });
+      entryType = await this.findOneOrFail({ id });
     } catch (error) {
       logDatabaseError(reponame, error);
     }

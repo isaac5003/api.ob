@@ -49,9 +49,9 @@ export class Service extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.services)
   company: Company;
 
-  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.services)
-  accountingCatalog: AccountingCatalog;
-
   @ManyToOne(() => SellingType, (sellingType) => sellingType.services)
   sellingType: SellingType;
+
+  @ManyToOne(() => AccountingCatalog, (accountingCatalog) => accountingCatalog.servicesSales)
+  accountingCatalogSales: AccountingCatalog;
 }

@@ -1,3 +1,4 @@
+import { CustomerIntegrations } from '../../customers/entities/CustomerIntegrations.entity';
 import {
   BaseEntity,
   Column,
@@ -8,6 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Access } from '../../auth/entities/Access.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
+import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 
 @Entity()
 export class Module extends BaseEntity {
@@ -29,6 +32,9 @@ export class Module extends BaseEntity {
   @Column({ default: false, type: 'boolean' })
   system: boolean;
 
+  @Column({ type: 'varchar', nullable: true })
+  shortName: string;
+
   @CreateDateColumn({ select: false })
   createdAt: string;
 
@@ -37,4 +43,13 @@ export class Module extends BaseEntity {
 
   @OneToMany(() => Access, (access) => access.module)
   accesses: Access[];
+
+  @OneToMany(() => CustomerIntegrations, (customerIntegration) => customerIntegration.module)
+  customerIntegration: CustomerIntegrations[];
+
+  @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.module)
+  invoicesIntegration: InvoicesIntegrations[];
+
+  @OneToMany(() => ServiceIntegrations, (serviceIntegration) => serviceIntegration.module)
+  serviceIntegrations: ServiceIntegrations[];
 }

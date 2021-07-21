@@ -1,6 +1,6 @@
 import { BaseEntity, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Echarges } from './echarges.entity';
-import { User } from 'src/auth/entities/User.entity';
+import { User } from '../../auth/entities/User.entity';
 
 @Entity()
 export class EchargesRequest extends BaseEntity {

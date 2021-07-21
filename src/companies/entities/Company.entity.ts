@@ -1,7 +1,7 @@
 import { Access } from '../../auth/entities/Access.entity';
 import { Profile } from '../../auth/entities/Profile.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { CustomerSetting } from '../../customers/entities/CustomerSetting.entity';
+import { CustomerIntegrations } from '../../customers/entities/CustomerIntegrations.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
@@ -13,7 +13,7 @@ import { InvoicesPaymentsCondition } from '../../invoices/entities/InvoicesPayme
 import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
 import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
 import { Service } from '../../services/entities/Service.entity';
-import { ServiceSetting } from '../../services/entities/ServiceSetting.entity';
+import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 import {
   BaseEntity,
   Column,
@@ -29,8 +29,9 @@ import { Branch } from './Branch.entity';
 import { CompanyType } from './CompanyType.entity';
 import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
-import { Purchase } from 'src/purchases/entities/Purchase.entity';
-import { Echarges } from 'src/echarges/entities/echarges.entity';
+import { Purchase } from '../../purchases/entities/Purchase.entity';
+import { Echarges } from '../../echarges/entities/echarges.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -88,9 +89,6 @@ export class Company extends BaseEntity {
   @OneToMany(() => AccountingEntryDetail, (accountingEntryDetail) => accountingEntryDetail.company)
   accountingEntryDetails: AccountingEntryDetail[];
 
-  @OneToMany(() => AccountingEntryType, (accountingEntryType) => accountingEntryType.company)
-  accountingEntryTypes: AccountingEntryType[];
-
   @OneToMany(() => AccountingSetting, (accountingSetting) => accountingSetting.company)
   accountingSettings: AccountingSetting[];
 
@@ -108,9 +106,6 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];
-
-  @OneToMany(() => CustomerSetting, (customerSetting) => customerSetting.company)
-  customerSettings: CustomerSetting[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.company)
   invoices: Invoice[];
@@ -136,8 +131,14 @@ export class Company extends BaseEntity {
   @OneToMany(() => Service, (service) => service.company)
   services: Service[];
 
-  @OneToMany(() => ServiceSetting, (serviceSetting) => serviceSetting.company)
-  serviceSettings: ServiceSetting[];
+  @OneToMany(() => CustomerIntegrations, (customerIntegrations) => customerIntegrations.company)
+  customerIntegration: CustomerIntegrations[];
+
+  @OneToMany(() => InvoicesIntegrations, (invoicesIntegration) => invoicesIntegration.company)
+  invoicesIntegration: InvoicesIntegrations[];
+
+  @OneToMany(() => ServiceIntegrations, (serviceIntegration) => serviceIntegration.company)
+  serviceIntegrations: ServiceIntegrations[];
 
   @OneToMany(() => Echarges, (echarges) => echarges.company)
   echarges: Echarges[];

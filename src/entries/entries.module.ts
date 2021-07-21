@@ -20,6 +20,7 @@ import { AuthModule } from '../auth/auth.module';
       AccountingSettingRepository,
     ]),
   ],
+  exports: [EntriesService],
   providers: [EntriesService],
   controllers: [EntriesController],
 })

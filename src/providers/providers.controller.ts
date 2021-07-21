@@ -53,18 +53,22 @@ export class ProvidersController {
     return new ResponseListDTO(plainToClass(CustomerTypeNatural, data), count);
   }
 
-  @Get('/setting/integrations')
-  async getSettingIntegrations(@GetAuthData('company') company: Company): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerSettingIntegrations(company);
+  @Get('/setting/integrations/:shortname')
+  async getSettingIntegrations(
+    @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
+  ): Promise<ResponseMinimalDTO> {
+    return await this.customersService.getCustomerSettingIntegrations(company, integratedModule, 'proveedor');
   }
 
-  @Put('/setting/integrations')
+  @Put('/setting/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateSettingIntegrations(
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return this.customersService.updateCustomerSettingsIntegrations(company, data);
+    return this.customersService.upsertCustomerSettingsIntegrations(company, data, integratedModule, 'proveedor');
   }
 
   @Put('/status/:id')
@@ -77,13 +81,14 @@ export class ProvidersController {
     return this.customersService.UpdateStatusCustomer(id, data, company, 'proveedor');
   }
 
-  @Get('/:id/integrations')
+  @Get('/:id/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getCustomerIntegration(
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
+    @Param('shortname') integratedModule: string,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.getCustomerIntegration(id, company, 'proveedor');
+    return await this.customersService.getCustomerIntegration(id, company, integratedModule, 'proveedor');
   }
 
   @Get('/:id/tributary')
@@ -154,14 +159,15 @@ export class ProvidersController {
     return this.customersService.deleteBranch(id, providerId, 'proveedor');
   }
 
-  @Put('/:id/integrations')
+  @Put('/:id/integrations/:shortname')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCustomerIntegration(
     @Param('id') id: string,
+    @Param('shortname') integratedModule: string,
     @Body() data: AccountignCatalogIntegrationDTO,
     @GetAuthData('company') company: Company,
   ): Promise<ResponseMinimalDTO> {
-    return await this.customersService.UpdateCustomerIntegration(id, data, company, 'proveedor');
+    return await this.customersService.UpdateCustomerIntegration(id, data, company, integratedModule, 'proveedor');
   }
 
   @Get('/report/general')

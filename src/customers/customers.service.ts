@@ -14,14 +14,15 @@ import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { CustomerTypeNaturalRepository } from './repositories/CustomerTypeNatural.repository';
-import { CustomerSettingRepository } from './repositories/CustomerSetting.repository';
+import { CustomerIntegrationsRepository } from './repositories/CustomerIntegrations.repository';
 import { Company } from '../companies/entities/Company.entity';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Dependencies, Injectable } from '@nestjs/common';
 import { ProviderStatusDTO } from '../providers/dtos/provider-updateStatus.dto';
 import { BranchDataDTO } from './dtos/customer-branch.dto';
-import { FilterDTO } from 'src/_dtos/filter.dto';
+import { FilterDTO } from '../_dtos/filter.dto';
+import { ModuleRepository } from '../system/repositories/Module.repository';
 
 @Injectable()
 export class CustomersService {
@@ -44,8 +45,11 @@ export class CustomersService {
     @InjectRepository(CustomerTypeNaturalRepository)
     private customerTypeNaturalRepository: CustomerTypeNaturalRepository,
 
-    @InjectRepository(CustomerSettingRepository)
-    private customerSettingRepository: CustomerSettingRepository,
+    @InjectRepository(CustomerIntegrationsRepository)
+    private customerIntegrationsRepository: CustomerIntegrationsRepository,
+
+    @InjectRepository(ModuleRepository)
+    private moduleRepository: ModuleRepository,
   ) {}
 
   async generateReportGeneral(company: Company, type = 'clientes'): Promise<any> {
@@ -156,44 +160,217 @@ export class CustomersService {
     }
     return customer;
   }
-
-  async getCustomerIntegration(id: string, company: Company, type = 'cliente'): Promise<ResponseMinimalDTO> {
-    const { accountingCatalog } = await this.customerRepository.getCustomer(id, company, type, ['ac']);
-
-    return {
-      integrations: {
-        catalog: accountingCatalog ? accountingCatalog.id : null,
-      },
-    };
+  /**
+   * Metodo utilizado para obtener las configuraciones de integraciones individuale de cada cliente o proveedor
+   * @param id del cliente o proveedor al que se le desean obtener las configuraciones
+   * @param company compañia del usuario que invoica el metodo
+   * @param integratedModule modulo del qu ese desean obtener las configuraciones
+   * @param type si es cliente o proveedor al que se desean obtener las ocnfiguraciones
+   * @returns retorna un objeto con las congiguraciones para ese cliente
+   */
+  async getCustomerIntegration(
+    id: string,
+    company: Company,
+    integratedModule: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    let integrations = {};
+    switch (integratedModule) {
+      case 'entries':
+        const settingsIntegrations = await this.customerRepository.getCustomer(id, company, type, ['ac']);
+        if (type == 'cliente') {
+          integrations = {
+            entries: {
+              accountingCatalogSales: settingsIntegrations.accountingCatalogSales
+                ? settingsIntegrations.accountingCatalogSales.id
+                : null,
+              accountingCatalogCXC: settingsIntegrations.accountingCatalogCXC
+                ? settingsIntegrations.accountingCatalogCXC.id
+                : null,
+            },
+          };
+        } else if (type == 'proveedor') {
+          integrations = {
+            ...integrations,
+            entries: {
+              accountingCatalogPurchases: settingsIntegrations.accountingCatalogPurchases
+                ? settingsIntegrations.accountingCatalogPurchases.id
+                : null,
+              accountingCatalogCXP: settingsIntegrations.accountingCatalogCXP
+                ? settingsIntegrations.accountingCatalogCXP.id
+                : null,
+            },
+          };
+        }
+        break;
+    }
+    return integrations;
   }
 
-  async getCustomerSettingIntegrations(company: Company): Promise<ResponseMinimalDTO> {
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
+  /**
+   *
+   * @param company compañia con la que esta logado el usuario que invoca el emtodo
+   * @param integratedModule shortname del modulo del que se desea obtener configuraciones
+   * @param type si se estan obteniendo confuguraciones de clientes o de proveedores
+   * @returns retorna un objeto con las configuraciones agrupadas por cada modulo
+   */
+  async getCustomerSettingIntegrations(
+    company: Company,
+    integratedModule: string,
+    type = 'cliente',
+  ): Promise<ResponseMinimalDTO> {
+    const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
+    const modules = await this.moduleRepository.getModules();
+    const integrations = {};
+    switch (integratedModule) {
+      case 'entries':
+        const filteredModules = [...new Set(settings.map((s) => s.module.id))];
 
-    return {
-      integrations: {
-        catalog: settings && settings.accountingCatalog ? settings.accountingCatalog.id : null,
-      },
-    };
+        const foundModules = modules.filter((m) => filteredModules.includes(m.id));
+
+        for (const f of foundModules) {
+          const values = settings
+            .filter((s) => filteredModules.includes(s.module.id))
+            .map((s) => {
+              return {
+                metaKey: s.metaKey,
+                metaValue: s.metaValue,
+              };
+            });
+
+          const data = {};
+          for (const v of values) {
+            if (type == 'cliente') {
+              switch (v.metaKey) {
+                case 'accountingCatalogCXC':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+                case 'accountingCatalogSales':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+              }
+            } else if (type == 'proveedor') {
+              switch (v.metaKey) {
+                case 'accountingCatalogCXP':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+                case 'accountingCatalogPurchases':
+                  data[v.metaKey] = v.metaValue;
+                  break;
+              }
+            }
+          }
+
+          integrations[f.shortName] = data;
+        }
+
+        break;
+    }
+    if (type == 'cliente') {
+      return Object.keys(integrations).length > 0 && Object.keys(integrations['entries']).length > 0
+        ? integrations
+        : { entries: { accountingCatalogCXC: null, accountingCatalogSales: null } };
+    } else if (type == 'proveedor') {
+      return Object.keys(integrations).length > 0 && Object.keys(integrations['entries']).length > 0
+        ? integrations
+        : { entries: { accountingCatalogCXP: null, accountingCatalogPurchases: null } };
+    }
   }
 
-  async updateCustomerSettingsIntegrations(
+  /**
+   * Metodo utilizado para actulizar o insertas configuraciones de integraciones generales de clientes y proveedores
+   * @param company compañia con la que esta logado el usuario que invoca el metodo
+   * @param data Campos necesario que se insertaran o actualizaran
+   * @param integratedModule shortname del modulo con el que se desean actulizar o insertar configuraciones de intergacion
+   * @param type si las integraciones se estan actulizando apra cliente o proveedor
+   * @returns mensaje de exito en el caso que asi fuese
+   */
+  async upsertCustomerSettingsIntegrations(
     company: Company,
     data: AccountignCatalogIntegrationDTO,
+    integratedModule: string,
+    type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
-    await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    const settings = await this.customerIntegrationsRepository.getCustomerIntegrations(company);
+    const setting = [];
 
-    const settings = await this.customerSettingRepository.getCustomerSettingIntegrations(company);
-    if (settings) {
-      await this.customerSettingRepository.updateCustomerSetting(company, data);
-      return {
-        message: 'La integración ha sido actualizada correctamente.',
-      };
+    switch (integratedModule) {
+      case 'entries':
+        if (type == 'cliente') {
+          if (data.accountingCatalogSales) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+          }
+          if (data.accountingCatalogCXC) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+          }
+
+          const accountingCatalogCXC = settings.find((s) => s.metaKey == 'accountingCatalogCXC');
+          const accountingCatalogSales = settings.find((s) => s.metaKey == 'accountingCatalogSales');
+
+          if (!accountingCatalogCXC) {
+            // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogCXC',
+              metaValue: data.accountingCatalogCXC,
+            });
+          } else {
+            setting.push({ ...accountingCatalogCXC, metaValue: data.accountingCatalogCXC });
+          }
+          if (!accountingCatalogSales) {
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogSales',
+              metaValue: data.accountingCatalogSales,
+            });
+          } else {
+            setting.push({ ...accountingCatalogSales, metaValue: data.accountingCatalogSales });
+          }
+        } else if (type == 'proveedor') {
+          if (data.accountingCatalogPurchases) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+              data.accountingCatalogPurchases,
+              company,
+            );
+          }
+          if (data.accountingCatalogCXP) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXP, company);
+          }
+
+          const accountingCatalogCXP = settings.find((s) => s.metaKey == 'accountingCatalogCXP');
+          const accountingCatalogPurchases = settings.find((s) => s.metaKey == 'accountingCatalogPurchases');
+
+          if (!accountingCatalogCXP) {
+            // await this.customerIntegrationsRepository.updateCustomerIntegrations(company, data);
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogCXP',
+              metaValue: data.accountingCatalogCXP,
+            });
+          } else {
+            setting.push({ ...accountingCatalogCXP, metaValue: data.accountingCatalogCXP });
+          }
+          if (!accountingCatalogPurchases) {
+            setting.push({
+              company: company,
+              module: 'a98b98e6-b2d5-42a3-853d-9516f64eade8',
+              metaKey: 'accountingCatalogPurchases',
+              metaValue: data.accountingCatalogPurchases,
+            });
+          } else {
+            setting.push({ ...accountingCatalogPurchases, metaValue: data.accountingCatalogPurchases });
+          }
+        }
+
+        break;
     }
 
-    await this.customerSettingRepository.createSettingIntegration(company, data);
+    await this.customerIntegrationsRepository.createCustomerIntegrations(setting);
     return {
-      message: 'La integración ha sido agregada correctamente.',
+      message: 'La integración ha sido actualizada correctamente.',
     };
   }
 
@@ -376,15 +553,40 @@ export class CustomersService {
     };
   }
 
+  /**
+   * Metodo utilizado para actualizar las configuraciones de integracion de clientes y proveedores individualmente
+   * @param id del cliente o proveedor al que se desean actulizar las configuraciones de integraciones
+   * @param data Campos necesarios o campos que se estan mandando a actulizar
+   * @param company compañia con la que esta logado el usuario que invoca el metdo
+   * @param integratedModule 'Modulo al que se le desean actulizar las configuraciones
+   * @param type que configuraciones se estan actulizando, cliente o proveedor
+   * @returns Mensaje de exito
+   */
   async UpdateCustomerIntegration(
     id: string,
     data: AccountignCatalogIntegrationDTO,
     company: Company,
+    integratedModule: string,
     type = 'cliente',
   ): Promise<ResponseMinimalDTO> {
     await this.customerRepository.getCustomer(id, company, type);
-    if (data.accountingCatalog) {
-      await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalog, company);
+    switch (integratedModule) {
+      case 'entries':
+        if (type == 'cliente') {
+          if (data.accountingCatalogCXC && data.accountingCatalogSales) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXC, company);
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogSales, company);
+          }
+        } else if (type == 'proveedor') {
+          if (data.accountingCatalogCXP && data.accountingCatalogPurchases) {
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(data.accountingCatalogCXP, company);
+            await this.accountingCatalogRepository.getAccountingCatalogNotUsed(
+              data.accountingCatalogPurchases,
+              company,
+            );
+          }
+        }
+        break;
     }
     await this.customerRepository.updateCustomer(id, data, company, type);
     return {
@@ -418,5 +620,12 @@ export class CustomersService {
       message:
         type == 'cliente' ? 'Se ha eliminado el cliente correctamente' : 'Se ha eliminado el proveedor correctamente',
     };
+  }
+}
+
+@Dependencies(CustomersService)
+export class CustomerDependsService {
+  constructor(customerService) {
+    customerService = customerService;
   }
 }
