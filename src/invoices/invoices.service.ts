@@ -252,7 +252,7 @@ export class InvoicesService {
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      data.invoicesZone as unknown as string,
+      (data.invoicesZone as unknown) as string,
     );
     const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
@@ -321,7 +321,7 @@ export class InvoicesService {
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => d.documentType as unknown as number),
+      data.map((d) => (d.documentType as unknown) as number),
     );
 
     let documentsToProcessUpdate = [];
@@ -339,7 +339,7 @@ export class InvoicesService {
         .map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           };
         });
     }
@@ -365,7 +365,7 @@ export class InvoicesService {
         delete d.id;
         return {
           ...d,
-          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
+          documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
           isCurrentDocument: true,
           company: company,
         };
@@ -848,7 +848,7 @@ export class InvoicesService {
 
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -1004,7 +1004,7 @@ export class InvoicesService {
     await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
     const details = [];
     for (const detail of data.details) {
-      const service = await this.serviceRepository.getService(company, detail.service as any as string);
+      const service = await this.serviceRepository.getService(company, (detail.service as any) as string);
       details.push({
         ...detail,
         service,
@@ -1019,10 +1019,16 @@ export class InvoicesService {
     };
   }
 
+  /**
+   * Metodo utilizado para eliminar documentos de venta
+   * @param company Compañia con la qu eesta logado el usuraio que invoca el metodo
+   * @param id de la venta que se desea eliminar
+   * @returns Returna mensaje de exito o de error en el caso que sea necesario
+   */
   async deleteInvoice(company: Company, id: string): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-    const allowedStatuses = [1];
+    const allowedStatuses = [1, 4];
     if (!allowedStatuses.includes(invoice.status.id)) {
       throw new BadRequestException(
         `La venta seleccionada no puede ser eliminada mientras tenga estado "${invoice.status.name.toUpperCase()}"`,
@@ -1030,7 +1036,13 @@ export class InvoicesService {
     }
 
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, invoice.documentType.id);
-    if (document.current - 1 != parseInt(invoice.sequence)) {
+    if (invoice.status.id == 4) {
+      if (parseInt(invoice.sequence) < document.current - 1) {
+        throw new BadRequestException(
+          'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que es menor que el ultimo correlativo ingresado.',
+        );
+      }
+    } else if (document.current - 1 != parseInt(invoice.sequence)) {
       throw new BadRequestException(
         'La venta seleccionada no puede ser eliminada, solo puede ser anulada ya que no es el ultimo correlativo ingresado.',
       );
@@ -1047,8 +1059,11 @@ export class InvoicesService {
       company,
     );
 
+    if (!result) {
+      throw new BadRequestException('No se ha podido eliminar la venta, contacta con tu administrador.');
+    }
     return {
-      message: result ? 'Se ha eliminado la venta correctamente' : 'No se ha podido eliminar venta',
+      message: 'Se ha eliminado la venta correctamente',
     };
   }
 
@@ -1122,9 +1137,8 @@ export class InvoicesService {
           order: invoice.invoices.indexOf(i) + 2,
           catalogName: (
             await this.accountingCatalogRepository.getAccountingCatalog(
-              (
-                await this.entriesService.getSettings(i.company, 'general')
-              ).data.accountingDebitCatalog as any as string,
+              ((await this.entriesService.getSettings(i.company, 'general')).data
+                .accountingDebitCatalog as any) as string,
               i.company,
               false,
             )
@@ -1151,15 +1165,12 @@ export class InvoicesService {
               order: invoice.invoices.indexOf(i) + 3,
               catalogName: (
                 await this.accountingCatalogRepository.getAccountingCatalog(
-                  (
-                    await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
-                  ).entries.accountingCatalogSales
-                    ? (
-                        await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')
-                      ).entries.accountingCatalogSales
-                    : (
-                        await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')
-                      ).entries.accountingCatalogSales,
+                  (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                    .accountingCatalogSales
+                    ? (await this.serviceService.getServiceIntegrations(i.company, id.service.id, 'entries')).entries
+                        .accountingCatalogSales
+                    : (await this.serviceService.getServiceSettingIntegrations(i.company, 'entries')).entries
+                        .accountingCatalogSales,
                   i.company,
                   false,
                 )
@@ -1182,15 +1193,12 @@ export class InvoicesService {
             order: invoice.invoices.indexOf(i) + 3,
             catalogName: (
               await this.accountingCatalogRepository.getAccountingCatalog(
-                (
-                  await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
-                ).entries.accountingCatalogSales
-                  ? (
-                      await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')
-                    ).entries.accountingCatalogSales
-                  : (
-                      await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')
-                    ).entries.accountingCatalogSales,
+                (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                  .accountingCatalogSales
+                  ? (await this.customerService.getCustomerIntegration(i.customer.id, i.company, 'entries')).entries
+                      .accountingCatalogSales
+                  : (await this.customerService.getCustomerSettingIntegrations(i.company, 'entries')).entries
+                      .accountingCatalogSales,
                 i.company,
                 false,
               )
