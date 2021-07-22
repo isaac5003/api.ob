@@ -13,10 +13,12 @@ import { ProvidersModule } from './providers/providers.module';
 import { TaxesModule } from './taxes/taxes.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { EchargesModule } from './echarges/echarges.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
+    ScheduleModule.forRoot(),
     ServicesModule,
     AuthModule,
     CustomersModule,

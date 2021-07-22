@@ -26,6 +26,8 @@ import { EntriesDependsService } from '../entries/entries.service';
 import { EntriesModule } from '../entries/entries.module';
 import { ServiceDependsService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
+import { SystemDependendService } from '../system/system.service';
+import { SystemModule } from '../system/system.module';
 
 @Module({
   imports: [
@@ -33,6 +35,7 @@ import { ServicesModule } from '../services/services.module';
     CustomersModule,
     EntriesModule,
     ServicesModule,
+    SystemModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoiceDetailRepository,
@@ -52,12 +55,14 @@ import { ServicesModule } from '../services/services.module';
       AccessRepository,
     ]),
   ],
+  exports: [InvoicesService],
   providers: [
     InvoicesService,
     DependentController,
     CustomerDependsService,
     EntriesDependsService,
     ServiceDependsService,
+    SystemDependendService,
   ],
   controllers: [InvoicesController],
 })

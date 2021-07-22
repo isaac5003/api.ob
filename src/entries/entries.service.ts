@@ -910,6 +910,7 @@ export class EntriesService {
       accounted: header.accounted,
       accountingEntryType: entryType,
       company: company,
+      origin: header.origin,
     };
 
     if (id && type == 'update') {
