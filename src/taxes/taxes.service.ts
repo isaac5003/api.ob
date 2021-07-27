@@ -6,7 +6,7 @@ import { Invoices } from 'src/invoices/entities/invoices.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
 import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
-import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
+import { InvoicesStatusesRepository } from 'src/invoices/repositories/invoices.statuses.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
 import { TaxesView } from './entities/taxes-view.entity';
@@ -41,8 +41,8 @@ export class TaxesService {
     @InjectRepository(InvoicesDocumentTypesRepository)
     private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
 
-    @InjectRepository(InvoicesStatusRepository)
-    private invoiceStatusRepository: InvoicesStatusRepository,
+    @InjectRepository(InvoicesStatusesRepository)
+    private invoiceStatusesRepository: InvoicesStatusesRepository,
 
     @InjectRepository(TaxesRepository)
     private taxesRepository: TaxesRepository,
@@ -79,7 +79,7 @@ export class TaxesService {
         const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
           data.documentType as number,
         ]);
-        const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        const invoiceStatus = await this.invoiceStatusesRepository.getInvoicesStatus(5);
         const newData = {
           authorization: data.authorization,
           sequence: data.sequence,

@@ -4,18 +4,18 @@ import { plainToClass } from 'class-transformer';
 import { GetAuthData } from 'src/auth/get-auth-data.decorator';
 import { Company } from 'src/companies/entities/Company.entity';
 import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { InvoicesStatusService } from '../services/invoices.status.service';
 
 @Controller('/status')
 @UseGuards(AuthGuard())
-export class InvoicesStatusController {
+export class InvoicesStatusesController {
   constructor(private invoiceStatus: InvoicesStatusService) {}
 
   @Get('/')
-  async getInvoicesStatus(): Promise<ResponseListDTO<InvoicesStatus, number, number, number>> {
+  async getInvoicesStatus(): Promise<ResponseListDTO<InvoicesStatuses, number, number, number>> {
     const { data, count } = await this.invoiceStatus.getInvoicesStatuses();
-    return new ResponseListDTO(plainToClass(InvoicesStatus, data), count);
+    return new ResponseListDTO(plainToClass(InvoicesStatuses, data), count);
   }
 
   @Put('/void/:id')

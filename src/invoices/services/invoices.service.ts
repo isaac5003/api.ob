@@ -18,8 +18,8 @@ import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.
 import { InvoicesDocumentTypesRepository } from '../repositories/invoices.documentTypes.repository';
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellersRepository } from '../repositories/invoices.sellers.repository';
-import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
 import { InvoicesZonesRepository } from '../repositories/invoices.zones.repository';
+import { InvoicesStatusesRepository } from '../repositories/invoices.statuses.repository';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { numeroALetras } from '../../_tools';
 import { format, parseISO } from 'date-fns';
@@ -43,8 +43,8 @@ export class InvoicesService {
     @InjectRepository(InvoicesDocumentTypesRepository)
     private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
 
-    @InjectRepository(InvoicesStatusRepository)
-    private invoiceStatusRepository: InvoicesStatusRepository,
+    @InjectRepository(InvoicesStatusesRepository)
+    private invoiceStatusesRepository: InvoicesStatusesRepository,
 
     @InjectRepository(InvoicesZonesRepository)
     private invoicesZoneRepository: InvoicesZonesRepository,
@@ -296,7 +296,7 @@ export class InvoicesService {
       customer.id,
     );
     const invoiceSeller = await this.invoicesSellersRepository.getInvoicesSeller(company, data.header.invoicesSeller);
-    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
+    const invoiceStatus = await this.invoiceStatusesRepository.getInvoicesStatus(1);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
       company,
@@ -389,7 +389,7 @@ export class InvoicesService {
       );
     }
 
-    const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(4);
+    const invoiceStatus = await this.invoiceStatusesRepository.getInvoicesStatus(4);
     const document = await this.invoicesDocumentRepository.getSequenceAvailable(company, data.documentType);
     if (data.sequenceFrom < document.current || data.sequenceTo > document.final) {
       throw new BadRequestException(

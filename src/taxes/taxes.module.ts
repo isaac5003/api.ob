@@ -7,7 +7,7 @@ import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
 import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
+import { InvoicesStatusesRepository } from 'src/invoices/repositories/invoices.statuses.repository';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
@@ -23,7 +23,7 @@ import { AuthDependentService } from 'src/auth/auth.service';
       InvoicesDetailsRepository,
       InvoicesDocumentTypesRepository,
       CustomerRepository,
-      InvoicesStatusRepository,
+      InvoicesStatusesRepository,
       TaxesRepository,
       PurchaseRepository,
       PurchasesStatusRepository,

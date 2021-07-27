@@ -6,8 +6,8 @@ import { InvoicesDocumentsRepository } from './repositories/invoices.documents.r
 import { InvoicesDocumentTypesRepository } from './repositories/invoices.documentTypes.repository';
 import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellersRepository } from './repositories/invoices.sellers.repository';
-import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZonesRepository } from './repositories/invoices.zones.repository';
+import { InvoicesStatusesRepository } from './repositories/invoices.statuses.repository';
 import { InvoicesService } from './services/invoices.service';
 import { InvoicesController } from './controllers/invoices.controller';
 import { AuthModule } from '../auth/auth.module';
@@ -30,7 +30,7 @@ import { SystemDependentService } from '../system/system.service';
 import { SystemModule } from '../system/system.module';
 import { InvoicesDocumentsController } from './controllers/invoices.documents.controller';
 import { InvoicesDocumentsService } from './services/invoices.documents.service';
-import { InvoicesStatusController } from './controllers/invoices.status.controller';
+import { InvoicesStatusesController } from './controllers/invoices.statuses.controller';
 import { InvoicesStatusService } from './services/invoices.status.service';
 import { InvoicesZonesService } from './services/invoices.zones.service';
 import { InvoicesZonesController } from './controllers/invoices.zones.controller';
@@ -55,8 +55,8 @@ import { InvoicesSellersService } from './services/invoices.sellers.service';
       InvoicesDocumentTypesRepository,
       InvoicesPaymentsConditionsRepository,
       InvoicesSellersRepository,
-      InvoicesStatusRepository,
       InvoicesZonesRepository,
+      InvoicesStatusesRepository,
       CustomerRepository,
       CustomerBranchRepository,
       ServiceRepository,
@@ -84,7 +84,7 @@ import { InvoicesSellersService } from './services/invoices.sellers.service';
   ],
   controllers: [
     InvoicesDocumentsController,
-    InvoicesStatusController,
+    InvoicesStatusesController,
     InvoicesZonesController,
     InvoicesPaymentsConditionsController,
     InvoicesIntegrationsController,
