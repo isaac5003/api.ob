@@ -5,7 +5,7 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesPaymentsConditionRepository } from '../repositories/InvoicesPaymentsCondition.repository';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class InvoicesPaymentsConditionService {
   async getInvoicesPaymentConditions(
     company: Company,
     filter: FilterDTO,
-  ): Promise<{ data: InvoicesPaymentsCondition[]; count: number }> {
+  ): Promise<{ data: InvoicesPaymentsConditions[]; count: number }> {
     return this.invoicesPaymentsConditionRepository.getInvoicesPaymentConditions(company, filter);
   }
 

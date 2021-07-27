@@ -12,7 +12,7 @@ import {
 import { Invoices } from './Invoices.entity';
 
 @Entity()
-export class InvoicesPaymentsCondition extends BaseEntity {
+export class InvoicesPaymentsConditions extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

@@ -8,7 +8,7 @@ import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { Invoices } from '../entities/Invoices.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
@@ -193,7 +193,7 @@ export class InvoiceRepository extends Repository<Invoices> {
     customer: Customer,
     customerBranch: CustomerBranch,
     invoiceSeller?: InvoicesSeller,
-    invoicesPaymentCondition?: InvoicesPaymentsCondition,
+    invoicesPaymentCondition?: InvoicesPaymentsConditions,
     documentType?: InvoicesDocumentType,
     document?: InvoicesDocument,
     invoiceStatus?: InvoicesStatus,

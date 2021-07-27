@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { InvoicesPaymentsCondition } from './InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from './invoices.paymentsConditions.entity';
 import { InvoicesSeller } from './InvoicesSeller.entity';
 import { InvoicesZone } from './InvoicesZone.entity';
 import { InvoicesStatus } from './InvoicesStatus.entity';
@@ -124,8 +124,8 @@ export class Invoices extends BaseEntity {
   @ManyToOne(() => Customer, (customer) => customer.invoices)
   customer: Customer;
 
-  @ManyToOne(() => InvoicesPaymentsCondition, (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices)
-  invoicesPaymentsCondition: InvoicesPaymentsCondition;
+  @ManyToOne(() => InvoicesPaymentsConditions, (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices)
+  invoicesPaymentsCondition: InvoicesPaymentsConditions;
 
   @ManyToOne(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.invoices)
   invoicesSeller: InvoicesSeller;

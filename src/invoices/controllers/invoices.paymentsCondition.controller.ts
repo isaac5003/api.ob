@@ -19,7 +19,7 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesPaymentsConditionService } from '../services/invoices.paymentsCondition.service';
 
 @Controller('/payment-condition')
@@ -32,9 +32,9 @@ export class InvoicesPaymentsConditionController {
   async getInvoicesPaymentConditions(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesPaymentsCondition, number, number, number>> {
+  ): Promise<ResponseListDTO<InvoicesPaymentsConditions, number, number, number>> {
     const { data, count } = await this.invoicePaymentCondition.getInvoicesPaymentConditions(company, filter);
-    return new ResponseListDTO(plainToClass(InvoicesPaymentsCondition, data), count, filter.page, filter.limit);
+    return new ResponseListDTO(plainToClass(InvoicesPaymentsConditions, data), count, filter.page, filter.limit);
   }
 
   @Post('/')

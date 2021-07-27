@@ -8,7 +8,7 @@ import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { validationMessage } from '../../_tools';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
@@ -132,7 +132,7 @@ export class InvoiceHeaderDataDTO {
   @IsNotEmpty({
     message: validationMessage('invoicesPaymentsCondition', 'IsNotEmpty'),
   })
-  invoicesPaymentsCondition: InvoicesPaymentsCondition;
+  invoicesPaymentsCondition: InvoicesPaymentsConditions;
 
   @IsNotEmpty({ message: validationMessage('invoicesSeller', 'IsNotEmpty') })
   invoicesSeller: InvoicesSeller;
