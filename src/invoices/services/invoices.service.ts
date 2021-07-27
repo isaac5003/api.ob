@@ -14,7 +14,7 @@ import { Invoices } from '../entities/invoices.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
-import { InvoicesDocumentsRepository } from '../repositories/invoicesDocuments.repository';
+import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';

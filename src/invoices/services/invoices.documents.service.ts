@@ -7,7 +7,7 @@ import { InvoiceDocumentLayoutDTO } from '../dtos/documents/invoice-document-lay
 import { InvoiceDocumentUpdateDTO } from '../dtos/documents/invoice-document-update.dto';
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
-import { InvoicesDocumentsRepository } from '../repositories/invoicesDocuments.repository';
+import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
 import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 

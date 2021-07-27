@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceRepository } from './repositories/invoices.repository';
 import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
-import { InvoicesDocumentsRepository } from './repositories/invoicesDocuments.repository';
+import { InvoicesDocumentsRepository } from './repositories/invoices.documents.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
