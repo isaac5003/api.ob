@@ -6,7 +6,7 @@ import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
-import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
+import { InvoicesPaymentsConditionsRepository } from '../repositories/invoices.paymentsConditions.repository';
 
 @Injectable()
 export class InvoicesPaymentsConditionsService {
