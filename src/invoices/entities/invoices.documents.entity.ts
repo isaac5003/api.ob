@@ -11,7 +11,7 @@ import {
 import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
 
 @Entity()
-export class InvoicesDocument extends BaseEntity {
+export class InvoicesDocuments extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

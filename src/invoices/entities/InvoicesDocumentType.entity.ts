@@ -8,7 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Invoices } from './invoices.entity';
-import { InvoicesDocument } from './InvoicesDocument.entity';
+import { InvoicesDocuments } from './invoices.documents.entity';
 
 @Entity()
 export class InvoicesDocumentType extends BaseEntity {
@@ -33,6 +33,6 @@ export class InvoicesDocumentType extends BaseEntity {
   @OneToMany(() => Invoices, (invoice) => invoice.documentType)
   invoices: Invoices[];
 
-  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.documentType)
-  invoicesDocuments: InvoicesDocument[];
+  @OneToMany(() => InvoicesDocuments, (invoicesDocument) => invoicesDocument.documentType)
+  invoicesDocuments: InvoicesDocuments[];
 }

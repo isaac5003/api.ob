@@ -7,7 +7,7 @@ import { InvoiceDocumentLayoutDTO } from '../dtos/documents/invoice-document-lay
 import { InvoiceDocumentUpdateDTO } from '../dtos/documents/invoice-document-update.dto';
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 
@@ -51,14 +51,14 @@ export class InvoicesDocumentsService {
     return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
-  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     const document = await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocuments, document[0]));
   }
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => (d.documentType as unknown) as number),
+      data.map((d) => d.documentType as unknown as number),
     );
 
     let documentsToProcessUpdate = [];
@@ -76,7 +76,7 @@ export class InvoicesDocumentsService {
         .map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
           };
         });
     }
@@ -102,7 +102,7 @@ export class InvoicesDocumentsService {
         delete d.id;
         return {
           ...d,
-          documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
           isCurrentDocument: true,
           company: company,
         };
@@ -135,9 +135,9 @@ export class InvoicesDocumentsService {
     };
   }
 
-  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocuments, documentLayout));
   }
 
   async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {
