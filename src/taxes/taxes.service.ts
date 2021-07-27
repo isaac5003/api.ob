@@ -317,6 +317,7 @@ export class TaxesService {
     if (updated.affected == 0) {
       throw new BadRequestException('No se ha podido actulizar el registro de IVA seleccionado.');
     }
+
     return {
       message: 'Se ha actulizado el registro de IVA correctamente.',
     };
