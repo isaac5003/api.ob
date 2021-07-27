@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceRepository } from './repositories/Invoice.repository';
-import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
+import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
@@ -50,7 +50,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     SystemModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
-      InvoiceDetailRepository,
+      InvoicesDetailsRepository,
       InvoicesDocumentRepository,
       InvoicesDocumentTypeRepository,
       InvoicesPaymentsConditionRepository,

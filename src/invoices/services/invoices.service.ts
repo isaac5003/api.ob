@@ -13,7 +13,7 @@ import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
 import { Invoice } from '../entities/Invoice.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoiceRepository } from '../repositories/Invoice.repository';
-import { InvoiceDetailRepository } from '../repositories/InvoiceDetail.repository';
+import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionRepository } from '../repositories/InvoicesPaymentsCondition.repository';
@@ -69,8 +69,8 @@ export class InvoicesService {
     @InjectRepository(ServiceRepository)
     private serviceRepository: ServiceRepository,
 
-    @InjectRepository(InvoiceDetailRepository)
-    private invoiceDetailRepository: InvoiceDetailRepository,
+    @InjectRepository(InvoicesDetailsRepository)
+    private invoiceDetailRepository: InvoicesDetailsRepository,
 
     @InjectRepository(InvoicesDocumentRepository)
     private invoicesDocumentRepository: InvoicesDocumentRepository,
@@ -357,7 +357,7 @@ export class InvoicesService {
         invoice: invoiceHeader,
       });
     }
-    await this.invoiceDetailRepository.createInvoiceDetail(details);
+    await this.invoiceDetailRepository.createInvoicesDetail(details);
 
     let nextSequence = parseInt(invoiceHeader.sequence) + 1;
     if (allInvoicesReserved.data.map((ir) => parseInt(ir.sequence)).includes(nextSequence)) {
@@ -502,7 +502,7 @@ export class InvoicesService {
 
     await this.invoiceRepository.updateInvoice([id], header);
     const ids = invoice.invoiceDetails.map((id) => id.id);
-    await this.invoiceDetailRepository.deleteInvoiceDetail(ids);
+    await this.invoiceDetailRepository.deleteInvoicesDetails(ids);
     const details = [];
     for (const detail of data.details) {
       const service = await this.serviceRepository.getService(company, detail.service as any as string);
@@ -513,7 +513,7 @@ export class InvoicesService {
         invoice: invoice,
       });
     }
-    await this.invoiceDetailRepository.createInvoiceDetail(details);
+    await this.invoiceDetailRepository.createInvoicesDetail(details);
 
     return {
       message: 'La venta se actualizo correctamente.',
@@ -550,7 +550,7 @@ export class InvoicesService {
     }
     const detailsIds = invoice.invoiceDetails.map((id) => id.id);
 
-    await this.invoiceDetailRepository.deleteInvoiceDetail(detailsIds);
+    await this.invoiceDetailRepository.deleteInvoicesDetails(detailsIds);
 
     const result = await this.invoiceRepository.deleteInvoice(company, id, invoice);
 

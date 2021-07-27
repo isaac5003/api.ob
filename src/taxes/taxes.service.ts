@@ -4,7 +4,7 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { Invoice } from 'src/invoices/entities/Invoice.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
-import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
+import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
@@ -32,8 +32,8 @@ export class TaxesService {
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
 
-    @InjectRepository(InvoiceDetailRepository)
-    private invoiceDetailRepository: InvoiceDetailRepository,
+    @InjectRepository(InvoicesDetailsRepository)
+    private invoiceDetailRepository: InvoicesDetailsRepository,
 
     @InjectRepository(CustomerRepository)
     private customerRepository: CustomerRepository,
@@ -114,7 +114,7 @@ export class TaxesService {
           invoice: invoice,
         };
 
-        await this.invoiceDetailRepository.createInvoiceDetail([details]);
+        await this.invoiceDetailRepository.createInvoicesDetail([details]);
         break;
       case 'purchases':
         if (await this.authService.hasModules(['cf5e4b29-f09c-438a-8d82-2ef482a9a461'], user, branch, company)) {
@@ -271,7 +271,7 @@ export class TaxesService {
           ventaTotalText: numeroALetras(data.total),
         };
         const invoice = await this.invoiceRepository.getInvoice(company, id);
-        await this.invoiceDetailRepository.deleteInvoiceDetail([invoice.invoiceDetails[0].id]);
+        await this.invoiceDetailRepository.deleteInvoicesDetails([invoice.invoiceDetails[0].id]);
         updated = await this.invoiceRepository.updateInvoice([id], invoiceToUpdate);
 
         const details = {
@@ -283,7 +283,7 @@ export class TaxesService {
           invoice: invoice,
         };
 
-        await this.invoiceDetailRepository.createInvoiceDetail([details]);
+        await this.invoiceDetailRepository.createInvoicesDetail([details]);
         break;
       case 'purchases':
         delete data.ivaRetenido;
@@ -330,7 +330,7 @@ export class TaxesService {
     switch (register.type) {
       case 'invoices':
         const invoice = await this.invoiceRepository.getInvoice(company, register.id);
-        await this.invoiceDetailRepository.deleteInvoiceDetail(invoice.invoiceDetails.map((d) => d.id));
+        await this.invoiceDetailRepository.deleteInvoicesDetails(invoice.invoiceDetails.map((d) => d.id));
         await this.invoiceRepository.deleteInvoice(company, id, invoice);
         break;
 

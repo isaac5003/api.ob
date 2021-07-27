@@ -17,7 +17,7 @@ import { InvoicesStatus } from './InvoicesStatus.entity';
 import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
-import { InvoiceDetail } from './InvoiceDetail.entity';
+import { InvoicesDetails } from './invoices.details.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
@@ -145,8 +145,8 @@ export class Invoice extends BaseEntity {
   @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoices)
   documentType: InvoicesDocumentType;
 
-  @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.invoice)
-  invoiceDetails: InvoiceDetail[];
+  @OneToMany(() => InvoicesDetails, (invoiceDetail) => invoiceDetail.invoice)
+  invoiceDetails: InvoicesDetails[];
 
   @OneToMany(() => Echarges, (echarges) => echarges.invoice)
   echarges: Echarges;
