@@ -7,7 +7,7 @@ import { PurchasesStatus } from 'src/purchases/entities/PurchasesStatus.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSellers } from '../entities/invoices.sellers.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
 
 export class InvoiceBaseDTO {
   authorization: string;
@@ -25,7 +25,7 @@ export class InvoiceBaseDTO {
   customerBranch: CustomerBranch | string;
   invoicesPaymentsCondition: InvoicesPaymentsConditions | string;
   invoicesSeller: InvoicesSellers | string;
-  invoicesZone: InvoicesZone;
+  invoicesZone: InvoicesZones;
   status: InvoicesStatus | PurchasesStatus | number;
   customerType: CustomerType | number;
   customerTypeNatural: CustomerTypeNatural | number;

@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Invoices } from './invoices.entity';
-import { InvoicesZone } from './InvoicesZone.entity';
+import { InvoicesZones } from './invoices.zones.entity';
 
 @Entity()
 export class InvoicesSellers extends BaseEntity {
@@ -35,6 +35,6 @@ export class InvoicesSellers extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.invoicesSellers)
   company: Company;
 
-  @ManyToOne(() => InvoicesZone, (invoicesZone) => invoicesZone.invoicesSellers)
-  invoicesZone: InvoicesZone;
+  @ManyToOne(() => InvoicesZones, (invoicesZone) => invoicesZone.invoicesSellers)
+  invoicesZone: InvoicesZones;
 }

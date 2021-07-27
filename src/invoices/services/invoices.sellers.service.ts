@@ -7,13 +7,13 @@ import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
 import { InvoicesSellers } from '../entities/invoices.sellers.entity';
 import { InvoicesSellersRepository } from '../repositories/invoices.sellers.repository';
-import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
+import { InvoicesZonesRepository } from '../repositories/invoices.zones.repository';
 
 @Injectable()
 export class InvoicesSellersService {
   constructor(
-    @InjectRepository(InvoicesZoneRepository)
-    private invoicesZoneRepository: InvoicesZoneRepository,
+    @InjectRepository(InvoicesZonesRepository)
+    private invoicesZoneRepository: InvoicesZonesRepository,
 
     @InjectRepository(InvoicesSellersRepository)
     private invoicesSellersRepository: InvoicesSellersRepository,

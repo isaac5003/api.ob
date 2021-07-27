@@ -19,7 +19,7 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
 import { InvoicesZonesService } from '../services/invoices.zones.service';
 
 @Controller('/zones')
@@ -32,9 +32,9 @@ export class InvoicesZonesController {
   async getInvoicesZones(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesZone, number, number, number>> {
+  ): Promise<ResponseListDTO<InvoicesZones, number, number, number>> {
     const { data, count } = await this.invoiceZone.getInvoicesZones(company, filter);
-    return new ResponseListDTO(plainToClass(InvoicesZone, data), count, filter.page, filter.limit);
+    return new ResponseListDTO(plainToClass(InvoicesZones, data), count, filter.page, filter.limit);
   }
 
   @Post('/')

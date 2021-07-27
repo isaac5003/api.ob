@@ -7,7 +7,7 @@ import { InvoicesDocumentTypesRepository } from './repositories/invoices.documen
 import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellersRepository } from './repositories/invoices.sellers.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
-import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
+import { InvoicesZonesRepository } from './repositories/invoices.zones.repository';
 import { InvoicesService } from './services/invoices.service';
 import { InvoicesController } from './controllers/invoices.controller';
 import { AuthModule } from '../auth/auth.module';
@@ -56,7 +56,7 @@ import { InvoicesSellersService } from './services/invoices.sellers.service';
       InvoicesPaymentsConditionsRepository,
       InvoicesSellersRepository,
       InvoicesStatusRepository,
-      InvoicesZoneRepository,
+      InvoicesZonesRepository,
       CustomerRepository,
       CustomerBranchRepository,
       ServiceRepository,

@@ -19,7 +19,7 @@ import { InvoicesDocumentTypesRepository } from '../repositories/invoices.docume
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellersRepository } from '../repositories/invoices.sellers.repository';
 import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
-import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
+import { InvoicesZonesRepository } from '../repositories/invoices.zones.repository';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { numeroALetras } from '../../_tools';
 import { format, parseISO } from 'date-fns';
@@ -46,8 +46,8 @@ export class InvoicesService {
     @InjectRepository(InvoicesStatusRepository)
     private invoiceStatusRepository: InvoicesStatusRepository,
 
-    @InjectRepository(InvoicesZoneRepository)
-    private invoicesZoneRepository: InvoicesZoneRepository,
+    @InjectRepository(InvoicesZonesRepository)
+    private invoicesZoneRepository: InvoicesZonesRepository,
 
     @InjectRepository(InvoicesPaymentsConditionsRepository)
     private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionsRepository,

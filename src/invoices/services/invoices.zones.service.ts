@@ -5,20 +5,20 @@ import { FilterDTO } from '../../_dtos/filter.dto';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
-import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
+import { InvoicesZonesRepository } from '../repositories/invoices.zones.repository';
 
 @Injectable()
 export class InvoicesZonesService {
   constructor(
-    @InjectRepository(InvoicesZoneRepository)
-    private invoicesZoneRepository: InvoicesZoneRepository,
+    @InjectRepository(InvoicesZonesRepository)
+    private invoicesZoneRepository: InvoicesZonesRepository,
   ) {}
 
   async getInvoicesZones(
     company: Company,
     filter: Partial<FilterDTO>,
-  ): Promise<{ data: InvoicesZone[]; count: number }> {
+  ): Promise<{ data: InvoicesZones[]; count: number }> {
     return this.invoicesZoneRepository.getInvoicesZones(company, filter);
   }
 
