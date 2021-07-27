@@ -6,7 +6,7 @@ import { PurchasesDocumentType } from 'src/purchases/entities/PurchasesDocumentT
 import { PurchasesStatus } from 'src/purchases/entities/PurchasesStatus.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSellers } from '../entities/invoices.sellers.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
 
 export class InvoiceBaseDTO {
@@ -26,7 +26,7 @@ export class InvoiceBaseDTO {
   invoicesPaymentsCondition: InvoicesPaymentsConditions | string;
   invoicesSeller: InvoicesSellers | string;
   invoicesZone: InvoicesZone;
-  status: InvoicesStatus | PurchasesStatus | number;
+  status: InvoicesStatuses | PurchasesStatus | number;
   customerType: CustomerType | number;
   customerTypeNatural: CustomerTypeNatural | number;
   documentType: DocumentType | PurchasesDocumentType | number;

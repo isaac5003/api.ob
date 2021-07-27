@@ -10,7 +10,7 @@ import { validationMessage } from '../../_tools';
 import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSellers } from '../entities/invoices.sellers.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { InvoicesZone } from '../entities/InvoicesZone.entity';
 
 export class InvoiceHeaderDataDTO {
@@ -141,7 +141,7 @@ export class InvoiceHeaderDataDTO {
   invoicesZone: InvoicesZone;
 
   @IsNotEmpty({ message: validationMessage('status', 'IsNotEmpty') })
-  status: InvoicesStatus;
+  status: InvoicesStatuses;
 
   @IsNotEmpty({ message: validationMessage('customerType', 'IsNotEmpty') })
   customerType: CustomerType;

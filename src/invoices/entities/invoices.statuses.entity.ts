@@ -2,7 +2,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, OneToMany, PrimaryGenerat
 import { Invoices } from './invoices.entity';
 
 @Entity()
-export class InvoicesStatus extends BaseEntity {
+export class InvoicesStatuses extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

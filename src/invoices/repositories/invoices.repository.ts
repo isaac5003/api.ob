@@ -10,7 +10,7 @@ import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSellers } from '../entities/invoices.sellers.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
 import { format, subDays, subMonths } from 'date-fns';
@@ -196,7 +196,7 @@ export class InvoiceRepository extends Repository<Invoices> {
     invoicesPaymentCondition?: InvoicesPaymentsConditions,
     documentType?: InvoicesDocumentTypes,
     document?: InvoicesDocuments,
-    invoiceStatus?: InvoicesStatus,
+    invoiceStatus?: InvoicesStatuses,
     origin?: string,
   ): Promise<Invoices> {
     let response: Invoices;

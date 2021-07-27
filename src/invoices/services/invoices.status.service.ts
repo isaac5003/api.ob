@@ -2,41 +2,41 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from '../../companies/entities/Company.entity';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { InvoiceRepository } from '../repositories/invoices.repository';
-import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
+import { InvoicesStatusesRepository } from '../repositories/invoices.statuses.repository';
 
 @Injectable()
 export class InvoicesStatusService {
   constructor(
-    @InjectRepository(InvoicesStatusRepository)
-    private invoiceStatusRepository: InvoicesStatusRepository,
+    @InjectRepository(InvoicesStatusesRepository)
+    private invoiceStatusesRepository: InvoicesStatusesRepository,
 
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
   ) {}
 
-  async getInvoicesStatuses(): Promise<{ data: InvoicesStatus[]; count: number }> {
-    return this.invoiceStatusRepository.getInvoicesStatuses();
+  async getInvoicesStatuses(): Promise<{ data: InvoicesStatuses[]; count: number }> {
+    return this.invoiceStatusesRepository.getInvoicesStatuses();
   }
 
   async updateInvoicesStatus(company: Company, id: string, type: string): Promise<ResponseMinimalDTO> {
     const invoice = await this.invoiceRepository.getInvoice(company, id);
 
-    let status: InvoicesStatus;
+    let status: InvoicesStatuses;
     let statuses = [];
 
     switch (type) {
       case 'void':
-        status = await this.invoiceStatusRepository.getInvoicesStatus(3);
+        status = await this.invoiceStatusesRepository.getInvoicesStatus(3);
         statuses = [1, 2];
         break;
       case 'printed':
-        status = await this.invoiceStatusRepository.getInvoicesStatus(2);
+        status = await this.invoiceStatusesRepository.getInvoicesStatus(2);
         statuses = [1, 2];
         break;
       case 'paid':
-        status = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        status = await this.invoiceStatusesRepository.getInvoicesStatus(5);
         statuses = [2];
         break;
       case 'reverse':
@@ -52,7 +52,7 @@ export class InvoicesStatusService {
             newStatus = 2;
             break;
         }
-        status = await this.invoiceStatusRepository.getInvoicesStatus(newStatus);
+        status = await this.invoiceStatusesRepository.getInvoicesStatus(newStatus);
         statuses = [2, 3, 5];
         break;
     }
