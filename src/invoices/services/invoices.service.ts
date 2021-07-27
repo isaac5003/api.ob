@@ -35,7 +35,7 @@ import { EntriesService } from '../../entries/entries.service';
 import { ServicesService } from '../../services/services.service';
 import { Cron } from '@nestjs/schedule';
 import { SystemService } from '../../system/system.service';
-import { InvoicesSettingService } from '../services/invoices.settings.service';
+import { InvoicesIntegrationsService } from './invoices.integrations.service';
 
 @Injectable()
 export class InvoicesService {
@@ -83,7 +83,7 @@ export class InvoicesService {
     private customerService: CustomersService,
     private entriesService: EntriesService,
     private serviceService: ServicesService,
-    private invoiceSettingsService: InvoicesSettingService,
+    private invoicesIntegrationsService: InvoicesIntegrationsService,
 
     @Inject(forwardRef(() => SystemService))
     private systemService: SystemService,
@@ -596,7 +596,7 @@ export class InvoicesService {
       for (const i of invoice.invoices) {
         let accountingCatalog;
         if (i.invoicesPaymentsCondition.cashPayment) {
-          accountingCatalog = (await this.invoiceSettingsService.getInvoicesIntegrations(i.company.id, 'entries'))
+          accountingCatalog = (await this.invoicesIntegrationsService.getInvoicesIntegrations(i.company.id, 'entries'))
             .entries.cashPaymentAccountingCatalog;
         } else {
           accountingCatalog = (
@@ -642,7 +642,8 @@ export class InvoicesService {
         });
 
         if (
-          (await this.invoiceSettingsService.getInvoicesIntegrations(i.company.id, 'entries')).entries.registerService
+          (await this.invoicesIntegrationsService.getInvoicesIntegrations(i.company.id, 'entries')).entries
+            .registerService
         ) {
           for (const id of i.invoiceDetails) {
             details.push({

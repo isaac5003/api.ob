@@ -6,10 +6,10 @@ import { ModuleRepository } from '../../system/repositories/Module.repository';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
 import { InvoiceIntegrationBaseDTO } from '../dtos/invoice-integration-base.dto';
 import { InvoicesEntriesRecurrencyRepository } from '../repositories/Invoices.entriesRecurrency.repository';
-import { InvoicesIntegrationsRepository } from '../repositories/InvoicesIntegration.repository';
+import { InvoicesIntegrationsRepository } from '../repositories/invoices.integrations.repository';
 
 @Injectable()
-export class InvoicesSettingService {
+export class InvoicesIntegrationsService {
   constructor(
     @InjectRepository(InvoicesIntegrationsRepository)
     private invoicesIntegrationsRepository: InvoicesIntegrationsRepository,
@@ -212,9 +212,9 @@ export class InvoicesSettingService {
   }
 }
 
-@Dependencies(InvoicesSettingService)
-export class InvoicesSettingDependendService {
-  constructor(invoicesSettingService) {
-    invoicesSettingService = invoicesSettingService;
+@Dependencies(InvoicesIntegrationsService)
+export class InvoicesIntegrationsDependendService {
+  constructor(invoicesIntegrationsService) {
+    invoicesIntegrationsService = invoicesIntegrationsService;
   }
 }

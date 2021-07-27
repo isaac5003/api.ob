@@ -31,7 +31,7 @@ import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
-import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/invoices.integrations.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {

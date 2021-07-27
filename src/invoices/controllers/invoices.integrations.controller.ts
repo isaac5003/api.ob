@@ -5,12 +5,12 @@ import { Company } from 'src/companies/entities/Company.entity';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { InvoiceIntegrationActiveDTO } from '../dtos/validate/invoice-integration-active.vdto';
 import { InvoicesIntegrationsDTO } from '../dtos/validate/invoice-integration.vdto';
-import { InvoicesSettingService } from '../services/invoices.settings.service';
+import { InvoicesIntegrationsService } from '../services/invoices.integrations.service';
 
 @Controller('setting')
 @UseGuards(AuthGuard())
-export class InvoicesSettingController {
-  constructor(private invoiceSettings: InvoicesSettingService) {}
+export class InvoicesIntegrationsController {
+  constructor(private invoiceSettings: InvoicesIntegrationsService) {}
 
   @Get('/integrations/:shortname')
   async getSettingIntegrations(

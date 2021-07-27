@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Access } from '../../auth/entities/Access.entity';
-import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/invoices.integrations.entity';
 import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 
 @Entity()

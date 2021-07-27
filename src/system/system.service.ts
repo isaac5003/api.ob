@@ -2,7 +2,6 @@ import { Dependencies, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccessRepository } from '../auth/repositories/Access.repository';
 import { Company } from '../companies/entities/Company.entity';
-import { InvoicesIntegrationsRepository } from 'src/invoices/repositories/InvoicesIntegration.repository';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
 import { State } from './entities/State.entity';
@@ -12,7 +11,7 @@ import { ModuleRepository } from './repositories/Module.repository';
 import { StateRepository } from './repositories/State.repository';
 import { EntriesService } from '../entries/entries.service';
 import { InvoicesService } from '../invoices/services/invoices.service';
-import { InvoicesSettingService } from 'src/invoices/services/invoices.settings.service';
+import { InvoicesIntegrationsService } from 'src/invoices/services/invoices.integrations.service';
 
 @Injectable()
 export class SystemService {
@@ -37,7 +36,7 @@ export class SystemService {
     @Inject(forwardRef(() => InvoicesService))
     private invoicesService: InvoicesService,
 
-    private invoicesSettingService: InvoicesSettingService,
+    private invoicesIntegrationsService: InvoicesIntegrationsService,
   ) {}
 
   async getCountries(): Promise<{ data: Country[]; count: number }> {
@@ -74,7 +73,7 @@ export class SystemService {
 
     switch (receiveModule.shortName) {
       case 'invoices':
-        const invoicesIntergation = await this.invoicesSettingService.getInvoicesIntegrations(company, 'entries');
+        const invoicesIntergation = await this.invoicesIntegrationsService.getInvoicesIntegrations(company, 'entries');
         switch (integrateModule.shortName) {
           case 'entries':
             const { data } = await this.entriesService.getSettings(company, 'general');

@@ -16,7 +16,7 @@ import { CustomerBranchRepository } from '../customers/repositories/CustomerBran
 import { ServiceRepository } from '../services/repositories/Service.repository';
 import { InvoicesEntriesRecurrencyRepository } from './repositories/Invoices.entriesRecurrency.repository';
 import { ModuleRepository } from '../system/repositories/Module.repository';
-import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
+import { InvoicesIntegrationsRepository } from './repositories/invoices.integrations.repository';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
 import { AuthDependentService } from '../auth/auth.service';
 import { AccessRepository } from '../auth/repositories/Access.repository';
@@ -38,8 +38,8 @@ import { InvoicesPaymentsConditionsService } from './services/invoices.paymentsC
 import { InvoicesPaymentsConditionsController } from './controllers/invoices.paymentsConditions.controller';
 import { InvoicesSellerService } from './services/invoices.seller.service';
 import { InvoicesSellerController } from './controllers/invoices.seller.controller';
-import { InvoicesSettingController } from './controllers/invoices.settings.controller';
-import { InvoicesSettingService } from './services/invoices.settings.service';
+import { InvoicesIntegrationsController } from './controllers/invoices.integrations.controller';
+import { InvoicesIntegrationsService } from './services/invoices.integrations.service';
 
 @Module({
   imports: [
@@ -67,7 +67,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
       AccessRepository,
     ]),
   ],
-  exports: [InvoicesService, InvoicesSettingService],
+  exports: [InvoicesService, InvoicesIntegrationsService],
   providers: [
     InvoicesService,
     AuthDependentService,
@@ -80,7 +80,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesZonesService,
     InvoicesPaymentsConditionsService,
     InvoicesSellerService,
-    InvoicesSettingService,
+    InvoicesIntegrationsService,
   ],
   controllers: [
     InvoicesDocumentsController,
@@ -88,7 +88,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesZonesController,
     InvoicesPaymentsConditionsController,
     InvoicesSellerController,
-    InvoicesSettingController,
+    InvoicesIntegrationsController,
     InvoicesController,
   ],
 })
