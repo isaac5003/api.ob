@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RouterModule } from '@nestjs/core';
 import { InvoiceRepository } from './repositories/Invoice.repository';
 import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
@@ -28,6 +29,8 @@ import { ServiceDependsService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
 import { SystemDependendService } from '../system/system.service';
 import { SystemModule } from '../system/system.module';
+import { InvoicesDocumentController } from './controllers/invoices.document.controller';
+import { InvoicesDocumentsService } from './services/invoices.documents.service';
 
 @Module({
   imports: [
@@ -36,6 +39,7 @@ import { SystemModule } from '../system/system.module';
     EntriesModule,
     ServicesModule,
     SystemModule,
+    RouterModule.register([]),
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoiceDetailRepository,
@@ -63,7 +67,8 @@ import { SystemModule } from '../system/system.module';
     EntriesDependsService,
     ServiceDependsService,
     SystemDependendService,
+    InvoicesDocumentsService,
   ],
-  controllers: [InvoicesController],
+  controllers: [InvoicesController, InvoicesDocumentController],
 })
 export class InvoicesModule {}
