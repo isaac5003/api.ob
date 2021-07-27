@@ -7,7 +7,7 @@ import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
 import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
 import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
 import { InvoicesPaymentsConditions } from '../../invoices/entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';

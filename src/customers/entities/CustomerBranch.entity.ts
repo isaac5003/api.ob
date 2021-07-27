@@ -12,7 +12,7 @@ import { Customer } from './Customer.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()

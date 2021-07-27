@@ -10,7 +10,7 @@ import { InvoiceDataDTO } from '../dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
-import { Invoices } from '../entities/Invoices.entity';
+import { Invoices } from '../entities/invoices.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';

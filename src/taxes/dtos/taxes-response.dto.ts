@@ -1,4 +1,4 @@
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 export class RInvoice extends Invoices {

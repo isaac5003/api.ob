@@ -18,7 +18,7 @@ import { User } from '../auth/entities/User.entity';
 import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Branch } from '../companies/entities/Branch.entity';
 import { Company } from '../companies/entities/Company.entity';
-import { Invoices } from '../invoices/entities/Invoices.entity';
+import { Invoices } from '../invoices/entities/invoices.entity';
 import { Purchase } from '../purchases/entities/Purchase.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';

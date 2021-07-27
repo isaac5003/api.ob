@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoices } from './Invoices.entity';
+import { Invoices } from './invoices.entity';
 import { InvoicesDocument } from './InvoicesDocument.entity';
 
 @Entity()

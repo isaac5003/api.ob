@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoices } from './Invoices.entity';
+import { Invoices } from './invoices.entity';
 
 @Entity()
 export class InvoicesPaymentsConditions extends BaseEntity {

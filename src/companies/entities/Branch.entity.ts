@@ -1,6 +1,6 @@
 import { Access } from '../../auth/entities/Access.entity';
 import { Profile } from '../../auth/entities/Profile.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';

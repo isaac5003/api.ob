@@ -5,7 +5,7 @@ import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { Invoices } from '../entities/Invoices.entity';
+import { Invoices } from '../entities/invoices.entity';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';

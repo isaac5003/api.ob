@@ -1,5 +1,5 @@
 import { Customer } from 'src/customers/entities/Customer.entity';
-import { Invoices } from 'src/invoices/entities/Invoices.entity';
+import { Invoices } from 'src/invoices/entities/invoices.entity';
 
 export class EchargesBaseDTO {
   customerName: string;

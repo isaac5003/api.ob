@@ -1,6 +1,6 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import {
   BaseEntity,
   Column,

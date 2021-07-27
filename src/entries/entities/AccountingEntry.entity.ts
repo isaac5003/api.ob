@@ -11,7 +11,7 @@ import {
 import { AccountingEntryType } from './AccountingEntryType.entity';
 import { AccountingEntryDetail } from './AccountingEntryDetail.entity';
 import { Company } from '../../companies/entities/Company.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 
 @Entity()
 export class AccountingEntry extends BaseEntity {

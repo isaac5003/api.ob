@@ -13,7 +13,7 @@ import { CustomerTaxerType } from './CustomerTaxerType.entity';
 import { CustomerType } from './CustomerType.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';

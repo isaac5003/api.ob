@@ -18,7 +18,7 @@ import { Company } from '../../companies/entities/Company.entity';
 import { ReportsDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../../_dtos/responseList.dto';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
-import { Invoices } from '../entities/Invoices.entity';
+import { Invoices } from '../entities/invoices.entity';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { InvoiceHeaderCreateDTO } from '../dtos/invoice-header-create.dto';
 import { InvoiceDetailDTO } from '../dtos/invoice-details.dto';

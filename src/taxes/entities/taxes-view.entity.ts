@@ -1,4 +1,4 @@
-import { Invoices } from 'src/invoices/entities/Invoices.entity';
+import { Invoices } from 'src/invoices/entities/invoices.entity';
 import { Connection, ViewColumn, ViewEntity } from 'typeorm';
 
 @ViewEntity({

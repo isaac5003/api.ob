@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Customer } from './Customer.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
-import { Invoices } from '../../invoices/entities/Invoices.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()
