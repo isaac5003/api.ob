@@ -1,5 +1,5 @@
 import { Customer } from 'src/customers/entities/Customer.entity';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
+import { Invoices } from 'src/invoices/entities/Invoices.entity';
 
 export class EchargesBaseDTO {
   customerName: string;
@@ -13,6 +13,6 @@ export class EchargesBaseDTO {
   paidDate: string;
   notify: boolean;
   email: string;
-  invoice: string | Invoice;
+  invoice: string | Invoices;
   customer: string | Customer;
 }

@@ -12,7 +12,7 @@ import { Customer } from './Customer.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()
@@ -58,8 +58,8 @@ export class CustomerBranch extends BaseEntity {
   @ManyToOne(() => State, (state) => state.customerBranches)
   state: State;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.customerBranch)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.customerBranch)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.providerBranch)
   purchases: Purchase[];

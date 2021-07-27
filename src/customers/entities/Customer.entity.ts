@@ -13,7 +13,7 @@ import { CustomerTaxerType } from './CustomerTaxerType.entity';
 import { CustomerType } from './CustomerType.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
@@ -86,8 +86,8 @@ export class Customer extends BaseEntity {
   @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.customer)
   customerBranches: CustomerBranch[];
 
-  @OneToMany(() => Invoice, (invoice) => invoice.customer)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.customer)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.provider)
   purchases: Purchase[];

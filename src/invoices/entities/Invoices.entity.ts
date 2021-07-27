@@ -24,7 +24,7 @@ import { Echarges } from '../../echarges/entities/echarges.entity';
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 
 @Entity()
-export class Invoice extends BaseEntity {
+export class Invoices extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 

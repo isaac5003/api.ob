@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
+import { Invoices } from 'src/invoices/entities/Invoices.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
@@ -68,7 +68,7 @@ export class TaxesService {
     branch: Branch,
     user: User,
   ): Promise<ResponseMinimalDTO> {
-    let invoice: Invoice | Purchase;
+    let invoice: Invoices | Purchase;
 
     switch (data.registerType) {
       case 'invoices':
@@ -199,7 +199,7 @@ export class TaxesService {
     id: string,
     company: Company,
   ): Promise<
-    ResponseSingleDTO<Partial<{ registerType: string } & Invoice> | Partial<{ registerType: string } & Purchase>>
+    ResponseSingleDTO<Partial<{ registerType: string } & Invoices> | Partial<{ registerType: string } & Purchase>>
   > {
     let data;
 

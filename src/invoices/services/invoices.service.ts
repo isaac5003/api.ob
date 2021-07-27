@@ -10,7 +10,7 @@ import { InvoiceDataDTO } from '../dtos/invoice-data.dto';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
-import { Invoice } from '../entities/Invoice.entity';
+import { Invoices } from '../entities/Invoices.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoiceRepository } from '../repositories/Invoice.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
@@ -218,7 +218,7 @@ export class InvoicesService {
   async getInvoices(
     company: Company,
     filter: InvoiceFilterDTO,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+  ): Promise<ResponseListDTO<Partial<Invoices>, number, number, number>> {
     const { data, count } = await this.invoiceRepository.getInvoices(company, filter);
 
     const sales = data.map((i) => {
@@ -243,7 +243,7 @@ export class InvoicesService {
     };
   }
 
-  async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoice>> {
+  async getInvoice(company: Company, id: string): Promise<ResponseSingleDTO<Invoices>> {
     const invoiceAll = await this.invoiceRepository.getInvoice(company, id);
 
     let details = [];
@@ -293,7 +293,7 @@ export class InvoicesService {
     delete invoiceAll.customerBranch;
     delete invoiceAll.customer;
 
-    return new ResponseSingleDTO(plainToClass(Invoice, invoice));
+    return new ResponseSingleDTO(plainToClass(Invoices, invoice));
   }
 
   async createInvoice(company: Company, branch: Branch, data: InvoiceDataDTO, user: User): Promise<ResponseMinimalDTO> {

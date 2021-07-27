@@ -1,6 +1,6 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import {
   BaseEntity,
   Column,
@@ -59,8 +59,8 @@ export class Echarges extends BaseEntity {
   @ManyToOne(() => Customer, (customer) => customer.echarges)
   customer: Customer;
 
-  @ManyToOne(() => Invoice, (invoice) => invoice.echarges)
-  invoice: Invoice;
+  @ManyToOne(() => Invoices, (invoice) => invoice.echarges)
+  invoice: Invoices;
 
   @OneToMany(() => EchargesRequest, (echargesRequest) => echargesRequest.echarges)
   request: EchargesRequest[];

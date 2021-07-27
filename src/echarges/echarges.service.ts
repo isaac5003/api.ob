@@ -4,7 +4,7 @@ import { plainToClass } from 'class-transformer';
 import { User } from 'src/auth/entities/User.entity';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
+import { Invoices } from 'src/invoices/entities/Invoices.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
 import { ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { emailSender } from 'src/_tools';

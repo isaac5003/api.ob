@@ -1,6 +1,6 @@
 import { Access } from '../../auth/entities/Access.entity';
 import { Profile } from '../../auth/entities/Profile.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import { City } from '../../system/entities/City.entity';
 import { Country } from '../../system/entities/Country.entity';
 import { State } from '../../system/entities/State.entity';
@@ -56,8 +56,8 @@ export class Branch extends BaseEntity {
   @ManyToOne(() => State, (state) => state.branches)
   state: State;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.branch)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.branch)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.branch)
   purchases: Purchase[];

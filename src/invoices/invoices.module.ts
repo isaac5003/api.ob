@@ -18,15 +18,15 @@ import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntri
 import { ModuleRepository } from '../system/repositories/Module.repository';
 import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
-import { DependentController } from '../auth/auth.service';
+import { AuthDependentService } from '../auth/auth.service';
 import { AccessRepository } from '../auth/repositories/Access.repository';
-import { CustomerDependsService } from '../customers/customers.service';
+import { CustomerDependentService } from '../customers/customers.service';
 import { CustomersModule } from '../customers/customers.module';
-import { EntriesDependsService } from '../entries/entries.service';
+import { EntriesDependentService } from '../entries/entries.service';
 import { EntriesModule } from '../entries/entries.module';
-import { ServiceDependsService } from '../services/services.service';
+import { ServiceDependentService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
-import { SystemDependendService } from '../system/system.service';
+import { SystemDependentService } from '../system/system.service';
 import { SystemModule } from '../system/system.module';
 import { InvoicesDocumentController } from './controllers/invoices.document.controller';
 import { InvoicesDocumentsService } from './services/invoices.documents.service';
@@ -70,11 +70,11 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
   exports: [InvoicesService, InvoicesSettingService],
   providers: [
     InvoicesService,
-    DependentController,
-    CustomerDependsService,
-    EntriesDependsService,
-    ServiceDependsService,
-    SystemDependendService,
+    AuthDependentService,
+    CustomerDependentService,
+    EntriesDependentService,
+    ServiceDependentService,
+    SystemDependentService,
     InvoicesDocumentsService,
     InvoicesStatusService,
     InvoicesZonesService,

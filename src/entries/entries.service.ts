@@ -1002,7 +1002,7 @@ export class EntriesService {
 }
 
 @Dependencies(EntriesService)
-export class EntriesDependsService {
+export class EntriesDependentService {
   constructor(entriesServices) {
     entriesServices = entriesServices;
   }
