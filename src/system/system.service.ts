@@ -11,7 +11,8 @@ import { CountryRepository } from './repositories/Country.repository';
 import { ModuleRepository } from './repositories/Module.repository';
 import { StateRepository } from './repositories/State.repository';
 import { EntriesService } from '../entries/entries.service';
-import { InvoicesService } from '../invoices/invoices.service';
+import { InvoicesService } from '../invoices/services/invoices.service';
+import { InvoicesSettingService } from 'src/invoices/services/invoices.settings.service';
 
 @Injectable()
 export class SystemService {
@@ -35,6 +36,8 @@ export class SystemService {
 
     @Inject(forwardRef(() => InvoicesService))
     private invoicesService: InvoicesService,
+
+    private invoicesSettingService: InvoicesSettingService,
   ) {}
 
   async getCountries(): Promise<{ data: Country[]; count: number }> {
@@ -63,7 +66,7 @@ export class SystemService {
     integratedModule: string,
     companiesWithIntegrations: string[],
   ): Promise<boolean> {
-    if (!((companiesWithIntegrations as any) as string[]).includes(company.id)) {
+    if (!(companiesWithIntegrations as any as string[]).includes(company.id)) {
       return false;
     }
     const integrateModule = await this.moduleRepository.getModule(integratedModule);
@@ -71,7 +74,7 @@ export class SystemService {
 
     switch (receiveModule.shortName) {
       case 'invoices':
-        const invoicesIntergation = await this.invoicesService.getInvoicesIntegrations(company, 'entries');
+        const invoicesIntergation = await this.invoicesSettingService.getInvoicesIntegrations(company, 'entries');
         switch (integrateModule.shortName) {
           case 'entries':
             const { data } = await this.entriesService.getSettings(company, 'general');

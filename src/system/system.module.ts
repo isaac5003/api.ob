@@ -13,7 +13,7 @@ import { TokenRepository } from './repositories/Token.repository';
 import { SystemController } from './system.controller';
 import { SystemService } from './system.service';
 import { InvoicesModule } from '../invoices/invoices.module';
-import { InvoicesDependendService } from '../invoices/invoices.service';
+import { InvoicesDependendService } from '../invoices/services/invoices.service';
 
 @Module({
   imports: [

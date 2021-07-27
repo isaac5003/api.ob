@@ -11,7 +11,7 @@ import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentsService } from '../services/invoices.documents.service';
 
-@Controller('invoices/documents')
+@Controller('/documents')
 @UseGuards(AuthGuard())
 export class InvoicesDocumentController {
   constructor(private invoiceDocuments: InvoicesDocumentsService) {}

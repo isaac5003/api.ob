@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { RouterModule } from '@nestjs/core';
 import { InvoiceRepository } from './repositories/Invoice.repository';
 import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
@@ -9,8 +8,8 @@ import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaym
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
-import { InvoicesService } from './invoices.service';
-import { InvoicesController } from './invoices.controller';
+import { InvoicesService } from './services/invoices.service';
+import { InvoicesController } from './controllers/invoices.controller';
 import { AuthModule } from '../auth/auth.module';
 import { CustomerRepository } from '../customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
@@ -31,6 +30,16 @@ import { SystemDependendService } from '../system/system.service';
 import { SystemModule } from '../system/system.module';
 import { InvoicesDocumentController } from './controllers/invoices.document.controller';
 import { InvoicesDocumentsService } from './services/invoices.documents.service';
+import { InvoicesStatusController } from './controllers/invoices.status.controller';
+import { InvoicesStatusService } from './services/invoices.status.service';
+import { InvoicesZonesService } from './services/invoices.zones.service';
+import { InvoicesZonesController } from './controllers/invocies.zones.controller';
+import { InvoicesPaymentsConditionService } from './services/invoices.paymentsCondition.service';
+import { InvoicesPaymentsConditionController } from './controllers/invoices.paymentsCondition.controller';
+import { InvoicesSellerService } from './services/invoices.seller.service';
+import { InvoiceSellerController } from './controllers/invoices.seller.controller';
+import { InvoicesSettingController } from './controllers/invoices.settings.controller';
+import { InvoicesSettingService } from './services/invoices.settings.service';
 
 @Module({
   imports: [
@@ -39,7 +48,6 @@ import { InvoicesDocumentsService } from './services/invoices.documents.service'
     EntriesModule,
     ServicesModule,
     SystemModule,
-    RouterModule.register([]),
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoiceDetailRepository,
@@ -59,7 +67,7 @@ import { InvoicesDocumentsService } from './services/invoices.documents.service'
       AccessRepository,
     ]),
   ],
-  exports: [InvoicesService],
+  exports: [InvoicesService, InvoicesSettingService],
   providers: [
     InvoicesService,
     DependentController,
@@ -68,7 +76,20 @@ import { InvoicesDocumentsService } from './services/invoices.documents.service'
     ServiceDependsService,
     SystemDependendService,
     InvoicesDocumentsService,
+    InvoicesStatusService,
+    InvoicesZonesService,
+    InvoicesPaymentsConditionService,
+    InvoicesSellerService,
+    InvoicesSettingService,
   ],
-  controllers: [InvoicesController, InvoicesDocumentController],
+  controllers: [
+    InvoicesDocumentController,
+    InvoicesStatusController,
+    InvoicesZonesController,
+    InvoicesPaymentsConditionController,
+    InvoiceSellerController,
+    InvoicesSettingController,
+    InvoicesController,
+  ],
 })
 export class InvoicesModule {}
