@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from '../../companies/entities/Company.entity';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { InvoiceRepository } from '../repositories/Invoice.repository';
+import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
 
 @Injectable()

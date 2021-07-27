@@ -3,7 +3,7 @@ import { TaxesService } from './taxes.service';
 import { TaxesController } from './taxes.controller';
 import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
+import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
 import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';

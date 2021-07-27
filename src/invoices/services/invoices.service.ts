@@ -12,7 +12,7 @@ import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
 import { Invoices } from '../entities/Invoices.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoiceRepository } from '../repositories/Invoice.repository';
+import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceRepository } from './repositories/Invoice.repository';
+import { InvoiceRepository } from './repositories/invoices.repository';
 import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
