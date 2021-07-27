@@ -19,22 +19,22 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
-import { InvoicesSellerService } from '../services/invoices.seller.service';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
+import { InvoicesSellersService } from '../services/invoices.sellers.service';
 
 @Controller('/sellers')
 @UseGuards(AuthGuard())
-export class InvoicesSellerController {
-  constructor(private invoicesSeller: InvoicesSellerService) {}
+export class InvoicesSellersController {
+  constructor(private invoicesSeller: InvoicesSellersService) {}
 
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))
   async getInvoicesSellers(
     @GetAuthData('company') company: Company,
     @Query() filter: FilterDTO,
-  ): Promise<ResponseListDTO<InvoicesSeller, number, number, number>> {
+  ): Promise<ResponseListDTO<InvoicesSellers, number, number, number>> {
     const { data, count } = await this.invoicesSeller.getInvoicesSellers(company, filter);
-    return new ResponseListDTO(plainToClass(InvoicesSeller, data), count, filter.page, filter.limit);
+    return new ResponseListDTO(plainToClass(InvoicesSellers, data), count, filter.page, filter.limit);
   }
 
   @Post('/')

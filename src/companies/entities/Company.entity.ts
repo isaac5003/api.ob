@@ -10,7 +10,7 @@ import { AccountingSetting } from '../../entries/entities/AccountingSetting.enti
 import { Invoices } from '../../invoices/entities/invoices.entity';
 import { InvoicesDocuments } from '../../invoices/entities/invoices.documents.entity';
 import { InvoicesPaymentsConditions } from '../../invoices/entities/invoices.paymentsConditions.entity';
-import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
+import { InvoicesSellers } from '../../invoices/entities/invoices.sellers.entity';
 import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
@@ -119,8 +119,8 @@ export class Company extends BaseEntity {
   @OneToMany(() => InvoicesPaymentsConditions, (invoicesPaymentsCondition) => invoicesPaymentsCondition.company)
   invoicesPaymentsConditions: InvoicesPaymentsConditions[];
 
-  @OneToMany(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.company)
-  invoicesSellers: InvoicesSeller[];
+  @OneToMany(() => InvoicesSellers, (invoicesSeller) => invoicesSeller.company)
+  invoicesSellers: InvoicesSellers[];
 
   @OneToMany(() => InvoicesZone, (invoicesZone) => invoicesZone.company)
   invoicesZones: InvoicesZone[];

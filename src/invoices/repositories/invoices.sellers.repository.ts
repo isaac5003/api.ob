@@ -4,13 +4,13 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
 import { paginate, paginateRaw } from 'nestjs-typeorm-paginate';
 
 const reponame = 'vendedor';
-@EntityRepository(InvoicesSeller)
-export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
-  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSeller[]; count: number }> {
+@EntityRepository(InvoicesSellers)
+export class InvoicesSellersRepository extends Repository<InvoicesSellers> {
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSellers[]; count: number }> {
     const { limit, page, search, active } = filter;
 
     try {
@@ -32,7 +32,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
         });
       }
       const count = await query.getCount();
-      const data = await paginate<InvoicesSeller>(query, { limit: limit ? limit : null, page: page ? page : null });
+      const data = await paginate<InvoicesSellers>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
       console.log(error);
@@ -40,8 +40,8 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     }
   }
 
-  async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<InvoicesSeller> {
-    let response: InvoicesSeller;
+  async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<InvoicesSellers> {
+    let response: InvoicesSellers;
     try {
       const invoiceSeller = this.create({ company, ...data });
       response = await this.save(invoiceSeller);
@@ -53,8 +53,8 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     return await response;
   }
 
-  async getInvoicesSeller(company: Company, id: string, joins: string[] = []): Promise<InvoicesSeller> {
-    let invoiceSeller: InvoicesSeller;
+  async getInvoicesSeller(company: Company, id: string, joins: string[] = []): Promise<InvoicesSellers> {
+    let invoiceSeller: InvoicesSellers;
 
     const leftJoinAndSelect = {
       iz: 'i.invoicesZone',
@@ -88,7 +88,7 @@ export class InvoicesSellerRepository extends Repository<InvoicesSeller> {
     id: string,
     company: Company,
     data: InvoiceSellerDataDTO | ActiveValidateDTO,
-  ): Promise<InvoicesSeller> {
+  ): Promise<InvoicesSellers> {
     try {
       await this.update({ id, company }, data);
       return this.findOne({ id, company });

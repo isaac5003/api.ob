@@ -17,7 +17,7 @@ import { InvoicesDetailsRepository } from '../repositories/invoices.details.repo
 import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
 import { InvoicesDocumentTypesRepository } from '../repositories/invoices.documentTypes.repository';
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
-import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';
+import { InvoicesSellersRepository } from '../repositories/invoices.sellers.repository';
 import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
 import { Branch } from '../../companies/entities/Branch.entity';
@@ -52,8 +52,8 @@ export class InvoicesService {
     @InjectRepository(InvoicesPaymentsConditionsRepository)
     private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionsRepository,
 
-    @InjectRepository(InvoicesSellerRepository)
-    private invoiceSellerRepository: InvoicesSellerRepository,
+    @InjectRepository(InvoicesSellersRepository)
+    private invoicesSellersRepository: InvoicesSellersRepository,
 
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
@@ -295,7 +295,7 @@ export class InvoicesService {
       'cliente',
       customer.id,
     );
-    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoiceSeller = await this.invoicesSellersRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(1);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
@@ -453,7 +453,7 @@ export class InvoicesService {
       'cliente',
       customer.id,
     );
-    const invoiceSeller = await this.invoiceSellerRepository.getInvoicesSeller(company, data.header.invoicesSeller);
+    const invoiceSeller = await this.invoicesSellersRepository.getInvoicesSeller(company, data.header.invoicesSeller);
     const invoicesPaymentCondition = await this.invoicesPaymentsConditionRepository.getInvoicesPaymentCondition(
       data.header.invoicesPaymentsCondition,
       company,
