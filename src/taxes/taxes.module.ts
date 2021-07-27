@@ -5,7 +5,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
-import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
+import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { TaxesRepository } from './repositories/taxes.repository';
@@ -21,7 +21,7 @@ import { AuthDependentService } from 'src/auth/auth.service';
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoicesDetailsRepository,
-      InvoicesDocumentTypeRepository,
+      InvoicesDocumentTypesRepository,
       CustomerRepository,
       InvoicesStatusRepository,
       TaxesRepository,

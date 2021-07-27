@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceRepository } from './repositories/invoices.repository';
 import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
 import { InvoicesDocumentsRepository } from './repositories/invoices.documents.repository';
-import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
+import { InvoicesDocumentTypesRepository } from './repositories/invoices.documentTypes.repository';
 import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
@@ -52,7 +52,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
       InvoiceRepository,
       InvoicesDetailsRepository,
       InvoicesDocumentsRepository,
-      InvoicesDocumentTypeRepository,
+      InvoicesDocumentTypesRepository,
       InvoicesPaymentsConditionsRepository,
       InvoicesSellerRepository,
       InvoicesStatusRepository,

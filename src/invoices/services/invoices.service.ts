@@ -15,7 +15,7 @@ import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
 import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
-import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
+import { InvoicesDocumentTypesRepository } from '../repositories/invoices.documentTypes.repository';
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
@@ -40,8 +40,8 @@ import { InvoicesSettingService } from '../services/invoices.settings.service';
 @Injectable()
 export class InvoicesService {
   constructor(
-    @InjectRepository(InvoicesDocumentTypeRepository)
-    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+    @InjectRepository(InvoicesDocumentTypesRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
 
     @InjectRepository(InvoicesStatusRepository)
     private invoiceStatusRepository: InvoicesStatusRepository,

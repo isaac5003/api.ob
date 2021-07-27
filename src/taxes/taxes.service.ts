@@ -5,7 +5,7 @@ import { CustomerRepository } from 'src/customers/repositories/Customer.reposito
 import { Invoices } from 'src/invoices/entities/invoices.entity';
 import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
 import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
-import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
+import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
 import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
@@ -38,8 +38,8 @@ export class TaxesService {
     @InjectRepository(CustomerRepository)
     private customerRepository: CustomerRepository,
 
-    @InjectRepository(InvoicesDocumentTypeRepository)
-    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+    @InjectRepository(InvoicesDocumentTypesRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
 
     @InjectRepository(InvoicesStatusRepository)
     private invoiceStatusRepository: InvoicesStatusRepository,

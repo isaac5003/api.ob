@@ -9,7 +9,7 @@ import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
 import { InvoicesDocuments } from '../entities/invoices.documents.entity';
-import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
+import { InvoicesDocumentTypesRepository } from '../repositories/invoices.documentTypes.repository';
 
 Injectable();
 export class InvoicesDocumentsService {
@@ -17,8 +17,8 @@ export class InvoicesDocumentsService {
     @InjectRepository(InvoicesDocumentsRepository)
     private invoicesDocumentRepository: InvoicesDocumentsRepository,
 
-    @InjectRepository(InvoicesDocumentTypeRepository)
-    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+    @InjectRepository(InvoicesDocumentTypesRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
   ) {}
 
   async getDocuments(
