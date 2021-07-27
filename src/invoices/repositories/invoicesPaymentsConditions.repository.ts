@@ -8,7 +8,7 @@ import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditi
 
 const reponame = 'condiciones de pago';
 @EntityRepository(InvoicesPaymentsConditions)
-export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaymentsConditions> {
+export class InvoicesPaymentsConditionsRepository extends Repository<InvoicesPaymentsConditions> {
   async getInvoicesPaymentConditions(
     company: Company,
     filter: FilterDTO,

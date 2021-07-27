@@ -20,12 +20,12 @@ import { ResponseListDTO, ResponseMinimalDTO } from 'src/_dtos/responseList.dto'
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
-import { InvoicesPaymentsConditionService } from '../services/invoices.paymentsCondition.service';
+import { InvoicesPaymentsConditionsService } from '../services/invoices.paymentsConditions.service';
 
 @Controller('/payment-condition')
 @UseGuards(AuthGuard())
-export class InvoicesPaymentsConditionController {
-  constructor(private invoicePaymentCondition: InvoicesPaymentsConditionService) {}
+export class InvoicesPaymentsConditionsController {
+  constructor(private invoicePaymentCondition: InvoicesPaymentsConditionsService) {}
 
   @Get('/')
   @UsePipes(new ValidationPipe({ transform: true }))

@@ -4,7 +4,7 @@ import { InvoiceRepository } from './repositories/invoices.repository';
 import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
-import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
+import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
@@ -33,9 +33,9 @@ import { InvoicesDocumentsService } from './services/invoices.documents.service'
 import { InvoicesStatusController } from './controllers/invoices.status.controller';
 import { InvoicesStatusService } from './services/invoices.status.service';
 import { InvoicesZonesService } from './services/invoices.zones.service';
-import { InvoicesZonesController } from './controllers/invocies.zones.controller';
-import { InvoicesPaymentsConditionService } from './services/invoices.paymentsCondition.service';
-import { InvoicesPaymentsConditionController } from './controllers/invoices.paymentsCondition.controller';
+import { InvoicesZonesController } from './controllers/invoices.zones.controller';
+import { InvoicesPaymentsConditionsService } from './services/invoices.paymentsConditions.service';
+import { InvoicesPaymentsConditionsController } from './controllers/invoices.paymentsConditions.controller';
 import { InvoicesSellerService } from './services/invoices.seller.service';
 import { InvoicesSellerController } from './controllers/invoices.seller.controller';
 import { InvoicesSettingController } from './controllers/invoices.settings.controller';
@@ -53,7 +53,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
       InvoicesDetailsRepository,
       InvoicesDocumentRepository,
       InvoicesDocumentTypeRepository,
-      InvoicesPaymentsConditionRepository,
+      InvoicesPaymentsConditionsRepository,
       InvoicesSellerRepository,
       InvoicesStatusRepository,
       InvoicesZoneRepository,
@@ -78,7 +78,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesDocumentsService,
     InvoicesStatusService,
     InvoicesZonesService,
-    InvoicesPaymentsConditionService,
+    InvoicesPaymentsConditionsService,
     InvoicesSellerService,
     InvoicesSettingService,
   ],
@@ -86,7 +86,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesDocumentController,
     InvoicesStatusController,
     InvoicesZonesController,
-    InvoicesPaymentsConditionController,
+    InvoicesPaymentsConditionsController,
     InvoicesSellerController,
     InvoicesSettingController,
     InvoicesController,
