@@ -16,7 +16,7 @@ import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
 import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
-import { InvoicesPaymentsConditionRepository } from '../repositories/InvoicesPaymentsCondition.repository';
+import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';
 import { InvoicesStatusRepository } from '../repositories/InvoicesStatus.repository';
 import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
@@ -51,8 +51,8 @@ export class InvoicesService {
     @InjectRepository(InvoicesZoneRepository)
     private invoicesZoneRepository: InvoicesZoneRepository,
 
-    @InjectRepository(InvoicesPaymentsConditionRepository)
-    private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionRepository,
+    @InjectRepository(InvoicesPaymentsConditionsRepository)
+    private invoicesPaymentsConditionRepository: InvoicesPaymentsConditionsRepository,
 
     @InjectRepository(InvoicesSellerRepository)
     private invoiceSellerRepository: InvoicesSellerRepository,
@@ -77,12 +77,6 @@ export class InvoicesService {
 
     @InjectRepository(InvoicesEntriesRecurrencyRepository)
     private invoicesEntriesRecurrencyRepository: InvoicesEntriesRecurrencyRepository,
-
-    @InjectRepository(InvoicesIntegrationsRepository)
-    private invoicesIntegrationsRepository: InvoicesIntegrationsRepository,
-
-    @InjectRepository(ModuleRepository)
-    private moduleRepository: ModuleRepository,
 
     @InjectRepository(AccountingCatalogRepository)
     private accountingCatalogRepository: AccountingCatalogRepository,
