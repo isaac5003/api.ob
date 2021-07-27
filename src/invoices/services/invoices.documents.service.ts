@@ -7,8 +7,8 @@ import { InvoiceDocumentLayoutDTO } from '../dtos/documents/invoice-document-lay
 import { InvoiceDocumentUpdateDTO } from '../dtos/documents/invoice-document-update.dto';
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
 import { InvoicesDocumentsRepository } from '../repositories/invoicesDocuments.repository';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 
 Injectable();
@@ -51,9 +51,9 @@ export class InvoicesDocumentsService {
     return { data: documents, count: documents.length, page: filter.page, limit: filter.limit };
   }
 
-  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  async getDocument(company: Company, id: string): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     const document = await this.invoicesDocumentRepository.getDocumentsByIds(company, [id]);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, document[0]));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocuments, document[0]));
   }
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
@@ -135,9 +135,9 @@ export class InvoicesDocumentsService {
     };
   }
 
-  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  async getDocumentLayout(company: Company, id: number): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     const { documentLayout } = await this.invoicesDocumentRepository.getSequenceAvailable(company, id);
-    return new ResponseSingleDTO(plainToClass(InvoicesDocument, documentLayout));
+    return new ResponseSingleDTO(plainToClass(InvoicesDocuments, documentLayout));
   }
 
   async updateDocumentStatus(id: string, company: Company, data: ActiveValidateDTO): Promise<ResponseMinimalDTO> {

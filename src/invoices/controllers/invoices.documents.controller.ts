@@ -8,7 +8,7 @@ import { InvoiceDocumentLayoutDTO } from '../dtos/documents/invoice-document-lay
 import { InvoiceDocumentUpdateDTO } from '../dtos/documents/invoice-document-update.dto';
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentsService } from '../services/invoices.documents.service';
 
 @Controller('/documents')
@@ -21,9 +21,9 @@ export class InvoicesDocumentsController {
   async getInvoiceDocuments(
     @GetAuthData('company') company: Company,
     @Query() filter: DocumentFilterDTO,
-  ): Promise<ResponseListDTO<InvoicesDocument, number, number, number>> {
+  ): Promise<ResponseListDTO<InvoicesDocuments, number, number, number>> {
     const { data, count } = await await this.invoiceDocuments.getDocuments(company, filter);
-    return new ResponseListDTO(plainToClass(InvoicesDocument, data), count, filter.page, filter.limit);
+    return new ResponseListDTO(plainToClass(InvoicesDocuments, data), count, filter.page, filter.limit);
   }
 
   @Get('/:id')
@@ -31,7 +31,7 @@ export class InvoicesDocumentsController {
   async getInvoiceDocument(
     @GetAuthData('company') company: Company,
     @Param('id') id: string,
-  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  ): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     return await this.invoiceDocuments.getDocument(company, id);
   }
 
@@ -48,7 +48,7 @@ export class InvoicesDocumentsController {
   async getDocumentLayout(
     @GetAuthData('company') company: Company,
     @Param('id') id: number,
-  ): Promise<ResponseSingleDTO<InvoicesDocument>> {
+  ): Promise<ResponseSingleDTO<InvoicesDocuments>> {
     return await this.invoiceDocuments.getDocumentLayout(company, id);
   }
 

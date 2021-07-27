@@ -2,20 +2,20 @@ import { Company } from '../../companies/entities/Company.entity';
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDocumentDBDTO } from '../dtos/invoice-document-db.dto';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 
 const reponame = ' documentos de venta';
-@EntityRepository(InvoicesDocument)
-export class InvoicesDocumentsRepository extends Repository<InvoicesDocument> {
-  async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocument[]> {
+@EntityRepository(InvoicesDocuments)
+export class InvoicesDocumentRepository extends Repository<InvoicesDocuments> {
+  async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocuments[]> {
     let active, documentType;
     if (filter) {
       active = filter.active;
       documentType = filter.documentType;
     }
 
-    let documents: InvoicesDocument[];
+    let documents: InvoicesDocuments[];
 
     const leftJoinAndSelect = {
       dt: 'i.documentType',
@@ -48,7 +48,7 @@ export class InvoicesDocumentsRepository extends Repository<InvoicesDocument> {
     company: Company,
     documentType: number,
     sequenceReserved?: number[],
-  ): Promise<InvoicesDocument> {
+  ): Promise<InvoicesDocuments> {
     let document;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
@@ -90,7 +90,7 @@ export class InvoicesDocumentsRepository extends Repository<InvoicesDocument> {
     return document;
   }
 
-  async getDocumentsByIds(company: Company, id: string[], type?: string): Promise<InvoicesDocument[]> {
+  async getDocumentsByIds(company: Company, id: string[], type?: string): Promise<InvoicesDocuments[]> {
     let invoiceDocuments;
     const leftJoinAndSelect = {
       dt: 'i.documentType',
@@ -131,7 +131,7 @@ export class InvoicesDocumentsRepository extends Repository<InvoicesDocument> {
     return invoiceDocuments;
   }
 
-  async createUpdateDocument(company: Company, documents: any, type: string): Promise<InvoicesDocument[]> {
+  async createUpdateDocument(company: Company, documents: any, type: string): Promise<InvoicesDocuments[]> {
     try {
       let document;
       switch (type) {

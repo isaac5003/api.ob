@@ -8,7 +8,7 @@ import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDet
 import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
 import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
 import { Invoices } from '../../invoices/entities/invoices.entity';
-import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
+import { InvoicesDocuments } from '../../invoices/entities/invoices.documents.entity';
 import { InvoicesPaymentsConditions } from '../../invoices/entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
 import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
@@ -113,8 +113,8 @@ export class Company extends BaseEntity {
   @OneToMany(() => Purchase, (purchase) => purchase.company)
   purchases: Purchase[];
 
-  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.company)
-  invoicesDocuments: InvoicesDocument[];
+  @OneToMany(() => InvoicesDocuments, (invoicesDocument) => invoicesDocument.company)
+  invoicesDocuments: InvoicesDocuments[];
 
   @OneToMany(() => InvoicesPaymentsConditions, (invoicesPaymentsCondition) => invoicesPaymentsCondition.company)
   invoicesPaymentsConditions: InvoicesPaymentsConditions[];

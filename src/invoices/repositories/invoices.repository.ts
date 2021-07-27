@@ -6,7 +6,7 @@ import { logDatabaseError, numeroALetras } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { Invoices } from '../entities/invoices.entity';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
@@ -195,7 +195,7 @@ export class InvoiceRepository extends Repository<Invoices> {
     invoiceSeller?: InvoicesSeller,
     invoicesPaymentCondition?: InvoicesPaymentsConditions,
     documentType?: InvoicesDocumentType,
-    document?: InvoicesDocument,
+    document?: InvoicesDocuments,
     invoiceStatus?: InvoicesStatus,
     origin?: string,
   ): Promise<Invoices> {
