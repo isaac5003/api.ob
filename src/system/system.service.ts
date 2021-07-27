@@ -95,7 +95,7 @@ export class SystemService {
 }
 
 @Dependencies(SystemService)
-export class SystemDependendService {
+export class SystemDependentService {
   constructor(systemService) {
     systemService = systemService;
   }

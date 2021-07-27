@@ -18,7 +18,7 @@ import { Company } from '../../companies/entities/Company.entity';
 import { ReportsDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../../_dtos/responseList.dto';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
-import { Invoice } from '../entities/Invoice.entity';
+import { Invoices } from '../entities/Invoices.entity';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { InvoiceHeaderCreateDTO } from '../dtos/invoice-header-create.dto';
 import { InvoiceDetailDTO } from '../dtos/invoice-details.dto';
@@ -66,16 +66,16 @@ export class InvoicesController {
   async getInvoices(
     @Query() filter: InvoiceFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+  ): Promise<ResponseListDTO<Partial<Invoices>, number, number, number>> {
     const { data, count } = await this.invoice.getInvoices(company, filter);
-    return new ResponseListDTO(plainToClass(Invoice, data), count, filter.page, filter.limit);
+    return new ResponseListDTO(plainToClass(Invoices, data), count, filter.page, filter.limit);
   }
 
   @Get('/:id')
   async getInvoice(
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<Invoice>> {
+  ): Promise<ResponseSingleDTO<Invoices>> {
     return await this.invoice.getInvoice(company, id);
   }
 

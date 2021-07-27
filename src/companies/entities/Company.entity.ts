@@ -7,7 +7,7 @@ import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
 import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
 import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
 import { InvoicesPaymentsCondition } from '../../invoices/entities/InvoicesPaymentsCondition.entity';
 import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
@@ -107,8 +107,8 @@ export class Company extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];
 
-  @OneToMany(() => Invoice, (invoice) => invoice.company)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.company)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.company)
   purchases: Purchase[];

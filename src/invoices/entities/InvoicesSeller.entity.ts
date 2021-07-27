@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoice } from './Invoice.entity';
+import { Invoices } from './Invoices.entity';
 import { InvoicesZone } from './InvoicesZone.entity';
 
 @Entity()
@@ -29,8 +29,8 @@ export class InvoicesSeller extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.invoicesSeller)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.invoicesSeller)
+  invoices: Invoices[];
 
   @ManyToOne(() => Company, (company) => company.invoicesSellers)
   company: Company;

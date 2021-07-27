@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoice } from './Invoice.entity';
+import { Invoices } from './Invoices.entity';
 
 @Entity()
 export class InvoicesPaymentsCondition extends BaseEntity {
@@ -31,8 +31,8 @@ export class InvoicesPaymentsCondition extends BaseEntity {
   @Column({ default: false, type: 'boolean' })
   cashPayment: boolean;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.invoicesPaymentsCondition)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.invoicesPaymentsCondition)
+  invoices: Invoices[];
 
   @ManyToOne(() => Company, (company) => company.invoicesPaymentsConditions)
   company: Company;

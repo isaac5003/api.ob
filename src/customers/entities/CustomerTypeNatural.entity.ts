@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { Customer } from './Customer.entity';
 import { CustomerType } from './CustomerType.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/Invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()
@@ -33,8 +33,8 @@ export class CustomerTypeNatural extends BaseEntity {
   @ManyToOne(() => CustomerType, (customerType) => customerType.customerTypeNaturals)
   customerType: CustomerType;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.customerTypeNatural)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.customerTypeNatural)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.providerTypeNatural)
   purchases: Purchase[];

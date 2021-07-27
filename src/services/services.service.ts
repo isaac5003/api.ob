@@ -287,7 +287,7 @@ export class ServicesService {
 }
 
 @Dependencies(ServicesService)
-export class ServiceDependsService {
+export class ServiceDependentService {
   constructor(serviceService) {
     serviceService = serviceService;
   }
