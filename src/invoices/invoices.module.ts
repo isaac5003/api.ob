@@ -37,7 +37,7 @@ import { InvoicesZonesController } from './controllers/invocies.zones.controller
 import { InvoicesPaymentsConditionService } from './services/invoices.paymentsCondition.service';
 import { InvoicesPaymentsConditionController } from './controllers/invoices.paymentsCondition.controller';
 import { InvoicesSellerService } from './services/invoices.seller.service';
-import { InvoiceSellerController } from './controllers/invoices.seller.controller';
+import { InvoicesSellerController } from './controllers/invoices.seller.controller';
 import { InvoicesSettingController } from './controllers/invoices.settings.controller';
 import { InvoicesSettingService } from './services/invoices.settings.service';
 
@@ -87,7 +87,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesStatusController,
     InvoicesZonesController,
     InvoicesPaymentsConditionController,
-    InvoiceSellerController,
+    InvoicesSellerController,
     InvoicesSettingController,
     InvoicesController,
   ],

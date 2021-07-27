@@ -24,7 +24,7 @@ import { InvoicesSellerService } from '../services/invoices.seller.service';
 
 @Controller('/sellers')
 @UseGuards(AuthGuard())
-export class InvoiceSellerController {
+export class InvoicesSellerController {
   constructor(private invoicesSeller: InvoicesSellerService) {}
 
   @Get('/')
