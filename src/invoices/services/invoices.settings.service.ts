@@ -5,7 +5,7 @@ import { AccountingCatalogRepository } from 'src/entries/repositories/Accounting
 import { ModuleRepository } from '../../system/repositories/Module.repository';
 import { ResponseMinimalDTO } from '../../_dtos/responseList.dto';
 import { InvoiceIntegrationBaseDTO } from '../dtos/invoice-integration-base.dto';
-import { InvoicesEntriesRecurrencyRepository } from '../repositories/InvoiceEntriesRecurrency.repository';
+import { InvoicesEntriesRecurrencyRepository } from '../repositories/Invoices.entriesRecurrency.repository';
 import { InvoicesIntegrationsRepository } from '../repositories/InvoicesIntegration.repository';
 
 @Injectable()

@@ -23,8 +23,8 @@ import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository'
 import { Branch } from '../../companies/entities/Branch.entity';
 import { numeroALetras } from '../../_tools';
 import { format, parseISO } from 'date-fns';
-import { InvoicesEntriesRecurrency } from '../entities/InvoicesEntriesRecurrency.entity';
-import { InvoicesEntriesRecurrencyRepository } from '../repositories/InvoiceEntriesRecurrency.repository';
+import { InvoicesEntriesRecurrency } from '../entities/invoices.entriesRecurrency.entity';
+import { InvoicesEntriesRecurrencyRepository } from '../repositories/Invoices.entriesRecurrency.repository';
 import { AccountingCatalogRepository } from '../../entries/repositories/AccountingCatalog.repository';
 import { AuthService } from '../../auth/auth.service';
 import { User } from '../../auth/entities/User.entity';

@@ -14,7 +14,7 @@ import { AuthModule } from '../auth/auth.module';
 import { CustomerRepository } from '../customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
-import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
+import { InvoicesEntriesRecurrencyRepository } from './repositories/Invoices.entriesRecurrency.repository';
 import { ModuleRepository } from '../system/repositories/Module.repository';
 import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';

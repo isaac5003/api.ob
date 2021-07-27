@@ -26,7 +26,7 @@ import { Branch } from '../../companies/entities/Branch.entity';
 import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
 import { InvoiceUpdateHeaderDTO } from '../dtos/invoice-header-update.dto';
 import { plainToClass } from 'class-transformer';
-import { InvoicesEntriesRecurrency } from '../entities/InvoicesEntriesRecurrency.entity';
+import { InvoicesEntriesRecurrency } from '../entities/invoices.entriesRecurrency.entity';
 import { User } from '../../auth/entities/User.entity';
 
 @Controller()
