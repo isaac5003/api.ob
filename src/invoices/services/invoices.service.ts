@@ -11,7 +11,7 @@ import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
 import { InvoiceReserveDataDTO } from '../dtos/invoice-reserve-data.dto';
 import { Invoices } from '../entities/invoices.entity';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
+import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
 import { InvoicesDocumentsRepository } from '../repositories/invoices.documents.repository';
@@ -95,7 +95,7 @@ export class InvoicesService {
   async getInvoicesEntriesRecurrencies(): Promise<{ data: InvoicesEntriesRecurrency[]; count: number }> {
     return this.invoicesEntriesRecurrencyRepository.getInvoicesEntriesRecurrencies();
   }
-  async getInvoicesDocumentTypes(): Promise<{ data: InvoicesDocumentType[]; count: number }> {
+  async getInvoicesDocumentTypes(): Promise<{ data: InvoicesDocumentTypes[]; count: number }> {
     return this.invoicesDocumentTypeRepository.getInvoiceDocumentsType();
   }
 

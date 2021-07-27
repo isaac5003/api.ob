@@ -16,7 +16,7 @@ import { InvoicesZone } from './InvoicesZone.entity';
 import { InvoicesStatus } from './InvoicesStatus.entity';
 import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
-import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
+import { InvoicesDocumentTypes } from './invoices.documentTypes.entity';
 import { InvoicesDetails } from './invoices.details.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
@@ -142,8 +142,8 @@ export class Invoices extends BaseEntity {
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.invoices)
   customerTypeNatural: CustomerTypeNatural;
 
-  @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoices)
-  documentType: InvoicesDocumentType;
+  @ManyToOne(() => InvoicesDocumentTypes, (invoicesDocumentType) => invoicesDocumentType.invoices)
+  documentType: InvoicesDocumentTypes;
 
   @OneToMany(() => InvoicesDetails, (invoiceDetail) => invoiceDetail.invoice)
   invoiceDetails: InvoicesDetails[];

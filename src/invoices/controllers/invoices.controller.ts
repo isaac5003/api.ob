@@ -16,7 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { GetAuthData } from '../../auth/get-auth-data.decorator';
 import { Company } from '../../companies/entities/Company.entity';
 import { ReportsDTO, ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../../_dtos/responseList.dto';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
+import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
 import { ReportFilterDTO } from '../dtos/invoice-report-filter.dto';
 import { Invoices } from '../entities/invoices.entity';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
@@ -41,9 +41,9 @@ export class InvoicesController {
   }
 
   @Get('/document-types')
-  async getInvoicesDocumentType(): Promise<ResponseListDTO<InvoicesDocumentType, number, number, number>> {
+  async getInvoicesDocumentType(): Promise<ResponseListDTO<InvoicesDocumentTypes, number, number, number>> {
     const { data, count } = await this.invoice.getInvoicesDocumentTypes();
-    return new ResponseListDTO(plainToClass(InvoicesDocumentType, data), count);
+    return new ResponseListDTO(plainToClass(InvoicesDocumentTypes, data), count);
   }
 
   @Get('/report/general')

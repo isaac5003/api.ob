@@ -7,7 +7,7 @@ import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { validationMessage } from '../../_tools';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
+import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
 import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
 import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
@@ -152,5 +152,5 @@ export class InvoiceHeaderDataDTO {
   customerTypeNatural: CustomerTypeNatural;
 
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
-  documentType: InvoicesDocumentType;
+  documentType: InvoicesDocumentTypes;
 }
