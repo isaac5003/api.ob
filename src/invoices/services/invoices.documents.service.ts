@@ -8,14 +8,14 @@ import { InvoiceDocumentUpdateDTO } from '../dtos/documents/invoice-document-upd
 import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
-import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
+import { InvoicesDocumentsRepository } from '../repositories/invoicesDocuments.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 
 Injectable();
 export class InvoicesDocumentsService {
   constructor(
-    @InjectRepository(InvoicesDocumentRepository)
-    private invoicesDocumentRepository: InvoicesDocumentRepository,
+    @InjectRepository(InvoicesDocumentsRepository)
+    private invoicesDocumentRepository: InvoicesDocumentsRepository,
 
     @InjectRepository(InvoicesDocumentTypeRepository)
     private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
@@ -58,7 +58,7 @@ export class InvoicesDocumentsService {
 
   async createUpdateDocument(company: Company, data: InvoiceDocumentUpdateDTO[]): Promise<ResponseMinimalDTO> {
     const documentTypes = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes(
-      data.map((d) => (d.documentType as unknown) as number),
+      data.map((d) => d.documentType as unknown as number),
     );
 
     let documentsToProcessUpdate = [];
@@ -76,7 +76,7 @@ export class InvoicesDocumentsService {
         .map((d) => {
           return {
             ...d,
-            documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+            documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
           };
         });
     }
@@ -102,7 +102,7 @@ export class InvoicesDocumentsService {
         delete d.id;
         return {
           ...d,
-          documentType: documentTypes.find((dt) => dt.id == ((d.documentType as unknown) as number)),
+          documentType: documentTypes.find((dt) => dt.id == (d.documentType as unknown as number)),
           isCurrentDocument: true,
           company: company,
         };

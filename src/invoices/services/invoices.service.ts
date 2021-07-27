@@ -14,7 +14,7 @@ import { Invoices } from '../entities/invoices.entity';
 import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
 import { InvoiceRepository } from '../repositories/invoices.repository';
 import { InvoicesDetailsRepository } from '../repositories/invoices.details.repository';
-import { InvoicesDocumentRepository } from '../repositories/InvoicesDocument.repository';
+import { InvoicesDocumentsRepository } from '../repositories/invoicesDocuments.repository';
 import { InvoicesDocumentTypeRepository } from '../repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionsRepository } from '../repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';
@@ -25,8 +25,6 @@ import { numeroALetras } from '../../_tools';
 import { format, parseISO } from 'date-fns';
 import { InvoicesEntriesRecurrency } from '../entities/InvoicesEntriesRecurrency.entity';
 import { InvoicesEntriesRecurrencyRepository } from '../repositories/InvoiceEntriesRecurrency.repository';
-import { InvoicesIntegrationsRepository } from '../repositories/InvoicesIntegration.repository';
-import { ModuleRepository } from '../../system/repositories/Module.repository';
 import { AccountingCatalogRepository } from '../../entries/repositories/AccountingCatalog.repository';
 import { AuthService } from '../../auth/auth.service';
 import { User } from '../../auth/entities/User.entity';
@@ -72,8 +70,8 @@ export class InvoicesService {
     @InjectRepository(InvoicesDetailsRepository)
     private invoiceDetailRepository: InvoicesDetailsRepository,
 
-    @InjectRepository(InvoicesDocumentRepository)
-    private invoicesDocumentRepository: InvoicesDocumentRepository,
+    @InjectRepository(InvoicesDocumentsRepository)
+    private invoicesDocumentRepository: InvoicesDocumentsRepository,
 
     @InjectRepository(InvoicesEntriesRecurrencyRepository)
     private invoicesEntriesRecurrencyRepository: InvoicesEntriesRecurrencyRepository,

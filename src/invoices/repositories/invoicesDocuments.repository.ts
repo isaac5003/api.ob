@@ -7,7 +7,7 @@ import { DocumentFilterDTO } from '../dtos/documents/invoice-documnet-filter.dto
 
 const reponame = ' documentos de venta';
 @EntityRepository(InvoicesDocument)
-export class InvoicesDocumentRepository extends Repository<InvoicesDocument> {
+export class InvoicesDocumentsRepository extends Repository<InvoicesDocument> {
   async getInvoicesDocuments(company: Company, filter?: DocumentFilterDTO): Promise<InvoicesDocument[]> {
     let active, documentType;
     if (filter) {

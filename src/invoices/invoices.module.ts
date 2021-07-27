@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { InvoiceRepository } from './repositories/invoices.repository';
 import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
-import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
+import { InvoicesDocumentsRepository } from './repositories/invoicesDocuments.repository';
 import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
 import { InvoicesPaymentsConditionsRepository } from './repositories/invoicesPaymentsConditions.repository';
 import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
@@ -28,7 +28,7 @@ import { ServiceDependentService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
 import { SystemDependentService } from '../system/system.service';
 import { SystemModule } from '../system/system.module';
-import { InvoicesDocumentController } from './controllers/invoices.document.controller';
+import { InvoicesDocumentsController } from './controllers/invoices.documents.controller';
 import { InvoicesDocumentsService } from './services/invoices.documents.service';
 import { InvoicesStatusController } from './controllers/invoices.status.controller';
 import { InvoicesStatusService } from './services/invoices.status.service';
@@ -51,7 +51,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     TypeOrmModule.forFeature([
       InvoiceRepository,
       InvoicesDetailsRepository,
-      InvoicesDocumentRepository,
+      InvoicesDocumentsRepository,
       InvoicesDocumentTypeRepository,
       InvoicesPaymentsConditionsRepository,
       InvoicesSellerRepository,
@@ -83,7 +83,7 @@ import { InvoicesSettingService } from './services/invoices.settings.service';
     InvoicesSettingService,
   ],
   controllers: [
-    InvoicesDocumentController,
+    InvoicesDocumentsController,
     InvoicesStatusController,
     InvoicesZonesController,
     InvoicesPaymentsConditionsController,

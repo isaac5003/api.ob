@@ -13,7 +13,7 @@ import { InvoicesDocumentsService } from '../services/invoices.documents.service
 
 @Controller('/documents')
 @UseGuards(AuthGuard())
-export class InvoicesDocumentController {
+export class InvoicesDocumentsController {
   constructor(private invoiceDocuments: InvoicesDocumentsService) {}
 
   @Get('/')
