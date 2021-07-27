@@ -5,30 +5,30 @@ import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseMinimalDTO } from 'src/_dtos/responseList.dto';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceSellerDataDTO } from '../dtos/sellers/invoice-data.dto';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
-import { InvoicesSellerRepository } from '../repositories/InvoicesSeller.repository';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
+import { InvoicesSellersRepository } from '../repositories/invoices.sellers.repository';
 import { InvoicesZoneRepository } from '../repositories/InvoicesZone.repository';
 
 @Injectable()
-export class InvoicesSellerService {
+export class InvoicesSellersService {
   constructor(
     @InjectRepository(InvoicesZoneRepository)
     private invoicesZoneRepository: InvoicesZoneRepository,
 
-    @InjectRepository(InvoicesSellerRepository)
-    private invoiceSellerRepository: InvoicesSellerRepository,
+    @InjectRepository(InvoicesSellersRepository)
+    private invoicesSellersRepository: InvoicesSellersRepository,
   ) {}
 
-  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSeller[]; count: number }> {
-    return this.invoiceSellerRepository.getInvoicesSellers(company, filter);
+  async getInvoicesSellers(company: Company, filter: FilterDTO): Promise<{ data: InvoicesSellers[]; count: number }> {
+    return this.invoicesSellersRepository.getInvoicesSellers(company, filter);
   }
 
   async createInvoicesSeller(company: Company, data: InvoiceSellerDataDTO): Promise<ResponseMinimalDTO> {
     const invoicesZone = await this.invoicesZoneRepository.getInvoicesZone(
       company,
-      (data.invoicesZone as unknown) as string,
+      data.invoicesZone as unknown as string,
     );
-    const seller = await this.invoiceSellerRepository.createInvoicesSeller(company, { ...data, invoicesZone });
+    const seller = await this.invoicesSellersRepository.createInvoicesSeller(company, { ...data, invoicesZone });
     return {
       id: seller.id,
       message: 'El vendedor se ha creado correctamente',
@@ -40,8 +40,8 @@ export class InvoicesSellerService {
     company: Company,
     data: InvoiceSellerDataDTO | ActiveValidateDTO,
   ): Promise<ResponseMinimalDTO> {
-    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
-    await this.invoiceSellerRepository.updateInvoicesSeller(id, company, data);
+    await this.invoicesSellersRepository.getInvoicesSeller(company, id);
+    await this.invoicesSellersRepository.updateInvoicesSeller(id, company, data);
 
     return {
       message: 'El vendedor se actualizo correctamente.',
@@ -49,9 +49,9 @@ export class InvoicesSellerService {
   }
 
   async deleteInvoicesSeller(company: Company, id: string): Promise<ResponseMinimalDTO> {
-    await this.invoiceSellerRepository.getInvoicesSeller(company, id);
+    await this.invoicesSellersRepository.getInvoicesSeller(company, id);
 
-    const result = await this.invoiceSellerRepository.deleteInvoicesSeller(company, id);
+    const result = await this.invoicesSellersRepository.deleteInvoicesSeller(company, id);
 
     return {
       message: result ? 'Se ha eliminado el vendedor correctamente' : 'No se ha podido eliminar el vendedor',

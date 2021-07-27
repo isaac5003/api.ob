@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Invoices } from './invoices.entity';
-import { InvoicesSeller } from './InvoicesSeller.entity';
+import { InvoicesSellers } from './invoices.sellers.entity';
 
 @Entity()
 export class InvoicesZone extends BaseEntity {
@@ -32,8 +32,8 @@ export class InvoicesZone extends BaseEntity {
   @OneToMany(() => Invoices, (invoice) => invoice.invoicesZone)
   invoices: Invoices[];
 
-  @OneToMany(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.invoicesZone)
-  invoicesSellers: InvoicesSeller[];
+  @OneToMany(() => InvoicesSellers, (invoicesSeller) => invoicesSeller.invoicesZone)
+  invoicesSellers: InvoicesSellers[];
 
   @ManyToOne(() => Company, (company) => company.invoicesZones)
   company: Company;

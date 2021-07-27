@@ -13,7 +13,7 @@ import { Invoices } from './invoices.entity';
 import { InvoicesZone } from './InvoicesZone.entity';
 
 @Entity()
-export class InvoicesSeller extends BaseEntity {
+export class InvoicesSellers extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
