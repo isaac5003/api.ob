@@ -4,10 +4,10 @@ import { CustomerType } from 'src/customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
 import { PurchasesDocumentType } from 'src/purchases/entities/PurchasesDocumentType.entity';
 import { PurchasesStatus } from 'src/purchases/entities/PurchasesStatus.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
 
 export class InvoiceBaseDTO {
   authorization: string;
@@ -23,10 +23,10 @@ export class InvoiceBaseDTO {
   invoiceDate: string;
   customer: Customer | string;
   customerBranch: CustomerBranch | string;
-  invoicesPaymentsCondition: InvoicesPaymentsCondition | string;
-  invoicesSeller: InvoicesSeller | string;
-  invoicesZone: InvoicesZone;
-  status: InvoicesStatus | PurchasesStatus | number;
+  invoicesPaymentsCondition: InvoicesPaymentsConditions | string;
+  invoicesSeller: InvoicesSellers | string;
+  invoicesZone: InvoicesZones;
+  status: InvoicesStatuses | PurchasesStatus | number;
   customerType: CustomerType | number;
   customerTypeNatural: CustomerTypeNatural | number;
   documentType: DocumentType | PurchasesDocumentType | number;

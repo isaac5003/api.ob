@@ -18,7 +18,7 @@ import { User } from '../auth/entities/User.entity';
 import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Branch } from '../companies/entities/Branch.entity';
 import { Company } from '../companies/entities/Company.entity';
-import { Invoice } from '../invoices/entities/Invoice.entity';
+import { Invoices } from '../invoices/entities/invoices.entity';
 import { Purchase } from '../purchases/entities/Purchase.entity';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from '../_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
@@ -47,16 +47,16 @@ export class TaxesController {
   async getInvoicesTaxes(
     @Query() filter: TaxesFilterDTO,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseListDTO<Partial<Invoice>, number, number, number>> {
+  ): Promise<ResponseListDTO<Partial<Invoices>, number, number, number>> {
     const { data, count, page, limit } = await this.taxes.getRegisters(company, filter);
-    return new ResponseListDTO(plainToClass(Invoice, data), count, page, limit);
+    return new ResponseListDTO(plainToClass(Invoices, data), count, page, limit);
   }
 
   @Get('/:id')
   async getRegister(
     @Param('id') id: string,
     @GetAuthData('company') company: Company,
-  ): Promise<ResponseSingleDTO<Partial<Invoice> | Partial<Purchase>>> {
+  ): Promise<ResponseSingleDTO<Partial<Invoices> | Partial<Purchase>>> {
     return await this.taxes.getRegister(id, company);
   }
 

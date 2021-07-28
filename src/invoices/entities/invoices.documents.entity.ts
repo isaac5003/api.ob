@@ -8,10 +8,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
+import { InvoicesDocumentTypes } from './invoices.documentTypes.entity';
 
 @Entity()
-export class InvoicesDocument extends BaseEntity {
+export class InvoicesDocuments extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -51,6 +51,6 @@ export class InvoicesDocument extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.invoicesDocuments)
   company: Company;
 
-  @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoicesDocuments)
-  documentType: InvoicesDocumentType;
+  @ManyToOne(() => InvoicesDocumentTypes, (invoicesDocumentType) => invoicesDocumentType.invoicesDocuments)
+  documentType: InvoicesDocumentTypes;
 }

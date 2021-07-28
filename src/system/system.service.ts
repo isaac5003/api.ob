@@ -2,7 +2,6 @@ import { Dependencies, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccessRepository } from '../auth/repositories/Access.repository';
 import { Company } from '../companies/entities/Company.entity';
-import { InvoicesIntegrationsRepository } from 'src/invoices/repositories/InvoicesIntegration.repository';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
 import { State } from './entities/State.entity';
@@ -11,7 +10,8 @@ import { CountryRepository } from './repositories/Country.repository';
 import { ModuleRepository } from './repositories/Module.repository';
 import { StateRepository } from './repositories/State.repository';
 import { EntriesService } from '../entries/entries.service';
-import { InvoicesService } from '../invoices/invoices.service';
+import { InvoicesService } from '../invoices/services/invoices.service';
+import { InvoicesIntegrationsService } from 'src/invoices/services/invoices.integrations.service';
 
 @Injectable()
 export class SystemService {
@@ -35,6 +35,8 @@ export class SystemService {
 
     @Inject(forwardRef(() => InvoicesService))
     private invoicesService: InvoicesService,
+
+    private invoicesIntegrationsService: InvoicesIntegrationsService,
   ) {}
 
   async getCountries(): Promise<{ data: Country[]; count: number }> {
@@ -63,7 +65,7 @@ export class SystemService {
     integratedModule: string,
     companiesWithIntegrations: string[],
   ): Promise<boolean> {
-    if (!((companiesWithIntegrations as any) as string[]).includes(company.id)) {
+    if (!(companiesWithIntegrations as any as string[]).includes(company.id)) {
       return false;
     }
     const integrateModule = await this.moduleRepository.getModule(integratedModule);
@@ -71,7 +73,7 @@ export class SystemService {
 
     switch (receiveModule.shortName) {
       case 'invoices':
-        const invoicesIntergation = await this.invoicesService.getInvoicesIntegrations(company, 'entries');
+        const invoicesIntergation = await this.invoicesIntegrationsService.getInvoicesIntegrations(company, 'entries');
         switch (integrateModule.shortName) {
           case 'entries':
             const { data } = await this.entriesService.getSettings(company, 'general');
@@ -92,7 +94,7 @@ export class SystemService {
 }
 
 @Dependencies(SystemService)
-export class SystemDependendService {
+export class SystemDependentService {
   constructor(systemService) {
     systemService = systemService;
   }

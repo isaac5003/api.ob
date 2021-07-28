@@ -1,6 +1,6 @@
 import { Company } from '../../companies/entities/Company.entity';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoicesIntegrations } from '../entities/InvoicesIntegrations.entity';
+import { InvoicesIntegrations } from '../entities/invoices.integrations.entity';
 import { logDatabaseError } from 'src/_tools';
 
 const reponame = 'integraciones de venta';

@@ -4,15 +4,15 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoicePaymentConditionDataDTO } from '../dtos/payment-condition/invoice-data.dto';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
 
 const reponame = 'condiciones de pago';
-@EntityRepository(InvoicesPaymentsCondition)
-export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaymentsCondition> {
+@EntityRepository(InvoicesPaymentsConditions)
+export class InvoicesPaymentsConditionsRepository extends Repository<InvoicesPaymentsConditions> {
   async getInvoicesPaymentConditions(
     company: Company,
     filter: FilterDTO,
-  ): Promise<{ data: InvoicesPaymentsCondition[]; count: number }> {
+  ): Promise<{ data: InvoicesPaymentsConditions[]; count: number }> {
     const { search, active } = filter;
 
     try {
@@ -42,8 +42,8 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
   async createInvoicesPaymentCondition(
     company: Company,
     data: InvoicePaymentConditionDataDTO,
-  ): Promise<InvoicesPaymentsCondition> {
-    let response: InvoicesPaymentsCondition;
+  ): Promise<InvoicesPaymentsConditions> {
+    let response: InvoicesPaymentsConditions;
     try {
       const invoicesPaymantsCondition = this.create({ company, ...data });
       response = await this.save(invoicesPaymantsCondition);
@@ -54,8 +54,8 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
     return await response;
   }
 
-  async getInvoicesPaymentCondition(id: string, company: Company): Promise<InvoicesPaymentsCondition> {
-    let invoicesPaymantsCondition: InvoicesPaymentsCondition;
+  async getInvoicesPaymentCondition(id: string, company: Company): Promise<InvoicesPaymentsConditions> {
+    let invoicesPaymantsCondition: InvoicesPaymentsConditions;
 
     try {
       invoicesPaymantsCondition = await this.findOneOrFail({ id, company });
@@ -69,7 +69,7 @@ export class InvoicesPaymentsConditionRepository extends Repository<InvoicesPaym
     id: string,
     company: Company,
     data: InvoicePaymentConditionDataDTO | ActiveValidateDTO,
-  ): Promise<InvoicesPaymentsCondition> {
+  ): Promise<InvoicesPaymentsConditions> {
     try {
       this.update({ id, company }, data);
       return this.findOne({ id, company });

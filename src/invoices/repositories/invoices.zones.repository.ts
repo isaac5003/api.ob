@@ -4,16 +4,16 @@ import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { ActiveValidateDTO } from '../dtos/invoice-active.dto';
 import { InvoiceZonesDataDTO } from '../dtos/zones/invoice-data.dto';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 
 const reponame = 'zonas';
-@EntityRepository(InvoicesZone)
-export class InvoicesZoneRepository extends Repository<InvoicesZone> {
+@EntityRepository(InvoicesZones)
+export class InvoicesZonesRepository extends Repository<InvoicesZones> {
   async getInvoicesZones(
     company: Company,
     filter: Partial<FilterDTO>,
-  ): Promise<{ data: InvoicesZone[]; count: number }> {
+  ): Promise<{ data: InvoicesZones[]; count: number }> {
     const { limit, page, search, active } = filter;
     try {
       const query = this.createQueryBuilder('iz').where({ company }).orderBy('iz.createdAt', 'DESC');
@@ -29,7 +29,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
         });
       }
       const count = await query.getCount();
-      const data = await paginate<InvoicesZone>(query, { limit: limit ? limit : null, page: page ? page : null });
+      const data = await paginate<InvoicesZones>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
       console.log(error);
@@ -37,8 +37,8 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
     }
   }
 
-  async createInvoicesZone(company: Company, data: InvoiceZonesDataDTO): Promise<InvoicesZone> {
-    let response: InvoicesZone;
+  async createInvoicesZone(company: Company, data: InvoiceZonesDataDTO): Promise<InvoicesZones> {
+    let response: InvoicesZones;
     try {
       const invoiceZone = this.create({ company, ...data });
       response = await this.save(invoiceZone);
@@ -49,8 +49,8 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
     return await response;
   }
 
-  async getInvoicesZone(company: Company, id: string): Promise<InvoicesZone> {
-    let invoicesZone: InvoicesZone;
+  async getInvoicesZone(company: Company, id: string): Promise<InvoicesZones> {
+    let invoicesZone: InvoicesZones;
     try {
       invoicesZone = await this.findOneOrFail({ id, company });
     } catch (error) {
@@ -63,7 +63,7 @@ export class InvoicesZoneRepository extends Repository<InvoicesZone> {
     id: string,
     company: Company,
     data: InvoiceZonesDataDTO | ActiveValidateDTO,
-  ): Promise<InvoicesZone> {
+  ): Promise<InvoicesZones> {
     try {
       this.update({ id, company }, data);
       return this.findOne({ id, company });

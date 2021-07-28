@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
+import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
 import { EchargesController } from './echarges.controller';
 import { EchargesService } from './echarges.service';
 import { EchargesRepository } from './repositories/echarges.repository';

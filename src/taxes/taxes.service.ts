@@ -2,11 +2,11 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from 'src/companies/entities/Company.entity';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { Invoice } from 'src/invoices/entities/Invoice.entity';
-import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
-import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
-import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
-import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
+import { Invoices } from 'src/invoices/entities/invoices.entity';
+import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
+import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
+import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
+import { InvoicesStatusesRepository } from 'src/invoices/repositories/invoices.statuses.repository';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
 import { TaxesFilterDTO } from './dtos/taxes-filter.dto';
 import { TaxesView } from './entities/taxes-view.entity';
@@ -32,17 +32,17 @@ export class TaxesService {
     @InjectRepository(InvoiceRepository)
     private invoiceRepository: InvoiceRepository,
 
-    @InjectRepository(InvoiceDetailRepository)
-    private invoiceDetailRepository: InvoiceDetailRepository,
+    @InjectRepository(InvoicesDetailsRepository)
+    private invoiceDetailRepository: InvoicesDetailsRepository,
 
     @InjectRepository(CustomerRepository)
     private customerRepository: CustomerRepository,
 
-    @InjectRepository(InvoicesDocumentTypeRepository)
-    private invoicesDocumentTypeRepository: InvoicesDocumentTypeRepository,
+    @InjectRepository(InvoicesDocumentTypesRepository)
+    private invoicesDocumentTypeRepository: InvoicesDocumentTypesRepository,
 
-    @InjectRepository(InvoicesStatusRepository)
-    private invoiceStatusRepository: InvoicesStatusRepository,
+    @InjectRepository(InvoicesStatusesRepository)
+    private invoiceStatusesRepository: InvoicesStatusesRepository,
 
     @InjectRepository(TaxesRepository)
     private taxesRepository: TaxesRepository,
@@ -68,7 +68,7 @@ export class TaxesService {
     branch: Branch,
     user: User,
   ): Promise<ResponseMinimalDTO> {
-    let invoice: Invoice | Purchase;
+    let invoice: Invoices | Purchase;
 
     switch (data.registerType) {
       case 'invoices':
@@ -79,7 +79,7 @@ export class TaxesService {
         const documentType = await this.invoicesDocumentTypeRepository.getInvoiceDocumentTypes([
           data.documentType as number,
         ]);
-        const invoiceStatus = await this.invoiceStatusRepository.getInvoicesStatus(5);
+        const invoiceStatus = await this.invoiceStatusesRepository.getInvoicesStatus(5);
         const newData = {
           authorization: data.authorization,
           sequence: data.sequence,
@@ -114,7 +114,7 @@ export class TaxesService {
           invoice: invoice,
         };
 
-        await this.invoiceDetailRepository.createInvoiceDetail([details]);
+        await this.invoiceDetailRepository.createInvoicesDetail([details]);
         break;
       case 'purchases':
         if (await this.authService.hasModules(['cf5e4b29-f09c-438a-8d82-2ef482a9a461'], user, branch, company)) {
@@ -199,7 +199,7 @@ export class TaxesService {
     id: string,
     company: Company,
   ): Promise<
-    ResponseSingleDTO<Partial<{ registerType: string } & Invoice> | Partial<{ registerType: string } & Purchase>>
+    ResponseSingleDTO<Partial<{ registerType: string } & Invoices> | Partial<{ registerType: string } & Purchase>>
   > {
     let data;
 
@@ -271,7 +271,7 @@ export class TaxesService {
           ventaTotalText: numeroALetras(data.total),
         };
         const invoice = await this.invoiceRepository.getInvoice(company, id);
-        await this.invoiceDetailRepository.deleteInvoiceDetail([invoice.invoiceDetails[0].id]);
+        await this.invoiceDetailRepository.deleteInvoicesDetails([invoice.invoiceDetails[0].id]);
         updated = await this.invoiceRepository.updateInvoice([id], invoiceToUpdate);
 
         const details = {
@@ -283,7 +283,7 @@ export class TaxesService {
           invoice: invoice,
         };
 
-        await this.invoiceDetailRepository.createInvoiceDetail([details]);
+        await this.invoiceDetailRepository.createInvoicesDetail([details]);
         break;
       case 'purchases':
         delete data.ivaRetenido;
@@ -317,6 +317,7 @@ export class TaxesService {
     if (updated.affected == 0) {
       throw new BadRequestException('No se ha podido actulizar el registro de IVA seleccionado.');
     }
+
     return {
       message: 'Se ha actulizado el registro de IVA correctamente.',
     };
@@ -330,7 +331,7 @@ export class TaxesService {
     switch (register.type) {
       case 'invoices':
         const invoice = await this.invoiceRepository.getInvoice(company, register.id);
-        await this.invoiceDetailRepository.deleteInvoiceDetail(invoice.invoiceDetails.map((d) => d.id));
+        await this.invoiceDetailRepository.deleteInvoicesDetails(invoice.invoiceDetails.map((d) => d.id));
         await this.invoiceRepository.deleteInvoice(company, id, invoice);
         break;
 

@@ -1,4 +1,3 @@
-import { InvoicesEntriesRecurrency } from '../invoices/entities/InvoicesEntriesRecurrency.entity';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class OB4511625944699622 implements MigrationInterface {
