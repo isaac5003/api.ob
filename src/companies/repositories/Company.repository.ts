@@ -16,7 +16,12 @@ export class CompanyRepository extends Repository<Company> {
 
   async getCompanyById(id: string): Promise<Company> {
     try {
-      const company = await this.createQueryBuilder('c').where({ id }).leftJoinAndSelect('c.branches', 'b').getOne();
+      const company = await this.createQueryBuilder('c')
+        .where({ id })
+        .leftJoinAndSelect('c.branches', 'b')
+        .leftJoinAndSelect('c.naturalType', 'ct')
+        .leftJoinAndSelect('c.companyType', 'cpt')
+        .getOne();
       return company;
     } catch (error) {
       logDatabaseError('company', error);
