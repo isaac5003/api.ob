@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { InvoiceDetail } from '../../invoices/entities/InvoiceDetail.entity';
+import { InvoicesDetails } from '../../invoices/entities/invoices.details.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { SellingType } from './SellingType.entity';
 import { Company } from '../../companies/entities/Company.entity';
@@ -43,8 +43,8 @@ export class Service extends BaseEntity {
   @Column({ default: false, type: 'boolean' })
   incRenta: boolean;
 
-  @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.service)
-  invoiceDetails: InvoiceDetail[];
+  @OneToMany(() => InvoicesDetails, (invoiceDetail) => invoiceDetail.service)
+  invoiceDetails: InvoicesDetails[];
 
   @ManyToOne(() => Company, (company) => company.services)
   company: Company;

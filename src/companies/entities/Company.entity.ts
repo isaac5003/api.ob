@@ -5,13 +5,12 @@ import { CustomerIntegrations } from '../../customers/entities/CustomerIntegrati
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 import { AccountingEntryDetail } from '../../entries/entities/AccountingEntryDetail.entity';
-import { AccountingEntryType } from '../../entries/entities/AccountingEntryType.entity';
 import { AccountingSetting } from '../../entries/entities/AccountingSetting.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
-import { InvoicesDocument } from '../../invoices/entities/InvoicesDocument.entity';
-import { InvoicesPaymentsCondition } from '../../invoices/entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../../invoices/entities/InvoicesSeller.entity';
-import { InvoicesZone } from '../../invoices/entities/InvoicesZone.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
+import { InvoicesDocuments } from '../../invoices/entities/invoices.documents.entity';
+import { InvoicesPaymentsConditions } from '../../invoices/entities/invoices.paymentsConditions.entity';
+import { InvoicesSellers } from '../../invoices/entities/invoices.sellers.entity';
+import { InvoicesZones } from '../../invoices/entities/invoices.zones.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { ServiceIntegrations } from '../../services/entities/ServiceIntegrations.entity';
 import {
@@ -31,7 +30,7 @@ import { NaturalType } from './NaturalType.entity';
 import { TaxerType } from './TaxerType.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
-import { InvoicesIntegrations } from '../../invoices/entities/InvoicesIntegrations.entity';
+import { InvoicesIntegrations } from '../../invoices/entities/invoices.integrations.entity';
 
 @Entity('company')
 export class Company extends BaseEntity {
@@ -107,23 +106,23 @@ export class Company extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.company)
   customers: Customer[];
 
-  @OneToMany(() => Invoice, (invoice) => invoice.company)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.company)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.company)
   purchases: Purchase[];
 
-  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.company)
-  invoicesDocuments: InvoicesDocument[];
+  @OneToMany(() => InvoicesDocuments, (invoicesDocument) => invoicesDocument.company)
+  invoicesDocuments: InvoicesDocuments[];
 
-  @OneToMany(() => InvoicesPaymentsCondition, (invoicesPaymentsCondition) => invoicesPaymentsCondition.company)
-  invoicesPaymentsConditions: InvoicesPaymentsCondition[];
+  @OneToMany(() => InvoicesPaymentsConditions, (invoicesPaymentsCondition) => invoicesPaymentsCondition.company)
+  invoicesPaymentsConditions: InvoicesPaymentsConditions[];
 
-  @OneToMany(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.company)
-  invoicesSellers: InvoicesSeller[];
+  @OneToMany(() => InvoicesSellers, (invoicesSeller) => invoicesSeller.company)
+  invoicesSellers: InvoicesSellers[];
 
-  @OneToMany(() => InvoicesZone, (invoicesZone) => invoicesZone.company)
-  invoicesZones: InvoicesZone[];
+  @OneToMany(() => InvoicesZones, (invoicesZone) => invoicesZone.company)
+  invoicesZones: InvoicesZones[];
 
   @ManyToMany(() => Profile, (profile) => profile.companies)
   profiles: Profile[];

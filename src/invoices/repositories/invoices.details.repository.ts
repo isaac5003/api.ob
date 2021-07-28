@@ -1,12 +1,12 @@
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceDetailDataDTO } from '../dtos/invoice-details-dat.dto';
-import { InvoiceDetail } from '../entities/InvoiceDetail.entity';
+import { InvoicesDetails } from '../entities/invoices.details.entity';
 
 const reponame = 'detalle del documento';
-@EntityRepository(InvoiceDetail)
-export class InvoiceDetailRepository extends Repository<InvoiceDetail[]> {
-  async createInvoiceDetail(data: Partial<InvoiceDetailDataDTO>[]): Promise<InvoiceDetail> {
+@EntityRepository(InvoicesDetails)
+export class InvoicesDetailsRepository extends Repository<InvoicesDetails[]> {
+  async createInvoicesDetail(data: Partial<InvoiceDetailDataDTO>[]): Promise<InvoicesDetails> {
     let response;
     try {
       const invoice = this.create([...data]);
@@ -19,7 +19,7 @@ export class InvoiceDetailRepository extends Repository<InvoiceDetail[]> {
     return await response;
   }
 
-  async deleteInvoiceDetail(ids: string[]): Promise<boolean> {
+  async deleteInvoicesDetails(ids: string[]): Promise<boolean> {
     try {
       if (ids.length > 0) {
         await this.delete(ids);

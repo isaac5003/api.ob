@@ -7,11 +7,11 @@ import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { validationMessage } from '../../_tools';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
-import { InvoicesZone } from '../entities/InvoicesZone.entity';
+import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
+import { InvoicesZones } from '../entities/invoices.zones.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 
 export class InvoiceHeaderDataDTO {
   @IsNotEmpty({ message: validationMessage('authorization', 'IsNotEmpty') })
@@ -132,16 +132,16 @@ export class InvoiceHeaderDataDTO {
   @IsNotEmpty({
     message: validationMessage('invoicesPaymentsCondition', 'IsNotEmpty'),
   })
-  invoicesPaymentsCondition: InvoicesPaymentsCondition;
+  invoicesPaymentsCondition: InvoicesPaymentsConditions;
 
   @IsNotEmpty({ message: validationMessage('invoicesSeller', 'IsNotEmpty') })
-  invoicesSeller: InvoicesSeller;
+  invoicesSeller: InvoicesSellers;
 
   @IsNotEmpty({ message: validationMessage('invoicesZone', 'IsNotEmpty') })
-  invoicesZone: InvoicesZone;
+  invoicesZone: InvoicesZones;
 
   @IsNotEmpty({ message: validationMessage('status', 'IsNotEmpty') })
-  status: InvoicesStatus;
+  status: InvoicesStatuses;
 
   @IsNotEmpty({ message: validationMessage('customerType', 'IsNotEmpty') })
   customerType: CustomerType;
@@ -152,5 +152,5 @@ export class InvoiceHeaderDataDTO {
   customerTypeNatural: CustomerTypeNatural;
 
   @IsNotEmpty({ message: validationMessage('documentType', 'IsNotEmpty') })
-  documentType: InvoicesDocumentType;
+  documentType: InvoicesDocumentTypes;
 }

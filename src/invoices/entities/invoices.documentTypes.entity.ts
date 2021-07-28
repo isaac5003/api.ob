@@ -7,11 +7,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoice } from './Invoice.entity';
-import { InvoicesDocument } from './InvoicesDocument.entity';
+import { Invoices } from './invoices.entity';
+import { InvoicesDocuments } from './invoices.documents.entity';
 
 @Entity()
-export class InvoicesDocumentType extends BaseEntity {
+export class InvoicesDocumentTypes extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'integer', name: 'id' })
   id: number;
 
@@ -30,9 +30,9 @@ export class InvoicesDocumentType extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.documentType)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.documentType)
+  invoices: Invoices[];
 
-  @OneToMany(() => InvoicesDocument, (invoicesDocument) => invoicesDocument.documentType)
-  invoicesDocuments: InvoicesDocument[];
+  @OneToMany(() => InvoicesDocuments, (invoicesDocument) => invoicesDocument.documentType)
+  invoicesDocuments: InvoicesDocuments[];
 }

@@ -10,21 +10,21 @@ import {
 } from 'typeorm';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
-import { InvoicesPaymentsCondition } from './InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from './InvoicesSeller.entity';
-import { InvoicesZone } from './InvoicesZone.entity';
-import { InvoicesStatus } from './InvoicesStatus.entity';
+import { InvoicesPaymentsConditions } from './invoices.paymentsConditions.entity';
+import { InvoicesSellers } from './invoices.sellers.entity';
+import { InvoicesZones } from './invoices.zones.entity';
+import { InvoicesStatuses } from './invoices.statuses.entity';
 import { CustomerType } from '../../customers/entities/CustomerType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
-import { InvoicesDocumentType } from './InvoicesDocumentType.entity';
-import { InvoiceDetail } from './InvoiceDetail.entity';
+import { InvoicesDocumentTypes } from './invoices.documentTypes.entity';
+import { InvoicesDetails } from './invoices.details.entity';
 import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
 import { AccountingEntry } from '../../entries/entities/AccountingEntry.entity';
 
 @Entity()
-export class Invoice extends BaseEntity {
+export class Invoices extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -124,17 +124,17 @@ export class Invoice extends BaseEntity {
   @ManyToOne(() => Customer, (customer) => customer.invoices)
   customer: Customer;
 
-  @ManyToOne(() => InvoicesPaymentsCondition, (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices)
-  invoicesPaymentsCondition: InvoicesPaymentsCondition;
+  @ManyToOne(() => InvoicesPaymentsConditions, (invoicesPaymentsCondition) => invoicesPaymentsCondition.invoices)
+  invoicesPaymentsCondition: InvoicesPaymentsConditions;
 
-  @ManyToOne(() => InvoicesSeller, (invoicesSeller) => invoicesSeller.invoices)
-  invoicesSeller: InvoicesSeller;
+  @ManyToOne(() => InvoicesSellers, (invoicesSeller) => invoicesSeller.invoices)
+  invoicesSeller: InvoicesSellers;
 
-  @ManyToOne(() => InvoicesZone, (invoicesZone) => invoicesZone.invoices)
-  invoicesZone: InvoicesZone;
+  @ManyToOne(() => InvoicesZones, (invoicesZone) => invoicesZone.invoices)
+  invoicesZone: InvoicesZones;
 
-  @ManyToOne(() => InvoicesStatus, (invoicesStatus) => invoicesStatus.invoices)
-  status: InvoicesStatus;
+  @ManyToOne(() => InvoicesStatuses, (invoicesStatus) => invoicesStatus.invoices)
+  status: InvoicesStatuses;
 
   @ManyToOne(() => CustomerType, (customerType) => customerType.invoices)
   customerType: CustomerType;
@@ -142,11 +142,11 @@ export class Invoice extends BaseEntity {
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.invoices)
   customerTypeNatural: CustomerTypeNatural;
 
-  @ManyToOne(() => InvoicesDocumentType, (invoicesDocumentType) => invoicesDocumentType.invoices)
-  documentType: InvoicesDocumentType;
+  @ManyToOne(() => InvoicesDocumentTypes, (invoicesDocumentType) => invoicesDocumentType.invoices)
+  documentType: InvoicesDocumentTypes;
 
-  @OneToMany(() => InvoiceDetail, (invoiceDetail) => invoiceDetail.invoice)
-  invoiceDetails: InvoiceDetail[];
+  @OneToMany(() => InvoicesDetails, (invoiceDetail) => invoiceDetail.invoice)
+  invoiceDetails: InvoicesDetails[];
 
   @OneToMany(() => Echarges, (echarges) => echarges.invoice)
   echarges: Echarges;

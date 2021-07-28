@@ -302,7 +302,7 @@ export class AuthService {
   }
 }
 @Dependencies(AuthService)
-export class DependentController {
+export class AuthDependentService {
   constructor(authService) {
     authService = authService;
   }

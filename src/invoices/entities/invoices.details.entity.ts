@@ -7,12 +7,12 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoice } from './Invoice.entity';
+import { Invoices } from './invoices.entity';
 import { Service } from '../../services/entities/Service.entity';
 import { SellingType } from '../../services/entities/SellingType.entity';
 
 @Entity()
-export class InvoiceDetail extends BaseEntity {
+export class InvoicesDetails extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -37,8 +37,8 @@ export class InvoiceDetail extends BaseEntity {
   @Column({ type: 'varchar' })
   chargeDescription: string;
 
-  @ManyToOne(() => Invoice, (invoice) => invoice.invoiceDetails)
-  invoice: Invoice;
+  @ManyToOne(() => Invoices, (invoice) => invoice.invoiceDetails)
+  invoice: Invoices;
 
   @ManyToOne(() => Service, (service) => service.invoiceDetails)
   service: Service;

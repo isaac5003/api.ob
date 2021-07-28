@@ -624,7 +624,7 @@ export class CustomersService {
 }
 
 @Dependencies(CustomersService)
-export class CustomerDependsService {
+export class CustomerDependentService {
   constructor(customerService) {
     customerService = customerService;
   }
