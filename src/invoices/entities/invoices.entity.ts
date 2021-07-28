@@ -14,7 +14,7 @@ import { InvoicesPaymentsConditions } from './invoices.paymentsConditions.entity
 import { InvoicesSellers } from './invoices.sellers.entity';
 import { InvoicesZones } from './invoices.zones.entity';
 import { InvoicesStatuses } from './invoices.statuses.entity';
-import { CustomerType } from '../../customers/entities/CustomerType.entity';
+import { PersonType } from '../../customers/entities/customers.personType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { InvoicesDocumentTypes } from './invoices.documentTypes.entity';
 import { InvoicesDetails } from './invoices.details.entity';
@@ -136,8 +136,8 @@ export class Invoices extends BaseEntity {
   @ManyToOne(() => InvoicesStatuses, (invoicesStatus) => invoicesStatus.invoices)
   status: InvoicesStatuses;
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.invoices)
-  customerType: CustomerType;
+  @ManyToOne(() => PersonType, (personType) => personType.invoices)
+  personType: PersonType;
 
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.invoices)
   customerTypeNatural: CustomerTypeNatural;

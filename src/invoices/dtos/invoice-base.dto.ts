@@ -1,6 +1,6 @@
 import { Customer } from 'src/customers/entities/Customer.entity';
 import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
-import { CustomerType } from 'src/customers/entities/CustomerType.entity';
+import { PersonType } from 'src/customers/entities/customers.personType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
 import { PurchasesDocumentType } from 'src/purchases/entities/PurchasesDocumentType.entity';
 import { PurchasesStatus } from 'src/purchases/entities/PurchasesStatus.entity';
@@ -27,7 +27,7 @@ export class InvoiceBaseDTO {
   invoicesSeller: InvoicesSellers | string;
   invoicesZone: InvoicesZones;
   status: InvoicesStatuses | PurchasesStatus | number;
-  customerType: CustomerType | number;
+  personType: PersonType | number;
   customerTypeNatural: CustomerTypeNatural | number;
   documentType: DocumentType | PurchasesDocumentType | number;
 }

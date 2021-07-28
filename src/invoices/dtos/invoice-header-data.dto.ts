@@ -4,7 +4,7 @@ import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
-import { CustomerType } from '../../customers/entities/CustomerType.entity';
+import { PersonType } from '../../customers/entities/customers.personType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import { validationMessage } from '../../_tools';
 import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
@@ -143,8 +143,8 @@ export class InvoiceHeaderDataDTO {
   @IsNotEmpty({ message: validationMessage('status', 'IsNotEmpty') })
   status: InvoicesStatuses;
 
-  @IsNotEmpty({ message: validationMessage('customerType', 'IsNotEmpty') })
-  customerType: CustomerType;
+  @IsNotEmpty({ message: validationMessage('personType', 'IsNotEmpty') })
+  personType: PersonType;
 
   @IsNotEmpty({
     message: validationMessage('customerTypeNatural', 'IsNotEmpty'),

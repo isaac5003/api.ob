@@ -487,7 +487,7 @@ export class InvoicesService {
       invoicesPaymentsCondition: invoicesPaymentCondition,
       invoicesSeller: invoiceSeller,
       invoicesZone: invoiceSeller.invoicesZone,
-      customerType: customer.customerType,
+      personType: customer.personType,
       customerTypeNatural: customer.customerTypeNatural,
       status: data.header.status,
     };
