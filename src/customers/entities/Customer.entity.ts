@@ -17,7 +17,7 @@ import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
-import { SellingType } from 'src/system/entities/SellingType.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
