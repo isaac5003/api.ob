@@ -1,6 +1,6 @@
 import { IsBoolean, IsDecimal, IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { SellingType } from '../entities/SellingType.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../_tools';
 

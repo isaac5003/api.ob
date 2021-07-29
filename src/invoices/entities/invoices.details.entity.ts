@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Invoices } from './invoices.entity';
 import { Service } from '../../services/entities/Service.entity';
-import { SellingType } from '../../services/entities/SellingType.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 
 @Entity()
 export class InvoicesDetails extends BaseEntity {

@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { SellingType } from '../../services/entities/SellingType.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 import { validationMessage } from '../../_tools';
 import { Invoices } from '../entities/invoices.entity';
 import { InvoiceDetailDTO } from './invoice-details.dto';
