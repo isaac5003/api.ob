@@ -6,7 +6,7 @@ import { CustomerRepository } from 'src/customers/repositories/Customer.reposito
 import { CustomerBranchRepository } from 'src/customers/repositories/CustomerBranch.repository';
 import { CustomerIntegrationsRepository } from 'src/customers/repositories/CustomerIntegrations.repository';
 import { CustomerTaxerTypeRepository } from 'src/customers/repositories/CustomerTaxerType.repository';
-import { CustomerTypeRepository } from 'src/customers/repositories/CustomerType.repository';
+import { PersonTypeRepository } from 'src/customers/repositories/customers.personType.repository';
 import { CustomerTypeNaturalRepository } from 'src/customers/repositories/CustomerTypeNatural.repository';
 import { AccountingCatalogRepository } from 'src/entries/repositories/AccountingCatalog.repository';
 import { ModuleRepository } from 'src/system/repositories/Module.repository';
@@ -20,7 +20,7 @@ import { ProvidersController } from './providers.controller';
       CustomerBranchRepository,
       CustomerIntegrationsRepository,
       CustomerTaxerTypeRepository,
-      CustomerTypeRepository,
+      PersonTypeRepository,
       CustomerTypeNaturalRepository,
       AccountingCatalogRepository,
       ModuleRepository,

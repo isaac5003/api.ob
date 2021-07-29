@@ -19,6 +19,7 @@ export function logDatabaseError(type: string, error: any): void {
       }
       throw new BadRequestException(message);
     case 'EntityNotFound':
+    case 'EntityNotFoundError':
       throw new BadRequestException(`El ${type} seleccionado no existe.`);
 
     default:

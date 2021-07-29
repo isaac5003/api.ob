@@ -1,8 +1,7 @@
-import { Dependencies, Injectable } from '@nestjs/common';
+import { Dependencies, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AccessRepository } from '../auth/repositories/Access.repository';
 import { Company } from '../companies/entities/Company.entity';
-import { InvoicesIntegrationsRepository } from 'src/invoices/repositories/InvoicesIntegration.repository';
 import { City } from './entities/City.entity';
 import { Country } from './entities/Country.entity';
 import { State } from './entities/State.entity';
@@ -10,6 +9,9 @@ import { CityRepository } from './repositories/City.repository';
 import { CountryRepository } from './repositories/Country.repository';
 import { ModuleRepository } from './repositories/Module.repository';
 import { StateRepository } from './repositories/State.repository';
+import { EntriesService } from '../entries/entries.service';
+import { InvoicesService } from '../invoices/services/invoices.service';
+import { InvoicesIntegrationsService } from 'src/invoices/services/invoices.integrations.service';
 
 @Injectable()
 export class SystemService {
@@ -29,8 +31,12 @@ export class SystemService {
     @InjectRepository(ModuleRepository)
     private moduleRepository: ModuleRepository,
 
-    @InjectRepository(InvoicesIntegrationsRepository)
-    private invoicesIntegrationsRepository: InvoicesIntegrationsRepository,
+    private entriesService: EntriesService,
+
+    @Inject(forwardRef(() => InvoicesService))
+    private invoicesService: InvoicesService,
+
+    private invoicesIntegrationsService: InvoicesIntegrationsService,
   ) {}
 
   async getCountries(): Promise<{ data: Country[]; count: number }> {
@@ -53,12 +59,12 @@ export class SystemService {
    * @param integratedModule  id del modulo con el que tiene integracion el receivedModule
    * @returns true o false dependiendo el caso
    */
-  async hasIntegration(company: Company, receivedModule: string, integratedModule: string): Promise<boolean> {
-    const companiesWithIntegrations = await this.accessRepository.getCompaniesWithIntegrations(
-      receivedModule,
-      integratedModule,
-    );
-
+  async hasIntegration(
+    company: Company,
+    receivedModule: string,
+    integratedModule: string,
+    companiesWithIntegrations: string[],
+  ): Promise<boolean> {
     if (!(companiesWithIntegrations as any as string[]).includes(company.id)) {
       return false;
     }
@@ -67,14 +73,20 @@ export class SystemService {
 
     switch (receiveModule.shortName) {
       case 'invoices':
-        const invoicesIntergation = await this.invoicesIntegrationsRepository.getInvoicesIntegrations(company);
+        const invoicesIntergation = await this.invoicesIntegrationsService.getInvoicesIntegrations(company, 'entries');
         switch (integrateModule.shortName) {
           case 'entries':
-            const response = invoicesIntergation.find(
-              (i) => i.metaKey == 'activeIntegration' && i.module.id == integratedModule,
-            );
+            const { data } = await this.entriesService.getSettings(company, 'general');
 
-            return response ? (response.metaValue == 'true' ? true : false) : false;
+            return (
+              invoicesIntergation.entries.activeIntegration,
+              invoicesIntergation.entries.recurrencyFrecuency,
+              invoicesIntergation.entries.cashPaymentAccountingCatalog &&
+              data.accountingDebitCatalog &&
+              data.accountingDebitCatalog
+                ? true
+                : false
+            );
         }
         break;
     }
@@ -82,7 +94,7 @@ export class SystemService {
 }
 
 @Dependencies(SystemService)
-export class SystemDependendService {
+export class SystemDependentService {
   constructor(systemService) {
     systemService = systemService;
   }

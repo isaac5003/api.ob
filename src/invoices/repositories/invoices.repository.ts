@@ -3,22 +3,22 @@ import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
 import { logDatabaseError, numeroALetras } from '../../_tools';
-import { EntityRepository, In, Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { InvoiceFilterDTO } from '../dtos/invoice-filter.dto';
-import { Invoice } from '../entities/Invoice.entity';
-import { InvoicesDocument } from '../entities/InvoicesDocument.entity';
-import { InvoicesDocumentType } from '../entities/InvoicesDocumentType.entity';
-import { InvoicesPaymentsCondition } from '../entities/InvoicesPaymentsCondition.entity';
-import { InvoicesSeller } from '../entities/InvoicesSeller.entity';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { Invoices } from '../entities/invoices.entity';
+import { InvoicesDocuments } from '../entities/invoices.documents.entity';
+import { InvoicesDocumentTypes } from '../entities/invoices.documentTypes.entity';
+import { InvoicesPaymentsConditions } from '../entities/invoices.paymentsConditions.entity';
+import { InvoicesSellers } from '../entities/invoices.sellers.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 import { paginate } from 'nestjs-typeorm-paginate';
 import { InvoiceBaseDTO } from '../dtos/invoice-base.dto';
 import { format, subDays, subMonths } from 'date-fns';
 
 const reponame = 'documento';
-@EntityRepository(Invoice)
-export class InvoiceRepository extends Repository<Invoice> {
-  async getInvoices(company: Company, filter: Partial<InvoiceFilterDTO>): Promise<{ data: Invoice[]; count: number }> {
+@EntityRepository(Invoices)
+export class InvoiceRepository extends Repository<Invoices> {
+  async getInvoices(company: Company, filter: Partial<InvoiceFilterDTO>): Promise<{ data: Invoices[]; count: number }> {
     const {
       limit,
       page,
@@ -118,7 +118,7 @@ export class InvoiceRepository extends Repository<Invoice> {
         );
       }
       const count = await query.getCount();
-      const data = await paginate<Invoice>(query, { limit: limit ? limit : null, page: page ? page : null });
+      const data = await paginate<Invoices>(query, { limit: limit ? limit : null, page: page ? page : null });
       return { data: data.items, count };
     } catch (error) {
       console.error(error);
@@ -126,8 +126,8 @@ export class InvoiceRepository extends Repository<Invoice> {
     }
   }
 
-  async getInvoice(company: Company, id: string, joins: string[] = []): Promise<Invoice> {
-    let invoice: Invoice;
+  async getInvoice(company: Company, id: string, joins: string[] = []): Promise<Invoices> {
+    let invoice: Invoices;
 
     const leftJoinAndSelect = {
       id: 'i.invoiceDetails',
@@ -135,7 +135,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       st: 'id.sellingType',
       c: 'i.customer',
       cb: 'i.customerBranch',
-      ct: 'i.customerType',
+      ct: 'i.personType',
       ctn: 'i.customerTypeNatural',
       dt: 'i.documentType',
       ipc: 'i.invoicesPaymentsCondition',
@@ -175,8 +175,8 @@ export class InvoiceRepository extends Repository<Invoice> {
    * @param id de la venta que se desea obtener
    * @returns un objeto del tipo invoice, donde se devuelven todos los campos del header
    */
-  async getInvoiceById(id: string): Promise<Invoice> {
-    let invoice: Invoice;
+  async getInvoiceById(id: string): Promise<Invoices> {
+    let invoice: Invoices;
     try {
       invoice = await this.findOne(id);
     } catch (error) {
@@ -192,14 +192,14 @@ export class InvoiceRepository extends Repository<Invoice> {
     data: Partial<InvoiceBaseDTO>,
     customer: Customer,
     customerBranch: CustomerBranch,
-    invoiceSeller?: InvoicesSeller,
-    invoicesPaymentCondition?: InvoicesPaymentsCondition,
-    documentType?: InvoicesDocumentType,
-    document?: InvoicesDocument,
-    invoiceStatus?: InvoicesStatus,
+    invoiceSeller?: InvoicesSellers,
+    invoicesPaymentCondition?: InvoicesPaymentsConditions,
+    documentType?: InvoicesDocumentTypes,
+    document?: InvoicesDocuments,
+    invoiceStatus?: InvoicesStatuses,
     origin?: string,
-  ): Promise<Invoice> {
-    let response: Invoice;
+  ): Promise<Invoices> {
+    let response: Invoices;
 
     const header = {
       authorization: data.authorization,
@@ -234,7 +234,7 @@ export class InvoiceRepository extends Repository<Invoice> {
       invoicesSeller: invoiceSeller,
       invoicesZone: invoiceSeller ? invoiceSeller.invoicesZone : null,
       status: invoiceStatus,
-      customerType: customer.customerType,
+      personType: customer.personType,
       customerTypeNatural: customer.customerTypeNatural,
       documentType: documentType,
       origin: origin ? origin : 'cfb8addb-541b-482f-8fa1-dfe5db03fdf4',
@@ -250,7 +250,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     return await response;
   }
 
-  async createReserveInvoice(company: Company, branch: Branch, data: any): Promise<Partial<Invoice[]>> {
+  async createReserveInvoice(company: Company, branch: Branch, data: any): Promise<Partial<Invoices[]>> {
     let response;
     try {
       const invoice = this.create([...data]);
@@ -272,7 +272,7 @@ export class InvoiceRepository extends Repository<Invoice> {
     }
   }
 
-  async deleteInvoice(company: Company, id: string, invoice: Invoice): Promise<boolean> {
+  async deleteInvoice(company: Company, id: string, invoice: Invoices): Promise<boolean> {
     try {
       await this.delete(invoice.id);
     } catch (error) {

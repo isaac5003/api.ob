@@ -910,6 +910,7 @@ export class EntriesService {
       accounted: header.accounted,
       accountingEntryType: entryType,
       company: company,
+      origin: header.origin,
     };
 
     if (id && type == 'update') {
@@ -1001,7 +1002,7 @@ export class EntriesService {
 }
 
 @Dependencies(EntriesService)
-export class EntriesDependsService {
+export class EntriesDependentService {
   constructor(entriesServices) {
     entriesServices = entriesServices;
   }

@@ -10,9 +10,9 @@ import { serviceDataDTO } from './dtos/service-data.dto';
 import { ServiceFilterDTO } from './dtos/service-filter.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { serviceStatusDTO } from './dtos/service-status.dto';
-import { SellingType } from './entities/SellingType.entity';
+import { SellingType } from '../system/entities/SellingType.entity';
 import { Service } from './entities/Service.entity';
-import { SellingTypeRepository } from './repositories/SellingType.repository';
+import { SellingTypeRepository } from '../system/repositories/SellingType.repository';
 import { ServiceRepository } from './repositories/Service.repository';
 import { ServiceIntegrationsRepository } from './repositories/ServiceIntegrations.repository';
 
@@ -287,7 +287,7 @@ export class ServicesService {
 }
 
 @Dependencies(ServicesService)
-export class ServiceDependsService {
+export class ServiceDependentService {
   constructor(serviceService) {
     serviceService = serviceService;
   }

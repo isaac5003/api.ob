@@ -1,31 +1,45 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceRepository } from './repositories/Invoice.repository';
-import { InvoiceDetailRepository } from './repositories/InvoiceDetail.repository';
-import { InvoicesDocumentRepository } from './repositories/InvoicesDocument.repository';
-import { InvoicesDocumentTypeRepository } from './repositories/InvoicesDocumentType.repository';
-import { InvoicesPaymentsConditionRepository } from './repositories/InvoicesPaymentsCondition.repository';
-import { InvoicesSellerRepository } from './repositories/InvoicesSeller.repository';
-import { InvoicesStatusRepository } from './repositories/InvoicesStatus.repository';
-import { InvoicesZoneRepository } from './repositories/InvoicesZone.repository';
-import { InvoicesService } from './invoices.service';
-import { InvoicesController } from './invoices.controller';
+import { InvoiceRepository } from './repositories/invoices.repository';
+import { InvoicesDetailsRepository } from './repositories/invoices.details.repository';
+import { InvoicesDocumentsRepository } from './repositories/invoices.documents.repository';
+import { InvoicesDocumentTypesRepository } from './repositories/invoices.documentTypes.repository';
+import { InvoicesPaymentsConditionsRepository } from './repositories/invoices.paymentsConditions.repository';
+import { InvoicesSellersRepository } from './repositories/invoices.sellers.repository';
+import { InvoicesZonesRepository } from './repositories/invoices.zones.repository';
+import { InvoicesStatusesRepository } from './repositories/invoices.statuses.repository';
+import { InvoicesService } from './services/invoices.service';
+import { InvoicesController } from './controllers/invoices.controller';
 import { AuthModule } from '../auth/auth.module';
 import { CustomerRepository } from '../customers/repositories/Customer.repository';
 import { CustomerBranchRepository } from '../customers/repositories/CustomerBranch.repository';
 import { ServiceRepository } from '../services/repositories/Service.repository';
-import { InvoicesEntriesRecurrencyRepository } from './repositories/InvoiceEntriesRecurrency.repository';
+import { InvoicesEntriesRecurrencyRepository } from './repositories/invoices.entriesRecurrency.repository';
 import { ModuleRepository } from '../system/repositories/Module.repository';
-import { InvoicesIntegrationsRepository } from './repositories/InvoicesIntegration.repository';
+import { InvoicesIntegrationsRepository } from './repositories/invoices.integrations.repository';
 import { AccountingCatalogRepository } from '../entries/repositories/AccountingCatalog.repository';
-import { DependentController } from '../auth/auth.service';
+import { AuthDependentService } from '../auth/auth.service';
 import { AccessRepository } from '../auth/repositories/Access.repository';
-import { CustomerDependsService } from '../customers/customers.service';
+import { CustomerDependentService } from '../customers/customers.service';
 import { CustomersModule } from '../customers/customers.module';
-import { EntriesDependsService } from '../entries/entries.service';
+import { EntriesDependentService } from '../entries/entries.service';
 import { EntriesModule } from '../entries/entries.module';
-import { ServiceDependsService } from '../services/services.service';
+import { ServiceDependentService } from '../services/services.service';
 import { ServicesModule } from '../services/services.module';
+import { SystemDependentService } from '../system/system.service';
+import { SystemModule } from '../system/system.module';
+import { InvoicesDocumentsController } from './controllers/invoices.documents.controller';
+import { InvoicesDocumentsService } from './services/invoices.documents.service';
+import { InvoicesStatusesController } from './controllers/invoices.statuses.controller';
+import { InvoicesStatusService } from './services/invoices.status.service';
+import { InvoicesZonesService } from './services/invoices.zones.service';
+import { InvoicesZonesController } from './controllers/invoices.zones.controller';
+import { InvoicesPaymentsConditionsService } from './services/invoices.paymentsConditions.service';
+import { InvoicesPaymentsConditionsController } from './controllers/invoices.paymentsConditions.controller';
+import { InvoicesSellersController } from './controllers/invoices.seller.controller';
+import { InvoicesIntegrationsController } from './controllers/invoices.integrations.controller';
+import { InvoicesIntegrationsService } from './services/invoices.integrations.service';
+import { InvoicesSellersService } from './services/invoices.sellers.service';
 
 @Module({
   imports: [
@@ -33,15 +47,16 @@ import { ServicesModule } from '../services/services.module';
     CustomersModule,
     EntriesModule,
     ServicesModule,
+    SystemModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
-      InvoiceDetailRepository,
-      InvoicesDocumentRepository,
-      InvoicesDocumentTypeRepository,
-      InvoicesPaymentsConditionRepository,
-      InvoicesSellerRepository,
-      InvoicesStatusRepository,
-      InvoicesZoneRepository,
+      InvoicesDetailsRepository,
+      InvoicesDocumentsRepository,
+      InvoicesDocumentTypesRepository,
+      InvoicesPaymentsConditionsRepository,
+      InvoicesSellersRepository,
+      InvoicesZonesRepository,
+      InvoicesStatusesRepository,
       CustomerRepository,
       CustomerBranchRepository,
       ServiceRepository,
@@ -52,13 +67,29 @@ import { ServicesModule } from '../services/services.module';
       AccessRepository,
     ]),
   ],
+  exports: [InvoicesService, InvoicesIntegrationsService],
   providers: [
     InvoicesService,
-    DependentController,
-    CustomerDependsService,
-    EntriesDependsService,
-    ServiceDependsService,
+    AuthDependentService,
+    CustomerDependentService,
+    EntriesDependentService,
+    ServiceDependentService,
+    SystemDependentService,
+    InvoicesDocumentsService,
+    InvoicesStatusService,
+    InvoicesZonesService,
+    InvoicesPaymentsConditionsService,
+    InvoicesIntegrationsService,
+    InvoicesSellersService,
   ],
-  controllers: [InvoicesController],
+  controllers: [
+    InvoicesDocumentsController,
+    InvoicesStatusesController,
+    InvoicesZonesController,
+    InvoicesPaymentsConditionsController,
+    InvoicesIntegrationsController,
+    InvoicesSellersController,
+    InvoicesController,
+  ],
 })
 export class InvoicesModule {}

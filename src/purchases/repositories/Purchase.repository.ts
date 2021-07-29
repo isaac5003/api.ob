@@ -51,7 +51,7 @@ export class PurchaseRepository extends Repository<Purchase> {
       company: company,
       provider: provider,
       providerBranch: providerBranch,
-      providerType: provider.customerType,
+      personType: provider.personType,
       providerTypeNatural: provider.customerTypeNatural,
       documentType: documentType,
       origin,

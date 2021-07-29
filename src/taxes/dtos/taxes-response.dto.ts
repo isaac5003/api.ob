@@ -1,7 +1,7 @@
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
-export class RInvoice extends Invoice {
+export class RInvoice extends Invoices {
   registerType: string;
 }
 

@@ -1,12 +1,12 @@
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoicesStatus } from '../entities/InvoicesStatus.entity';
+import { InvoicesStatuses } from '../entities/invoices.statuses.entity';
 
 const reponame = 'estado del documento';
-@EntityRepository(InvoicesStatus)
-export class InvoicesStatusRepository extends Repository<InvoicesStatus> {
-  async getInvoicesStatuses(): Promise<{ data: InvoicesStatus[]; count: number }> {
-    let statuses: InvoicesStatus[];
+@EntityRepository(InvoicesStatuses)
+export class InvoicesStatusesRepository extends Repository<InvoicesStatuses> {
+  async getInvoicesStatuses(): Promise<{ data: InvoicesStatuses[]; count: number }> {
+    let statuses: InvoicesStatuses[];
     try {
       statuses = await this.find();
     } catch (error) {
@@ -15,8 +15,8 @@ export class InvoicesStatusRepository extends Repository<InvoicesStatus> {
     return { data: statuses, count: statuses.length };
   }
 
-  async getInvoicesStatus(id: number): Promise<InvoicesStatus> {
-    let invoiceStatus: InvoicesStatus;
+  async getInvoicesStatus(id: number): Promise<InvoicesStatuses> {
+    let invoiceStatus: InvoicesStatuses;
     try {
       invoiceStatus = await this.findOneOrFail({ id });
     } catch (error) {

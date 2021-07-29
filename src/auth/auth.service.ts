@@ -139,6 +139,7 @@ export class AuthService {
       }
     }
     userLogged.profile.accesses = access;
+    const allCompany = await this.companyRepository.getCompanyById(company.id);
 
     const userToShow = {
       user: {
@@ -172,7 +173,13 @@ export class AuthService {
           }),
         },
         workspace: (userLogged['workspace'] = {
-          company: { id: company.id, unique: company.unique, name: company.name },
+          company: {
+            id: company.id,
+            unique: company.unique,
+            name: company.name,
+            companyType: { id: allCompany.companyType.id, name: allCompany.companyType.name },
+            naturalType: { id: allCompany.naturalType.id, name: allCompany.naturalType.name },
+          },
           branch: { id: branch.id, name: branch.name },
         }),
       },
@@ -295,7 +302,7 @@ export class AuthService {
   }
 }
 @Dependencies(AuthService)
-export class DependentController {
+export class AuthDependentService {
   constructor(authService) {
     authService = authService;
   }

@@ -23,7 +23,7 @@ import { GetAuthData } from '../auth/get-auth-data.decorator';
 import { Company } from '../companies/entities/Company.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { CustomerBranch } from './entities/CustomerBranch.entity';
-import { CustomerType } from './entities/CustomerType.entity';
+import { PersonType } from './entities/customers.personType.entity';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
 import { IsProviderDTO } from './dtos/customers-isprovider.dto';
@@ -35,9 +35,9 @@ export class CustomersController {
   constructor(private customersService: CustomersService) {}
 
   @Get('/types')
-  async getTypes(): Promise<ResponseListDTO<CustomerType, number, number, number>> {
+  async getTypes(): Promise<ResponseListDTO<PersonType, number, number, number>> {
     const { data, count } = await this.customersService.getCustomerTypes();
-    return new ResponseListDTO(plainToClass(CustomerType, data), count);
+    return new ResponseListDTO(plainToClass(PersonType, data), count);
   }
 
   @Get('/taxer-types')

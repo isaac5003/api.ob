@@ -13,10 +13,19 @@ import { ProvidersModule } from './providers/providers.module';
 import { TaxesModule } from './taxes/taxes.module';
 import { PurchasesModule } from './purchases/purchases.module';
 import { EchargesModule } from './echarges/echarges.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot(ormconfig),
+    RouterModule.register([
+      {
+        path: 'invoices',
+        module: InvoicesModule,
+      },
+    ]),
+    ScheduleModule.forRoot(),
     ServicesModule,
     AuthModule,
     CustomersModule,

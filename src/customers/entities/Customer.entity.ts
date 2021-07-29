@@ -10,13 +10,14 @@ import {
 } from 'typeorm';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { CustomerTaxerType } from './CustomerTaxerType.entity';
-import { CustomerType } from './CustomerType.entity';
+import { PersonType } from './customers.personType.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
@@ -77,8 +78,11 @@ export class Customer extends BaseEntity {
   @ManyToOne(() => CustomerTaxerType, (customerTaxerType) => customerTaxerType.customers)
   customerTaxerType: CustomerTaxerType;
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.customers, {})
-  customerType: CustomerType;
+  @ManyToOne(() => PersonType, (personType) => personType.customers, {})
+  personType: PersonType;
+
+  @ManyToOne(() => SellingType, (customerType) => customerType.customers, {})
+  customerType: SellingType;
 
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.customers)
   customerTypeNatural: CustomerTypeNatural;
@@ -86,8 +90,8 @@ export class Customer extends BaseEntity {
   @OneToMany(() => CustomerBranch, (customerBranch) => customerBranch.customer)
   customerBranches: CustomerBranch[];
 
-  @OneToMany(() => Invoice, (invoice) => invoice.customer)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.customer)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.provider)
   purchases: Purchase[];

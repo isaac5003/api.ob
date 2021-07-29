@@ -8,8 +8,8 @@ import { CustomerStatusDTO } from './dtos/customer-status.dto';
 import { CustomerDataDTO } from './dtos/customer-data.dto';
 import { plainToClass } from 'class-transformer';
 import { CustomerBranch } from './entities/CustomerBranch.entity';
-import { CustomerType } from './entities/CustomerType.entity';
-import { CustomerTypeRepository } from './repositories/CustomerType.repository';
+import { PersonType } from './entities/customers.personType.entity';
+import { PersonTypeRepository } from './repositories/customers.personType.repository';
 import { CustomerTaxerType } from './entities/CustomerTaxerType.entity';
 import { CustomerTaxerTypeRepository } from './repositories/CustomerTaxerType.repository';
 import { CustomerTypeNatural } from './entities/CustomerTypeNatural.entity';
@@ -39,8 +39,8 @@ export class CustomersService {
     @InjectRepository(CustomerTaxerTypeRepository)
     private customerTaxerTypeRepository: CustomerTaxerTypeRepository,
 
-    @InjectRepository(CustomerTypeRepository)
-    private customerTypeRepository: CustomerTypeRepository,
+    @InjectRepository(PersonTypeRepository)
+    private personTypeRepository: PersonTypeRepository,
 
     @InjectRepository(CustomerTypeNaturalRepository)
     private customerTypeNaturalRepository: CustomerTypeNaturalRepository,
@@ -375,14 +375,14 @@ export class CustomersService {
   }
 
   async getCustomerTributary(id: string, company: Company, type = 'cliente'): Promise<ResponseSingleDTO<Customer>> {
-    const { dui, nit, nrc, giro, customerType, customerTaxerType, customerTypeNatural } =
+    const { dui, nit, nrc, giro, personType, customerTaxerType, customerTypeNatural } =
       await this.customerRepository.getCustomer(id, company, type);
     const tributary = {
       dui,
       nit,
       nrc,
       giro,
-      customerType,
+      personType,
       customerTaxerType,
       customerTypeNatural,
     };
@@ -472,8 +472,8 @@ export class CustomersService {
     };
   }
 
-  async getCustomerTypes(): Promise<{ data: CustomerType[]; count: number }> {
-    return this.customerTypeRepository.getCustomerTypes();
+  async getCustomerTypes(): Promise<{ data: PersonType[]; count: number }> {
+    return this.personTypeRepository.getPersonTypes();
   }
 
   async getCustomerTaxerTypes(): Promise<{ data: CustomerTaxerType[]; count: number }> {
@@ -624,7 +624,7 @@ export class CustomersService {
 }
 
 @Dependencies(CustomersService)
-export class CustomerDependsService {
+export class CustomerDependentService {
   constructor(customerService) {
     customerService = customerService;
   }

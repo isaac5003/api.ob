@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Customer } from './Customer.entity';
-import { CustomerType } from './CustomerType.entity';
-import { Invoice } from '../../invoices/entities/Invoice.entity';
+import { PersonType } from './customers.personType.entity';
+import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 
 @Entity()
@@ -30,11 +30,11 @@ export class CustomerTypeNatural extends BaseEntity {
   @OneToMany(() => Customer, (customer) => customer.customerTypeNatural)
   customers: Customer[];
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.customerTypeNaturals)
-  customerType: CustomerType;
+  @ManyToOne(() => PersonType, (personType) => personType.customerTypeNaturals)
+  customerType: PersonType;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.customerTypeNatural)
-  invoices: Invoice[];
+  @OneToMany(() => Invoices, (invoice) => invoice.customerTypeNatural)
+  invoices: Invoices[];
 
   @OneToMany(() => Purchase, (purchase) => purchase.providerTypeNatural)
   purchases: Purchase[];

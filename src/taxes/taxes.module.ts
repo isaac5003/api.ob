@@ -3,27 +3,27 @@ import { TaxesService } from './taxes.service';
 import { TaxesController } from './taxes.controller';
 import { AuthModule } from 'src/auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { InvoiceRepository } from 'src/invoices/repositories/Invoice.repository';
-import { InvoiceDetailRepository } from 'src/invoices/repositories/InvoiceDetail.repository';
-import { InvoicesDocumentTypeRepository } from 'src/invoices/repositories/InvoicesDocumentType.repository';
+import { InvoiceRepository } from 'src/invoices/repositories/invoices.repository';
+import { InvoicesDetailsRepository } from 'src/invoices/repositories/invoices.details.repository';
+import { InvoicesDocumentTypesRepository } from 'src/invoices/repositories/invoices.documentTypes.repository';
 import { CustomerRepository } from 'src/customers/repositories/Customer.repository';
-import { InvoicesStatusRepository } from 'src/invoices/repositories/InvoicesStatus.repository';
+import { InvoicesStatusesRepository } from 'src/invoices/repositories/invoices.statuses.repository';
 import { TaxesRepository } from './repositories/taxes.repository';
 import { PurchaseRepository } from 'src/purchases/repositories/Purchase.repository';
 import { PurchasesDocumentTypeRepository } from 'src/purchases/repositories/PurchaseDocumentType.repository';
 import { PurchasesStatusRepository } from 'src/purchases/repositories/PurchaseStatus.repository';
 import { PurchaseDetailRepository } from 'src/purchases/repositories/PurchaseDetail.repository';
-import { AuthService, DependentController } from 'src/auth/auth.service';
+import { AuthDependentService } from 'src/auth/auth.service';
 
 @Module({
   imports: [
     AuthModule,
     TypeOrmModule.forFeature([
       InvoiceRepository,
-      InvoiceDetailRepository,
-      InvoicesDocumentTypeRepository,
+      InvoicesDetailsRepository,
+      InvoicesDocumentTypesRepository,
       CustomerRepository,
-      InvoicesStatusRepository,
+      InvoicesStatusesRepository,
       TaxesRepository,
       PurchaseRepository,
       PurchasesStatusRepository,
@@ -32,7 +32,7 @@ import { AuthService, DependentController } from 'src/auth/auth.service';
     ]),
   ],
 
-  providers: [TaxesService, DependentController],
+  providers: [TaxesService, AuthDependentService],
   controllers: [TaxesController],
 })
 export class TaxesModule {}

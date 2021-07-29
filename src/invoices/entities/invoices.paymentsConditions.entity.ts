@@ -9,11 +9,10 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Invoice } from './Invoice.entity';
-import { InvoicesZone } from './InvoicesZone.entity';
+import { Invoices } from './invoices.entity';
 
 @Entity()
-export class InvoicesSeller extends BaseEntity {
+export class InvoicesPaymentsConditions extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -29,12 +28,12 @@ export class InvoicesSeller extends BaseEntity {
   @UpdateDateColumn({ select: false })
   updatedAt: string;
 
-  @OneToMany(() => Invoice, (invoice) => invoice.invoicesSeller)
-  invoices: Invoice[];
+  @Column({ default: false, type: 'boolean' })
+  cashPayment: boolean;
 
-  @ManyToOne(() => Company, (company) => company.invoicesSellers)
+  @OneToMany(() => Invoices, (invoice) => invoice.invoicesPaymentsCondition)
+  invoices: Invoices[];
+
+  @ManyToOne(() => Company, (company) => company.invoicesPaymentsConditions)
   company: Company;
-
-  @ManyToOne(() => InvoicesZone, (invoicesZone) => invoicesZone.invoicesSellers)
-  invoicesZone: InvoicesZone;
 }

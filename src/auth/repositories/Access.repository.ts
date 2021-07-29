@@ -28,6 +28,6 @@ export class AccessRepository extends Repository<Access> {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener el listado de empresas.');
     }
-    return companiesWithIntegrations.map((c) => c.company.id);
+    return companiesWithIntegrations.map((c) => c.company);
   }
 }

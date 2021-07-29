@@ -1,6 +1,6 @@
 import { logDatabaseError } from 'src/_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { InvoicesEntriesRecurrency } from '../entities/InvoicesEntriesRecurrency.entity';
+import { InvoicesEntriesRecurrency } from '../entities/invoices.entriesRecurrency.entity';
 
 const reponame = 'recurrencia';
 @EntityRepository(InvoicesEntriesRecurrency)

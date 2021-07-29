@@ -2,7 +2,7 @@ import { Branch } from '../../companies/entities/Branch.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Customer } from '../../customers/entities/Customer.entity';
 import { CustomerBranch } from '../../customers/entities/CustomerBranch.entity';
-import { CustomerType } from '../../customers/entities/CustomerType.entity';
+import { PersonType } from '../../customers/entities/customers.personType.entity';
 import { CustomerTypeNatural } from '../../customers/entities/CustomerTypeNatural.entity';
 import {
   BaseEntity,
@@ -117,8 +117,8 @@ export class Purchase extends BaseEntity {
   @ManyToOne(() => PurchasesStatus, (purchaseStatus) => purchaseStatus.purchases)
   status: PurchasesStatus;
 
-  @ManyToOne(() => CustomerType, (providerType) => providerType.purchases)
-  providerType: CustomerType;
+  @ManyToOne(() => PersonType, (personType) => personType.purchases)
+  personType: PersonType;
 
   @ManyToOne(() => CustomerTypeNatural, (providerTypeNatural) => providerTypeNatural.purchases)
   providerTypeNatural: CustomerTypeNatural;

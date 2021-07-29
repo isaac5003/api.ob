@@ -1,12 +1,12 @@
 import { logDatabaseError } from '../../_tools';
 import { EntityRepository, Repository } from 'typeorm';
-import { CustomerType } from '../entities/CustomerType.entity';
+import { PersonType } from '../entities/customers.personType.entity';
 
 const reponame = 'tipo de cliente';
-@EntityRepository(CustomerType)
-export class CustomerTypeRepository extends Repository<CustomerType> {
-  async getCustomerTypes(): Promise<{ data: CustomerType[]; count: number }> {
-    let types: CustomerType[];
+@EntityRepository(PersonType)
+export class PersonTypeRepository extends Repository<PersonType> {
+  async getPersonTypes(): Promise<{ data: PersonType[]; count: number }> {
+    let types: PersonType[];
     try {
       types = await this.find();
     } catch (error) {
