@@ -84,13 +84,13 @@ describe('SERVICES MODULE', () => {
   });
 
   describe('POST / rejects when any required value is not being sent', () => {
-    const { name, cost, sellingType, description, incIva, incRenta } = newServicePayload;
+    const { name, cost, sellingType, description, incIva, incRenta5, incRenta10 } = newServicePayload;
     it('omitting name', () => {
       return request(app)
         .post(path)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, description, incIva, incRenta })
+        .send({ cost, sellingType, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -103,7 +103,7 @@ describe('SERVICES MODULE', () => {
         .post(path)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ name, sellingType, description, incIva, incRenta })
+        .send({ name, sellingType, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -116,7 +116,7 @@ describe('SERVICES MODULE', () => {
         .post(path)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, name, description, incIva, incRenta })
+        .send({ cost, name, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -129,7 +129,7 @@ describe('SERVICES MODULE', () => {
         .post(path)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, name, incIva, incRenta })
+        .send({ cost, sellingType, name, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -142,7 +142,7 @@ describe('SERVICES MODULE', () => {
         .post(path)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, description, name, incRenta })
+        .send({ cost, sellingType, description, name, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -183,7 +183,8 @@ describe('SERVICES MODULE', () => {
         expect(body.data.cost).toBe(newServicePayload.cost);
         expect(body.data.description).toBe(newServicePayload.description);
         expect(body.data.incIva).toBe(newServicePayload.incIva);
-        expect(body.data.incRenta).toBe(newServicePayload.incRenta);
+        expect(body.data.incRenta5).toBe(newServicePayload.incRenta5);
+        expect(body.data.incRenta10).toBe(newServicePayload.incRenta10);
         expect(body.data.active).toBeTruthy();
         expect(body.data.sellingType.id).toBe(newServicePayload.sellingType);
         expect(body.data.sellingType.name).toBeDefined();
@@ -243,7 +244,8 @@ describe('SERVICES MODULE', () => {
         expect(body.data.cost).toBe(editServicePayload.cost);
         expect(body.data.description).toBe(editServicePayload.description);
         expect(body.data.incIva).toBe(editServicePayload.incIva);
-        expect(body.data.incRenta).toBe(editServicePayload.incRenta);
+        expect(body.data.incRenta5).toBe(editServicePayload.incRenta5);
+        expect(body.data.incRenta10).toBe(editServicePayload.incRenta10);
         expect(body.data.active).toBeTruthy();
         expect(body.data.sellingType.id).toBe(editServicePayload.sellingType);
         expect(body.data.sellingType.name).toBeDefined();
@@ -292,13 +294,13 @@ describe('SERVICES MODULE', () => {
   });
 
   describe('PUT /:id rejects when any required value is not being sent', () => {
-    const { name, cost, sellingType, description, incIva, incRenta } = editServicePayload;
+    const { name, cost, sellingType, description, incIva, incRenta5, incRenta10 } = editServicePayload;
     it('omitting name', () => {
       return request(app)
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, description, incIva, incRenta })
+        .send({ cost, sellingType, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -311,7 +313,7 @@ describe('SERVICES MODULE', () => {
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ name, sellingType, description, incIva, incRenta })
+        .send({ name, sellingType, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -324,7 +326,7 @@ describe('SERVICES MODULE', () => {
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, name, description, incIva, incRenta })
+        .send({ cost, name, description, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -337,7 +339,7 @@ describe('SERVICES MODULE', () => {
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, name, incIva, incRenta })
+        .send({ cost, sellingType, name, incIva, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -350,7 +352,7 @@ describe('SERVICES MODULE', () => {
         .put(`${path}/${id}`)
         .set('Content-Type', 'application/json')
         .set('Authorization', token)
-        .send({ cost, sellingType, description, name, incRenta })
+        .send({ cost, sellingType, description, name, incRenta5, incRenta10 })
         .expect(400)
         .expect(({ body }) => {
           expect(body.message).toBeDefined();
@@ -438,6 +440,8 @@ describe('SERVICES MODULE', () => {
   });
 
   it('DELETE /:id successfully deletes the service', () => {
+    console.log(id);
+
     return request(app)
       .get(`${path}/${id}`)
       .set('Authorization', token)

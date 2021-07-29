@@ -26,11 +26,17 @@ export class serviceDataDTO {
   @IsBoolean({ message: validationMessage('incIva', 'IsBoolean') })
   incIva: boolean;
 
-  @IsNotEmpty({ message: validationMessage('incRenta', 'IsNotEmpty') })
+  @IsNotEmpty({ message: validationMessage('incRenta10', 'IsNotEmpty') })
   @IsBoolean({
-    message: validationMessage('incRenta', 'IsBoolean'),
+    message: validationMessage('incRenta10', 'IsBoolean'),
   })
-  incRenta: boolean;
+  incRenta10: boolean;
+
+  @IsNotEmpty({ message: validationMessage('incRenta5', 'IsNotEmpty') })
+  @IsBoolean({
+    message: validationMessage('incRenta5', 'IsBoolean'),
+  })
+  incRenta5: boolean;
 
   @IsOptional()
   @IsBoolean({ message: validationMessage('active', 'IsBoolean') })
