@@ -4,7 +4,8 @@ const newServicePayload = {
   sellingType: 3,
   description: 'description',
   incIva: true,
-  incRenta: false,
+  incRenta5: false,
+  incRenta10: false,
 };
 
 const editServicePayload = {
@@ -13,7 +14,8 @@ const editServicePayload = {
   sellingType: 2,
   description: 'description modificada',
   incIva: false,
-  incRenta: true,
+  incRenta5: true,
+  incRenta10: false,
 };
 
 export { newServicePayload, editServicePayload };
