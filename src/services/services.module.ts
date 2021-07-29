@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServiceRepository } from './repositories/Service.repository';
-import { SellingTypeRepository } from './repositories/SellingType.repository';
+import { SellingTypeRepository } from '../system/repositories/SellingType.repository';
 import { ServicesController } from './services.controller';
 import { ServicesService } from './services.service';
 import { ServiceIntegrationsRepository } from './repositories/ServiceIntegrations.repository';

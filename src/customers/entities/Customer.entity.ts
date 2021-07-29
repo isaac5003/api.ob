@@ -17,6 +17,7 @@ import { Invoices } from '../../invoices/entities/invoices.entity';
 import { Company } from '../../companies/entities/Company.entity';
 import { Purchase } from '../../purchases/entities/Purchase.entity';
 import { Echarges } from '../../echarges/entities/echarges.entity';
+import { SellingType } from 'src/system/entities/SellingType.entity';
 
 @Entity()
 export class Customer extends BaseEntity {
@@ -79,6 +80,9 @@ export class Customer extends BaseEntity {
 
   @ManyToOne(() => PersonType, (personType) => personType.customers, {})
   personType: PersonType;
+
+  @ManyToOne(() => SellingType, (customerType) => customerType.customers, {})
+  customerType: SellingType;
 
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.customers)
   customerTypeNatural: CustomerTypeNatural;

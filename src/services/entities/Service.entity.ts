@@ -3,7 +3,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -11,7 +10,7 @@ import {
 } from 'typeorm';
 import { InvoicesDetails } from '../../invoices/entities/invoices.details.entity';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
-import { SellingType } from './SellingType.entity';
+import { SellingType } from '../../system/entities/SellingType.entity';
 import { Company } from '../../companies/entities/Company.entity';
 
 @Entity()
@@ -41,7 +40,10 @@ export class Service extends BaseEntity {
   incIva: boolean;
 
   @Column({ default: false, type: 'boolean' })
-  incRenta: boolean;
+  incRenta10: boolean;
+
+  @Column({ default: false, type: 'boolean' })
+  incRenta5: boolean;
 
   @OneToMany(() => InvoicesDetails, (invoiceDetail) => invoiceDetail.service)
   invoiceDetails: InvoicesDetails[];

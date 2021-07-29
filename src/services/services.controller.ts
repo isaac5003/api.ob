@@ -29,7 +29,7 @@ import { serviceStatusDTO } from './dtos/service-status.dto';
 import { ServiceIntegrationDTO } from './dtos/service-integration.dto';
 import { ServicesIdsDTO } from './dtos/delete-updateServices/service-deleteupdate.dto';
 import { UpdateStatusDTO } from './dtos/delete-updateServices/service-update-status.dto';
-import { SellingType } from './entities/SellingType.entity';
+import { SellingType } from '../system/entities/SellingType.entity';
 
 @Controller('services')
 @UseGuards(AuthGuard())
