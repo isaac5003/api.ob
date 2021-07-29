@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsNotEmpty, IsInt, ValidateNested, IsBoolean } fr
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { validationMessage } from '../../_tools';
 import { CustomerTaxerType } from '../entities/CustomerTaxerType.entity';
-import { CustomerType } from '../entities/CustomerType.entity';
+import { PersonType } from '../entities/customers.personType.entity';
 import { CustomerTypeNatural } from '../entities/CustomerTypeNatural.entity';
 import { BranchDataDTO } from './customer-branch.dto';
 
@@ -42,7 +42,7 @@ export class CustomerDataDTO {
 
   @IsNotEmpty({ message: validationMessage(' customerType', 'IsNotEmpty') })
   @IsInt({ message: validationMessage('customerType', 'IsInt') })
-  customerType: CustomerType;
+  personType: PersonType;
 
   @IsOptional()
   @IsInt({ message: validationMessage('customerTaxerType', 'IsInt') })

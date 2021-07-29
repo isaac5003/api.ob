@@ -19,7 +19,7 @@ export class CustomerRepository extends Repository<Customer> {
     try {
       const { active, limit, page, search, order, prop, branch } = filter;
       const query = this.createQueryBuilder('customer')
-        .leftJoinAndSelect('customer.customerType', 'customerType')
+        .leftJoinAndSelect('customer.personType', 'personType')
         .leftJoinAndSelect('customer.customerTypeNatural', 'customerTypeNatural')
         .where({ company });
 
@@ -68,7 +68,7 @@ export class CustomerRepository extends Repository<Customer> {
   async getCustomer(id: string, company: Company, type: string, joins: string[] = []): Promise<Customer> {
     let customer: Customer;
     const leftJoinAndSelect = {
-      ct: 'c.customerType',
+      ct: 'c.personType',
       ctt: 'c.customerTaxerType',
       ctn: 'c.customerTypeNatural',
       cb: 'c.customerBranches',

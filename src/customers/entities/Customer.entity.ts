@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { AccountingCatalog } from '../../entries/entities/AccountingCatalog.entity';
 import { CustomerTaxerType } from './CustomerTaxerType.entity';
-import { CustomerType } from './CustomerType.entity';
+import { PersonType } from './customers.personType.entity';
 import { CustomerTypeNatural } from './CustomerTypeNatural.entity';
 import { CustomerBranch } from './CustomerBranch.entity';
 import { Invoices } from '../../invoices/entities/invoices.entity';
@@ -77,8 +77,8 @@ export class Customer extends BaseEntity {
   @ManyToOne(() => CustomerTaxerType, (customerTaxerType) => customerTaxerType.customers)
   customerTaxerType: CustomerTaxerType;
 
-  @ManyToOne(() => CustomerType, (customerType) => customerType.customers, {})
-  customerType: CustomerType;
+  @ManyToOne(() => PersonType, (personType) => personType.customers, {})
+  personType: PersonType;
 
   @ManyToOne(() => CustomerTypeNatural, (customerTypeNatural) => customerTypeNatural.customers)
   customerTypeNatural: CustomerTypeNatural;

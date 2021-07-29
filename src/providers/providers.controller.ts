@@ -23,7 +23,7 @@ import { AccountignCatalogIntegrationDTO } from 'src/customers/dtos/customer-int
 import { Customer } from 'src/customers/entities/Customer.entity';
 import { CustomerBranch } from 'src/customers/entities/CustomerBranch.entity';
 import { CustomerTaxerType } from 'src/customers/entities/CustomerTaxerType.entity';
-import { CustomerType } from 'src/customers/entities/CustomerType.entity';
+import { PersonType } from 'src/customers/entities/customers.personType.entity';
 import { CustomerTypeNatural } from 'src/customers/entities/CustomerTypeNatural.entity';
 import { FilterDTO } from 'src/_dtos/filter.dto';
 import { ResponseListDTO, ResponseMinimalDTO, ResponseSingleDTO } from 'src/_dtos/responseList.dto';
@@ -36,9 +36,9 @@ export class ProvidersController {
   constructor(private customersService: CustomersService) {}
 
   @Get('/types')
-  async getTypes(): Promise<ResponseListDTO<CustomerType, number, number, number>> {
+  async getTypes(): Promise<ResponseListDTO<PersonType, number, number, number>> {
     const { data, count } = await this.customersService.getCustomerTypes();
-    return new ResponseListDTO(plainToClass(CustomerType, data), count);
+    return new ResponseListDTO(plainToClass(PersonType, data), count);
   }
 
   @Get('/taxer-types')
