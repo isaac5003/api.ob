@@ -440,8 +440,6 @@ describe('SERVICES MODULE', () => {
   });
 
   it('DELETE /:id successfully deletes the service', () => {
-    console.log(id);
-
     return request(app)
       .get(`${path}/${id}`)
       .set('Authorization', token)
